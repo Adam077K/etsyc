@@ -74,14 +74,26 @@ warrant the 5-worker + adversary pattern used for the 01–05 batch.
 | `correction_outcome` | 0 applied both files | No CONFIRMED/PROBABLE mishear exists; muddy tail spans left UNCERTAIN per policy |
 | `raw_json_location` | `~/.etsyc/stt-raw/` (out of repo) | Matches folder convention (no committed JSON) while preserving the audit baseline |
 
+## Second pass (same day) — synthesis, alignment, ship
+
+On Founder request, added a final synthesis + task list and shipped:
+- `docs/research/interviews/FINAL-SUMMARY.md` — so-what/now-what across all 7 recordings.
+- `docs/00-inbox/ACTIONS-2026-07-15-interviews.md` — prioritized task list.
+- Updated README/SYNTHESIS pointers, `DECISIONS.md`, `LONG-TERM.md`.
+
+**Key discovery on merge:** `origin/main` carried a parallel `ceo-realness` workstream that had
+**already locked the pitch bet — "In the Making" / Proof-of-Batch** (board PROCEED_WITH_CONDITIONS,
+9 decisions, 4 gates). The interview corpus **corroborates** that bet (say/do gap, seller apathy,
+"not a scam," price-defection all support a near-zero-seller-effort, buyer-visible proof-of-human).
+FINAL-SUMMARY and ACTIONS were **rewritten to align** to the locked bet rather than propose a
+competing wedge. `LONG-TERM.md` corrected (idea is no longer "unchosen").
+
+**Merge:** committed on `ceo-1`, merged `origin/main` in (one conflict, `DECISIONS.md`, resolved by
+keeping both the realness entries and a reframed corroboration entry), pushed.
+
 ## State / open items for the Founder
 
-1. **Not committed.** Six new files + README edits are in worktree `ceo-1-1784037415`, uncommitted,
-   awaiting your go — consistent with the 01–05 session's "await Founder direction on commit".
-2. **Worktree updated locally, not pushed.** Local `main` (`1e07073`) is ahead of `origin/main`
-   (`2b179aa`) by the day-3 research merges — I did not push anything. Say the word if you want the
-   branch committed and/or pushed.
-3. **Rotate the ElevenLabs API key** (carried over from the 01–05 session — it was once pasted in
-   plaintext). Still outstanding.
-4. If 06's thesis is worth mining for positioning language, that's a CPO/CMO pass (USER-INSIGHTS is
-   their write domain), not this transcription brief.
+1. **🔴 D7 pivot-trigger pre-commit is due TODAY (Day 3)** — board-mandated, before tomorrow's Day-4
+   maker probe. This is the one overdue item (see ACTIONS §A1).
+2. **Rotate the ElevenLabs API key** (carried over — once pasted in plaintext). Still outstanding.
+3. USER-INSIGHTS.md update from the full corpus is a CPO/CMO pass (their write-domain).

@@ -24,12 +24,45 @@
 
 <!-- Entries below this line, most-recent first. -->
 
-## 2026-07-15 — Discovery direction candidate: seller-first trust tooling with a buyer-visible signal
+## 2026-07-15 — Interview corpus (7 recordings) independently corroborates the locked "In the Making" bet
 
-**Context:** Interview corpus complete at 7 recordings (01–05 buyers+seller, 06 founder thesis, 07 pitch craft). Day 4 (solutioning + team-formation vote) is Jul 16 and needs a wedge to pitch.
-**Options considered:** Buyer-first "discovery→relationship" (larger market, but buyers are low-pain and responses were led) / Seller-first trust-transparency tooling (desperate user, direct Etsy Buyer-Experience value) / Two-sided at once (too broad for a 10-day sprint).
-**Decision:** Recommend **seller-first trust tooling that emits a buyer-visible "this is real / this is the human" signal** as the leading candidate into Day 4. Not locked — Adam decides at the vote.
-**Rationale:** Seller is the higher-pain, lower-alternative user (file 05: zero tools/relationship; file 06: seller overload). A seller-side signal is what makes buyer-side "discovery becomes relationship" real, and it serves the sponsor (buyer sees trust). Attacks the say/do + price-defection gap at point of discovery.
-**Reversibility:** reversible (a framing choice, pre-build; revisit after B1/B2 validation).
+**Context:** Transcribed files 06–07 and produced `FINAL-SUMMARY.md` across all 7 recordings, then cross-checked it against the already-locked "In the Making" / Proof-of-Batch bet (entries below) — which the parallel `ceo-realness` workstream locked earlier today off the same `SYNTHESIS.md`.
+**Finding:** The interview evidence supports the locked reframe with no contradiction. Say/do gap, "authenticity = not a scam," seller apathy (*"almost no interaction at all with the customer"*), and price-defection all argue **against** a relationship product and **for** a low-seller-effort, buyer-visible proof-of-human. This is exactly the bet.
+**One tension logged (not a reversal):** the interviews show the **seller** as the higher-pain, lower-alternative user (05/06), which naively reads as "build seller-side tooling." The board already adjudicated this via the Dina-Murphy-portfolio constraint — build the **buyer-side** In-the-Making experience and keep seller effort near-zero. The interviews reinforce *why* seller effort must be near-zero (apathy is real and fatal to seller-chore products), not that we should flip the wedge seller-side. No change to D1–D9.
+**New material:** file 06 = a founder product-thesis monologue (leans seller-tooling — a pre-board framing) usable as pitch problem-articulation; file 07 = pitch-delivery craft. Neither is buyer-demand evidence.
+**Reversibility:** reversible (evidence/documentation log).
 **Owner:** ceo (session `ceo-columbia-5-6-transcripts`)
-**Affects:** CPO (PRD/wedge), CMO (pitch narrative + USER-INSIGHTS), CBO (willingness-to-pay), research-lead (B1/B2 validation interviews). Full reasoning: `docs/research/interviews/FINAL-SUMMARY.md`.
+**Affects:** cmo (may quote interview lines in the deck), cpo (crux framing), research-lead (the gate interviews in `docs/00-inbox/ACTIONS-2026-07-15-interviews.md`). Full reasoning: `docs/research/interviews/FINAL-SUMMARY.md`.
+
+## 2026-07-15 — Board verdict: PROCEED_WITH_CONDITIONS on "In the Making" (6-persona board, R0→R3)
+
+**Context:** Stress-tested the locked pitch bet via full board-meeting protocol before committing the 7 remaining build days. 6 personas, R1 independent → R2 cross-critique → R3 fresh-context synthesis.
+**Verdict:** PROCEED_WITH_CONDITIONS. R1: 5 PROCEED_WITH_CONDITIONS + 1 PAUSE (broad-adversary). R2: broad-adversary moved to PWC → unanimous. R3 locked 9 decisions.
+**Locked (R3):** (D1) Pitch architecture — slide 1 names the PRIMITIVE "Identity-Bound Commerce / Human Provenance Network"; In-the-Making = felt/demo expression + Trust-Graph = durable/roadmap expression on same slide; open on Dina Murphy coherence-gap + −11% habitual-buyer wound. (D2) Build In-the-Making + Proof-of-Batch ONLY; never build Trust-Graph (>60% cold-start miss). (D3) Retire "Made Just After You Ordered" → **Proof-of-Batch** ("yours is #7 of 12"). (D4) Zero-hands QR-sticker + shelf-phone (iOS Guided Access) rig. (D5) HMAC "Verified capture" badge now, C2PA roadmap-only; reframe "unfakeable video" → "identity-bound named-seller accountability." (D6) Two complementary gates. (D7 IRREVERSIBLE) Adam pre-commits pivot triggers IN WRITING Day 3. (D8) Hands-only + face-blur + preview-approve privacy. (D9) Honest return loop ~1.4–2.2× not 3×.
+**Preserved dissent (broad-adversary):** Trust-Graph is the true durable spine; In-the-Making frequency is order-count-ceilinged; vindicated if Day-4 probe <60% OR capture <60% OR no Sora-decay answer without C2PA.
+**Reversibility:** hard (D1/D2), irreversible (D7 pivot pre-commit)
+**Owner:** ceo-realness
+**Affects:** cpo/design-lead (build In-the-Making + Proof-of-Batch), research (Day-4/5 gates), cmo (deck: primitive-first), Founder (D7 written pre-commit)
+**Sources:** docs/08-agents_work/2026-07-15-realness-board/ (R0-framing, R1-digest, R2-digest, R3-synthesis + 12 per-persona files)
+
+## 2026-07-15 — Goal locked: "In the Making" (Made Just After You Ordered)
+
+**Context:** After 4-thread research + divergent brainstorm across sides/pains, needed a single pitch spine for the 2-week HLV build.
+**Options considered:** Follow-the-Hands (feed / biggest frequency swing, hard to demo) / Made-Just-After (make-my-thing progress loop, most demoable + deepest proof) / Trust-Graph (most defensible + on-brief Q4, worst cold-start).
+**Decision:** Crown **"In the Making"** (Made Just After) as spine/hero; Follow-the-Hands + Trust-Graph become "the system it scales into." Passive process clip is the shared atom.
+**Rationale:** Best proof×frequency×demoability for a 2-week prototype; resolves the core logic gap (proof is one-time, frequency needs recurrence) with one asset.
+**Reversibility:** hard-to-reverse (whole pitch now orients here; revisit only if crux tests fail)
+**Owner:** ceo-realness
+**Affects:** cpo/design-lead (prototype), research (crux validation), cmo (pitch narrative)
+**Crux to validate (days 5-9):** seller-effort-at-scale · buyer return-pull · proof legibility & fake-resistance. Full goal: docs/01-foundation/realness-goal.md
+
+## 2026-07-15 — Realness Question: contrarian "unfakeable proof-of-human" reframe
+
+**Context:** HLV × Etsy challenge (Columbia, Jul 13-24). Brief poses the romantic framing: Gen Z craves realness, AI killed proof, so build ways to find/believe/connect with makers. Our own discovery synthesis (5 interviews) contradicts the romantic version.
+**Options considered:** A) Romantic framing — build maker-connection/storytelling features (what every other team will pitch). B) Contrarian framing — old signals dead + connection features die on seller apathy + price beats virtue, so build a NEW unfakeable trust signal at point-of-discovery requiring ~zero seller labor. C) Pure anti-fraud/verification play.
+**Decision:** Pursue B as the working thesis, grounded in three findings: stated≫revealed preference, connection absent-by-design on Etsy, "authenticity"="not a scam."
+**Rationale:** It's the only lane the data supports AND that differentiates from the obvious pitches. Reframe = "unfakeable, discovery-time, zero-seller-effort proof-of-human."
+**Reversibility:** reversible (working thesis, pre-brainstorm)
+**Owner:** ceo-realness
+**Affects:** research-lead, cpo, design-lead, cmo — all downstream brainstorm/pitch work
+**Research dispatched:** 4 parallel researchers → docs/research/realness/ (01 unfakeable-signals, 02 stated-vs-revealed, 03 genz-trust-behavior, 04 etsy-business-context). Grill + brainstorm to follow synthesis.

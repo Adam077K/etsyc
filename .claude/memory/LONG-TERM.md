@@ -30,12 +30,13 @@
 | 7–9 | Jul 20–22 | Prototyping + testing |
 | 10 | **Fri Jul 24** | **Final pitches** |
 
-## Day 3 (Jul 15) — leading reframe candidate
-- **Thesis:** generic search (Google/Etsy/Amazon) can't build relationships; move the buyer↔maker relationship **on-platform** and Adam's 3 goals (find / connect / stay) stop competing. Whitespace = **"discovery that becomes relationship"** (Shopify has relationship no discovery; Etsy has discovery no relationship). Full work on Miro board `uXjVG1iySzI=` + `docs/08-agents_work/sessions/2026-07-15-ceo-buyer-journey-ist-reframe.md`.
-- **"IST"** = Adam's tag for a friction point that is also a build opportunity.
+## Day 3 (Jul 15) — IDEA LOCKED: "In the Making" (Proof-of-Batch)
+- **Bet (locked, board PROCEED_WITH_CONDITIONS):** un-fakeable, discovery-time, near-zero-seller-effort **proof-of-human** — buyer watches timestamped, camera-signed moments of their item being made (Proof-of-Batch: "yours is #7 of 12"). Buyer-side (Dina Murphy's portfolio). Primitive on slide 1 = "Identity-Bound Commerce / Human Provenance Network." Full spec: `docs/01-foundation/realness-goal.md`; 9 locked decisions (D1–D9) + 4 test gates in `DECISIONS.md` + `docs/08-agents_work/2026-07-15-realness-board/`.
+- **Interview corpus (7 recordings) corroborates the bet** — see `docs/research/interviews/FINAL-SUMMARY.md`.
+- Earlier "discovery that becomes relationship" reframe (Miro `uXjVG1iySzI=`) fed into this and is now superseded by the locked bet. **"IST"** = Adam's tag for a friction that is also a build opportunity.
 
 ## Live constraints
-- **No idea chosen yet** as of Day 2. Idea selection is the gating item, not build capacity.
+- **Idea is chosen** ("In the Making"). Gating items are now the **validation gates** (Day-4 cold-DM maker probe ≥60%, capture-rig, forced-choice, lapsed-buyer) and Adam's **D7 written pivot pre-commit (due Day 3)**. Not build capacity.
 - Teams form by **vote on Day 4** — Adam does not control his team. Venture ambition vs. teammates optimizing for the pitch is an unresolved tension.
 - Days 5–6 blueprint must state value to **buyer, seller, AND Etsy** — all three.
 
