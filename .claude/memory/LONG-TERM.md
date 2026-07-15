@@ -30,6 +30,10 @@
 | 7–9 | Jul 20–22 | Prototyping + testing |
 | 10 | **Fri Jul 24** | **Final pitches** |
 
+## Day 3 (Jul 15) — leading reframe candidate
+- **Thesis:** generic search (Google/Etsy/Amazon) can't build relationships; move the buyer↔maker relationship **on-platform** and Adam's 3 goals (find / connect / stay) stop competing. Whitespace = **"discovery that becomes relationship"** (Shopify has relationship no discovery; Etsy has discovery no relationship). Full work on Miro board `uXjVG1iySzI=` + `docs/08-agents_work/sessions/2026-07-15-ceo-buyer-journey-ist-reframe.md`.
+- **"IST"** = Adam's tag for a friction point that is also a build opportunity.
+
 ## Live constraints
 - **No idea chosen yet** as of Day 2. Idea selection is the gating item, not build capacity.
 - Teams form by **vote on Day 4** — Adam does not control his team. Venture ambition vs. teammates optimizing for the pitch is an unresolved tension.
