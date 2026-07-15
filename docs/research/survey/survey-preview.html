@@ -1,0 +1,511 @@
+<title>AI-Detection Survey — Etsy × Columbia</title>
+<style>
+  :root {
+    --paper:#EAEDF2; --card:#FBFCFD; --card-2:#F3F5F8;
+    --ink:#191C22; --ink-soft:#565D6A; --ink-faint:#8A909C;
+    --line:#D5DAE1; --line-soft:#E4E8ED;
+    --brand:#2E45C7; --brand-ink:#22318f; --brand-soft:#E3E7FB;
+    --human:#B65F35; --human-soft:#F3E3D8;
+    --ai:#0E7F98; --ai-soft:#D8ECF1;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,'SF Mono','Menlo','Consolas',monospace;
+    --radius:14px; --shadow:0 1px 2px rgba(20,26,40,.05),0 12px 32px -14px rgba(20,26,40,.18);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0E1015; --card:#171A21; --card-2:#1D212A;
+      --ink:#E8EAEF; --ink-soft:#A2A9B5; --ink-faint:#727A88;
+      --line:#2A2F3A; --line-soft:#22262F;
+      --brand:#8393F6; --brand-ink:#aab5fa; --brand-soft:#1B2136;
+      --human:#D68A5D; --human-soft:#2C2018;
+      --ai:#48B4CE; --ai-soft:#132A31;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#EAEDF2; --card:#FBFCFD; --card-2:#F3F5F8;
+    --ink:#191C22; --ink-soft:#565D6A; --ink-faint:#8A909C;
+    --line:#D5DAE1; --line-soft:#E4E8ED;
+    --brand:#2E45C7; --brand-ink:#22318f; --brand-soft:#E3E7FB;
+    --human:#B65F35; --human-soft:#F3E3D8;
+    --ai:#0E7F98; --ai-soft:#D8ECF1;
+    --shadow:0 1px 2px rgba(20,26,40,.05),0 12px 32px -14px rgba(20,26,40,.18);
+  }
+  :root[data-theme="dark"]{
+    --paper:#0E1015; --card:#171A21; --card-2:#1D212A;
+    --ink:#E8EAEF; --ink-soft:#A2A9B5; --ink-faint:#727A88;
+    --line:#2A2F3A; --line-soft:#22262F;
+    --brand:#8393F6; --brand-ink:#aab5fa; --brand-soft:#1B2136;
+    --human:#D68A5D; --human-soft:#2C2018;
+    --ai:#48B4CE; --ai-soft:#132A31;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px -16px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0}
+  .wrap{
+    background:
+      radial-gradient(1200px 500px at 50% -8%, color-mix(in srgb,var(--brand) 9%,transparent), transparent 70%),
+      var(--paper);
+    color:var(--ink); font-family:var(--sans);
+    min-height:100vh; padding:clamp(18px,4vw,56px) 18px 90px;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .col{max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:22px}
+
+  /* ---- cover ---- */
+  .cover{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:clamp(24px,4vw,42px); position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:""; position:absolute; inset:0 0 auto 0; height:4px;
+    background:linear-gradient(90deg,var(--human) 0 50%,var(--ai) 50% 100%);
+  }
+  .kicker{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink-faint); display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  }
+  .kicker b{color:var(--brand); font-weight:600}
+  h1{
+    font-family:var(--serif); font-weight:600; font-size:clamp(29px,5.2vw,44px);
+    line-height:1.05; letter-spacing:-.015em; margin:18px 0 0; text-wrap:balance;
+  }
+  .thesis{
+    margin:20px 0 0; font-family:var(--serif); font-size:clamp(16px,2.4vw,19px);
+    font-style:italic; color:var(--ink-soft); border-left:3px solid var(--brand);
+    padding:4px 0 4px 16px; max-width:60ch;
+  }
+  .meta{
+    margin-top:24px; display:flex; flex-wrap:wrap; gap:10px;
+  }
+  .chip{
+    font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+    background:var(--card-2); border:1px solid var(--line-soft); border-radius:999px;
+    padding:6px 12px; display:inline-flex; gap:7px; align-items:center;
+  }
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--brand)}
+
+  /* ---- legend ---- */
+  .legend{
+    display:flex; flex-wrap:wrap; gap:8px 20px; align-items:center;
+    font-size:13px; color:var(--ink-soft); padding:14px 18px;
+    background:var(--card); border:1px dashed var(--line); border-radius:12px;
+  }
+  .legend .lg{display:inline-flex; gap:8px; align-items:center}
+  .swatch{width:13px;height:13px;border-radius:4px;border:1px solid var(--line)}
+  .swatch.resp{background:var(--card-2)}
+  .swatch.note{background:repeating-linear-gradient(45deg,var(--brand-soft),var(--brand-soft) 4px,transparent 4px,transparent 8px)}
+
+  /* ---- section card ---- */
+  .sec{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .sec-head{
+    display:flex; align-items:baseline; gap:14px; padding:20px clamp(20px,3vw,30px) 0;
+  }
+  .sec-num{
+    font-family:var(--mono); font-size:12px; font-weight:600; color:var(--brand);
+    border:1px solid var(--brand); border-radius:7px; padding:3px 8px; flex:none;
+    letter-spacing:.04em;
+  }
+  .sec-title{font-family:var(--serif); font-size:20px; font-weight:600; letter-spacing:-.01em; margin:0}
+  .sec-sub{color:var(--ink-faint); font-size:13px; margin:2px 0 0; font-family:var(--mono)}
+  .sec-body{padding:16px clamp(20px,3vw,30px) 24px; display:flex; flex-direction:column; gap:22px}
+
+  /* ---- question ---- */
+  .q{display:flex; flex-direction:column; gap:11px}
+  .q-label{display:flex; gap:10px; align-items:baseline}
+  .q-id{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); flex:none; padding-top:1px}
+  .q-text{font-size:15.5px; font-weight:550; color:var(--ink)}
+  .req{color:var(--human); font-weight:700}
+  .opts{display:flex; flex-direction:column; gap:8px}
+
+  label.opt{
+    display:flex; align-items:center; gap:11px; padding:10px 13px; cursor:pointer;
+    border:1px solid var(--line); border-radius:10px; background:var(--card);
+    font-size:14.5px; color:var(--ink-soft); transition:border-color .14s, background .14s, color .14s;
+  }
+  label.opt:hover{border-color:var(--brand); color:var(--ink)}
+  label.opt .mark{
+    width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;
+    display:grid;place-items:center; transition:border-color .14s;
+  }
+  label.opt .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand);transform:scale(0);transition:transform .14s}
+  .opt input{position:absolute;opacity:0;pointer-events:none}
+  .opt:has(input:checked){border-color:var(--brand); background:var(--brand-soft); color:var(--ink)}
+  .opt:has(input:checked) .mark{border-color:var(--brand)}
+  .opt:has(input:checked) .mark::after{transform:scale(1)}
+  .opt input:focus-visible + .mark{outline:2px solid var(--brand); outline-offset:2px}
+
+  /* scale */
+  .scale{display:flex; align-items:stretch; gap:8px}
+  .scale .end{font-size:12px; color:var(--ink-faint); align-self:center; max-width:12ch; flex:none}
+  .scale .end.hi{text-align:right}
+  .scale-row{display:flex; gap:7px; flex:1}
+  label.tick{
+    flex:1; display:grid; place-items:center; padding:11px 0; border:1px solid var(--line);
+    border-radius:9px; cursor:pointer; font-family:var(--mono); font-size:14px; color:var(--ink-soft);
+    transition:all .14s;
+  }
+  label.tick:hover{border-color:var(--brand); color:var(--ink)}
+  .tick:has(input:checked){background:var(--brand); border-color:var(--brand); color:#fff; font-weight:600}
+  .tick input{position:absolute;opacity:0;pointer-events:none}
+  .tick input:focus-visible{outline:none}
+  .tick:has(input:focus-visible){outline:2px solid var(--brand);outline-offset:2px}
+
+  /* ---- researcher note ---- */
+  .note{
+    border:1px dashed var(--brand); background:
+      linear-gradient(0deg,var(--brand-soft),var(--brand-soft));
+    border-radius:11px; padding:13px 15px; display:flex; gap:12px; align-items:flex-start;
+  }
+  .note .tag{
+    font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    color:#fff; background:var(--brand); padding:3px 7px; border-radius:5px; flex:none; margin-top:1px;
+  }
+  .note p{margin:0; font-size:13.5px; color:var(--ink); font-family:var(--mono); line-height:1.5}
+  .note p b{color:var(--brand-ink)}
+
+  .branch{
+    font-family:var(--mono); font-size:12.5px; color:var(--ink-soft);
+    background:var(--card-2); border-left:3px solid var(--ink-faint); border-radius:0 8px 8px 0;
+    padding:8px 12px; display:flex; gap:8px; align-items:center;
+  }
+  .branch b{color:var(--ink)}
+
+  /* ---- detection test ---- */
+  .test-intro{font-size:14.5px; color:var(--ink-soft)}
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+  @media (max-width:520px){.grid{grid-template-columns:1fr}}
+  .tile{
+    border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card);
+    display:flex; flex-direction:column;
+  }
+  .tile .frame{
+    aspect-ratio:4/3; position:relative; display:grid; place-items:center;
+    background:
+      linear-gradient(135deg,var(--card-2),var(--card));
+    border-bottom:1px solid var(--line-soft); overflow:hidden;
+  }
+  .tile .frame::before{
+    content:""; position:absolute; inset:0;
+    background-image:repeating-linear-gradient(0deg,transparent 0 15px,color-mix(in srgb,var(--ink) 5%,transparent) 15px 16px);
+    opacity:.6;
+  }
+  .tile .slot{
+    position:relative; z-index:1; text-align:center; color:var(--ink-faint); font-family:var(--mono); font-size:11.5px;
+  }
+  .tile .slot .big{display:block; font-size:26px; color:var(--ink-soft); margin-bottom:5px}
+  .tile .truth{
+    position:absolute; top:9px; right:9px; z-index:2; font-family:var(--mono); font-size:10.5px;
+    font-weight:600; letter-spacing:.08em; text-transform:uppercase; padding:4px 8px; border-radius:6px;
+    opacity:0; transform:translateY(-4px); transition:opacity .28s, transform .28s;
+  }
+  .truth.human{background:var(--human-soft); color:var(--human); border:1px solid var(--human)}
+  .truth.ai{background:var(--ai-soft); color:var(--ai); border:1px solid var(--ai)}
+  .revealed .truth{opacity:1; transform:none}
+  .tile .pick{display:flex; padding:10px; gap:8px}
+  label.bin{
+    flex:1; text-align:center; padding:9px 0; border:1px solid var(--line); border-radius:8px;
+    cursor:pointer; font-size:13.5px; font-weight:550; color:var(--ink-soft); transition:all .14s;
+  }
+  label.bin:hover{border-color:currentColor}
+  label.bin.h:hover{color:var(--human)}
+  label.bin.a:hover{color:var(--ai)}
+  .bin.h:has(input:checked){background:var(--human-soft); border-color:var(--human); color:var(--human)}
+  .bin.a:has(input:checked){background:var(--ai-soft); border-color:var(--ai); color:var(--ai)}
+  .bin input{position:absolute;opacity:0;pointer-events:none}
+  .bin:has(input:focus-visible){outline:2px solid var(--brand);outline-offset:2px}
+
+  .reveal-bar{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+  button.reveal{
+    font-family:var(--mono); font-size:13px; font-weight:600; letter-spacing:.03em;
+    color:#fff; background:var(--brand); border:none; border-radius:9px; padding:11px 18px; cursor:pointer;
+    transition:filter .14s, transform .05s;
+  }
+  button.reveal:hover{filter:brightness(1.08)}
+  button.reveal:active{transform:translateY(1px)}
+  button.reveal:focus-visible{outline:2px solid var(--brand); outline-offset:3px}
+  .key-hint{font-family:var(--mono); font-size:12px; color:var(--ink-faint)}
+  .key-hint b.h{color:var(--human)} .key-hint b.a{color:var(--ai)}
+
+  /* ---- readout ---- */
+  .readout{
+    background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:clamp(24px,4vw,36px);
+  }
+  .readout h3{font-family:var(--serif); font-size:20px; margin:0 0 6px; font-weight:600}
+  .readout .lede{color:var(--ink-soft); font-size:14px; margin:0 0 20px}
+  .quote{
+    font-family:var(--serif); font-size:clamp(18px,2.8vw,23px); line-height:1.4; font-style:italic;
+    color:var(--ink); margin:0; text-wrap:pretty;
+  }
+  .quote .h{color:var(--human); font-style:normal; font-weight:600}
+  .quote .a{color:var(--ai); font-style:normal; font-weight:600}
+  .quote .b{color:var(--brand); font-style:normal; font-weight:600}
+  .maps{margin-top:22px; display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  .maprow{display:grid; grid-template-columns:1fr 1.3fr; gap:14px; background:var(--card); padding:11px 15px; font-size:13.5px}
+  .maprow .k{font-weight:600; color:var(--ink)}
+  .maprow .v{color:var(--ink-soft)}
+  @media (max-width:520px){.maprow{grid-template-columns:1fr; gap:3px}}
+
+  .foot{text-align:center; font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); letter-spacing:.04em; padding-top:6px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="col">
+
+    <!-- COVER -->
+    <header class="cover">
+      <div class="kicker"><b>Etsy × Columbia</b> · Discovery Instrument · <span>v1</span></div>
+      <h1>Can shoppers actually tell what&rsquo;s AI-made?</h1>
+      <p class="thesis">Buyers can&rsquo;t reliably tell when a product is AI-made &mdash; and once they find out, their trust drops.</p>
+      <div class="meta">
+        <span class="chip"><span class="dot"></span>Online shoppers only</span>
+        <span class="chip"><span class="dot"></span>~90 seconds</span>
+        <span class="chip"><span class="dot"></span>15 questions · 7 sections</span>
+        <span class="chip"><span class="dot"></span>Behavioral detection test</span>
+      </div>
+    </header>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <span class="lg"><span class="swatch resp"></span> What respondents see</span>
+      <span class="lg"><span class="swatch note"></span> Private &mdash; researcher notes &amp; answer key</span>
+      <span class="lg" style="font-family:var(--mono);color:var(--ink-faint)">This is a clickable preview &mdash; try it.</span>
+    </div>
+
+    <!-- SECTION 1 -->
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-num">S1</span>
+        <div><h2 class="sec-title">Screener</h2><p class="sec-sub">exits non-shoppers</p></div>
+      </div>
+      <div class="sec-body">
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q1</span><span class="q-text">How often do you buy physical products online? <span class="req">*</span></span></div>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="q1"><span class="mark"></span>Never</label>
+            <label class="opt"><input type="radio" name="q1"><span class="mark"></span>A few times a year</label>
+            <label class="opt"><input type="radio" name="q1"><span class="mark"></span>About once a month</label>
+            <label class="opt"><input type="radio" name="q1"><span class="mark"></span>Weekly or more</label>
+          </div>
+          <div class="branch">↳ If <b>Never</b> → skip to Thank-you (respondent exits)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-num">S2</span>
+        <div><h2 class="sec-title">Baseline attitudes</h2><p class="sec-sub">care · awareness</p></div>
+      </div>
+      <div class="sec-body">
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q2</span><span class="q-text">How much do you care whether a product is made by a real person vs. mass-produced or AI-made? <span class="req">*</span></span></div>
+          <div class="scale">
+            <span class="end">Don&rsquo;t care</span>
+            <div class="scale-row">
+              <label class="tick"><input type="radio" name="q2">1</label>
+              <label class="tick"><input type="radio" name="q2">2</label>
+              <label class="tick"><input type="radio" name="q2">3</label>
+              <label class="tick"><input type="radio" name="q2">4</label>
+              <label class="tick"><input type="radio" name="q2">5</label>
+            </div>
+            <span class="end hi">Care a lot</span>
+          </div>
+        </div>
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q3</span><span class="q-text">Before today, did you know sellers can use AI to create product images, descriptions, or even the products themselves? <span class="req">*</span></span></div>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="q3"><span class="mark"></span>Yes &mdash; well aware</label>
+            <label class="opt"><input type="radio" name="q3"><span class="mark"></span>Vaguely aware</label>
+            <label class="opt"><input type="radio" name="q3"><span class="mark"></span>No &mdash; didn&rsquo;t know</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-num">S3</span>
+        <div><h2 class="sec-title">Your confidence</h2><p class="sec-sub">asked before the test</p></div>
+      </div>
+      <div class="sec-body">
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q4</span><span class="q-text">How good do you think you are at telling whether a product was made by AI vs. a real person? <span class="req">*</span></span></div>
+          <div class="scale">
+            <span class="end">Not good</span>
+            <div class="scale-row">
+              <label class="tick"><input type="radio" name="q4">1</label>
+              <label class="tick"><input type="radio" name="q4">2</label>
+              <label class="tick"><input type="radio" name="q4">3</label>
+              <label class="tick"><input type="radio" name="q4">4</label>
+              <label class="tick"><input type="radio" name="q4">5</label>
+            </div>
+            <span class="end hi">Very good</span>
+          </div>
+        </div>
+        <div class="note">
+          <span class="tag">Why</span>
+          <p>The money variable. We compare <b>claimed confidence (Q4)</b> against <b>actual score (S4)</b>. High confidence + a coin-flip score = the knowledge gap, proven.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 — TEST -->
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-num">S4</span>
+        <div><h2 class="sec-title">The detection test</h2><p class="sec-sub">4 items · no reveal yet</p></div>
+      </div>
+      <div class="sec-body">
+        <p class="test-intro">These are 4 real products. For each, take your best guess: <strong>made by a human</strong>, or <strong>made / generated by AI</strong>? Go with your gut.</p>
+        <div class="grid" id="grid">
+          <div class="tile"><div class="frame"><span class="truth human">Human</span><span class="slot"><span class="big">▦</span>Image slot 1</span></div>
+            <div class="pick"><label class="bin h"><input type="radio" name="q5">Human</label><label class="bin a"><input type="radio" name="q5">AI</label></div></div>
+          <div class="tile"><div class="frame"><span class="truth ai">AI</span><span class="slot"><span class="big">▦</span>Image slot 2</span></div>
+            <div class="pick"><label class="bin h"><input type="radio" name="q6">Human</label><label class="bin a"><input type="radio" name="q6">AI</label></div></div>
+          <div class="tile"><div class="frame"><span class="truth human">Human</span><span class="slot"><span class="big">▦</span>Image slot 3</span></div>
+            <div class="pick"><label class="bin h"><input type="radio" name="q7">Human</label><label class="bin a"><input type="radio" name="q7">AI</label></div></div>
+          <div class="tile"><div class="frame"><span class="truth ai">AI</span><span class="slot"><span class="big">▦</span>Image slot 4</span></div>
+            <div class="pick"><label class="bin h"><input type="radio" name="q8">Human</label><label class="bin a"><input type="radio" name="q8">AI</label></div></div>
+        </div>
+        <div class="reveal-bar">
+          <button class="reveal" id="revealBtn" type="button">Reveal the answer key</button>
+          <span class="key-hint">Private key · <b class="h">1 Human</b> · <b class="a">2 AI</b> · <b class="h">3 Human</b> · <b class="a">4 AI</b></span>
+        </div>
+        <div class="note">
+          <span class="tag">Integrity</span>
+          <p>Put S4 and S5 in <b>separate Google Forms sections</b> and disable &ldquo;edit after submit,&rdquo; so nobody changes a guess after the reveal. Never show the key to respondents.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-num">S5</span>
+        <div><h2 class="sec-title">Reveal &amp; trust</h2><p class="sec-sub">the &ldquo;does it matter&rdquo; half</p></div>
+      </div>
+      <div class="sec-body">
+        <div class="note"><span class="tag">Shown</span><p>&ldquo;Reveal: <b>2 of those 4 were AI-generated</b>, 2 were made by real people. How did you do?&rdquo;</p></div>
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q9</span><span class="q-text">If you found out a product you liked was mostly AI-generated, how would it change how likely you are to buy it? <span class="req">*</span></span></div>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="q9"><span class="mark"></span>Much less likely</label>
+            <label class="opt"><input type="radio" name="q9"><span class="mark"></span>Somewhat less likely</label>
+            <label class="opt"><input type="radio" name="q9"><span class="mark"></span>No change</label>
+            <label class="opt"><input type="radio" name="q9"><span class="mark"></span>More likely</label>
+          </div>
+        </div>
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q10</span><span class="q-text">Should sellers be required to disclose when AI made the product or its images? <span class="req">*</span></span></div>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="q10"><span class="mark"></span>Yes</label>
+            <label class="opt"><input type="radio" name="q10"><span class="mark"></span>No</label>
+            <label class="opt"><input type="radio" name="q10"><span class="mark"></span>Not sure</label>
+          </div>
+        </div>
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q11</span><span class="q-text">Whose job is it to be transparent about AI use in a product? <span class="req">*</span></span></div>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="q11"><span class="mark"></span>The seller</label>
+            <label class="opt"><input type="radio" name="q11"><span class="mark"></span>The platform (e.g. Etsy)</label>
+            <label class="opt"><input type="radio" name="q11"><span class="mark"></span>The buyer, to research it</label>
+            <label class="opt"><input type="radio" name="q11"><span class="mark"></span>No one</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-num">S6</span>
+        <div><h2 class="sec-title">About you</h2><p class="sec-sub">demographics</p></div>
+      </div>
+      <div class="sec-body">
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q12</span><span class="q-text">Your age? <span class="req">*</span></span></div>
+          <div class="opts" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <label class="opt"><input type="radio" name="q12"><span class="mark"></span>Under 18</label>
+            <label class="opt"><input type="radio" name="q12"><span class="mark"></span>18&ndash;24</label>
+            <label class="opt"><input type="radio" name="q12"><span class="mark"></span>25&ndash;34</label>
+            <label class="opt"><input type="radio" name="q12"><span class="mark"></span>35&ndash;44</label>
+            <label class="opt"><input type="radio" name="q12"><span class="mark"></span>45&ndash;54</label>
+            <label class="opt"><input type="radio" name="q12"><span class="mark"></span>55+</label>
+          </div>
+        </div>
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q13</span><span class="q-text">Which best describes you? <span class="req">*</span></span></div>
+          <div class="opts" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+            <label class="opt"><input type="radio" name="q13"><span class="mark"></span>Student</label>
+            <label class="opt"><input type="radio" name="q13"><span class="mark"></span>Working professional</label>
+            <label class="opt"><input type="radio" name="q13"><span class="mark"></span>Parent</label>
+            <label class="opt"><input type="radio" name="q13"><span class="mark"></span>Educator</label>
+            <label class="opt"><input type="radio" name="q13"><span class="mark"></span>Other</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-num">S7</span>
+        <div><h2 class="sec-title">Interview recruit</h2><p class="sec-sub">required by the brief</p></div>
+      </div>
+      <div class="sec-body">
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q14</span><span class="q-text">Would you be willing to answer a few follow-up questions in a short interview? <span class="req">*</span></span></div>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="q14"><span class="mark"></span>Yes</label>
+            <label class="opt"><input type="radio" name="q14"><span class="mark"></span>No</label>
+          </div>
+          <div class="branch">↳ If <b>Yes</b> → ask Q15 · If <b>No</b> → Thank-you</div>
+        </div>
+        <div class="q">
+          <div class="q-label"><span class="q-id">Q15</span><span class="q-text">Best email or phone to reach you? <span style="color:var(--ink-faint);font-weight:400">(optional · project use only)</span></span></div>
+          <div class="opt" style="cursor:text;color:var(--ink-faint);font-family:var(--mono);font-size:13px">Short answer text&hellip;</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- READOUT -->
+    <section class="readout">
+      <h3>The result you&rsquo;re building toward</h3>
+      <p class="lede">Every question maps to a piece of the proof. Here&rsquo;s the headline it&rsquo;s engineered to produce:</p>
+      <p class="quote">&ldquo;Shoppers rated their own AI-spotting ability at <span class="b">4 / 5</span> &mdash; but scored just <span class="b">51%</span>, no better than a coin flip. And <span class="h">68%</span> said they&rsquo;d be <span class="a">less likely to buy</span> once they knew.&rdquo;</p>
+      <div class="maps">
+        <div class="maprow"><span class="k">Core proof</span><span class="v">Score on Q5&ndash;Q8 near 50% = buyers genuinely can&rsquo;t tell</span></div>
+        <div class="maprow"><span class="k">The killer chart</span><span class="v">Q4 confidence vs. actual score = they think they can, but can&rsquo;t</span></div>
+        <div class="maprow"><span class="k">Does it matter</span><span class="v">Q9 &mdash; most say &ldquo;less likely to buy&rdquo; → the misperception has a cost</span></div>
+        <div class="maprow"><span class="k">Transparency demand</span><span class="v">Q10 + Q11 → who should own AI disclosure</span></div>
+      </div>
+    </section>
+
+    <p class="foot">Buyer knowledge-gap cell · seller-misuse half intentionally scoped out to fit the timebox</p>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var btn=document.getElementById('revealBtn');
+    var grid=document.getElementById('grid');
+    if(btn&&grid){
+      btn.addEventListener('click',function(){
+        var on=grid.classList.toggle('revealed');
+        grid.querySelectorAll('.tile').forEach(function(t){t.classList.toggle('revealed',on)});
+        btn.textContent=on?'Hide the answer key':'Reveal the answer key';
+      });
+    }
+  })();
+</script>
