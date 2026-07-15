@@ -1,5 +1,10 @@
 # Discovery Synthesis — Etsy × Columbia Challenge
 
+> **Companion doc (2026-07-15):** the *so-what / now-what* and direction live in
+> [`FINAL-SUMMARY.md`](FINAL-SUMMARY.md). Files **06–07** were added later and are **not** buyer
+> interviews (06 = founder product-thesis, 07 = pitch-coaching) — they are excluded from the sample
+> below and do not change the n. This file remains the evidence layer for files 01–05.
+
 **Corpus:** 4 buyer street interviews (files 01–04, English, near Columbia/NYC) + 1 expert-seller phone call (file 05, Hebrew Etsy seller, translated).
 **Sample:** n = 4 buyers + 1 seller. **Directional, not conclusive.** Every supply-side claim rests on a single voice (see §7).
 **Data caveat:** File 05's sharpest 54s (the small-business-vs-price answer) was silently truncated by the primary transcription model and recovered only from a second model — it is single-sourced and unconfirmed against audio (README §"READ THIS FIRST"). It is also the most valuable material in the corpus, so it is flagged wherever quoted.
