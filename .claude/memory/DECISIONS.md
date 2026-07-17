@@ -24,6 +24,25 @@
 
 <!-- Entries below this line, most-recent first. -->
 
+## 2026-07-16 — Pitch finalized: named "KOL," tagline locked, rebalanced to full vision
+
+**Context:** Finished the Day-4 concept pitch (from the 2026-07-15 spine entry below). Ran a 3-writer copy sprint (converged), a 6-writer/2-round fable tagline sprint, and a vision-alignment audit.
+**Decisions:** (1) **Name = KOL** — Hebrew for *voice* (double meaning: the sound + being *heard*). Working name — **trademark/domain check still REQUIRED** before public/API use (see Etsyc entry). (2) **Tagline LOCKED: "Every maker, finally heard."** (3) **Vision rebalance:** founder flagged the deck over-indexed on the voice feature; captured the full vision in `docs/01-foundation/KOL-vision-capture.md` and rebalanced so the **personalized branded world (colors/film/studio), maker creative-authorship, and CONNECTION** land alongside trust — voice kept as the un-fakeable anchor + name, not the whole product. Founder confirmed aligned.
+**Deliverable (FINAL, paste-ready):** `docs/05-marketing/HLV-pitch-KOL-slidebuild.md` (v3).
+**Reversibility:** reversible (pre-pitch copy) except the name (trademark = do NOT go public before clearing).
+**Owner:** ceo (session ceo-hlv-pitch) · **Affects:** cmo (copy), cpo/design-lead (prototype: transcript-grounded personalized store + "tap→hear"), legal (KOL trademark check).
+
+## 2026-07-15 — Pitch spine evolved: founder re-opened "In the Making," landed on "Meet the maker before you meet the product" (voice-cited discovery)
+
+**Context:** Founder-led interview + brainstorm + 6-persona board (R0/R1 in `docs/08-agents_work/2026-07-15-pitch-board/`) to lock the Day-4 (Jul 16) HLV×Etsy **concept pitch** (3 min, ISS words-only template, spoken live; job = recruit a team + land with Etsy mentors).
+**Decision (pitch spine):** A **new way to shop built around the real human behind the product, not a grid.** Discovery-first (connection *before* purchase; watch-it-made = post-purchase encore). Feed = the **making** (hands/material/time) with the **maker's own voice** as the soundtrack; tap in → her voice keeps playing beside a store that feels like her.
+**The board reframe (adopted, load-bearing):** the un-fakeable atom is **the maker's own voice + hands, cited to timecode** — *"tap any line, hear the exact second she said it."* Replaces the earlier, indefensible *"AI bounded by design"* trust claim (which all 6 personas said a mentor guts in one question, and which IS the platform-declared trust Q4 pre-rejects). **AI is demoted from the trust story to invisible plumbing** — it does the design work the maker can't, but never speaks for her.
+**Other locked calls:** price → lead with *"support," "even pay a little more"* as honest tail, no number (mentors bite unproven premiums). Vision → **stay grounded** ("a new way to shop from real humans"), not moonshot. Positioning → own app / Etsy-compatible add-on. Voice/delivery → file 06 (plain, human) + file 07 (open the door, let them discover it). Cut AI-store-builder airtime to one line; plant team-shaped lanes.
+**Supersedes:** the 2026-07-15 "In the Making / Proof-of-Batch" locked bet (post-purchase, anti-story) — founder deliberately re-opened it; discovery-first story/connection now leads, with proof-of-making folded in as the trust atom.
+**Still to nail in the draft:** the on-stage answer to "sellers won't do this" (one concrete maker + one low-effort ritual); the team lanes.
+**Reversibility:** hard-to-reverse (whole deck orients here) · **Owner:** ceo (session ceo-hlv-pitch) · **Affects:** cmo (deck copy), cpo/design-lead (prototype: transcript-grounded store + "tap→hear"), research (seller-consent + say-do gates).
+**Board verdict:** 4 PROCEED_WITH_CONDITIONS + 2 RECONSIDER, zero KILL. Full digest: `docs/08-agents_work/2026-07-15-pitch-board/R1-digest.md`.
+
 ## 2026-07-15 — Interview corpus (7 recordings) independently corroborates the locked "In the Making" bet
 
 **Context:** Transcribed files 06–07 and produced `FINAL-SUMMARY.md` across all 7 recordings, then cross-checked it against the already-locked "In the Making" / Proof-of-Batch bet (entries below) — which the parallel `ceo-realness` workstream locked earlier today off the same `SYNTHESIS.md`.
