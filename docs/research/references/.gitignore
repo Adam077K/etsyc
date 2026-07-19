@@ -1,0 +1,23 @@
+# KOL reference media policy (set by founder, 2026-07-19):
+#   IMAGES (screenshots) → committed to GitHub, so anyone can see the references.
+#   VIDEOS → NEVER committed (too large for git; kept locally for exploration only).
+#
+# Anything matching below is ignored in this folder + subfolders. Images
+# (.png .jpg .jpeg .webp .gif .heic .svg) are NOT listed, so they are tracked.
+
+*.mp4
+*.MP4
+*.mov
+*.MOV
+*.m4v
+*.M4V
+*.webm
+*.WEBM
+*.avi
+*.AVI
+*.mkv
+*.MKV
+*.mpg
+*.mpeg
+*.wmv
+*.flv

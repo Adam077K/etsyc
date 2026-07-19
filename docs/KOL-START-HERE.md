@@ -48,5 +48,5 @@ These generic-named files exist but are **unfilled templates** (headers + agent-
 
 ## Current status (as of 2026-07-19)
 - ✅ Phases 0–3 complete (concept lock · references · feature map · design-system specs).
-- 🔄 **Design direction being reset** — Adam is re-gathering references (30-company list) because the first palette/font direction was off. Design-Lead will redo the rails once the new direction is pinned.
+- 🔄 **Design direction being reset** — the first palette/font direction was off. Adam curated a tight 5-reference set (Faire, Kotn, Lusion, Cuberto, TikTok Shop) as the operative design-token source: [`docs/research/references/`](research/references/README.md). Screenshots (committed) + videos (git-ignored) are being added there; Design-Lead redoes `KOL-design-system.md` from that set once explored.
 - ⏭️ Next: finalize visual direction → Phase 4 (data model + AI/video engine specs) → Phase 5 (per-feature specs) → Phase 6 (build in `apps/kol/`).
