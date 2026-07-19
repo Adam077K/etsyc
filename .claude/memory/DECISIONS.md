@@ -24,6 +24,14 @@
 
 <!-- Entries below this line, most-recent first. -->
 
+## 2026-07-19 — D15: seller-shop design FREEDOM (amends D4/D9 anti-slop model)
+
+**Context:** Founder challenged the constrained 5-palette model: capping seller shops to a fixed palette set = the "flattening" the whole product exists to fight. Clarified the design-system references/tokens were scoped for KOL's OWN product, and seller shops should be "as customizable as possible."
+**Decision:** Two surfaces, two rules. (a) **KOL's own product UI** (feed/nav/chrome/checkout/marketing) keeps the FIXED design system (5 palettes/4 pairings/motion presets). (b) **Seller shops get FULL brand freedom** — any colors/fonts/imagery; AI derives a *coherent custom design system per shop* from the seller's brand; the 5 palettes are **starting points, not a cap**. Anti-slop for shops shifts from "palette limitation (layer 1)" to **AI-generation coherence + auto-critic (contrast/AA/hierarchy/coherence, auto-regen) + maker approval (layers 2+3)**. Layer 1 for shops = block system + mandatory AA enforcement only.
+**Rationale:** Freedom for the artist/seller/brand is core to the vision ("no flattening, utopian store"); the "never slop" bar is held by an excellent critic + human approval, not training wheels. Bet: strong AI models make generation-coherence + critic good enough.
+**Trade-off (accepted):** the auto-critic becomes LOAD-BEARING (not a backstop); quality variance rises vs a 5-option cap. Phase 4 AI-pipeline spec must include a robust "brand input → coherent custom design system" derivation + automated contrast/coherence enforcement.
+**Reversibility:** hard (reframes D4/D9). **Owner:** ceo (session `ceo-5`). **Affects:** Design-Lead, ai-engineer (pipeline + critic), CTO (Phase 4 specs), QA-Lead (contrast enforcement). Full text: `docs/01-foundation/KOL-v2-concept-lock.md` D15.
+
 ## 2026-07-19 — KOL v2 concept lock: 13 decisions for the production-grade MVP build
 
 **Context:** Adam signaled the product had evolved past the Jul-16 pitch vision and asked the CEO to grill him to re-align the design tree before planning the first real MVP build. Full 11-fork grill completed.
