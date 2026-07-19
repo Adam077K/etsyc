@@ -35,8 +35,16 @@
 - **Interview corpus (7 recordings) corroborates the bet** — see `docs/research/interviews/FINAL-SUMMARY.md`.
 - Earlier "discovery that becomes relationship" reframe (Miro `uXjVG1iySzI=`) fed into this and is now superseded by the locked bet. **"IST"** = Adam's tag for a friction that is also a build opportunity.
 
+## Onboarding — read this first
+- **`docs/KOL-START-HERE.md`** is the single canonical entry point for KOL. Any new session/agent reads it first: it has the 60-sec what-is-KOL, a tiered reading path (Tier 1 authoritative KOL-* docs → pitch → research → history), and a list of empty template files to IGNORE. Keep it current when major docs change.
+
+## Day 5-6 (Jul 19) — PRODUCT EVOLVED: KOL v2 locked for the real MVP build
+- The build target is no longer the "In the Making / Proof-of-Batch" pitch bet — that's now historical pitch framing. Current product = **KOL v2**: a **desktop-first, video-native marketplace** where buyers scroll a magazine feed of real makers on film → tap → the maker's personalized branded **world unfolds around a still-playing video** → meet the human → buy. Makers build their world via an AI **co-creation interview** (they stay the author; anti-slop is structural).
+- **13 locked decisions (D1–D13):** `docs/01-foundation/KOL-v2-concept-lock.md`. **Auth is now IN scope** (Supabase) — reversed the earlier "skip auth." Master build plan: `docs/03-system-design/KOL-MVP-master-plan.md` (Phases 0–8).
+- **MVP model:** competition = checkpoint on a production build (seeded with 4 teammate worlds), then cutover to real buyers+sellers. Every agent uses MCPs (Supabase, Playwright, Miro, Refero/Stitch/Pencil/Figma) on demand.
+
 ## Live constraints
-- **Idea is chosen** ("In the Making"). Gating items are now the **validation gates** (Day-4 cold-DM maker probe ≥60%, capture-rig, forced-choice, lapsed-buyer) and Adam's **D7 written pivot pre-commit (due Day 3)**. Not build capacity.
+- **Idea is chosen** (KOL v2, see above). Gating items are now the **validation gates** (Day-4 cold-DM maker probe ≥60%, capture-rig, forced-choice, lapsed-buyer) and Adam's **D7 written pivot pre-commit (due Day 3)**. Not build capacity.
 - Teams form by **vote on Day 4** — Adam does not control his team. Venture ambition vs. teammates optimizing for the pitch is an unresolved tension.
 - Days 5–6 blueprint must state value to **buyer, seller, AND Etsy** — all three.
 

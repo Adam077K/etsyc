@@ -24,6 +24,15 @@
 
 <!-- Entries below this line, most-recent first. -->
 
+## 2026-07-19 — KOL v2 concept lock: 13 decisions for the production-grade MVP build
+
+**Context:** Adam signaled the product had evolved past the Jul-16 pitch vision and asked the CEO to grill him to re-align the design tree before planning the first real MVP build. Full 11-fork grill completed.
+**Decision:** Locked KOL v2 as a **desktop-first, video-native marketplace** (Next.js) with 13 decisions (D1–D13) — see [`docs/01-foundation/KOL-v2-concept-lock.md`](../../docs/01-foundation/KOL-v2-concept-lock.md). Headlines: **D2 auth is now IN scope** (Supabase, reversing the earlier "skip auth"); **D4** stores are a section/block library + per-maker JSON config (AI emits data, never code); **D5** one unified rules+context video engine (discovery + store + contextual narration, AI-ranker-ready); **D6** KOL-owned Stripe test-mode checkout; **D8** seller co-creation loop (interview → AI drafts JSON → maker co-edits → approve); **D9** 3-layer anti-slop (constrained primitives + auto-critic + human gate); **D12** 4 team-produced worlds (one per teammate, 3 pre-built + 1 live); **D13** competition = checkpoint on a production build, then cutover to real buyers+sellers.
+**Rationale:** Hybrid scope (D3) proves the full experience end-to-end while bounding the hardest part (generation) to one flow; JSON-config store engine makes both hand-built and AI worlds share one renderer and keeps AI output structurally safe.
+**Reversibility:** hard (D1/D2/D4/D5/D8/D9/D13); reversible (D3/D6/D7/D10/D11/D12)
+**Owner:** ceo (session `ceo-5`)
+**Affects:** ALL — CTO/CPO/CMO/Design-Lead/Research-Lead/QA-Lead + every worker. Master build plan: [`docs/03-system-design/KOL-MVP-master-plan.md`](../../docs/03-system-design/KOL-MVP-master-plan.md). Supersedes the Jul-16 `KOL-vision-capture.md` where they conflict; the "In the Making / Proof-of-Batch" pitch bet is now historical framing, not the current build target.
+
 ## 2026-07-16 — Pitch finalized: named "KOL," tagline locked, rebalanced to full vision
 
 **Context:** Finished the Day-4 concept pitch (from the 2026-07-15 spine entry below). Ran a 3-writer copy sprint (converged), a 6-writer/2-round fable tagline sprint, and a vision-alignment audit.
