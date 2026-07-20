@@ -24,6 +24,13 @@
 
 <!-- Entries below this line, most-recent first. -->
 
+## 2026-07-20 — Phase 3 formally CLOSED: design gate run + v2 reconcile + apps/kol scaffolded (QA-Lead PASS)
+
+**Context:** Pre-Phase-5 audit found Phase 3 was never truly *done* — its master-plan gate (design-critic loop + QA-Lead PASS) was never run (only docs existed), and the "coded component library shell" deliverable was unbuilt. Founder chose to close both now.
+**What the gate caught (load-bearing):** (1) the store-config schema still carried the **rejected v1** palette/pairing names + only 3 motion presets — never synced when design-system was rewritten to **v2**; the AI-pipeline spec had the same stale enums. Both would have hard-blocked every Phase-6 builder. (2) A **Tailwind alpha-modifier bug** in the scaffold silently emitted no CSS for every `/opacity` utility (illegible hero over film, invisible controls/hover) — a green build hid it; only the code + visual review caught it. (3) A **fabricated attributed maker quote** in the thank-you fallback (D10 violation on the product's core honesty claim).
+**Decision / outcome:** **store-config.schema.md → v1.3** — curated enums synced to design-system v2 (`sunbaked·market-plum·cuberto-noir·orchard·bazaar` / `statement-grotesk·warm-serif·modern-mono-grotesk·character-maximal` / `hushed·fluid·liquid·dimensional`), block-grounds exposed with AA restrictions, `--accent-3`, optional maker-authored thank-you `message` field (D10). AI-pipeline spec synced. **`apps/kol` scaffolded** (Next 16/React 19/strict TS/Tailwind): 11 blocks × 4 states, `renderStore` for both `theme.kind`, curated (Sena) + custom (Noor any-hex) fixtures, `/preview`. Anti-slop AA guarantee made concrete: a per-palette+mode **AA-measured `--accent-cta` token** (all combos ≥4.5:1). **QA-Lead PASS** (Full tier) after 2 fix cycles. Scaffold is shell-only — no backend/auth/DB (mock fixtures).
+**Reversibility:** hard (design system + store-config contract + app foundation are what Phase 5/6 build on). **Owner:** ceo (`ceo-6`). **Affects:** all Phase-5/6 build agents (build against apps/kol + store-config v1.3 + design-system v2); 7 tracked P3 follow-ups in `docs/08-agents_work/sessions/2026-07-20-qa-lead-kol-phase3-closure.md`. Merged to main, Founder-confirmed.
+
 ## 2026-07-19 — Phase 4 complete: KOL data model + AI-pipeline + video-engine specs (all QA-passed)
 
 **Context:** Per the build-planning handoff, took KOL into Phase 4 of the master plan — fully specify the two technical spines (Supabase data model, AI/video engines) before any build. Ran schema-first (Founder choice), then AI-pipeline + video-engine specs in parallel. Orchestrated on Opus (spec/planning tier); Fable 5 reserved for Phase-6 build.
