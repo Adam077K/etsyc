@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   KOL global design tokens — design-system v2 §1
+   (docs/03-system-design/KOL-design-system.md)
+
+   GLOBAL here: type scale, spacing, pill radius, shadow recipe,
+   motion tokens. PER-WORLD (set by apply-theme.ts at the world
+   root, curated + custom converge on identical names): --ground,
+   --surface, --ink, --muted, --line, --accent, --accent-2,
+   --accent-3, --accent-ink, --on-media, --block-a/-b/-c,
+   --on-block-a/-b/-c, --font-display/-text/-mono,
+   --radius-sm/-md/-lg, --space-section.
+   ============================================================ */
+
+:root {
+  /* --- §1.1 type scale (8 roles + cinematic hero tier) --- */
+  --fs-display-hero: clamp(3.5rem, 8vw, 7rem);
+  --fs-display: clamp(2.75rem, 5.5vw, 5.25rem);
+  --fs-h1: clamp(2rem, 3.8vw, 3.5rem);
+  --fs-h2: clamp(1.5rem, 2.4vw, 2.25rem);
+  --fs-h3: 1.375rem;
+  --fs-body-lg: 1.1875rem;
+  --fs-body: 1.0625rem;
+  --fs-caption: 0.8125rem;
+
+  /* --- §1.2 spacing (8px grid, editorial reach) --- */
+  --space-0-5: 4px; /* the only half-step */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-10: 80px;
+  --space-12: 96px;
+  --space-16: 128px;
+  --space-20: 160px;
+
+  /* --- §1.3 radius: pill is global; sm/md/lg are per-world
+         identity (sharp/soft/round) — soft defaults so chrome
+         outside a world root still renders sanely --- */
+  --radius-pill: 999px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  /* --- §1.4 shadows: tinted to the world ground, wide + soft.
+         Doc notation `color/N%` is realized as a nested
+         color-mix toward transparent. --- */
+  --shadow-subtle: 0 1px 2px -1px
+    color-mix(in oklab, color-mix(in oklab, var(--ground) 88%, black) 6%, transparent);
+  --shadow-card: 0 12px 28px -12px
+    color-mix(in oklab, color-mix(in oklab, var(--ground) 82%, black) 12%, transparent);
+  --shadow-raised: 0 24px 56px -20px
+    color-mix(in oklab, color-mix(in oklab, var(--ground) 78%, black) 16%, transparent);
+  --shadow-overlay: 0 40px 90px -28px
+    color-mix(in oklab, color-mix(in oklab, var(--ground) 70%, black) 22%, transparent);
+  --shadow-depth:
+    0 60px 120px -30px
+      color-mix(in oklab, color-mix(in oklab, var(--ground) 62%, black) 28%, transparent),
+    0 8px 24px -8px
+      color-mix(in oklab, color-mix(in oklab, var(--ground) 80%, black) 14%, transparent);
+
+  /* --- §1.5 motion tokens (cinematic + physical) --- */
+  --ease-kol: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-cinematic: cubic-bezier(0.62, 0.02, 0.1, 1);
+  --dur-tap: 120ms;
+  --dur-state: 200ms;
+  --dur-enter: 340ms;
+  --dur-reveal: 520ms;
+  --dur-unfold: 900ms;
+  --dur-cinema: 1200ms;
+  /* spring params are consumed by JS (video dock / liquid signature —
+     Phase 6); kept as data attributes of the token layer here */
+  --spring-video: 210 26 1;
+  --spring-liquid: 140 18 1.2;
+
+  /* --- app-chrome fallback palette (KOL's own UI = sunbaked light,
+         design-system §2.1) so pages outside a world root are never
+         unstyled. Worlds override every one of these at their root. --- */
+  --ground: #f6efe3;
+  --surface: #fffbf3;
+  --ink: #221c15;
+  --muted: #6f6153;
+  --line: #e7dcc8;
+  --accent: #c64a2c;
+  --accent-2: #3e7e8c;
+  --accent-3: var(--accent);
+  /* AA-measured CTA pair (sunbaked light: cream on 5%-darkened accent, 4.72:1) */
+  --accent-cta: color-mix(in srgb, var(--accent) 95%, black);
+  --accent-ink: #fbf3e8;
+  --on-media: #fbf3e8;
+  --block-a: #b8452a;
+  --block-b: #5f6b33;
+  --block-c: #4c93a8;
+  --on-block-a: #fbf3e8;
+  --on-block-b: #fbf3e8;
+  --on-block-c: #fbf3e8;
+  --scrim: linear-gradient(
+    to top,
+    color-mix(in oklab, var(--ground) 45%, black) 0%,
+    transparent 55%
+  );
+
+  /* pairing fallback until a world root sets its own */
+  --font-display: var(--font-clash-display, var(--font-fraunces)), serif;
+  --font-text: var(--font-general-sans, ui-sans-serif), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* density (airy | standard) — section vertical rhythm §1.2 */
+  --space-section: var(--space-16);
+}
+
+@layer base {
+  body {
+    background-color: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: var(--fs-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--accent) 24%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* ---- scroll reveal (§4.2): once per element, --ease-kol,
+          translate+opacity only, media-leads-text handled by
+          stagger delays from the Reveal wrapper ---- */
+  .kol-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity var(--dur-reveal) var(--ease-kol),
+      transform var(--dur-reveal) var(--ease-kol);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  .kol-reveal.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---- skeleton shimmer: opacity pulse only (no perpetual
+          translate), static under reduced motion ---- */
+  .kol-skeleton {
+    background-color: color-mix(in oklab, var(--ink) 8%, var(--surface));
+    animation: kol-skeleton-pulse 1.6s var(--ease-kol) infinite;
+  }
+  @keyframes kol-skeleton-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* ---- over-media type treatment (§1.1 rules) ---- */
+  .kol-scrim::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--scrim);
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kol-reveal {
+    transform: none;
+    transition: opacity var(--dur-state) linear;
+    transition-delay: 0ms;
+  }
+  .kol-skeleton {
+    animation: none;
+    opacity: 0.7;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

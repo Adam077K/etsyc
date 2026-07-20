@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="One tumbler, start to trim — poster frame">
+  <defs>
+    <linearGradient id="clay" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8A4A2E"/>
+      <stop offset="1" stop-color="#3C1E10"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#clay)"/>
+  <!-- spinning wheel from above -->
+  <circle cx="800" cy="450" r="330" fill="none" stroke="#E8B98A" stroke-width="3" opacity="0.35"/>
+  <circle cx="800" cy="450" r="240" fill="none" stroke="#E8B98A" stroke-width="2" opacity="0.3"/>
+  <circle cx="800" cy="450" r="140" fill="#5A2E1B"/>
+  <circle cx="800" cy="450" r="80" fill="#C1703F"/>
+  <circle cx="800" cy="450" r="26" fill="#F6EFE3" opacity="0.9"/>
+</svg>

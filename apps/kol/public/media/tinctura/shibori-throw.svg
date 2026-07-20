@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-label="Shibori-fold throw, three dips deep — stand-in still">
+  <rect width="900" height="900" fill="#141B2E"/>
+  <!-- draped throw -->
+  <path d="M80 220 C300 140 600 140 820 220 L820 780 C600 700 300 700 80 780 Z" fill="#1B2E6E"/>
+  <!-- shibori fold pattern -->
+  <g stroke="#C8CFE0" stroke-width="6" opacity="0.7" fill="none">
+    <path d="M120 320 C340 250 560 250 780 320"/>
+    <path d="M120 430 C340 360 560 360 780 430"/>
+    <path d="M120 540 C340 470 560 470 780 540"/>
+    <path d="M120 650 C340 580 560 580 780 650"/>
+  </g>
+  <g fill="#E9E4D6" opacity="0.85">
+    <circle cx="250" cy="375" r="10"/><circle cx="450" cy="345" r="10"/><circle cx="650" cy="375" r="10"/>
+    <circle cx="350" cy="595" r="10"/><circle cx="550" cy="565" r="10"/>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Serving bowl, matte oatmeal exterior — stand-in still">
+  <rect width="1200" height="800" fill="#EFE6D2"/>
+  <ellipse cx="600" cy="640" rx="360" ry="42" fill="#C9B592" opacity="0.55"/>
+  <!-- wide serving bowl -->
+  <path d="M260 420 C260 560 400 650 600 650 C800 650 940 560 940 420 Z" fill="#B9AD93"/>
+  <ellipse cx="600" cy="420" rx="340" ry="60" fill="#8A8272"/>
+  <ellipse cx="600" cy="420" rx="300" ry="48" fill="#6F6555"/>
+  <!-- ash-fire variation -->
+  <path d="M340 500 C420 560 520 590 600 592 L600 650 C460 648 360 585 300 480 Z" fill="#5A5142" opacity="0.5"/>
+</svg>
