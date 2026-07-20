@@ -33,9 +33,21 @@
 --   DROP TABLE IF EXISTS public.videos;
 --   DROP TABLE IF EXISTS public.media;
 --   DROP TYPE  IF EXISTS public.media_kind;
+--
+-- Security (QA fix cycle 1, P1-5): a caller may only attach media/videos to a
+-- store they own (or leave store_id null for account-level assets). The store
+-- clause is in the WITH CHECK, closing the cross-store brand-hijack where an
+-- attacker set store_id to a victim's store on their own owner_id row.
 -- ============================================================================
 
-create type public.media_kind as enum ('image', 'audio', 'model3d', 'poster');
+begin;
+
+do $$ begin
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'media_kind' and n.nspname = 'public') then
+    create type public.media_kind as enum ('image', 'audio', 'model3d', 'poster');
+  end if;
+end $$;
 
 -- --- media (images / audio / 3D / posters) ----------------------------------
 create table if not exists public.media (
@@ -96,19 +108,27 @@ alter table public.videos         enable row level security;
 alter table public.video_profiles enable row level security;
 
 -- media: owner full; public reads media attached to a PUBLISHED store.
+-- P1-5: store_id must be null (account-level) or a store the caller owns.
 create policy "media_owner_all"
   on public.media for all
   using (owner_id = auth.uid())
-  with check (owner_id = auth.uid());
+  with check (
+    owner_id = auth.uid()
+    and (store_id is null
+         or store_id in (select id from public.stores where owner_id = auth.uid())));
 create policy "media_public_read_published"
   on public.media for select
   using (store_id in (select id from public.stores where published = true));
 
 -- videos: owner full; public reads clips of a PUBLISHED store.
+-- P1-5: same cross-store guard as media.
 create policy "videos_owner_all"
   on public.videos for all
   using (owner_id = auth.uid())
-  with check (owner_id = auth.uid());
+  with check (
+    owner_id = auth.uid()
+    and (store_id is null
+         or store_id in (select id from public.stores where owner_id = auth.uid())));
 create policy "videos_public_read_published"
   on public.videos for select
   using (store_id in (select id from public.stores where published = true));
@@ -125,3 +145,5 @@ create policy "video_profiles_public_read_published"
     select v.id from public.videos v
     join public.stores s on s.id = v.store_id
     where s.published = true));
+
+commit;
