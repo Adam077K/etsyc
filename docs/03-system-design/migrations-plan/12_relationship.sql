@@ -34,10 +34,23 @@
 --   DROP TYPE  IF EXISTS public.save_subject;
 -- ============================================================================
 
-create type public.save_subject   as enum ('product', 'store');
-create type public.signal_subject as enum ('maker', 'store', 'product');
-create type public.signal_type    as enum
-  ('visit', 'purchase', 'question', 'save', 'follow', 'commission', 'review');
+begin;
+
+do $$ begin
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'save_subject' and n.nspname = 'public') then
+    create type public.save_subject as enum ('product', 'store');
+  end if;
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'signal_subject' and n.nspname = 'public') then
+    create type public.signal_subject as enum ('maker', 'store', 'product');
+  end if;
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'signal_type' and n.nspname = 'public') then
+    create type public.signal_type as enum
+      ('visit', 'purchase', 'question', 'save', 'follow', 'commission', 'review');
+  end if;
+end $$;
 
 -- --- follows (buyer -> maker only) ------------------------------------------
 create table if not exists public.follows (
@@ -70,8 +83,8 @@ create table if not exists public.buyer_signals (
   buyer_id     uuid not null references public.profiles (id) on delete cascade,
   subject_type public.signal_subject not null,
   subject_id   uuid not null,   -- polymorphic; no FK (app-validated)
-  signal_type  public.signal_type not null,
-  weight       numeric(6,3) not null default 1.0,
+  signal_type  public.signal_type not null,   -- constrained by the enum type
+  weight       numeric(6,3) not null default 1.0 check (weight >= 0 and weight <= 100),  -- P2-4
   created_at   timestamptz not null default now()
 );
 
@@ -101,8 +114,12 @@ create policy "saves_buyer_all"
   using (buyer_id = auth.uid())
   with check (buyer_id = auth.uid());
 
--- buyer_signals: buyer owns; NEVER public. (Engine reads via service role.)
-create policy "buyer_signals_buyer_all"
-  on public.buyer_signals for all
-  using (buyer_id = auth.uid())
-  with check (buyer_id = auth.uid());
+-- buyer_signals: NEVER public. A buyer may READ own signals, but signals are
+-- EMITTED by the server on real events (the service role sets `weight`) — P2-4:
+-- clients may not write arbitrary weighted signals, so there is no user INSERT/
+-- UPDATE policy. The weight CHECK above is defence-in-depth.
+create policy "buyer_signals_buyer_read"
+  on public.buyer_signals for select
+  using (buyer_id = auth.uid());
+
+commit;
