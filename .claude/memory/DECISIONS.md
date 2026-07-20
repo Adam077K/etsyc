@@ -24,6 +24,13 @@
 
 <!-- Entries below this line, most-recent first. -->
 
+## 2026-07-19 — D16: 8 "final missing features" grilled & tiered (7 MVP, 1 roadmap)
+
+**Context:** Founder supplied `KOL_Final_Missing_Features.docx` (8 features) and asked to "make sure we have those." CEO cross-checked vs the 31-feature tree, grilled each.
+**Decision:** **MVP (7):** Two Shopping Modes (search/filters as utility — results open maker worlds, NEVER a flat grid; feed stays default); Proof of Product (maker-declared+shown provenance, not physical verification); Ask the Maker (public per-product Q&A text/audio/video); Exactly What to Expect (required structured product-info standard); Trustworthy Reviews (verified-purchase + photo/video + variation + maker responses); **Guided Buyer–Maker Co-Creation — FULL** (brief → buyer↔maker messaging → shared drafts → revisions → approve); Relationship-Based Ranking (follow/save + purchase/question/project signals). **Roadmap v1.1 (1):** Live Studio Sessions (heavy streaming infra, doesn't gate core).
+**Scope impact:** two NEW subsystems enter MVP — a buyer↔maker **messaging + draft-versioning** system (full co-creation; Ask-the-Maker reuses it) and **search/browse**. MVP feature count ~31 → ~39.
+**Reversibility:** hard (scope decision); reversible (individual tiers). **Owner:** ceo (`ceo-5`). **Affects:** CPO (integrate into feature tree §3/§4/§5 in Phase 5), database-engineer (new tables in Phase 4: threads/messages/commissions/questions/follows/saves/product_specs/product_provenance/review_media), CTO (plan re-tier). Detail: concept-lock D16 + feature-tree §1D addendum.
+
 ## 2026-07-19 — D15: seller-shop design FREEDOM (amends D4/D9 anti-slop model)
 
 **Context:** Founder challenged the constrained 5-palette model: capping seller shops to a fixed palette set = the "flattening" the whole product exists to fight. Clarified the design-system references/tokens were scoped for KOL's OWN product, and seller shops should be "as customizable as possible."

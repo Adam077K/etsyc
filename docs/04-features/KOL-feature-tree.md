@@ -55,7 +55,26 @@
 | S8 | **Product management** | Add/edit products, images, 3D (optional), price, link clips | D4, D6 | `products`, `media` | Supabase |
 | S9 | **Verification flow (Real-Maker)** | Voice-anchored real-human verification that mints the badge | D7 | `verifications`, `badges` | Supabase |
 
-**Feature counts:** Shared/Platform **12** · Buyer **10** · Seller **9** · **Total 31.**
+**Feature counts (base):** Shared/Platform **12** · Buyer **10** · Seller **9** · **Total 31.**
+
+### 1D · Missing-Features Addendum (D16 — grilled & tiered 2026-07-19)
+
+The 8 "final missing features" from `KOL_Final_Missing_Features.docx`, folded in. 7 MVP, 1 roadmap. New IDs continue the scheme; CPO integrates these into §3 screens + §4/§5 flows during Phase 5, database-engineer adds the tables in Phase 4.
+
+| # | Feature | Description | Implements | Risk | Data need (new) | MVP? |
+|---|---------|-------------|-----------|------|-----------------|------|
+| P13 | **Proof of Product** | Maker-*declared & shown* provenance on product/store: exact role, materials, process, production location, partners, process media. NOT 3rd-party physical verification (roadmap per D7) | D16-2, D7 | `product_provenance`, `media` | ✅ |
+| P14 | **Exactly What to Expect** | Required structured product-info standard: dimensions, materials, texture, handmade variation, production time, shipping, care, repairs, returns, customization limits | D16-4 | `product_specs` | ✅ |
+| P15 | **Buyer↔Maker messaging + draft-versioning** | The subsystem powering full co-creation + Ask-the-Maker: threads, messages (text/audio/video), shared drafts with revisions | D16-6, D16-3 | `threads`, `messages`, `commission_drafts` | ✅ |
+| B11 | **Search & browse mode** | Direct search / categories / filters / delivery reqs; **results show makers-on-film and open their world — never a flat product grid**. Discovery feed stays default | D16-1, D1 | search index over `stores`/`products`/`makers` | ✅ |
+| B12 | **Ask the Maker (public Q&A)** | Buyers ask public, product-specific questions; maker answers via text/audio/video. Reuses P15 messaging | D16-3 | `questions`, `answers`, `media` | ✅ |
+| B13 | **Follow & Save** | Follow makers; save products/worlds. Feeds Relationship-Based Ranking | D16-7 | `follows`, `saves` | ✅ |
+| B14 | **Guided Co-Creation / Commission** | FULL: guided brief (recipient/occasion/meaning/preferences) → buyer↔maker messaging → shared drafts → revisions → approve → custom order | D16-6 | `commissions`, uses P15 + `orders` | ✅ |
+| B6+ | **Trustworthy Reviews (enriched)** | Enrich existing reviews (B6): verified-purchase flag, photo/video, exact variation, customization context, expectation-accuracy, maker responses | D16-5 | `reviews`(+`verified`,+`maker_response`), `review_media` | ✅ |
+| P6+ | **Relationship-Based Ranking** | Extend the video/rank engine (P6): repeat visits, purchases, follows, saves, questions, custom projects, reviews as ranking signals (not general popularity) | D16-7, D5 | `buyer_signals`(+relationship signals) | ✅ |
+| — | **Live Studio Sessions** | Optional real-time watch-the-maker streaming + chat, no auction/sales pressure | D16-8 | streaming service + `sessions` | 🔜 **v1.1 roadmap** |
+
+**Updated counts (MVP):** base **31** + **8 new MVP features** (P13–P15, B11–B14, + 2 enrichments to B6/P6) = **~39 MVP features**; **1 roadmap** (Live Studio). Two are new *subsystems* (P15 messaging/drafts, B11 search) that materially expand scope.
 
 ---
 
