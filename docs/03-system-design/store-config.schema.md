@@ -1,9 +1,11 @@
 # KOL — Store-Config Schema (the D4 Spine)
 *Phase 3 deliverable · session `ceo-5` · Design-Lead · 2026-07-19. The formal contract for feature P3/P4. Implements D4 (store engine) and binds D5 (video engine), D7 (trust), D9 (anti-slop), D10/D11 (voice). Tokens referenced here are defined in [`KOL-design-system.md`](./KOL-design-system.md); blocks in [`KOL-block-catalog.md`](../04-features/KOL-block-catalog.md).*
 
-> **What this is.** The one JSON object every maker world *is*. The AI drafter (S3) emits it. Hand-built worlds emit it. The single renderer (P4) consumes it. It contains **data, never code** (D4). Because every field is bounded — palette/pairing are IDs into curated sets, blocks are from a fixed catalog, motion is a preset — a valid config is structurally incapable of being slop (D9 layer 1).
+> **What this is.** The one JSON object every maker world *is*. The AI drafter (S3) emits it. Hand-built worlds emit it. The single renderer (P4) consumes it. It contains **data, never code** (D4). For `theme:{kind:"curated"}` worlds every field is bounded — palette/pairing are IDs into curated sets, blocks are from a fixed catalog, motion is a preset — so a valid config is structurally incapable of being slop (D9 layer 1). For **seller shops** (`theme:{kind:"custom"}`, **D15**) the theme carries full brand freedom (any-hex palette, catalog fonts); there the anti-slop guarantee is **not** the enum but the deterministic WCAG-AA contrast gate + auto-critic + maker approval (D9 layers 2–3), per [`KOL-ai-pipeline-spec.md`](./KOL-ai-pipeline-spec.md) §5.4/§6. Blocks remain catalog-bounded in both cases.
 >
 > **Validation.** Zod schema on every read/write (P3). Stored as `stores.config jsonb` in Supabase. Store versions snapshot the whole object (`store_versions`), carrying `criticScore` (P9) and per-section approval status (P10).
+>
+> **Changelog.** `v1.1` — `theme` becomes a discriminated union on `kind` (`curated | custom`) for D15 seller-shop brand freedom; the curated-enum invariant scopes to `kind:"curated"` only, with the WCAG-AA gate + auto-critic as the guarantee for `kind:"custom"`; §2.3 `videoProfile` source-of-truth note (ADR-0001 OQ-2). `v1.0` — initial Phase 3 contract.
 
 ---
 
@@ -11,10 +13,10 @@
 
 ```jsonc
 {
-  "schemaVersion": "1.0",     // string, semver — migration anchor
+  "schemaVersion": "1.1",     // string, semver — migration anchor (see Changelog)
   "storeId":       "uuid",    // FK stores.id
   "maker":         { … },     // identity + trust badges (D7)
-  "theme":         { … },     // which curated palette/pairing/motion/radius (D9 rails)
+  "theme":         { … },     // discriminated union on `kind`: curated (D9 enum rails) | custom (seller freedom, D15)
   "media":         { … },     // clips[] (video, D5-tagged) + images[]
   "products":      [ … ],     // the catalog
   "voiceovers":    [ … ],     // per-element real-voice recordings (D10/D11)
@@ -26,7 +28,7 @@
 **Top-level keys:** `schemaVersion · storeId · maker · theme · media · products · voiceovers · blocks · meta`.
 
 Design invariants (enforced by the Zod validator):
-- `theme.paletteId` / `fontPairingId` / `motionPreset` **must** be members of the curated enums — free values rejected.
+- `theme` is a **discriminated union on `kind`**. For `kind:"curated"`, `paletteId` / `fontPairingId` / `motionPreset` **must** be members of the curated enums — free values rejected. For `kind:"custom"` (seller shops, D15), the curated-enum constraint does **not** apply; the accessibility + anti-slop guarantee is instead the deterministic WCAG-AA contrast gate + auto-critic + maker approval (D9 layers 2–3) — see §2.2 and [`KOL-ai-pipeline-spec.md`](./KOL-ai-pipeline-spec.md) §5.4/§6.
 - Every `blocks[].bindings.*` id **must** resolve to a real entry in `media` / `products` / `voiceovers` (referential integrity).
 - `blocks` is order-significant; `order` is the render sequence, `id` is stable across edits (so approvals/critic scores pin to a section, not a position).
 - Exactly one `hero-video` block per world (the persistent film). Zero-or-more of every other type.
@@ -61,9 +63,13 @@ Design invariants (enforced by the Zod validator):
 ```
 Both trust layers must be *provable in v1* (D7). `realMaker.status: verified` requires a resolved `voiceAnchorClipId`; the renderer shows `pending` state otherwise (never a false claim).
 
-### 2.2 `theme` — the anti-slop rails selection (D9)
+### 2.2 `theme` — the design-system selection, a discriminated union on `kind` (D9 + D15)
+`theme` is a **Zod `discriminatedUnion('kind', [Curated, Custom])`**. Its field names and shape mirror [`KOL-ai-pipeline-spec.md`](./KOL-ai-pipeline-spec.md) §5.4 (the emit-target) **exactly**, so the pipeline's output and this contract agree.
+
 ```jsonc
+// kind:"curated" — KOL's OWN product UI, hand-built worlds, and the starting points offered to sellers. UNCHANGED behavior.
 "theme": {
+  "kind":          "curated",
   "paletteId":     "atelier-chalk | studio-paper | nocturne | orchard | bazaar",  // enum
   "mode":          "light | dark",     // which of the palette's two sets
   "fontPairingId": "editorial-warm | gallery-grotesque | contrast-editorial | character-maximal", // enum
@@ -71,8 +77,29 @@ Both trust layers must be *provable in v1* (D7). `realMaker.status: verified` re
   "radiusIdentity":"sharp | soft | round",   // §1.3 of design system
   "density":       "airy | standard"         // VISUAL_DENSITY 3 / 5; "cockpit" not offered to worlds
 }
+
+// kind:"custom" — SELLER SHOPS: full brand freedom (D15). Derived per shop by the AI co-creation pipeline. NEW.
+"theme": {
+  "kind":          "custom",
+  "customPalette": {
+    "mode":  "light | dark",
+    "roles": { "bg":"#hex", "surface":"#hex", "ink":"#hex", "inkMuted":"#hex",
+               "accent":"#hex", "accentInk":"#hex", "border":"#hex" }   // 7 required roles, any valid hex
+  },
+  "customPairing": {
+    "displayFamily":"string", "textFamily":"string",                    // from the hosted font catalog (AI-pipeline §5.5)
+    "scaleRatio":"number", "displayWeight":"number", "textWeight":"number"
+  },
+  "motionPreset":  "still | calm | lively",  // kept as preset (nearest-to-intensity; open_q #1b)
+  "radiusIdentity":"sharp | soft | round",
+  "density":       "airy | standard"
+}
 ```
-No raw colors, fonts, or timings ever appear here — only IDs into curated sets. This is *the* enforcement point for D9 layer 1.
+
+- **`kind:"curated"`** — the original enum shape (unchanged). Every value is an ID into a curated set, so no raw colors, fonts, or timings ever appear and the theme is structurally incapable of being slop (**D9 layer 1**). Used by KOL's *own* product UI (feed, chrome, checkout), by hand-built worlds, and as **starting points** offered to sellers. This is *the* enforcement point for D9 layer 1 — but **only for curated themes**.
+- **`kind:"custom"`** — **full seller-shop brand freedom (D15)**: an any-hex 7-role palette + a pairing of any two families from the hosted font catalog + motion/radius/density. Palette-capping a seller shop is forbidden (it is the flattening the product exists to fight). **The curated-enum invariant does NOT apply here.** Instead the accessibility + anti-slop guarantee is the **deterministic WCAG-AA contrast gate + auto-critic + maker approval** (D9 layers 2–3): a `kind:"custom"` config must carry a passing `meta.criticScore` from the AA gate before `meta.status` may leave `draft` — the guarantee moves from *input enum* to *output gate*. See [`KOL-ai-pipeline-spec.md`](./KOL-ai-pipeline-spec.md) §5.4 (the emit shape this mirrors) and §6 (the auto-critic that carries the quality bar for custom themes).
+
+The renderer (P4) reads either shape: `curated` → look up tokens by id (existing path); `custom` → apply `roles`/`customPairing` directly as CSS custom properties.
 
 ### 2.3 `media` — clips (D5-tagged) + images
 ```jsonc
@@ -102,6 +129,8 @@ No raw colors, fonts, or timings ever appear here — only IDs into curated sets
 }
 ```
 **How the video engine references clips (D5).** The engine never reads `blocks`. It queries `media.clips[].videoProfile` — filtering by `pageEligibility` (what state the buyer is in) ∩ `purpose` ∩ (for narration) `productLinks` ∩ `mood`, then applies anti-repetition on `antiRepetitionKey`. This **decouples footage from layout**: one tagged pool serves discovery, the persistent store player, *and* contextual narration. A `thankyou` clip is `pageEligibility:["thankyou"]` only — structurally it can never surface in the feed (the locked constraint from the buyer state machine).
+
+> **Source-of-truth note (ADR-0001 OQ-2).** The inline `videoProfile` block above is a **config-side mirror for authoring/reference only**. The canonical, queryable source of truth is the **`video_profiles` table** (GIN-indexed on `purpose[]` / `page_eligibility[]` / `product_links[]` / `mood[]`); the video engine reads `videos` / `video_profiles` and **ignores the inline copy** — `media.clips[]` reference `videos.id`, and the write path upserts config and tables in one transaction. See [`adr/0001-kol-data-model.md`](./adr/0001-kol-data-model.md) OQ-2 and [`KOL-video-engine-spec.md`](./KOL-video-engine-spec.md).
 
 ### 2.4 `products`
 ```jsonc
@@ -170,7 +199,7 @@ Independent of `products[].description` and of clip narration — the three voic
 
 ```jsonc
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "storeId": "a7f3…-ashwork",
   "maker": {
     "id": "mk_sena",
@@ -190,6 +219,7 @@ Independent of `products[].description` and of clip narration — the three voic
     }
   },
   "theme": {
+    "kind": "curated",
     "paletteId": "atelier-chalk", "mode": "light",
     "fontPairingId": "editorial-warm", "motionPreset": "calm",
     "radiusIdentity": "soft", "density": "airy"
