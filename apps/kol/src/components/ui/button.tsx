@@ -9,12 +9,16 @@ import { cn } from "@/lib/utils";
  * scale-[0.98] on :active. 44px minimum touch target.
  */
 const buttonVariants = cva(
-  "inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-pill font-text text-body font-medium transition-[color,background-color,transform] duration-state ease-kol focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-pill font-text text-body font-medium transition-[color,background-color,transform] duration-state ease-kol focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:active:scale-100",
   {
     variants: {
       variant: {
-        /** The one high-emphasis accent action per world (e.g. add-to-cart). */
-        accent: "bg-accent text-accent-ink hover:bg-accent/90",
+        /**
+         * The one high-emphasis accent action per world (e.g. add-to-cart).
+         * Set bold at body-lg so accent-ink on the accent ground clears the
+         * WCAG large-text threshold (≥18.66px bold → 3:1) on every palette.
+         */
+        accent: "bg-accent text-body-lg font-bold text-accent-ink hover:bg-accent/90",
         /** Quiet default — relationship, not conversion pressure. */
         quiet: "border border-line bg-surface text-ink hover:bg-ground",
         /** Ghost for chrome inside media/colored grounds; inherits ink. */
@@ -35,10 +39,15 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, type = "button", ...props }, ref) => (
+  ({ className, variant, size, type = "button", disabled, onClick, ...props }, ref) => (
+    // aria-disabled instead of the native attribute: the button stays
+    // focusable + hoverable so its `title` REASON ("Messaging opens soon")
+    // is reachable by keyboard and pointer; activation is blocked here.
     <button
       ref={ref}
       type={type}
+      aria-disabled={disabled || undefined}
+      onClick={disabled ? (e) => e.preventDefault() : onClick}
       className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     />

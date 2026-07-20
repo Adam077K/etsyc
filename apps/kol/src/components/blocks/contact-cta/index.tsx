@@ -48,7 +48,9 @@ export function ContactCtaBlock({ block, data, state = "success" }: BlockProps<"
           {avatar ? <SmartImage image={avatar} className="w-24 rounded-pill" /> : null}
           <div>
             <p className="font-display text-h3">{data.maker.displayName}</p>
-            <p className="mt-0.5 text-caption uppercase tracking-[0.08em] text-muted">
+            {/* full --ink (→ --on-block-* on colored grounds) — the mixed
+                muted tone fails AA at caption size on block-grounds */}
+            <p className="mt-0.5 text-caption uppercase tracking-[0.08em] text-ink">
               @{data.maker.handle} · {data.maker.location}
             </p>
           </div>
@@ -66,7 +68,7 @@ export function ContactCtaBlock({ block, data, state = "success" }: BlockProps<"
           <p className="font-display text-h2 [text-wrap:balance]">
             Keep in touch with {data.maker.displayName.split(" ")[0]}
           </p>
-          <p className="mt-1 text-caption uppercase tracking-[0.08em] text-muted">
+          <p className="mt-1 text-caption uppercase tracking-[0.08em] text-ink">
             @{data.maker.handle}
           </p>
         </Reveal>

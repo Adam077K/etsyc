@@ -12,5 +12,4 @@
   <circle cx="800" cy="450" r="140" fill="#5A2E1B"/>
   <circle cx="800" cy="450" r="80" fill="#C1703F"/>
   <circle cx="800" cy="450" r="26" fill="#F6EFE3" opacity="0.9"/>
-  <text x="80" y="820" font-family="Georgia, serif" font-size="34" fill="#FBF3E8" opacity="0.85">Process — the wheel</text>
 </svg>

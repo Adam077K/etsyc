@@ -14,5 +14,4 @@
   <!-- cloth entering the dye -->
   <path d="M700 120 C740 260 700 380 760 470 C800 530 860 540 900 560" stroke="#E3A857" stroke-width="14" fill="none" opacity="0.9"/>
   <path d="M700 120 C660 240 690 360 730 450" stroke="#C8CFE0" stroke-width="8" fill="none" opacity="0.5"/>
-  <text x="80" y="820" font-family="Georgia, serif" font-size="34" fill="#E9E4D6" opacity="0.85">Tinctura — vat film</text>
 </svg>

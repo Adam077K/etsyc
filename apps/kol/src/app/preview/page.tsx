@@ -33,8 +33,10 @@ export default async function PreviewPage({
 
   return (
     <main className="min-h-screen bg-ground">
-      {/* preview chrome — KOL's own fixed identity, outside any world root */}
-      <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur">
+      {/* preview chrome — KOL's own fixed identity, outside any world root.
+          Static (not sticky): review chrome must never overlay the world's
+          hero type it exists to screenshot. */}
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-3 px-[var(--space-2)] py-3 md:px-[var(--space-6)]">
           <p className="font-text text-caption uppercase tracking-[0.08em] text-muted">
             KOL preview · {config.maker.displayName} · theme:{config.theme.kind}

@@ -16,5 +16,4 @@
   <ellipse cx="800" cy="740" rx="420" ry="60" fill="#3A1D10" opacity="0.55"/>
   <path d="M700 740 C700 600 690 520 740 470 C770 440 830 440 860 470 C910 520 900 600 900 740 Z" fill="#2A130A" opacity="0.8"/>
   <path d="M745 470 C760 452 840 452 855 470" stroke="#E8B98A" stroke-width="6" fill="none" opacity="0.6"/>
-  <text x="80" y="820" font-family="Georgia, serif" font-size="34" fill="#FBF3E8" opacity="0.85">Ashwork Ceramics — studio film</text>
 </svg>
