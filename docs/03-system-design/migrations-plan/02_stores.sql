@@ -20,14 +20,24 @@
 -- FK deps:  stores.owner_id -> profiles.id (group 01)
 --           store_versions.store_id -> stores.id
 --
+-- Security (QA fix cycle 1): store creation is role-gated to sellers (P2-6) — a
+-- buyer JWT cannot create a store. Enforced in the RLS WITH CHECK via profiles.role.
+--
 -- Rollback notes (create-only):
 --   DROP TABLE IF EXISTS public.store_versions;
 --   DROP TABLE IF EXISTS public.stores;
 --   DROP TYPE  IF EXISTS public.store_version_status;
 -- ============================================================================
 
-create type public.store_version_status as enum
-  ('draft', 'in_review', 'approved', 'published');
+begin;
+
+do $$ begin
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'store_version_status' and n.nspname = 'public') then
+    create type public.store_version_status as enum
+      ('draft', 'in_review', 'approved', 'published');
+  end if;
+end $$;
 
 -- --- stores -----------------------------------------------------------------
 create table if not exists public.stores (
@@ -55,7 +65,8 @@ create table if not exists public.store_versions (
   version           integer not null,                         -- config.meta.version
   config            jsonb not null,                           -- full snapshot
   status            public.store_version_status not null default 'draft',
-  critic_score      numeric(4,3),                             -- P9 auto-critic 0..1
+  critic_score      numeric(4,3) check (critic_score is null                  -- P3
+                       or (critic_score >= 0 and critic_score <= 1)),          -- P9 0..1
   approved_sections jsonb not null default '[]'::jsonb,       -- P10 blockId[] human gate
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
@@ -74,10 +85,15 @@ create policy "stores_public_read_published"
   on public.stores for select
   using (published = true or owner_id = auth.uid());
 
+-- P2-6: only a SELLER may own/write a store. The WITH CHECK requires the owner
+-- to be the caller AND to hold role='seller' — a buyer JWT cannot create one.
 create policy "stores_owner_write"
   on public.stores for all
   using (owner_id = auth.uid())
-  with check (owner_id = auth.uid());
+  with check (
+    owner_id = auth.uid()
+    and exists (select 1 from public.profiles p
+                where p.id = auth.uid() and p.role = 'seller'));
 
 -- store_versions: OWNER ONLY (drafts are internal). No public read — the live
 -- store is served from stores.config, not from draft versions.
@@ -85,3 +101,5 @@ create policy "store_versions_owner_all"
   on public.store_versions for all
   using (store_id in (select id from public.stores where owner_id = auth.uid()))
   with check (store_id in (select id from public.stores where owner_id = auth.uid()));
+
+commit;
