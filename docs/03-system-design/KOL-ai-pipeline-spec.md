@@ -430,26 +430,39 @@ Output: per-dimension 0–1 + rationale + a bulleted list of concrete fixes. **`
 - **Dataset (labelled slop set):** ≥ 20 configs, half **known-slop** (generic templates, clashing palettes, broken hierarchy, AA-failing), half **known-good custom** (real, distinctive, accessible, on-brand — including deliberately *unconventional-but-good* designs, e.g. maximal folk, high-contrast brutalist). Grows over time from real regen escalations.
 - **Metrics:** **precision & recall on slop detection.** Two failure modes measured explicitly: **false negatives** (slop scored ≥ 0.75 — ships slop; recall protects against this) and **false positives** (good custom work scored < 0.75 — over-rejects and *attacks D15 freedom*; precision protects against this). The false-positive rate on the "unconventional-but-good" subset is the D15 canary — a critic that only likes safe designs is a flattening critic and fails this eval. AA-gate accuracy is separately asserted as **1.0** (it's deterministic — any deviation is a bug, tested with known color-pair fixtures).
 
-### 8d · Shared eval-harness shape *(proposal — convergence with Workstream C, open_question #2)*
+### 8d · Shared eval-harness shape *(AGREED with Workstream C — 2026-07-20)*
 
-Both this pipeline and the video engine (C) need an LLM eval harness. Proposed shared shape so the two converge rather than fork:
+Both this pipeline and the video engine (C) need an LLM eval harness. Workstream C proposed a shape; we converged on it with three small **additive** extensions (all optional, non-breaking) that Workstream B needs. This is the **agreed** shared harness — both workstreams implement it, in `apps/kol/src/lib/agents/evals/`:
 
-```jsonc
-// Dataset — JSONL, one golden example per line, same shape both workstreams:
-{ "id":"ext-001", "feature":"extraction", "input": {...}, "expected": {...}, "labels": {...}, "notes":"terse maker" }
+```typescript
+// Dataset — each eval file exports a TS array (C's shape); min 10 examples/feature,
+// covering happy-path · edge · adversarial · boundary. B extends only with optional labels.
+type GoldenExample = {
+  id: string;
+  input: unknown;
+  expected: unknown;
+  description: string;
+  tags?: string[];                       // C's shape; B encodes slop/good labels here (e.g. ["slop"], ["good","unconventional"])
+};
+export const goldenExamples: GoldenExample[] = [ /* … */ ];
 
-// Metric interface — each feature registers a scorer:
-type Scorer<I,O,E> = (output: O, expected: E, input: I) => {
-  score: number;                       // 0..1 primary
-  breakdown: Record<string, number>;   // sub-metrics (precision, recall, f1, hallucinationRate, correlation…)
-  pass: boolean;                       // vs. the feature's threshold
-}
+// Metric interface — C's shape + B's optional `breakdown` (needed to report precision+recall together):
+type Metric<I, O> = (out: O, expected: O, input: I) => {
+  score: number;                         // 0..1 primary
+  pass: boolean;                         // vs. the feature's threshold
+  detail?: string;
+  breakdown?: Record<string, number>;    // [B extension] sub-metrics: precision, recall, f1, hallucinationRate, correlation…
+};
 
-// Runner contract (CI): run(feature) → { n, passRate, meanScore, breakdown, regressions[], costUsd }
-// Fails the build if passRate < feature.minPassRate OR a regression vs. the committed baseline.
+// Runner — C's signature:
+runEval(feature, examples, metric, threshold)
+  → { passed, failed, meanScore, perExample[] }
+// Fails CI if meanScore < threshold OR any adversarial-tagged example regresses vs. baseline.
 ```
 
-The cost-log schema (§10.1) is the **same** across both workstreams so eval-run cost and production cost roll up together.
+Named metrics per workstream: **B** — `extraction_prf` (precision/recall/F1 + hallucinationRate), `design_coherence`, `critic_accuracy` (precision+recall on the slop set); **C** — `tagging_accuracy`, `ranking_ndcg@k`. The AI-ranker seam (D5) is C's; B references it only.
+
+The cost-log schema (§10.1) is the **same** across both workstreams so eval-run cost and production cost roll up together; evals sum `cost_usd` into a per-run `eval_cost_usd` line.
 
 ---
 
@@ -463,7 +476,9 @@ The cost-log schema (§10.1) is the **same** across both workstreams so eval-run
 
 ## 10 · Cost logging & guardrails (every LLM call)
 
-### 10.1 Cost-log schema (emitted on EVERY LLM call — shared with Workstream C)
+### 10.1 Cost-log schema (emitted on EVERY LLM call — AGREED with Workstream C, 2026-07-20)
+
+**Shared required core** (identical both workstreams — one JSON line to stdout per call):
 
 ```jsonc
 {
@@ -472,15 +487,25 @@ The cost-log schema (§10.1) is the **same** across both workstreams so eval-run
   "model":         "claude-sonnet-4-6 | claude-opus-4-7 | claude-haiku-4-5",
   "input_tokens":  0,
   "output_tokens": 0,
-  "cached_tokens": 0,          // prompt-cache read hits
   "cost_usd":      0.0,        // computed from the model's rate card
   "latency_ms":    0,
-  "trace_id":      "uuid",     // correlates a full pipeline run
-  "store_id":      "uuid",
-  "iteration":     0,          // regen iteration, for §6.3 cost attribution
+  "ts":            "iso8601"
+}
+```
+
+**Agreed optional extensions** (either workstream MAY emit; B emits these for per-shop + regen cost attribution):
+
+```jsonc
+{
+  "cached_tokens": 0,          // prompt-cache read hits (cache-hit-rate monitoring)
+  "trace_id":      "uuid",     // correlates a full pipeline run → cost per published shop
+  "store_id":      "uuid",     // B: per-shop cost
+  "iteration":     0,          // B: regen iteration, for §6.3 cost attribution
   "outcome":       "ok | retry | fallback | error"
 }
 ```
+
+The required core matches Workstream C's proposal exactly (incl. `ts`); the optional block is additive and non-breaking, so both eval-run cost and production cost roll up together across workstreams.
 
 Aggregations to watch: **cost per published shop** (sum over a `trace_id`), **regen iterations per shop** (loop health — §6.3), **Opus share** (derivation cost), **cache-hit rate** (should be high on the stable beat-sheet / schema / rubric blocks).
 
@@ -505,7 +530,7 @@ malformed output  → structural retry (max 2) with the Zod/validator error fed 
 ## 11 · Open questions (for sign-off / cross-spec)
 
 1. **Schema freedom amendment (§5.4)** — the `theme` discriminated-union (curated | custom) needs Design-Lead / database-engineer sign-off; the §2.2 enum invariant must be scoped to `kind:"curated"` only, with the AA gate (§6.1) as the accessibility guarantee for `kind:"custom"`. *Blocker-if-rejected: seller-shop configs cannot validate without this.* (1b, low priority: allow raw `motionIntensity` alongside `motionPreset`?)
-2. **Shared eval harness (§8d)** — proposed dataset/metric/cost-log shapes for convergence with Workstream C. Needs C's agreement to adopt the same harness + cost-log schema.
+2. **Shared eval harness (§8d) — RESOLVED 2026-07-20.** Converged with Workstream C on C's proposed shape (`goldenExamples` TS array, `Metric<I,O>`, `runEval`) + B's additive optional extensions (`breakdown?` on the metric return; the optional cost-log block in §10.1). No open divergence.
 3. **Inline `videoProfile` vs. reference (§5.4, §9)** — store-config §2.3 authors `videoProfile` inline, but the locked contract says `media.clips[]` references `videos.id` with `video_profiles` canonical (owned by C). Resolve with C + schema owner: read-cache or pure reference?
 4. **Font freedom scope (§5.5)** — MVP resolves `customPairing` against a broad hosted catalog ("any font" in practice). Arbitrary font-file upload (hosting + licensing) = roadmap; confirm acceptable for MVP.
 
