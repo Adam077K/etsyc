@@ -28,6 +28,8 @@
 --   -- (pg_trgm left installed; harmless)
 -- ============================================================================
 
+begin;
+
 create extension if not exists pg_trgm;
 
 -- --- Full-text: stores ------------------------------------------------------
@@ -99,3 +101,5 @@ create policy "product_categories_owner_write"
   with check (product_id in (
     select p.id from public.products p
     where p.store_id in (select id from public.stores where owner_id = auth.uid())));
+
+commit;
