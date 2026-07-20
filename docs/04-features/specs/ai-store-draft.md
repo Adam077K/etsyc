@@ -162,7 +162,7 @@ Surface distinction: the **seller shop being drafted** = FULL brand freedom (`th
 | P3 store-config Zod schema + validator (referential integrity) | Feature | Not Started | H — cannot validate emit |
 | P4 renderer (draft review) | Feature | Not Started | H — cannot show the draft |
 | `stores` / `store_versions` tables | Data (Irreversible) | Not Started | H |
-| Theme discriminated-union schema amendment (ai-pipeline §5.4 open_q #1) | Schema sign-off | Open | H — custom configs cannot validate until accepted |
+| Theme discriminated-union schema (ai-pipeline §5.4 open_q #1) | Schema sign-off | Done | LOCKED in store-config v1.3 §67 — the `theme` `curated \| custom` `discriminatedUnion`; the P3 validator and this stage's emit shape mirror each other exactly. |
 
 **Downstream Dependencies**
 
@@ -190,7 +190,7 @@ Surface distinction: the **seller shop being drafted** = FULL brand freedom (`th
 |------|-----------|--------|------------|
 | Flattening — makers collapse to a house style | M | H | Prompt forbids a safe default; `distinctness` eval floor; critic fit-to-brand penalizes generic output |
 | Emitting invalid config / raw code | L | H | Zod validation on emit; max-2 structural retry then escalate; data-only invariant |
-| Custom theme cannot validate (schema amendment unresolved) | M | H | Escalated as open_q; blocker-if-rejected flagged; curated fallback is NOT acceptable (defeats D15) |
+| Custom theme cannot validate (schema amendment unresolved) | L | L | RESOLVED — theme `curated \| custom` union is LOCKED in store-config v1.3 §67; the validator and the pipeline emit shape mirror each other exactly. |
 | Opus cost/availability | M | M | Runs per-shop not per-request; Sonnet fallback with quality flag; cost logged per shop |
 | Ungrounded (hallucinated) design | M | M | `derivedFrom` trace required; thin-signal fallback to moodWords, not invention |
 
@@ -227,7 +227,7 @@ Surface distinction: the **seller shop being drafted** = FULL brand freedom (`th
 
 | # | Question | Owner | Due |
 |---|---|---|---|
-| 1 | Theme discriminated-union amendment (ai-pipeline §5.4 open_q #1) — until Design-Lead/database-engineer accept it, `theme.kind:"custom"` configs cannot validate. Blocker-if-rejected. | CTO + Design-Lead | Before build |
+| 1 | **RESOLVED** — Theme discriminated-union (ai-pipeline §5.4 open_q #1): the `theme` `curated \| custom` `discriminatedUnion` is LOCKED in store-config v1.3 §67; `theme.kind:"custom"` configs validate against it and no amendment is pending. | CTO | Resolved 2026-07-20 |
 | 2 | Store-config.schema §2.3 inline `videoProfile` wording — confirm the emit is a pure `videos.id` reference (resolved in principle, ADR OQ-2; schema-doc wording alignment pending). | schema owner | Before build |
 | 3 | Font freedom scope (§5.5) — confirm the hosted catalog is acceptable for MVP; arbitrary font upload is roadmap. | CPO + CTO | Before build |
 

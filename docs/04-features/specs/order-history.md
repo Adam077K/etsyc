@@ -111,7 +111,7 @@ Surface touched: **KOL's own product UI** (buyer account area) → FIXED curated
 
 ## Technical Requirements
 
-> **Risk tier: Full** (auth + DB reads gated by RLS — the read-own boundary is the trust surface). Data-need table below = **Irreversible** if any RLS policy or column is added; here the tables and policies are **already locked** (B7/B0), so this feature adds none — database-engineer confirms the read-own policies exist before backend-engineer wires the reads.
+> **Risk tier: Lite** (CTO-authoritative — read-own over already-locked RLS, no new DB object, <300 LOC; the read-own boundary is the trust surface but this feature adds no schema). Data-need table below = **Irreversible** if any RLS policy or column is added; here the tables and policies are **already locked** (B7/B0), so this feature adds none — database-engineer confirms the read-own policies exist before backend-engineer wires the reads.
 
 ### Backend Changes
 

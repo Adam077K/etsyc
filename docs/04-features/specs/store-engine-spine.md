@@ -1156,7 +1156,7 @@ The rails are the design-system vocabulary the renderer (P4) and blocks (P5) con
 - Capping seller shops to the 5 palettes (forbidden — D15).
 - The auto-critic / AA gate itself (P9) — P8 only supplies the curated enum vocabulary.
 
-### Risk Assessment — **Tier: Lite / Full** (Lite as a config-bound token set; Full where it intersects the theme validator and chrome). No migration (no table).
+### Risk Assessment — **Tier: Lite** (CTO-authoritative: a config-bound token set — no table, no API of its own. The validator/chrome intersection is **P3/P4's** tier, not P8's.) No migration.
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|

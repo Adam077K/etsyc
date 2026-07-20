@@ -65,10 +65,11 @@ A section-by-section approval model backed by `store_versions.approved_sections`
 4. When the maker publishes, the gate checks the hard precondition (below). If met, `status → 'published'` and `stores.published` flips true. If not, publish is blocked with the exact failing reason (surfaced by S6).
 5. If the maker later **edits** any approved block (copy, tokens, media, order), that block's `id` is **removed** from `approved_sections` and the auto-critic (P9/§6) is **re-triggered** on the changed section (and on coherence, since a token change is global). The maker must re-approve.
 
-**Publish precondition (hard — all three must hold, ai-pipeline §7):**
+**Publish precondition (hard — all four must hold, ai-pipeline §7):**
 - **(a)** the deterministic AA gate (P9 §6.1) PASSes on the *current* version, AND
 - **(b)** every *rendered* block's `id` is present in `approved_sections`, AND
-- **(c)** any Real-Maker trust badge's `voiceAnchorClipId` is resolved (P11 / store-config §2.1 — no false claim).
+- **(c)** any Real-Maker trust badge's `voiceAnchorClipId` is resolved (P11 / store-config §2.1 — no false claim), AND
+- **(d)** the required `product_specs` completeness holds for **every product in the store** (D16-4; enforced via P14's product-completeness check — `exactly-what-to-expect.md` — folded into this publish gate). *Composition point (where P14's check is invoked inside the gate) is being finalized with P14/S8.*
 
 Media-only clips not bound to a block (e.g. a `thankyou` clip) do **not** require approval; they surface via the video engine's `pageEligibility` (D5).
 
@@ -133,7 +134,8 @@ Media-only clips not bound to a block (e.g. a `thankyou` clip) do **not** requir
 ## Technical Requirements
 
 ### Backend Changes
-- Publish transition enforced at the data layer (DB-enforced status transition, Part B §B0 — never app-side only). The transition to `'published'` must verify preconditions (a) AA PASS on the current version, (b) every rendered block `id ∈ approved_sections`, (c) any Real-Maker badge `voiceAnchorClipId` resolved.
+- **P10 owns the publish-transition RPC/guard implementation** — the DB-enforced check of the publish preconditions. **S6 (`section-approve-publish.md`) invokes it** and renders its result; S6 does not re-implement the transition.
+- Publish transition enforced at the data layer (DB-enforced status transition, Part B §B0 — never app-side only). The transition to `'published'` must verify preconditions (a) AA PASS on the current version, (b) every rendered block `id ∈ approved_sections`, (c) any Real-Maker badge `voiceAnchorClipId` resolved, (d) required `product_specs` completeness for every product (P14 product-completeness check, D16-4 — composition point being finalized with P14/S8).
 - Approve action appends a `blockId` to `store_versions.approved_sections`; edit action removes the `blockId` and enqueues the P9/§6 re-critic on the changed section + coherence.
 - Behavior cited from `KOL-ai-pipeline-spec.md §7`; do not redesign — implement the locked contract.
 
@@ -216,7 +218,7 @@ Media-only clips not bound to a block (e.g. a `thankyou` clip) do **not** requir
 
 | Stage | Audience | Criteria to Advance | Duration |
 |-------|----------|---------------------|----------|
-| Internal Testing | 4 seed worlds (D12) | All three preconditions enforced; edit revokes approval + re-critics; no bypass | 1–2 days |
+| Internal Testing | 4 seed worlds (D12) | All four preconditions enforced; edit revokes approval + re-critics; no bypass | 1–2 days |
 | Private Beta | First seller cohort | No stale-approval publishes; blocked-reason clarity validated with real makers | 1 week |
 | Full Launch | All sellers | All prior stages pass | — |
 
