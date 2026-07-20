@@ -2,9 +2,9 @@
 *From session `ceo-6` · 2026-07-20 · for a fresh session to pick up KOL after Phase 4. Runs on **Fable 5** (`claude-fable-5`) for build; **Opus** for spec/synthesis if you prefer.*
 
 ## Your job
-Phases 0–4 are **done and merged to `main`**. Pick up KOL and do **two things, in this order of dependency**:
+Phases 0–4 are **done and merged to `main`**, and **Phase 3 is now formally CLOSED** (design-critic gate run + PASS; design-system v2 reconciled; **`apps/kol` scaffolded** with the coded component shell). Pick up KOL and do **two things, in this order of dependency**:
 1. **(Founder-gated, do first when Adam is ready) Apply the data-model migration** — it is a reviewed PLAN, not applied. Run the mandatory staging validation, then apply on Adam's sign-off.
-2. **Phase 5 — per-feature spec packs.** Turn the 39-feature tree into build-ready specs in `docs/04-features/specs/`, each citing the now-locked schema + engine contracts. Then Phase 6 (build in `apps/kol/`).
+2. **Phase 5 — per-feature spec packs.** Turn the 39-feature tree into build-ready specs in `docs/04-features/specs/`, each citing the now-locked schema + engine contracts. Then Phase 6 (build in `apps/kol/` — the shell is already scaffolded; you extend it).
 
 You are the CEO/orchestrator — delegate to C-suite + workers, don't implement yourself.
 
@@ -17,14 +17,16 @@ You are the CEO/orchestrator — delegate to C-suite + workers, don't implement 
    - **`docs/03-system-design/adr/0001-kol-data-model.md`** + **`docs/03-system-design/migrations-plan/01..13_*.sql`** — the 31-table schema PLAN (non-applied), RLS, RPCs/triggers, and the **"Pre-apply staging validation (MANDATORY)"** + "Post-MVP hardening" sections.
    - **`docs/03-system-design/adr/0002-ai-co-creation-pipeline.md`** + **`docs/03-system-design/KOL-ai-pipeline-spec.md`** — the seller AI pipeline (interview→brand→custom design system→auto-critic→approval), 6 per-feature evals, cost logging.
    - **`docs/03-system-design/adr/0003-video-engine.md`** + **`docs/03-system-design/KOL-video-engine-spec.md`** — unified selection engine, tagging, ranker slot, relationship ranking; shared eval-harness contract (agreed with the AI pipeline).
-   - **`docs/03-system-design/store-config.schema.md` (v1.1)** — the D4 spine. **`theme` is now a `discriminatedUnion('kind',[curated|custom])`** (D15); the `get_public_profile(uuid)` fn replaces the old profiles view.
-6. **`.claude/memory/DECISIONS.md`** (top entry = 2026-07-19 Phase-4) + **`LONG-TERM.md`**.
+   - **`docs/03-system-design/store-config.schema.md` (v1.3)** — the D4 spine. **`theme` is a `discriminatedUnion('kind',[curated|custom])`** (D15); curated enums are the **design-system v2** ids (`sunbaked·market-plum·cuberto-noir·orchard·bazaar` / `statement-grotesk·warm-serif·modern-mono-grotesk·character-maximal` / motion `hushed·fluid·liquid·dimensional`); optional maker-authored thank-you `message` field (D10); the `get_public_profile(uuid)` fn replaces the old profiles view.
+   - **`apps/kol/`** — the scaffolded component shell: Next 16/React 19/strict TS/Tailwind; design-system-v2 tokens; **11 blocks × 4 states**; `renderStore` (both `theme.kind`); Sena (curated) + Noor (custom any-hex) fixtures; `/preview`. **Shell only — no backend/auth/DB yet (mock fixtures).** The per-palette AA-measured `--accent-cta` token is the concrete anti-slop AA gate.
+6. **`.claude/memory/DECISIONS.md`** (top entry = 2026-07-20 Phase-3 closure) + **`LONG-TERM.md`**.
 
-## State (as of GitHub `main` @ commit `7a9e979`, all synced & pushed)
-- **Phases 0–4 done.** Phase 4 shipped the two technical spines: the data model + the AI/video engine specs, all QA-passed.
+## State (as of GitHub `main` @ commit `6e37803`, all synced & pushed)
+- **Phases 0–4 done; Phase 3 formally CLOSED** (gate run + `apps/kol` scaffolded, QA-Lead PASS). Phase 4 shipped the two technical spines (data model + AI/video engine specs), all QA-passed.
 - **Schema QA (Irreversible):** 2 BLOCK cycles → **PASS**. Cycle-1 closed 5 P1 write/trust-integrity holes (root cause: RLS is the only boundary — app-side column allow-lists are bypassable via direct PostgREST). Fix moved all enforcement DB-side (**10 SECURITY DEFINER fns, 6 triggers**). Cycle-2 closed an anon-enumerable user view + a null-uid service-role footgun. Cycle-3 PASS.
-- **D15 is now expressible:** store-config §2.2 theme union (curated | custom); anti-slop for seller shops is carried by the **deterministic WCAG-AA gate + auto-critic + maker approval**, not a palette cap.
-- **B/C specs share one eval-harness contract** (dataset/metric/cost-log shapes agreed) — implement it once in `apps/kol/src/lib/agents/evals/`.
+- **Phase-3 closure QA (Full):** the design gate caught a schema↔design-system **v2 enum drift** (schema still had rejected-v1 palette/pairing/motion names — would have hard-blocked every builder) → reconciled to **store-config v1.3**. Scaffold QA caught + fixed a library-wide **Tailwind alpha-modifier bug** (green build hid it; only code+visual review found it) and a **fabricated attributed maker quote** (D10). QA-Lead PASS. 7 P3 follow-ups tracked in `docs/08-agents_work/sessions/2026-07-20-qa-lead-kol-phase3-closure.md`.
+- **D15 is expressible:** store-config theme union (curated | custom); anti-slop for seller shops is the **deterministic WCAG-AA gate + auto-critic + maker approval**, not a palette cap — now concrete as the `--accent-cta` AA-measured token in the scaffold.
+- **B/C specs share one eval-harness contract** (dataset/metric/cost-log shapes agreed) — implement it once in `apps/kol/src/lib/agents/evals/` (placeholder dir already scaffolded).
 
 ## ⚠️ The Phase-4 item that is NOT done (Founder-gated, Irreversible)
 **The migration is a PLAN — nothing has touched Supabase.** Before it is applied:
