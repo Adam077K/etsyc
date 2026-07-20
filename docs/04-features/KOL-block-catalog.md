@@ -33,7 +33,9 @@
 
 **Variants.** `text-left-media-right` (default; asymmetric per DESIGN_VARIANCE) · `stacked-editorial` (full-width type, media between paragraphs, NYT "Snow Fall" cadence) · `pull-quote` (one oversized line from the maker in display face).
 
-**Props / bindings.** `props: { heading, body, pullQuote? }` · `bindings.imageIds` (art-directed with `focalPoint`), optional `bindings.voiceoverIds` (tap-to-hear on the heading). Body at `--fs-body-lg`, `max-w-[65ch]`; display face used once (the heading or pull-quote), not both.
+**Props / bindings.** `props: { heading, body, pullQuote?, blockGround? }` · `bindings.imageIds` (art-directed with `focalPoint`), optional `bindings.voiceoverIds` (tap-to-hear on the heading). Body at `--fs-body-lg`, `max-w-[65ch]`; display face used once (the heading or pull-quote), not both.
+
+**Block-ground (P2-a — the Faire color-block move).** `blockGround?: "a" | "b" | "c" | null` (default `null`). When set, the section renders **full-bleed in `--block-{a|b|c}`** with `--on-block-{a|b|c}` ink, `--space-12`→`--space-16` internal padding (design-system §1.2), and washes its ground in first on reveal (§4.2). **AA constraint:** `craft-story` carries body copy, so it may only color-block on a **dark** ground that clears AA body 4.5:1 — the two midtone grounds (`sunbaked`/`cuberto-noir` `--block-c`) are display-only and **rejected here** unless the variant is `pull-quote` (display type only). Best fit: `stacked-editorial` or `pull-quote` on `--block-a`.
 
 | State | Design behavior |
 |-------|-----------------|
@@ -81,7 +83,9 @@
 
 **Variants.** `audio-tap` (quote + tap-to-hear real voice) · `text-only` (typeset quote, no audio) · `text+waveform` (quote with a slim waveform that fills as it plays).
 
-**Props / bindings.** `props: { quote, attribution? }` · `bindings.voiceoverIds` (the real recording). Quote in display face at restraint; waveform in `--accent` at low opacity.
+**Props / bindings.** `props: { quote, attribution?, blockGround? }` · `bindings.voiceoverIds` (the real recording). Quote in display face at restraint; waveform in `--accent` at low opacity.
+
+**Block-ground (P2-a).** `blockGround?: "a" | "b" | "c" | null` (default `null`) — the strongest color-block candidate: a maker's quote set in display face on a vivid `--block-{a|b|c}` ground (`--on-block-*` ink), full-bleed per §1.2, washed in per §4.2. Because the quote is **display/large type**, all three grounds are valid here — including the two midtone grounds (`--block-c`), which are display-only. Waveform recolors to `--on-block-*` at low opacity on a colored ground.
 
 | State | Design behavior |
 |-------|-----------------|
@@ -159,9 +163,9 @@
 ## 10 · `atmosphere`
 **Purpose.** Per-maker mood connective tissue — color field, texture, or motion transition between blocks. The "world breathes" spacer. The *only* block permitted ambient motion.
 
-**Variants.** `color-wash` (a field in the world's `--ground`→`--surface` gradient) · `image-band` (full-bleed art-directed still) · `motion-divider` (sub-threshold ambient motion — Aesop-quiet, respects reduced-motion by going static).
+**Variants.** `color-wash` (a field in the world's `--ground`→`--surface` gradient) · `block-ground` (P2-a — a solid full-bleed band in a vivid `--block-{a|b|c}`, the purest Faire color-block; the connective tissue that carries the brave-color move between film sections) · `image-band` (full-bleed art-directed still) · `motion-divider` (sub-threshold ambient motion — Aesop-quiet, respects reduced-motion by going static).
 
-**Props / bindings.** `props: { toneShift: "warm"|"cool"|"neutral" }` · optional `bindings.imageIds`. Height from spacing scale (`--space-16`/`--space-20`).
+**Props / bindings.** `props: { toneShift: "warm"|"cool"|"neutral", blockGround? }` · optional `bindings.imageIds`. Height from spacing scale (`--space-16`/`--space-20`). `blockGround?: "a" | "b" | "c" | null` selects the ground for the `block-ground` variant; since atmosphere carries little or no type (or only display/eyebrow type), **all three grounds are valid** here including the midtone `--block-c` — any body-scale caption on it must recolor to a compliant pairing or drop to display size.
 
 | State | Design behavior |
 |-------|-----------------|
@@ -177,7 +181,9 @@
 
 **Variants.** `button` (single quiet CTA) · `card` (maker mini-profile + CTA) · `footer-strip` (full-width close with handle + message action).
 
-**Props / bindings.** `props: { label }` · reads `maker` for handle/avatar. One accent action, low urgency (relationship, not conversion pressure).
+**Props / bindings.** `props: { label, blockGround? }` · reads `maker` for handle/avatar. One accent action, low urgency (relationship, not conversion pressure).
+
+**Block-ground (P2-a).** `blockGround?: "a" | "b" | "c" | null` (default `null`) — the world's closing note color-blocks into a `--block-{a|b|c}` ground for a confident sign-off (strongest on `footer-strip`, full-bleed per §1.2). The `label`/handle set in `--on-block-*`. The CTA is `--fs-body`/caption type, so on a colored ground it must sit on a **dark** ground that clears AA body 4.5:1; the two midtone `--block-c` grounds are display-only and rejected here (use `--block-a`).
 
 | State | Design behavior |
 |-------|-----------------|
@@ -196,6 +202,9 @@
 - **Error = quiet + inline + recoverable**, in the interface's voice, never blocking the rest of the world (frontend-design writing rules).
 - **Reveal on the one curve** — `--ease-kol`, 70ms stagger, media-leads-text, once per element, reduced-motion → instant fade.
 - **The film always wins.** No block's chrome, motion, or color may pull focus from the maker's video.
+- **Block-grounds are the brave-color move (P2-a).** Four blocks expose an optional `blockGround: "a" | "b" | "c"` prop that renders the section full-bleed in a palette's `--block-{a|b|c}` ground with `--on-block-*` ink (design-system §2): `voice-quote` + `atmosphere` (`block-ground` variant) accept **all three** grounds (display/large type or no type); `craft-story` + `contact-cta` carry body/UI copy so they accept **only dark grounds that clear AA body 4.5:1** — the two midtone grounds (`sunbaked`/`cuberto-noir` `--block-c`) are display-only and rejected there. Grounds wash in first on reveal (§4.2), `--space-12`→`--space-16` padding (§1.2). This is how the renderer builds the Faire "section-on-a-color-block" identity from config alone.
+
+*P3-c — impact-stat primitive (optional, deferred):* a small maker-authored stat pair (e.g. "12 years · one wheel", set in mono/tabular figures per design-system §3) could live as a `craft-story` sub-slot or a future dedicated primitive; not one of the 11 in v1, noted here so P4 doesn't reinvent it ad hoc.
 
 ---
 
