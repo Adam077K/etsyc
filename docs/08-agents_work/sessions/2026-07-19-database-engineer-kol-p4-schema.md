@@ -23,8 +23,15 @@ applied: false
 - Money = integer minor units + 3-char currency. RLS on every table; buyer/seller/public split keyed on `profiles.role` (signup-trigger seeded).
 - FK-order fixes: `orders.commission_id` FK and `threads.commission_id` FK added via ALTER in group 10 (forward/circular refs).
 
+**Fix cycle 1 (QA-Lead BLOCK #1 → resolved on same branch)**
+- Principle applied: RLS is the only boundary, so every column/transition restriction is now DB-ENFORCED (SECURITY DEFINER RPC / BEFORE trigger / definer view / service-role), not "app-side". Vulnerable comments removed. Full table in ADR "Security hardening" section.
+- P1 (all 5): P1-1 order/item writes → `create_order`/`cancel_order`/`set_order_status` RPCs (amounts server-computed; tables SELECT-only). P1-2 verification/real-maker badge service-role-only + integrity trigger (D7 no false claim). P1-3 review order-item↔product match. P1-4 seller-scope trigger (maker_response only). P1-5 media/video cross-store WITH CHECK.
+- P2 (all 8): role self-escalation guard + buyer-only signup seed; `public_profiles` view; `buyer_signals` weight not client-set + CHECK; thread/commission counterparty + status-transition triggers; store creation seller-gated; BEGIN/COMMIT + type/trigger idempotency guards; Q&A store/product match + body CHECK.
+- P3: indexed `messages.media_id`/`answers.media_id`; `critic_score` 0–1 CHECK; `moddatetime` noted as backend follow-up.
+- New objects: 9 SECURITY DEFINER functions, 6 triggers, 1 view. Lint: 31 tables == 31 ENABLE RLS, 54 policies (every table ≥1), 0 DROP/TRUNCATE outside rollback comments, 13/13 files BEGIN/COMMIT-balanced.
+
 **Not done / handoffs**
-- Nothing applied or merged (QA gate is structural — Irreversible tier: Full + 2-of-3 judge + Founder sign-off).
+- Still NON-APPLIED / not merged (QA re-verify pending; Irreversible tier — Full + 2-of-3 judge + Founder sign-off).
 - `blocks` + `categories` need a platform seed step (public-read, service-role write) — not in these create-only files.
-- backend-engineer: honor column-level RLS gaps (seller may update only `orders.status` / `reviews.maker_response`) + the OQ-2 sync contract.
+- Server (service-role) flows backend-engineer must own: Stripe webhook → `orders.status='paid'`; verification resolution → verified/rejected; role → `seller` during onboarding (BEFORE store creation); `buyer_signals` emission with weights; `moddatetime` updated_at triggers.
 - CTO/lead to append the DECISIONS.md breadcrumb (workers don't write DECISIONS.md).
