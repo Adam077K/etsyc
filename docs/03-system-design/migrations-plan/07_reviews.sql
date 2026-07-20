@@ -88,8 +88,10 @@ security definer
 set search_path = ''
 as $$
 begin
-  -- Only constrain interactive users; the service role (null uid) is trusted.
-  if auth.uid() is not null and auth.uid() is distinct from old.buyer_id then
+  -- Constrain everyone except the service role (N1: explicit role check — anon
+  -- also has a null uid). The review's own buyer may edit their content freely.
+  if auth.role() is distinct from 'service_role'
+     and auth.uid() is distinct from old.buyer_id then
     if new.rating               is distinct from old.rating
        or new.body                 is distinct from old.body
        or new.variation            is distinct from old.variation

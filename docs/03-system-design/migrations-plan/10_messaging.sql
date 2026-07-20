@@ -209,8 +209,9 @@ begin
     raise exception 'commission store must belong to the maker';
   end if;
 
-  -- Interactive callers only; the service role (null uid) is trusted.
-  if auth.uid() is not null then
+  -- Interactive callers only; the service role is trusted (N1: explicit role
+  -- check — anon also has a null uid).
+  if auth.role() is distinct from 'service_role' then
     if tg_op = 'INSERT' then
       if auth.uid() <> new.buyer_id or new.status <> 'brief' then
         raise exception 'a commission must be opened by the buyer with status brief';
