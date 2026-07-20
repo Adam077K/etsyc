@@ -376,17 +376,40 @@ Overload/rate-limit never blocks a seller: on failure the editor falls back to *
 
 ---
 
-## 7 · Shared eval harness (convergence with Workstream B)
+## 7 · Shared eval harness — AGREED with Workstream B (2026-07-19)
 
-Both this spec (tagging accuracy + ranker offline eval) and Workstream B (interview-extraction / draft / critic evals) need one harness. **Proposed shape (sent to B for convergence — see open questions):**
+Both this spec (tagging accuracy + ranker offline eval) and Workstream B (extraction / design-coherence / critic evals) ride ONE harness. **Converged 2026-07-19** — B adopted this shape as the shared base (their spec §8d/§10.1, commit `553cbc2`); the only deltas are three **additive, optional, non-breaking** extensions B needs. Both specs now cite this identical harness.
 
-- **Location:** `apps/kol/src/lib/agents/evals/` (co-located with the LLM runner the whole app shares — extend it, don't fork).
-- **Dataset format:** each eval file exports `goldenExamples: GoldenExample[]`, `GoldenExample = { id; input; expected; description; tags? }`. Min 10/feature; must cover happy-path, edge, adversarial, boundary.
-- **Metric interface:** `Metric<I,O> = (out, expected, input) => { score: 0–1; pass: boolean; detail? }`. Registered by key (mine: `tagging_accuracy`, `ranking_ndcg@k`).
+**Core (required, identical for both workstreams):**
+
+- **Location:** `apps/kol/src/lib/agents/evals/` (co-located with the shared LLM runner — extend it, don't fork).
+- **Dataset format:** each eval file exports `export const goldenExamples: GoldenExample[]`, `GoldenExample = { id; input; expected; description; tags? }`. Min 10/feature; must cover happy-path, edge, adversarial, boundary. (B encodes its slop/good labels in the existing `tags?`, e.g. `['slop']`, `['good','unconventional']` — no new field.)
 - **Runner:** `runEval(feature, examples, metric, threshold) → { passed, failed, meanScore, perExample[] }`; CI-fails if `meanScore < threshold` OR any adversarial example regresses.
-- **Cost-log schema (every LLM call):** `{ event:'llm_call', feature, model, input_tokens, output_tokens, cost_usd, latency_ms, ts }`; evals emit a per-run `eval_cost_usd`.
+- **Cost-log core (every LLM call, required):** `{ event:'llm_call', feature, model, input_tokens, output_tokens, cost_usd, latency_ms, ts }`; evals emit a per-run `eval_cost_usd`.
 
-If B is running a different cost-log field set or dataset shape, we align on theirs or record the delta in open questions — see §8.
+**Metric interface (with B's additive `breakdown?`):**
+```ts
+type Metric<I, O> = (out: O, expected: O, input: I) => {
+  score:   number;                     // 0–1 (required)
+  pass:    boolean;                    // required
+  detail?: string;
+  breakdown?: Record<string, number>;  // OPTIONAL (B's extension) — multi-component metrics,
+                                        // e.g. B's extraction P/R/F1 + hallucinationRate, critic precision+recall.
+                                        // MY metrics (tagging_accuracy, ranking_ndcg@k) do not set it.
+};
+```
+
+**Cost-log optional block (either workstream MAY emit; my required core is unchanged):**
+```ts
+// appended to the core cost-log line when relevant:
+{ cached_tokens?: number; trace_id?: string; store_id?: string; iteration?: number; outcome?: string }
+// B uses trace_id (per-shop pipeline cost), iteration (regen-loop attribution), cached_tokens (cache-hit rate).
+// I MAY emit cached_tokens for the tagging prompt-cache hit rate (§6.2); the rest are optional/unused by me.
+```
+
+**Named metrics on the harness:** mine — `tagging_accuracy`, `ranking_ndcg@k`; B's — `extraction_prf`, `design_coherence`, `critic_accuracy`. Disjoint; no collision. The **AI-ranker seam (§4) is mine (D5)**; B references it only.
+
+**Status: AGREED / OQ-V1 RESOLVED.** The two additive optionals (`breakdown?`, cost-log optional block) are accepted — they extend, never break, the required core or my metrics.
 
 ---
 
@@ -394,8 +417,8 @@ If B is running a different cost-log field set or dataset shape, we align on the
 
 | # | Item | Status | Detail |
 |---|------|--------|--------|
-| OQ-V1 | **Shared eval harness convergence** | Awaiting B | Proposed shape §7 sent to `ai-engineer-kol-ai-pipeline`. Converge on dataset format + `Metric` interface + cost-log fields; flag any divergence. Both specs must cite the same harness. |
-| OQ-V2 | **Footage-tagging handoff / untagged-at-draft behaviour** | Specified, needs B ack | B's `stores.config.media.clips[]` reference `videos.id` that P7 (this spec) tags. **If footage is untagged at draft time:** its `video_profiles` arrays are empty (`'{}'` default, §0.2) → it matches **no** eligibility query (every state requires a positive `page_eligibility` overlap) → **the engine never surfaces it**. A consumer (B's renderer / draft preview) sees the clip in config but the engine returns nothing for it until tags are confirmed. Net: untagged clips are invisible to buyers, safe-by-default (no wrong clip), but sellers must tag before a clip can play. B should surface an "untagged — won't appear" hint in the co-edit editor. |
+| OQ-V1 | **Shared eval harness convergence** | ✅ RESOLVED (2026-07-19) | AGREED with Workstream B — §7. B adopted this shape as base (their §8d/§10.1, `553cbc2`) + 3 additive optional extensions (`breakdown?`, cost-log optional block, `tags?`-encoded slop labels), all folded into §7. No breaking delta. |
+| OQ-V2 | **Footage-tagging handoff / untagged-at-draft behaviour** | ✅ RESOLVED (2026-07-19) | Confirmed consistent with B: B's pipeline emits clip **references** (`stores.config.media.clips[].id` = `videos.id`), NOT inline profiles — matches ADR-0001 OQ-2 (engine reads the canonical tables; config is a mirror the engine ignores). **If footage is untagged at draft time:** its `video_profiles` arrays are empty (`'{}'` default, §0.2) → matches **no** eligibility query (every state requires a positive `page_eligibility` overlap) → **the engine never surfaces it** (safe-by-default, no wrong clip). B should surface an "untagged — won't appear" hint in the co-edit editor. Note: the inline `videoProfile` shown in `store-config.schema.md` §2.3 is the config-side mirror; canonical source-of-truth is `video_profiles` (ADR-0001) — this spec queries the table. Flagged to schema owner for the schema-doc wording alignment. |
 | OQ-V3 | **Scoring weights (TBD post-launch)** | Deferred | §3.2 weights are launch defaults, not tuned. Need real interaction data to calibrate `w_relation` vs `w_freshness` (feed diversity vs affinity). Owner: ai-engineer post-launch, against buyer_signals + click-through. |
 | OQ-V4 | **Anti-repetition storage** | Decided (MVP) | Session-scoped ephemeral (in-memory/cookie ring, §3.1), no new table. Revisit if cross-session "don't re-show" becomes a requirement — would need a `buyer_seen_clips` table (schema change, not in this phase). |
 | OQ-V5 | **AI-ranker seam ownership** | Owned here | The `Ranker` seam (§4) is this spec's (D5). Workstream B references it (a re-ranker could use interview-derived embeddings) but does not design it. B: read from the interface, don't fork it. |

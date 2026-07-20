@@ -25,8 +25,8 @@ qa_verdict: PENDING
 
 **Read-only contract honoured:** engine reads `videos`/`video_profiles`/`buyer_signals` (ADR-0001), never `blocks`/config. Added zero columns.
 
-**Coordination:** proposed shared eval-harness shape to Workstream B (`ai-engineer-kol-ai-pipeline`); convergence pending (OQ-V1). Untagged-at-draft behaviour specified (OQ-V2): untagged clips match no eligibility query → invisible to buyers, safe-by-default.
+**Coordination:** shared eval-harness AGREED with Workstream B (`ai-engineer-kol-ai-pipeline`) — B adopted my shape as base + 3 additive-optional extensions (`breakdown?`, cost-log optional block, `tags?`-encoded labels); folded into spec §7 (OQ-V1 RESOLVED). Untagged-at-draft behaviour confirmed consistent with B's reference-emitting pipeline (OQ-V2 RESOLVED): untagged clips match no eligibility query → invisible to buyers, safe-by-default.
 
-**Open questions:** OQ-V1 harness convergence · OQ-V2 tagging handoff (B ack) · OQ-V3 scoring weights TBD post-launch.
+**Open questions:** OQ-V3 scoring weights TBD post-launch (only remaining open). OQ-V1/OQ-V2 resolved.
 
 **Commits:** ADR-0003; P6/P7 spec. Not merged — QA gate structural.
