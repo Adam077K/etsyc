@@ -30,6 +30,12 @@ applied: false
 - P3: indexed `messages.media_id`/`answers.media_id`; `critic_score` 0–1 CHECK; `moddatetime` noted as backend follow-up.
 - New objects: 9 SECURITY DEFINER functions, 6 triggers, 1 view. Lint: 31 tables == 31 ENABLE RLS, 54 policies (every table ≥1), 0 DROP/TRUNCATE outside rollback comments, 13/13 files BEGIN/COMMIT-balanced.
 
+**Fix cycle 2 (QA-Lead PASS-WITH-REQUIRED-HARDENING → both required items closed)**
+- NEW-1: removed the enumerable `public_profiles` view (owner-run, GRANTed anon, no WHERE → any anon could `SELECT *` the whole membership list). Replaced with id-keyed `get_public_profile(uuid)` SECURITY DEFINER fn — returns one KNOWN profile's {id, display_name, avatar_url, role}; no enumeration. REVOKE public + GRANT anon/authenticated.
+- N1: replaced `auth.uid() IS NULL ⇒ trusted service role` with explicit `auth.role() = 'service_role'` in `guard_profile_role`, `enforce_review_seller_scope`, `guard_commission` (anon also has null uid; latent bypass closed). `enforce_real_maker_badge` already trusts no one.
+- ADR-0001: filed the 4 P3 follow-ups (NEW-3 draft-status guard · NEW-4/N2 order from-state machine · N3 create_order inventory check · N4 badge auto-revoke) under "Post-MVP hardening", and added the mandated 9-point "Pre-apply staging validation (MANDATORY)" section.
+- Object count now: **10 SECURITY DEFINER functions, 6 triggers, 0 views.**
+
 **Not done / handoffs**
 - Still NON-APPLIED / not merged (QA re-verify pending; Irreversible tier — Full + 2-of-3 judge + Founder sign-off).
 - `blocks` + `categories` need a platform seed step (public-read, service-role write) — not in these create-only files.
