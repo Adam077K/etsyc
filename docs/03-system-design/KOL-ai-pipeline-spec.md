@@ -169,7 +169,7 @@ For each beat, after the opening question, an LLM (`claude-sonnet-4-6`) decides 
     "colorTemperature":  "warm | cool | neutral | mixed | null",
     "contrastPreference":"soft | bold | null",
     "typeFeel":          "editorial | grotesque | serif-literary | hand | geometric | null",
-    "motionFeel":        "still | calm | lively | null",
+    "motionFeel":        "hushed | fluid | liquid | dimensional | null",
     "densityFeel":       "airy | standard | null",
     "radiusFeel":        "sharp | soft | round | null",
     "references":        "string[]"           // "like a gallery catalog", "like my grandmother's kitchen"
@@ -235,7 +235,7 @@ Output: an intermediate **DesignSystem** object (not yet store-config), so it ca
     "displayWeight": "number",
     "textWeight":    "number"
   },
-  "motion":     { "intensity": "number(0-10)", "preset": "still | calm | lively" },  // preset = nearest KOL preset for the renderer
+  "motion":     { "intensity": "number(0-10)", "preset": "hushed | fluid | liquid | dimensional" },  // preset = nearest KOL preset (v2 dials 3/5/7/8) for the renderer
   "atmosphere": { "radius": "sharp | soft | round", "density": "airy | standard" }   // MVP: maps 1:1 to theme §5.4 radiusIdentity + density
 }
 ```
@@ -263,7 +263,7 @@ From the DesignSystem + brand profile + available media (`videos.id` set, §9), 
 
 ### 5.3 Worked mapping — a custom palette into the `theme` block
 
-Maker: metalsmith, "cold, precise, industrial — like a machinist's shop at dawn." Extracted `paletteSignals.described`: `["gunmetal", "steel blue", "raw brass"]`; `colorTemperature: "cool"`; `typeFeel: "geometric"`; `motionFeel: "still"`. **None of the 5 KOL palettes fits** — that is the point of D15. Derived DesignSystem palette:
+Maker: metalsmith, "cold, precise, industrial — like a machinist's shop at dawn." Extracted `paletteSignals.described`: `["gunmetal", "steel blue", "raw brass"]`; `colorTemperature: "cool"`; `typeFeel: "geometric"`; `motionFeel: "hushed"`. **None of the 5 KOL palettes fits** — that is the point of D15. Derived DesignSystem palette:
 
 ```jsonc
 "palette": { "mode": "dark",
@@ -284,7 +284,7 @@ Encoded into `theme` (proposed custom form, §5.4):
   },
   "customPairing": { "displayFamily":"Space Grotesk","textFamily":"IBM Plex Sans",
                      "scaleRatio":1.25,"displayWeight":600,"textWeight":400 },
-  "motionPreset": "still",          // nearest KOL preset (intensity 1 → "still")
+  "motionPreset": "hushed",          // nearest KOL preset (dial ~3 → "hushed", the quietest v2 preset)
   "radiusIdentity": "sharp",
   "density": "standard"
 }
@@ -302,10 +302,10 @@ Make `theme` a **discriminated union on `kind`**:
 // theme = curated (KOL's own worlds, hand-built worlds, template starting points) — UNCHANGED behavior
 "theme": {
   "kind": "curated",
-  "paletteId":     "atelier-chalk | studio-paper | nocturne | orchard | bazaar",
+  "paletteId":     "sunbaked | market-plum | cuberto-noir | orchard | bazaar",
   "mode":          "light | dark",
-  "fontPairingId": "editorial-warm | gallery-grotesque | contrast-editorial | character-maximal",
-  "motionPreset":  "still | calm | lively",
+  "fontPairingId": "statement-grotesk | warm-serif | modern-mono-grotesk | character-maximal",
+  "motionPreset":  "hushed | fluid | liquid | dimensional",
   "radiusIdentity":"sharp | soft | round",
   "density":       "airy | standard"
 }
@@ -322,7 +322,7 @@ Make `theme` a **discriminated union on `kind`**:
     "displayFamily":"string","textFamily":"string",                     // from hosted font catalog (§5.5)
     "scaleRatio":"number","displayWeight":"number","textWeight":"number"
   },
-  "motionPreset":  "still | calm | lively",   // kept as preset; nearest-to-intensity. (open_q #1b: allow raw intensity?)
+  "motionPreset":  "hushed | fluid | liquid | dimensional",   // kept as preset; nearest-to-intensity. (open_q #1b: allow raw intensity?)
   "radiusIdentity":"sharp | soft | round",
   "density":       "airy | standard"
 }
@@ -336,7 +336,7 @@ Make `theme` a **discriminated union on `kind`**:
 **Other schema fields checked for seller-freedom expressiveness (flagging per brief):**
 - `media.clips[].videoProfile` (§2.3) is authored **inline** in the schema, but the locked data contract says `videos`/`video_profiles` are canonical and `media.clips[]` **references `videos.id`**. The pipeline emits clip **references**, not inline profiles; the `videoProfile` source of truth is `video_profiles` (Workstream C). Flagged as **open_question #3** (coordinate with C + schema owner: is inline `videoProfile` a denormalized read-cache, or should §2.3 become a pure `{ videoId }` reference?).
 - `theme.density` offers only `airy | standard` ("cockpit" withheld from worlds) — adequate for shops; no change requested.
-- `motionPreset` as a 3-value enum is a mild freedom cap vs. a continuous intensity; noted as open_question #1b, low priority (3 presets read as expressive enough).
+- `motionPreset` as a 4-value enum (`hushed | fluid | liquid | dimensional`, design-system v2 §4.5) is a mild freedom cap vs. a continuous intensity; noted as open_question #1b, low priority (4 presets — incl. the signature `liquid`/`dimensional` cinematic beats — read as expressive enough).
 - All other fields (`maker`, `products`, `blocks.props`, `voiceovers`) already accept free values — no freedom conflict.
 
 ### 5.5 Fonts — "any font" in practice
