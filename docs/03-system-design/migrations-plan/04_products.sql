@@ -32,7 +32,14 @@
 --   DROP TYPE  IF EXISTS public.inventory_status;
 -- ============================================================================
 
-create type public.inventory_status as enum ('in-stock', 'made-to-order', 'sold-out');
+begin;
+
+do $$ begin
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'inventory_status' and n.nspname = 'public') then
+    create type public.inventory_status as enum ('in-stock', 'made-to-order', 'sold-out');
+  end if;
+end $$;
 
 -- --- products ---------------------------------------------------------------
 create table if not exists public.products (
@@ -133,3 +140,5 @@ create policy "product_provenance_public_read_published"
   using (product_id in (
     select p.id from public.products p
     where p.store_id in (select id from public.stores where published = true)));
+
+commit;

@@ -24,7 +24,14 @@
 --   DROP TYPE  IF EXISTS public.voiceover_element_kind;
 -- ============================================================================
 
-create type public.voiceover_element_kind as enum ('block', 'product', 'field');
+begin;
+
+do $$ begin
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'voiceover_element_kind' and n.nspname = 'public') then
+    create type public.voiceover_element_kind as enum ('block', 'product', 'field');
+  end if;
+end $$;
 
 -- --- blocks (static catalog, OQ-1) ------------------------------------------
 -- Catalog of the block TYPES + variants the single renderer supports. Seeded by
@@ -78,3 +85,5 @@ create policy "voiceovers_owner_all"
 create policy "voiceovers_public_read_published"
   on public.voiceovers for select
   using (store_id in (select id from public.stores where published = true));
+
+commit;

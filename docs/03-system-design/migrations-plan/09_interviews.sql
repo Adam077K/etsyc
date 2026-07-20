@@ -20,8 +20,18 @@
 --   DROP TYPE  IF EXISTS public.interview_mode;
 -- ============================================================================
 
-create type public.interview_mode   as enum ('film', 'voice');
-create type public.interview_status as enum ('in_progress', 'complete');
+begin;
+
+do $$ begin
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'interview_mode' and n.nspname = 'public') then
+    create type public.interview_mode as enum ('film', 'voice');
+  end if;
+  if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+                 where t.typname = 'interview_status' and n.nspname = 'public') then
+    create type public.interview_status as enum ('in_progress', 'complete');
+  end if;
+end $$;
 
 -- --- interviews -------------------------------------------------------------
 create table if not exists public.interviews (
@@ -66,3 +76,5 @@ create policy "interview_answers_maker_all"
   on public.interview_answers for all
   using (interview_id in (select id from public.interviews where maker_id = auth.uid()))
   with check (interview_id in (select id from public.interviews where maker_id = auth.uid()));
+
+commit;
