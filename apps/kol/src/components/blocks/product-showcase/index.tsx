@@ -1,7 +1,7 @@
 "use client";
 
-import { AudioLines } from "lucide-react";
 import { SmartImage } from "@/components/media/SmartImage";
+import { TapToHear } from "@/components/media/TapToHear";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { EmptyPrompt } from "@/components/states/EmptyPrompt";
@@ -177,13 +177,7 @@ function ProductCard({
         {product.badges[0] ? <Badge>{product.badges[0]}</Badge> : null}
       </div>
       {voiceover ? (
-        <button
-          type="button"
-          className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-pill border border-line px-3 py-1.5 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink active:scale-[0.98]"
-        >
-          <AudioLines className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-          {voiceover.label}
-        </button>
+        <TapToHear src={voiceover.src} label={voiceover.label} className="mt-2 px-3 py-1.5" />
       ) : null}
     </article>
   );

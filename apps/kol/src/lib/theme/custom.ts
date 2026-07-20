@@ -19,6 +19,31 @@ import type { CustomTheme } from "@/lib/store-config/types";
 import type { ThemeVars } from "./curated";
 import { densitySectionGap, radiusIdentities } from "./tokens";
 
+/**
+ * Hosted-font-catalog family → the stack that actually resolves at runtime.
+ * next/font-loaded faces register under hashed family names, so a raw
+ * `"Fraunces"` would silently fall back to system-ui — those map to their
+ * next/font CSS variables. Fontshare-CSS faces register under their real
+ * names and pass through quoted. Unknown families (catalog grows with the
+ * pipeline §5.5) pass through quoted too — worst case is the system stack.
+ */
+const fontCatalog: Record<string, string> = {
+  Fraunces: "var(--font-fraunces)",
+  "Bricolage Grotesque": "var(--font-bricolage)",
+  "Geist Mono": "var(--font-geist-mono)",
+  "JetBrains Mono": "var(--font-jetbrains-mono)",
+  "Space Mono": "var(--font-space-mono)",
+  "Clash Display": '"Clash Display"',
+  "General Sans": '"General Sans"',
+  Satoshi: '"Satoshi"',
+  "Cabinet Grotesk": '"Cabinet Grotesk"',
+};
+
+function resolveFamily(family: string, fallback: string): string {
+  const resolved = fontCatalog[family] ?? `"${family}"`;
+  return `${resolved}, ${fallback}`;
+}
+
 export function customThemeVars(theme: CustomTheme): ThemeVars {
   const { mode, roles } = theme.customPalette;
   const pairing = theme.customPairing;
@@ -46,9 +71,10 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--block-c": roles.accent,
     "--on-block-c": roles.accentInk,
     "--scrim": `linear-gradient(to top, color-mix(in oklab, ${roles.bg} 45%, black) 0%, transparent 55%)`,
-    // customPairing — families from the hosted font catalog (pipeline §5.5)
-    "--font-display": `"${pairing.displayFamily}", system-ui, sans-serif`,
-    "--font-text": `"${pairing.textFamily}", system-ui, sans-serif`,
+    // customPairing — families from the hosted font catalog (pipeline §5.5),
+    // mapped through the catalog so next/font faces actually resolve
+    "--font-display": resolveFamily(pairing.displayFamily, "system-ui, sans-serif"),
+    "--font-text": resolveFamily(pairing.textFamily, "system-ui, sans-serif"),
     "--font-mono": "var(--font-geist-mono), ui-monospace, monospace",
     "--weight-display": String(pairing.displayWeight),
     "--weight-text": String(pairing.textWeight),

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AudioLines, BadgeCheck, ChevronDown, Sparkles } from "lucide-react";
+import { BadgeCheck, ChevronDown, Sparkles } from "lucide-react";
+import { TapToHear } from "@/components/media/TapToHear";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/states/Skeleton";
 import { cn } from "@/lib/utils";
@@ -100,13 +101,11 @@ export function TrustBadgeBlock({ block, data, state = "success" }: BlockProps<"
                 </p>
               ) : null}
               {status === "verified" && anchorClip ? (
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-line px-4 py-2 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
-                >
-                  <AudioLines className="h-4 w-4 text-accent" aria-hidden="true" />
-                  Hear {data.maker.displayName.split(" ")[0]} — the voice behind the badge
-                </button>
+                // the voice anchor plays the audio of the maker's own intro clip
+                <TapToHear
+                  src={anchorClip.src}
+                  label={`Hear ${data.maker.displayName.split(" ")[0]} — the voice behind the badge`}
+                />
               ) : null}
             </div>
           </div>

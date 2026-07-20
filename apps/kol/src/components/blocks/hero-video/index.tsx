@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FilmFrame } from "@/components/media/FilmFrame";
+import { PosterStill } from "@/components/media/PosterStill";
 import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { Skeleton } from "@/components/states/Skeleton";
 import { cn } from "@/lib/utils";
@@ -23,12 +24,17 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
     "corner-shrunk": "ml-auto aspect-video w-80 rounded-md shadow-raised",
   }[block.variant];
 
-  // Empty — seller preview only; a published world can't reach this.
+  // Empty — seller preview only; a published world can't reach this. If a
+  // poster already exists (clip uploaded, world un-published) it shows behind
+  // the prompt per the catalog ("poster still with a muted prompt").
   if (state === "empty" || !clip) {
     if (!isPreview) return null;
     return (
       <section className="mx-auto w-full max-w-page px-[var(--space-2)] md:px-[var(--space-6)]">
-        <div className={cn("relative flex items-center justify-center bg-surface", frameClass)}>
+        <div className={cn("relative flex items-center justify-center overflow-hidden bg-surface", frameClass)}>
+          {clip ? (
+            <PosterStill src={clip.poster} className="absolute inset-0 h-full w-full object-cover opacity-40" />
+          ) : null}
           <EmptyPrompt
             prompt="Add your first clip"
             hint="Your film is the front door of your world — 30 seconds of you at work is enough to start."
@@ -47,7 +53,7 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
       >
         <div className={cn("relative overflow-hidden bg-surface", frameClass)}>
           {/* poster shows immediately; shimmer is a progress edge, never a spinner */}
-          <img src={clip.poster} alt="" aria-hidden="true" className="h-full w-full object-cover opacity-60" onError={(e) => e.currentTarget.remove()} />
+          <PosterStill src={clip.poster} className="h-full w-full object-cover opacity-60" />
           <Skeleton className="absolute inset-x-0 bottom-0 h-1 rounded-none" />
         </div>
       </section>
@@ -64,10 +70,13 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
           : "mx-auto w-full max-w-page px-[var(--space-2)] md:px-[var(--space-6)]",
       )}
     >
-      <div className={cn("kol-scrim relative overflow-hidden", frameClass)}>
+      {/* container-query root: display-hero sizes to the FRAME, not the
+          viewport, so sub-page-width containers (matrix cells, docked
+          variants) scale the line down instead of clipping mid-word */}
+      <div className={cn("kol-scrim relative overflow-hidden [container-type:inline-size]", frameClass)}>
         {showError ? (
           <div className="relative flex h-full w-full items-end bg-surface">
-            <img src={clip.poster} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" onError={(e) => e.currentTarget.remove()} />
+            <PosterStill src={clip.poster} className="absolute inset-0 h-full w-full object-cover" />
             <p className="relative m-4 rounded-md bg-surface/85 px-3 py-2 text-caption text-muted">
               Couldn&rsquo;t load this clip
             </p>
@@ -77,7 +86,7 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
         )}
         {/* the one big line per world — display-hero over film, --on-media ink over the scrim */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-[var(--space-4)] md:p-[var(--space-8)]">
-          <h1 className="font-display text-display-hero text-on-media [text-wrap:balance]">
+          <h1 className="font-display font-bold leading-[0.92] tracking-[-0.03em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),10cqi)]">
             {data.maker.displayName}
           </h1>
           {block.props.showCraftLine ? (

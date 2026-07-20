@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BlockBoundary } from "@/components/blocks/BlockBoundary";
 import { blockRegistry } from "@/components/blocks/registry";
 import type { BlockProps, BlockState } from "@/components/blocks/shared";
 import type { StoreBlock, StoreConfig } from "@/lib/store-config/types";
@@ -58,12 +59,8 @@ export function renderBlock(
   // can't correlate the two generics across the index, hence the local cast.
   const Component = blockRegistry[block.type] as React.ComponentType<BlockProps>;
   return (
-    <Component
-      key={block.id}
-      block={block}
-      data={data}
-      state={state}
-      isPreview={isPreview}
-    />
+    <BlockBoundary key={block.id} blockId={block.id}>
+      <Component block={block} data={data} state={state} isPreview={isPreview} />
+    </BlockBoundary>
   );
 }

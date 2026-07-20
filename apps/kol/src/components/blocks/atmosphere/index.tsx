@@ -52,6 +52,7 @@ export function AtmosphereBlock({ block, data, state = "success" }: BlockProps<"
         style={fallback ? washStyle : undefined}
       >
         {!fallback ? (
+          // eslint-disable-next-line @next/next/no-img-element -- config-driven remote srcs; next/image domains are a P5 config concern
           <img
             src={image.src}
             alt=""

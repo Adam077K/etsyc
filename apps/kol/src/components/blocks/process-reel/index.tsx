@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FilmFrame } from "@/components/media/FilmFrame";
+import { PosterStill } from "@/components/media/PosterStill";
 import { Reveal } from "@/components/motion/Reveal";
 import { Skeleton } from "@/components/states/Skeleton";
 import type { Clip } from "@/lib/store-config/types";
@@ -31,7 +32,9 @@ export function ProcessReelBlock({ block, data, state = "success" }: BlockProps<
           <div className="flex gap-[var(--space-2)]">
             {/* first poster leads; siblings hold as skeleton frames */}
             <div className="relative aspect-video w-full overflow-hidden rounded-md bg-surface">
-              <img src={clips[0]?.poster} alt="" aria-hidden="true" className="h-full w-full object-cover opacity-60" onError={(e) => e.currentTarget.remove()} />
+              {clips[0] ? (
+                <PosterStill src={clips[0].poster} className="h-full w-full object-cover opacity-60" />
+              ) : null}
               <Skeleton className="absolute inset-x-0 bottom-0 h-1 rounded-none" />
             </div>
             {clips.slice(1, 3).map((clip) => (
@@ -54,7 +57,7 @@ export function ProcessReelBlock({ block, data, state = "success" }: BlockProps<
       <BlockSection>
         <div className="relative flex aspect-video w-full items-end overflow-hidden rounded-md bg-surface">
           {poster ? (
-            <img src={poster.poster} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" onError={(e) => e.currentTarget.remove()} />
+            <PosterStill src={poster.poster} className="absolute inset-0 h-full w-full object-cover" />
           ) : null}
           <div className="relative m-4 flex items-center gap-3 rounded-md bg-surface/85 px-3 py-2">
             <span className="text-caption text-muted">Couldn&rsquo;t load this footage</span>

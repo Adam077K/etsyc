@@ -1,7 +1,7 @@
 "use client";
 
-import { AudioLines } from "lucide-react";
 import { SmartImage } from "@/components/media/SmartImage";
+import { TapToHear } from "@/components/media/TapToHear";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -128,15 +128,7 @@ export function ProductDetailBlock({ block, data, state = "success" }: BlockProp
               >
                 Add to cart
               </Button>
-              {voiceover ? (
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-line px-4 py-2 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink active:scale-[0.98]"
-                >
-                  <AudioLines className="h-4 w-4 text-accent" aria-hidden="true" />
-                  {voiceover.label}
-                </button>
-              ) : null}
+              {voiceover ? <TapToHear src={voiceover.src} label={voiceover.label} /> : null}
             </div>
             {/* compact trust chips render inline here via the trust-badge block (catalog §4) */}
             <div className="flex gap-2 pt-[var(--space-1)]">
