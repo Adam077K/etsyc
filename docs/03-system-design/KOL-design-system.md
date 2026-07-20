@@ -116,9 +116,11 @@ See §4 for the full language. The atomic tokens (v2 — cinematic + physical):
 
 ## 2 · Curated palettes (5 world moods — braver, color-blocking)
 
-Five pre-approved palettes, recalibrated for the corrected direction: **warm human temperature, but brave enough to color-block whole sections.** Each ships light + dark and — new in v2 — a **block-ground set** (`--block-a/-b/-c` with matching `--on-block-*` ink) so a world can render full-bleed vivid sections (the Faire move) without authoring raw hex. The AI picks one whole palette per world; never mixes across palettes. Every value meets WCAG AA for its paired text (verified in the QA gate, not assumed).
+Five pre-approved palettes, recalibrated for the corrected direction: **warm human temperature, but brave enough to color-block whole sections.** Each ships light + dark and — new in v2 — a **block-ground set** (`--block-a/-b/-c` with matching `--on-block-*` ink) so a world can render full-bleed vivid sections (the Faire move) without authoring raw hex. For **curated worlds** (KOL's own UI + direction-less shops) the AI picks one whole palette per world and never mixes across palettes; **seller shops bring their own brand** (D15 — the scope note up top), and these five are their optional presets, not a cap. AA on block-grounds is honest and per-combo (see the AA-levels note below the token contract) — re-verified in the QA gate, not assumed.
 
-**Token contract per palette:** `--ground` (page), `--surface` (raised/card), `--ink` (primary text), `--muted` (secondary), `--line` (hairline), `--accent` (interactive accent), `--accent-2` (secondary), `--on-media` (type set over film), plus the **block set** `--block-a/-b/-c` + `--on-block-a/-b/-c`.
+**Token contract per palette:** `--ground` (page), `--surface` (raised/card), `--ink` (primary text), `--muted` (secondary), `--line` (hairline), `--accent` (interactive accent), `--accent-2` (secondary), `--accent-3` (**optional** — a third interactive accent; declared only by palettes with three-way accent play, e.g. `bazaar`; two-accent palettes leave it unset), `--on-media` (type set over film), plus the **block set** `--block-a/-b/-c` + `--on-block-a/-b/-c`.
+
+**AA levels on block-grounds (honest, per-combo — re-verified in the QA gate, not assumed).** Paired text on the **dark block-grounds** clears WCAG AA body (4.5:1). Two **midtone grounds are large-text-only** — cream/paper ink on them lands between 3:1 and 4.5:1, passing AA **large text (≥24px, or ≥18.66px bold → 3:1) but failing body**: `sunbaked --block-c` (sky `#4C93A8` + cream ≈ 3.1:1) and `cuberto-noir --block-c` (electric `#3D6CE0` + paper ≈ 4.4:1). **Restrict those two grounds to display/large statement type** — which is exactly what color-block sections carry (the `display-hero`/`display` line washes over the ground, §1.2/§4.2). For body copy on a colored section, use a **dark** ground (`--block-a`) or the standard `--ground`/`--surface`. The guarantee is therefore *body 4.5:1 on dark grounds, large-text 3:1 on the two midtone grounds* — not a blanket body-level claim.
 
 ### 2.1 `sunbaked` — warm, human, sun-drenched (Kotn × Faire)
 *The default warm-marketplace mood: ceramics, textiles, apparel, wood. Kotn's sun-drenched human film with bold earth color-blocks. Terracotta is used **bold at ground scale** (Kotn), not as a timid accent — that's how we escape the cliché.*
@@ -195,7 +197,8 @@ Five pre-approved palettes, recalibrated for the corrected direction: **warm hum
 | muted | `#7A5A54` | `#C7A6B8` |
 | line | `#E7D3C0` | `#43254D` |
 | accent | `#C2452D` (vermilion) | `#E0623F` |
-| accent-2 | `#1F6F6B` (teal) + `#D8A24A` (gold) | `#2E9A93` + `#E7B45C` |
+| accent-2 | `#1F6F6B` (teal) | `#2E9A93` |
+| accent-3 | `#D8A24A` (gold) | `#E7B45C` |
 | on-media | `#FBEFE0` | `#FBEFE0` |
 
 **Block set:** `--block-a #7A1E3C` jewel-magenta (`--on-block-a #F9DCE6`) · `--block-b #1F6F6B` teal (`--on-block-b #EAF7F5`) · `--block-c #D8A24A` gold (`--on-block-c #2A1004`).
@@ -207,6 +210,8 @@ Five pre-approved palettes, recalibrated for the corrected direction: **warm hum
 ## 3 · Curated font pairings (4 sets — bolder, bigger, characterful)
 
 Each pairing is display + text + mono. **No Inter.** Displays are now **bold grotesques and heavy optical serifs** chosen for their ability to make Kotn-scale statements over film — the timid small-serif approach of the first pass is gone. Each names a self-hostable primary (free / Fontshare / Google) so nothing blocks build; premium alternates note the ceiling. The AI picks one whole pairing per world; roles never cross pairings.
+
+> **Pairing ↔ palette is bound, not a free cross-product.** Each pairing declares the palette(s) it serves (the `For …` line under each set): `statement-grotesk` → `sunbaked` + `orchard`, `warm-serif` → `market-plum`, `modern-mono-grotesk` → `cuberto-noir`, `character-maximal` → `bazaar`. A curated world takes its palette's bound pairing — it is not a free 5×4 palette×pairing matrix. Variety across curated worlds therefore comes from **palette (5) × motion preset (4) × radius identity (3) × density (2) × which block-grounds it color-blocks × which blocks in which order** — a wide, bold space — *not* from mixing an arbitrary pairing onto an arbitrary palette (that would risk incoherence, the opposite of the rails' purpose). §5 states the claim at this honest scope. (Seller `kind:"custom"` shops are unaffected — they derive their own pairing per D15.)
 
 ### 3.1 `statement-grotesk`
 *Kotn energy — big, bold, confident sans statements over human film. For `sunbaked`, `orchard`.*
@@ -290,8 +295,8 @@ Every world carries **exactly one** memorable cinematic beat (Cuberto's gooey "T
 | Ugly / clashing color | AI picks 1 of 5 vetted palettes incl. their block-ground sets; cannot author raw hex |
 | Timid / muted / craft-fair feel (the v1 rejection) | Every palette carries **bold block-grounds**; type scale has a `display-hero` tier; dials baseline at VARIANCE 7 / MOTION 6 / DENSITY 4 — the system defaults bold |
 | Generic typography (Inter everywhere) | AI picks 1 of 4 vetted pairings, all bold display faces; Inter not in the set |
-| Flat sameness across worlds | Palette × pairing × motion preset × radius identity × which block-grounds = wide, distinct, bold combination space |
-| Illegible / low-contrast (incl. type-over-film) | Every palette + `--on-media`/`--on-block-*` pre-checked AA; over-media scrim mandatory; caption tracking + measure fixed |
+| Flat sameness across worlds | Palette (5, each with its bound pairing — §3) × motion preset (4) × radius identity (3) × density (2) × which block-grounds a world color-blocks × which blocks in which order = a wide, distinct, bold combination space (pairing tracks palette, not a free cross-product — §3) |
+| Illegible / low-contrast (incl. type-over-film) | Every palette + `--on-media`/`--on-block-*` pre-checked AA **at its honest level** — body 4.5:1 on dark grounds; the two midtone grounds (`sunbaked`/`cuberto-noir` `--block-c`) are large-text-only at 3:1 and restricted to display type (§2); over-media scrim mandatory; caption tracking + measure fixed |
 | Janky or gratuitous motion | One base curve + one cinematic curve, fixed ramp, hard unfold/cinema budgets, one signature per world, `transform`/`opacity`/`filter` only, reduced-motion honored |
 | The cream+dainty-serif+timid-terracotta cliché | Terracotta only appears as a **bold ground** (Kotn) paired with a heavy grotesque; warm-paper is 1 of 5 moods |
 | Devolving into a transactional product grid | Blocks are film-led and human-first by spec (block catalog); `product-showcase` bans the generic 3-column card row; no urgency/deal chrome exists in the token set |
