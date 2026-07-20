@@ -43,6 +43,11 @@
 - **13 locked decisions (D1–D13):** `docs/01-foundation/KOL-v2-concept-lock.md`. **Auth is now IN scope** (Supabase) — reversed the earlier "skip auth." Master build plan: `docs/03-system-design/KOL-MVP-master-plan.md` (Phases 0–8).
 - **MVP model:** competition = checkpoint on a production build (seeded with 4 teammate worlds), then cutover to real buyers+sellers. Every agent uses MCPs (Supabase, Playwright, Miro, Refero/Stitch/Pencil/Figma) on demand.
 
+## Day 7 (Jul 20) — KOL Phase 5 COMPLETE (specs), Phases 0–4 done + Phase 3 closed
+- **Phase 5 done:** 32 build-ready per-feature specs (40 MVP features) in `docs/04-features/specs/`, CPO+CTO BUILD-READY, merged to main. Dispatch packet: `docs/08-agents_work/handoffs/2026-07-20-phase5-dispatch-packet.md`. See DECISIONS.md top entry for risk tiers, Founder decisions, and the Phase-6 build order.
+- **Next:** Phase 6 build in `apps/kol/` (Fable 5). **P15 messaging must land before B12/B14.** Deferred hardening gaps N2/N3/N4/NEW-3 accepted for seeded MVP (post-launch). B11 search scope decided at Phase-6 planning.
+- **STILL DEFERRED (Founder-gated, Irreversible):** the 31-table migration is a reviewed PLAN — nothing applied to Supabase. Needs the 9-point staging validation + Adam's sign-off before apply.
+
 ## Live constraints
 - **Idea is chosen** (KOL v2, see above). Gating items are now the **validation gates** (Day-4 cold-DM maker probe ≥60%, capture-rig, forced-choice, lapsed-buyer) and Adam's **D7 written pivot pre-commit (due Day 3)**. Not build capacity.
 - Teams form by **vote on Day 4** — Adam does not control his team. Venture ambition vs. teammates optimizing for the pitch is an unresolved tension.

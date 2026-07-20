@@ -24,6 +24,15 @@
 
 <!-- Entries below this line, most-recent first. -->
 
+## 2026-07-20 — Phase 5 COMPLETE: 32 build-ready per-feature specs (40 MVP features), CPO+CTO BUILD-READY
+
+**Context:** Per the Phase-5 handoff, turn the ~39-feature tree into build-ready specs in `docs/04-features/specs/` before Phase-6 build. Ran the T2 dispatch-packet model on Opus: CPO briefs + CTO data-contract/risk map → 5 parallel technical-writer workers → CPO+CTO build-ready review → surgical fix pass → merge.
+**Delivered:** 32 specs (~9,057 LOC) covering all 40 MVP features (hybrid granularity — store-engine spine as one pack; buyer/seller/trust per-feature), each filling `_TEMPLATE.md`, D#-traceable, all-4-states, bound to real Phase-4 tables/RPCs, overlaps policed. Plus the consolidated dispatch packet (`docs/08-agents_work/handoffs/2026-07-20-phase5-dispatch-packet.md`) as the durable source-of-truth.
+**Both chiefs signed BUILD-READY** (CTO: 0 P1 technical errors). **Risk tiers (CTO-authoritative):** P1/P3 Irreversible · P4/P5/P6/P7 Full · P8 Lite · P12 Full/Lite; §B1 had under-tiered P3/P4/P5, ratified to §A3.
+**Founder decisions (Adam):** (1) deferred hardening gaps N2/N3/N4/NEW-3 → ACCEPT ALL for seeded MVP, schedule post-launch (each fix = Irreversible migration); (2) B11 search scope (first-wave vs fast-follow) → decide at Phase-6 planning.
+**Carried to Phase 6:** RICE effort uncomputed on 14 spine/buyer-core features (needs CTO estimates; not a blocker); voice-anchor verification mechanism (S9) unspecified — gates Real-Maker badge + publish precondition (c); B11 delivery-filter field undefined. **Build order:** P1→P3→P5-seed→P4; P7→P6→B1–B8; **P15 before B12/B14**; P9→S6/P10 publish; S9→S6(c)/P11; B7→B6+/B9; S8→B6/B7.
+**Reversibility:** hard-to-reverse (specs gate all Phase-6 build). **Owner:** ceo (`ceo-phase5`). **Affects:** all Phase-6 Design-Build (Fable) + QA agents; database-engineer (migration order); Founder (deferred migration apply is still untouched). Merged to main, Founder-confirmed.
+
 ## 2026-07-20 — Phase 3 formally CLOSED: design gate run + v2 reconcile + apps/kol scaffolded (QA-Lead PASS)
 
 **Context:** Pre-Phase-5 audit found Phase 3 was never truly *done* — its master-plan gate (design-critic loop + QA-Lead PASS) was never run (only docs existed), and the "coded component library shell" deliverable was unbuilt. Founder chose to close both now.
