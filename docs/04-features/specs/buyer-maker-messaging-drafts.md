@@ -11,7 +11,7 @@
 | **Reviewers** | CPO + CTO |
 | **Created** | 2026-07-20 |
 | **Last Updated** | 2026-07-20 |
-| **Target Sprint** | Phase 6 — Seller pipeline build |
+| **Target Sprint** | Phase 6 — Build |
 
 ---
 

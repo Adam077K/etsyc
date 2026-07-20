@@ -15,7 +15,7 @@
 | **Reviewers** | CPO + CTO |
 | **Created** | 2026-07-20 |
 | **Last Updated** | 2026-07-20 |
-| **Target Sprint** | Phase 5 — spec authoring |
+| **Target Sprint** | Phase 6 — Build |
 
 ---
 

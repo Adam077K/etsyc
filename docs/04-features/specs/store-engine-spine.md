@@ -15,7 +15,7 @@
 | **Reviewers** | CPO + CTO |
 | **Created** | 2026-07-20 |
 | **Last Updated** | 2026-07-20 |
-| **Target Sprint** | Phase 5 — spec authoring (build in a later phase; migration apply is a separate Founder-gated step, NOT part of this work) |
+| **Target Sprint** | Phase 6 — Build |
 | **Surface** | Mostly KOL platform (curated `theme.kind:"curated"` chrome) + the shared render/engine layer. The renderer (P4) and block library (P5) additionally serve **custom** seller shops (`theme.kind:"custom"`, D15). Called out per-section. |
 | **Source contracts** | `docs/03-system-design/store-config.schema.md` (v1.3-LOCKED) · `docs/03-system-design/KOL-video-engine-spec.md` (ADR-0003) · `docs/03-system-design/KOL-ai-pipeline-spec.md` (ADR-0002) · `docs/04-features/KOL-block-catalog.md` · `docs/01-foundation/KOL-v2-concept-lock.md` (D1–D16) · dispatch packet Part B §B0/§B1 |
 
