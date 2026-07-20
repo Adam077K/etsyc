@@ -86,8 +86,10 @@ export function groundStyle(ground: Exclude<BlockGround, null>): CSSProperties {
     "--surface": `color-mix(in oklab, var(--on-block-${ground}) 8%, var(--block-${ground}))`,
     // Accent inverts on a colored ground: the world accent can sit adjacent
     // to (or BE, on custom worlds) the ground hue and vanish — on-block ink
-    // becomes the interactive color, the ground its ink.
+    // becomes the interactive color, the ground its ink. (on-block/block
+    // pairs are the §2 AA-checked combos — ≥4.87:1 on the dark grounds.)
     "--accent": `var(--on-block-${ground})`,
+    "--accent-cta": `var(--on-block-${ground})`,
     "--accent-ink": `var(--block-${ground})`,
   } as CSSProperties;
 }

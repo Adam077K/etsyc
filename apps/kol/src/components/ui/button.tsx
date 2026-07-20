@@ -15,10 +15,11 @@ const buttonVariants = cva(
       variant: {
         /**
          * The one high-emphasis accent action per world (e.g. add-to-cart).
-         * Set bold at body-lg so accent-ink on the accent ground clears the
-         * WCAG large-text threshold (≥18.66px bold → 3:1) on every palette.
+         * Uses the AA-measured --accent-cta/--accent-ink pair (≥4.5:1 BODY
+         * contrast in every curated palette+mode — see theme/curated.ts);
+         * bold body-lg keeps it unambiguously readable on top of that.
          */
-        accent: "bg-accent text-body-lg font-bold text-accent-ink hover:bg-accent/90",
+        accent: "bg-accent-cta text-body-lg font-bold text-accent-ink hover:bg-accent-cta/90",
         /** Quiet default — relationship, not conversion pressure. */
         quiet: "border border-line bg-surface text-ink hover:bg-ground",
         /** Ghost for chrome inside media/colored grounds; inherits ink. */

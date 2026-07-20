@@ -14,11 +14,36 @@ import {
 
 export type ThemeVars = Record<`--${string}`, string>;
 
+/**
+ * The accent-CTA pair, AA-measured per palette+mode (WCAG body 4.5:1):
+ * LIGHT modes set on-media cream on the accent darkened 5% (srgb) —
+ * measured 4.72–8.7:1. DARK modes set the near-black ground on the raw
+ * accent — 5.08–5.97:1 — except market-plum dark, whose midtone accent
+ * needs cream on a 10% darken (4.81:1). Ratios computed with the WCAG
+ * relative-luminance formula against these exact srgb mixes; QA re-measures
+ * at the gate. `--accent` itself stays the untouched brand hue for
+ * non-text uses (waveform, stars, focus ring — UI-component 3:1 scope).
+ */
+function accentCtaPair(
+  paletteId: CuratedTheme["paletteId"],
+  mode: CuratedTheme["mode"],
+  palette: ReturnType<typeof getPaletteTokens>,
+): { bg: string; ink: string } {
+  if (mode === "light") {
+    return { bg: `color-mix(in srgb, ${palette.accent} 95%, black)`, ink: palette.onMedia };
+  }
+  if (paletteId === "market-plum") {
+    return { bg: `color-mix(in srgb, ${palette.accent} 90%, black)`, ink: palette.onMedia };
+  }
+  return { bg: palette.accent, ink: palette.ground };
+}
+
 export function curatedThemeVars(theme: CuratedTheme): ThemeVars {
   const palette = getPaletteTokens(theme.paletteId, theme.mode);
   const blocks = palettes[theme.paletteId].blocks;
   const pairing = fontPairings[theme.fontPairingId];
   const radius = radiusIdentities[theme.radiusIdentity];
+  const cta = accentCtaPair(theme.paletteId, theme.mode, palette);
 
   return {
     // palette contract (design-system §2)
@@ -32,7 +57,9 @@ export function curatedThemeVars(theme: CuratedTheme): ThemeVars {
     // two-accent palettes leave --accent-3 unset in the doc; falling back to
     // --accent keeps any accent-3 utility harmless instead of transparent.
     "--accent-3": palette.accent3 ?? palette.accent,
-    "--accent-ink": palette.onMedia,
+    // the high-emphasis CTA pair (AA-measured, see accentCtaPair)
+    "--accent-cta": cta.bg,
+    "--accent-ink": cta.ink,
     "--on-media": palette.onMedia,
     // block-ground set (P2-a)
     "--block-a": blocks.blockA,

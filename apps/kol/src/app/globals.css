@@ -90,6 +90,8 @@
   --accent: #c64a2c;
   --accent-2: #3e7e8c;
   --accent-3: var(--accent);
+  /* AA-measured CTA pair (sunbaked light: cream on 5%-darkened accent, 4.72:1) */
+  --accent-cta: color-mix(in srgb, var(--accent) 95%, black);
   --accent-ink: #fbf3e8;
   --on-media: #fbf3e8;
   --block-a: #b8452a;

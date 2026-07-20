@@ -1,6 +1,13 @@
 import type { Config } from "tailwindcss";
 
-/** token name → `rgb(from var(--name) r g b / <alpha-value>)` color entries. */
+/**
+ * token name → `rgb(from var(--name) r g b / <alpha-value>)` color entries.
+ *
+ * BROWSER FLOOR: CSS relative color (`rgb(from …)`) needs Chrome/Edge 119+,
+ * Safari 16.4+, Firefox 128+. Acceptable for the desktop-first MVP (concept
+ * lock D1); revisit with a channel-triplet fallback if analytics ever show
+ * older engines.
+ */
 function tokenColors(names: string[]): Record<string, string> {
   return Object.fromEntries(
     names.map((name) => [name, `rgb(from var(--${name}) r g b / <alpha-value>)`]),
@@ -34,6 +41,7 @@ const config: Config = {
           "accent",
           "accent-2",
           "accent-3",
+          "accent-cta",
           "accent-ink",
           "on-media",
           // block-ground set (the Faire color-block move, §2 / P2-a)

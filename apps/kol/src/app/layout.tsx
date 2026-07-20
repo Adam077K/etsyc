@@ -33,7 +33,7 @@ const spaceMono = Space_Mono({
 });
 
 const FONTSHARE_CSS =
-  "https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=general-sans@400,500,600&f[]=satoshi@400,500,700&f[]=cabinet-grotesk@500,700,800&display=swap";
+  "https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,700&f[]=cabinet-grotesk@500,700,800&display=swap";
 
 export const metadata: Metadata = {
   title: "KOL — meet the maker",

@@ -62,6 +62,9 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--accent": roles.accent,
     "--accent-2": roles.accent,
     "--accent-3": roles.accent,
+    // accent/accentInk is a pipeline-derived pair — the deterministic WCAG-AA
+    // gate (schema §2.2) guarantees it, so the CTA uses it untouched
+    "--accent-cta": roles.accent,
     "--accent-ink": roles.accentInk,
     "--on-media": onMedia,
     "--block-a": roles.accent,

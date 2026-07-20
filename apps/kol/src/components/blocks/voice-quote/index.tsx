@@ -66,8 +66,11 @@ function QuoteText({ quote, attribution }: { quote: string; attribution?: string
       <blockquote className="font-display text-h1 [text-wrap:balance]">
         &ldquo;{quote}&rdquo;
       </blockquote>
+      {/* attribution sets in full --ink (→ --on-block cream on grounds,
+          4.87:1 measured) — the 72% muted mix fails AA at caption size on
+          the clay band (3.33:1) */}
       {attribution ? (
-        <figcaption className="text-caption uppercase tracking-[0.08em] text-muted">
+        <figcaption className="text-caption uppercase tracking-[0.08em] text-ink">
           — {attribution}
         </figcaption>
       ) : null}
