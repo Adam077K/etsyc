@@ -5,7 +5,7 @@
 >
 > **Validation.** Zod schema on every read/write (P3). Stored as `stores.config jsonb` in Supabase. Store versions snapshot the whole object (`store_versions`), carrying `criticScore` (P9) and per-section approval status (P10).
 >
-> **Changelog.** `v1.2` — reconciled the `kind:"curated"` enums to design-system **v2** (the founder-confirmed authoritative direction): `paletteId` → `sunbaked | market-plum | cuberto-noir | orchard | bazaar` (was the rejected v1 `atelier-chalk | studio-paper | nocturne | …`); `fontPairingId` → `statement-grotesk | warm-serif | modern-mono-grotesk | character-maximal` (was `editorial-warm | gallery-grotesque | …`); `motionPreset` → `hushed | fluid | liquid | dimensional` (4-value, was the 3-value `still | calm | lively`; adds the `liquid`/`dimensional` cinematic-signature presets required by design-system §4.5); §3 worked example re-themed to valid v2 ids. `v1.1` — `theme` becomes a discriminated union on `kind` (`curated | custom`) for D15 seller-shop brand freedom; the curated-enum invariant scopes to `kind:"curated"` only, with the WCAG-AA gate + auto-critic as the guarantee for `kind:"custom"`; §2.3 `videoProfile` source-of-truth note (ADR-0001 OQ-2). `v1.0` — initial Phase 3 contract.
+> **Changelog.** `v1.3` — added an **optional** `message?: string` to the `thank-you` block's `props` (§2.6): the maker's own written thank-you words, shown in the `text+media` / no-clip variant. Closes a D10 honesty gap the scaffold QA caught — without this field the block had to fabricate a maker quote; per D10 (voice = the maker's own words) the message is maker-authored only, never AI-generated, and omitted → neutral platform fallback (no fabricated quote). `v1.2` — reconciled the `kind:"curated"` enums to design-system **v2** (the founder-confirmed authoritative direction): `paletteId` → `sunbaked | market-plum | cuberto-noir | orchard | bazaar` (was the rejected v1 `atelier-chalk | studio-paper | nocturne | …`); `fontPairingId` → `statement-grotesk | warm-serif | modern-mono-grotesk | character-maximal` (was `editorial-warm | gallery-grotesque | …`); `motionPreset` → `hushed | fluid | liquid | dimensional` (4-value, was the 3-value `still | calm | lively`; adds the `liquid`/`dimensional` cinematic-signature presets required by design-system §4.5); §3 worked example re-themed to valid v2 ids. `v1.1` — `theme` becomes a discriminated union on `kind` (`curated | custom`) for D15 seller-shop brand freedom; the curated-enum invariant scopes to `kind:"curated"` only, with the WCAG-AA gate + auto-critic as the guarantee for `kind:"custom"`; §2.3 `videoProfile` source-of-truth note (ADR-0001 OQ-2). `v1.0` — initial Phase 3 contract.
 
 ---
 
@@ -13,7 +13,7 @@
 
 ```jsonc
 {
-  "schemaVersion": "1.2",     // string, semver — migration anchor (see Changelog)
+  "schemaVersion": "1.3",     // string, semver — migration anchor (see Changelog)
   "storeId":       "uuid",    // FK stores.id
   "maker":         { … },     // identity + trust badges (D7)
   "theme":         { … },     // discriminated union on `kind`: curated (D9 enum rails) | custom (seller freedom, D15)
@@ -179,6 +179,18 @@ Independent of `products[].description` and of clip narration — the three voic
 ```
 `props` shape is defined per block type in the block catalog; the Zod schema is a discriminated union on `type`. `bindings` are validated for referential integrity at write time.
 
+**Typed props called out at the contract level** (the catalog holds the full per-type shape; these are pinned here because validation / honesty rules depend on them):
+```jsonc
+// type:"thank-you" props
+"props": {
+  "message": "string | undefined"   // OPTIONAL — the maker's own written thank-you words (maker-authored;
+                                     // shown in the `text+media` / no-clip variant). D10: voice = the maker's
+                                     // OWN words — never AI-generated or fabricated. Omit if the maker wrote
+                                     // none; the renderer then falls back to neutral platform copy (never a
+                                     // fabricated quote).
+}
+```
+
 ### 2.7 `meta`
 ```jsonc
 "meta": {
@@ -199,7 +211,7 @@ Independent of `products[].description` and of clip narration — the three voic
 
 ```jsonc
 {
-  "schemaVersion": "1.2",
+  "schemaVersion": "1.3",
   "storeId": "a7f3…-ashwork",
   "maker": {
     "id": "mk_sena",
