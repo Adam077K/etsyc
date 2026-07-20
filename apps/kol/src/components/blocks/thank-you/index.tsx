@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FilmFrame } from "@/components/media/FilmFrame";
+import { PosterStill } from "@/components/media/PosterStill";
 import { SmartImage } from "@/components/media/SmartImage";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import { Skeleton, SkeletonLines } from "@/components/states/Skeleton";
@@ -19,7 +20,17 @@ export function ThankYouBlock({
   data,
   state = "success",
   orderSummary,
-}: BlockProps<"thank-you"> & { orderSummary?: React.ReactNode }) {
+  message,
+}: BlockProps<"thank-you"> & {
+  orderSummary?: React.ReactNode;
+  /**
+   * Maker-AUTHORED thank-you message, rendered plainly when present. The
+   * platform NEVER fabricates or quote-attributes words for a maker (D10
+   * voice honesty) — store-config v1.3 will carry this field (Design-Lead
+   * follow-up); until then only an explicit caller-provided message shows.
+   */
+  message?: string;
+}) {
   const clip = firstClip(data, block.bindings.clipTags);
   const portrait = imageById(data, data.maker.avatarMediaId);
   const [clipFailed, setClipFailed] = useState(false);
@@ -30,7 +41,7 @@ export function ThankYouBlock({
         <div aria-busy="true" className="mx-auto max-w-2xl space-y-[var(--space-4)]">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-surface">
             {clip ? (
-              <img src={clip.poster} alt="" aria-hidden="true" className="h-full w-full object-cover opacity-60" onError={(e) => e.currentTarget.remove()} />
+              <PosterStill src={clip.poster} className="h-full w-full object-cover opacity-60" />
             ) : null}
             <Skeleton className="absolute inset-x-0 bottom-0 h-1 rounded-none" />
           </div>
@@ -73,11 +84,17 @@ export function ThankYouBlock({
           <h2 className="font-display text-h1 [text-wrap:balance]">
             Thank you — from {firstName}
           </h2>
-          <p className="mx-auto mt-2 max-w-measure text-body-lg text-muted">
-            {useVideo
-              ? `A few words from ${firstName} before your piece goes on the wheel.`
-              : `“Every order keeps this workshop going. Your piece will be packed by my own hands.” — ${data.maker.displayName}`}
-          </p>
+          {message ? (
+            // the maker's own words — rendered plainly, no invented attribution
+            <p className="mx-auto mt-2 max-w-measure text-body-lg text-muted">{message}</p>
+          ) : (
+            // neutral platform copy — the heading carries the personal moment
+            <p className="mx-auto mt-2 max-w-measure text-body-lg text-muted">
+              {useVideo
+                ? `A personal message from ${firstName}. Sound is off until you turn it on.`
+                : "Your order is confirmed and saved to your account."}
+            </p>
+          )}
         </Reveal>
         {orderSummary ? (
           <Reveal delayMs={STAGGER_MS * 2} className="border-t border-line pt-[var(--space-3)] text-left">
