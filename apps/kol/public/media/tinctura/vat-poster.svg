@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Noor over the indigo vat — poster frame">
+  <defs>
+    <linearGradient id="indigo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A3654"/>
+      <stop offset="0.6" stop-color="#141B2E"/>
+      <stop offset="1" stop-color="#0B0F1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#indigo)"/>
+  <!-- vat from above -->
+  <ellipse cx="800" cy="560" rx="380" ry="200" fill="#101B3A"/>
+  <ellipse cx="800" cy="560" rx="340" ry="172" fill="#1B2E6E"/>
+  <ellipse cx="800" cy="560" rx="250" ry="120" fill="#27439E" opacity="0.8"/>
+  <!-- cloth entering the dye -->
+  <path d="M700 120 C740 260 700 380 760 470 C800 530 860 540 900 560" stroke="#E3A857" stroke-width="14" fill="none" opacity="0.9"/>
+  <path d="M700 120 C660 240 690 360 730 450" stroke="#C8CFE0" stroke-width="8" fill="none" opacity="0.5"/>
+  <text x="80" y="820" font-family="Georgia, serif" font-size="34" fill="#E9E4D6" opacity="0.85">Tinctura — vat film</text>
+</svg>

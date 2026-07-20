@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-label="Ridge tumbler, ash glaze pooling at the base — stand-in still">
+  <rect width="900" height="900" fill="#F1E4CE"/>
+  <ellipse cx="450" cy="720" rx="260" ry="36" fill="#C9B592" opacity="0.6"/>
+  <!-- tumbler with ridge -->
+  <path d="M330 720 L330 380 C330 340 370 320 450 320 C530 320 570 340 570 380 L570 720 Z" fill="#8A8272"/>
+  <rect x="330" y="470" width="240" height="10" fill="#6F6153" opacity="0.65"/>
+  <!-- ash glaze pooling darker at the base -->
+  <path d="M330 640 C380 610 520 610 570 640 L570 720 L330 720 Z" fill="#4A4438"/>
+  <path d="M345 360 C380 344 520 344 555 360" stroke="#F6EFE3" stroke-width="7" fill="none" opacity="0.8"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Noor folding linen, indigo to the elbows — stand-in still">
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A3654"/>
+      <stop offset="1" stop-color="#0B0F1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#night)"/>
+  <circle cx="400" cy="310" r="105" fill="#0B0F1A"/>
+  <path d="M210 1000 C225 700 300 540 400 520 C500 540 575 700 590 1000 Z" fill="#0B0F1A"/>
+  <!-- folded linen stack -->
+  <rect x="270" y="640" width="260" height="42" rx="8" fill="#27439E"/>
+  <rect x="285" y="690" width="230" height="42" rx="8" fill="#1B2E6E"/>
+  <rect x="300" y="740" width="200" height="42" rx="8" fill="#E3A857"/>
+</svg>

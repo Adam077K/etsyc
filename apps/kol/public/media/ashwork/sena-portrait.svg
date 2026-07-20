@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Sena at the wheel, hands cupping wet clay — stand-in still">
+  <defs>
+    <linearGradient id="warm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E8B98A"/>
+      <stop offset="1" stop-color="#7A3A20"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#warm)"/>
+  <!-- figure silhouette leaning over the wheel -->
+  <circle cx="400" cy="330" r="110" fill="#3A1D10" opacity="0.85"/>
+  <path d="M220 1000 C230 720 300 560 400 540 C500 560 570 720 580 1000 Z" fill="#3A1D10" opacity="0.85"/>
+  <!-- cupped hands / vessel -->
+  <path d="M330 700 C330 640 350 610 400 605 C450 610 470 640 470 700 C470 730 440 745 400 745 C360 745 330 730 330 700 Z" fill="#C1703F"/>
+  <path d="M345 640 C365 626 435 626 455 640" stroke="#FBF3E8" stroke-width="5" fill="none" opacity="0.7"/>
+</svg>
