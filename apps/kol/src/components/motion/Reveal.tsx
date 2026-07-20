@@ -32,8 +32,10 @@ export function Reveal({
     const node = ref.current;
     if (!node) return;
     if (typeof IntersectionObserver === "undefined") {
-      setRevealed(true);
-      return;
+      // ancient-browser fallback: reveal on the next frame (async — no
+      // cascading render inside the effect body)
+      const raf = requestAnimationFrame(() => setRevealed(true));
+      return () => cancelAnimationFrame(raf);
     }
     const observer = new IntersectionObserver(
       (entries) => {
@@ -52,8 +54,9 @@ export function Reveal({
 
   return (
     <Tag
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ref={ref as any}
+      ref={(el: HTMLElement | null) => {
+        ref.current = el;
+      }}
       className={cn("kol-reveal", revealed && "is-revealed", className)}
       style={{ "--reveal-delay": `${delayMs}ms` } as React.CSSProperties}
     >
