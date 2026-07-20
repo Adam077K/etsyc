@@ -236,9 +236,11 @@ Output: an intermediate **DesignSystem** object (not yet store-config), so it ca
     "textWeight":    "number"
   },
   "motion":     { "intensity": "number(0-10)", "preset": "still | calm | lively" },  // preset = nearest KOL preset for the renderer
-  "atmosphere": { "radius": "sharp | soft | round", "density": "airy | standard", "texture": "none | paper | grain | wash | null" }
+  "atmosphere": { "radius": "sharp | soft | round", "density": "airy | standard" }   // MVP: maps 1:1 to theme §5.4 radiusIdentity + density
 }
 ```
+
+> **MVP scope note — `texture` is roadmap, not MVP.** An earlier draft carried an `atmosphere.texture (none|paper|grain|wash)` field. It has **no persistence target** — it is in neither the §5.4 custom-theme amendment nor store-config §2.2 — so it would be silently dropped at emit and could never render. **Dropped from the MVP DesignSystem.** Every `atmosphere` field above maps 1:1 onto the theme block (`radius`→`radiusIdentity`, `density`→`density`). Surface texture (paper/grain/wash) is deferred to a future schema revision; when added, it needs a `theme` field first (a Design-Lead/schema-owner change), then this DesignSystem field, then a renderer capability.
 
 **Derivation guidance baked into the prompt:**
 - Ground palette in `aesthetic.paletteSignals` (named colors) and `sourceImagery` (extract a palette from the *described* materials/place — "wet stoneware + ash + north light" → warm greys, clay browns, cream). If signals are thin, use `moodWords` + `colorTemperature`.
@@ -411,7 +413,7 @@ Output: per-dimension 0–1 + rationale + a bulleted list of concrete fixes. **`
 
 ---
 
-## 8 · Evals — one harness, three datasets (every LLM feature has one)
+## 8 · Evals — one harness, one dataset per LLM feature (every feature has one)
 
 **Non-negotiable:** no LLM feature ships without a golden dataset + metric + a run in CI before deploy. Shared harness shape in §8d (also the Workstream-C convergence proposal).
 
@@ -429,6 +431,24 @@ Output: per-dimension 0–1 + rationale + a bulleted list of concrete fixes. **`
 
 - **Dataset (labelled slop set):** ≥ 20 configs, half **known-slop** (generic templates, clashing palettes, broken hierarchy, AA-failing), half **known-good custom** (real, distinctive, accessible, on-brand — including deliberately *unconventional-but-good* designs, e.g. maximal folk, high-contrast brutalist). Grows over time from real regen escalations.
 - **Metrics:** **precision & recall on slop detection.** Two failure modes measured explicitly: **false negatives** (slop scored ≥ 0.75 — ships slop; recall protects against this) and **false positives** (good custom work scored < 0.75 — over-rejects and *attacks D15 freedom*; precision protects against this). The false-positive rate on the "unconventional-but-good" subset is the D15 canary — a critic that only likes safe designs is a flattening critic and fails this eval. AA-gate accuracy is separately asserted as **1.0** (it's deterministic — any deviation is a bug, tested with known color-pair fixtures).
+
+### 8e · Interview follow-up quality (§3.2)
+
+- **Feature:** `interview_followup` — given a beat, its required fields, and the transcript so far, the model decides whether/what to probe.
+- **Dataset:** ≥ 12 labelled examples: `(beat, required-fields-state, partial-transcript) → (expected action)` where action ∈ `{ probe(field) | advance }`. Cover: all required fields filled → must **advance** (no needless probing); a vague answer → must **probe the vague field**; a specific answer with one field still missing → **probe the missing field**; 3 follow-ups already spent → must **advance** (budget respected); maker signalled "that's about it" → **advance**; an adversarial verbose-but-empty answer (many words, zero required fields) → **probe**; a film case with `visualNotes` present.
+- **Metrics:** **action accuracy** (probe-vs-advance decision correct); **field-targeting accuracy** (when probing, is it the highest-value missing field?); **over-probe rate** (probes when it should have advanced — the "feels like a form" failure, target low); **budget adherence** (never exceeds 3 follow-ups/beat — asserted deterministically). Named metric: `interview_followup_quality`.
+
+### 8f · Copy quality (§5.6)
+
+- **Feature:** `copy_gen` — brand profile → block headings/body + `products[].description` in the maker's voice.
+- **Dataset:** ≥ 12 labelled examples: `(brand profile, block/product context) → (reference copy + a rubric-scored acceptance band)` spanning distinct voice tones (warm-understated, wry, plain-spoken, lyrical, technical-precise, etc.).
+- **Metrics:** LLM-rubric score (0–1) on **voice-fit** (matches `brand.voiceTone` + `brand.adjectives`), **faithfulness** (no invented facts not in the brand profile — a hallucination guard), **concision/legibility** (within block length limits), and **distinctness** (not generic marketing filler / AI-tell — the D15 no-flattening check applied to copy). Faithfulness is the hard sub-metric: any fabricated product fact fails the example regardless of style. Named metric: `copy_quality`.
+
+### 8g · Beat-satisfied classifier (§3.2, Haiku)
+
+- **Feature:** `beat_classifier` — the cheap Haiku call that scores each interview answer `filled | vague | done` to drive the per-beat stopping budget.
+- **Dataset:** ≥ 12 labelled `(answer text, beat required-fields) → (filled | vague | done)` examples, including boundary cases (a partially-specific answer, a topic-change, an explicit "I'm done"). It is a **3-class classifier**, so it ships with a golden set like any LLM feature — not exempt for being small.
+- **Metrics:** per-class **precision / recall / F1** and confusion matrix; the costly error to minimize is **`vague`→`filled`** (a false "satisfied" that stops probing too early and starves design/copy of specifics). Named metric: `beat_classifier_accuracy`.
 
 ### 8d · Shared eval-harness shape *(AGREED with Workstream C — 2026-07-20)*
 
@@ -460,7 +480,7 @@ runEval(feature, examples, metric, threshold)
 // Fails CI if meanScore < threshold OR any adversarial-tagged example regresses vs. baseline.
 ```
 
-Named metrics per workstream: **B** — `extraction_prf` (precision/recall/F1 + hallucinationRate), `design_coherence`, `critic_accuracy` (precision+recall on the slop set); **C** — `tagging_accuracy`, `ranking_ndcg@k`. The AI-ranker seam (D5) is C's; B references it only.
+Named metrics per workstream — **B covers all 5 LLM features + the Haiku classifier** (one eval each, per the §2 non-negotiable): `extraction_prf` (precision/recall/F1 + hallucinationRate), `design_coherence`, `critic_accuracy` (precision+recall on the slop set), `interview_followup_quality`, `copy_quality`, `beat_classifier_accuracy`; **C** — `tagging_accuracy`, `ranking_ndcg@k`. The AI-ranker seam (D5) is C's; B references it only.
 
 The cost-log schema (§10.1) is the **same** across both workstreams so eval-run cost and production cost roll up together; evals sum `cost_usd` into a per-run `eval_cost_usd` line.
 
@@ -483,7 +503,7 @@ The cost-log schema (§10.1) is the **same** across both workstreams so eval-run
 ```jsonc
 {
   "event":         "llm_call",
-  "feature":       "interview_followup | extraction | design_derivation | copy_gen | critic_coherence",
+  "feature":       "interview_followup | beat_classifier | extraction | design_derivation | copy_gen | critic_coherence",
   "model":         "claude-sonnet-4-6 | claude-opus-4-7 | claude-haiku-4-5",
   "input_tokens":  0,
   "output_tokens": 0,
