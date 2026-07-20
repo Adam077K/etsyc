@@ -102,6 +102,39 @@ Adopt a **31-table Postgres/Supabase model** applied in 13 FK-ordered migration-
 
 ---
 
+## Security hardening (QA fix cycle 1)
+
+QA-Lead blocked v1 because several column/transition restrictions were only "enforced app-side". In this stack **RLS is the only boundary** — any authed user reaches PostgREST directly with their JWT, bypassing any app-layer allow-list. So every such restriction is now **DB-enforced** via SECURITY DEFINER RPCs, `BEFORE` triggers, or a definer view. The "enforced app-side" comments were removed.
+
+**Decisions (all DB-enforced):**
+
+| # | Rule | Mechanism |
+|---|------|-----------|
+| P1-1 | Orders/items/amounts/status are not client-writable; amounts are computed server-side from `products` | `orders`/`order_items` have **SELECT-only** RLS. Writes go through SECURITY DEFINER RPCs `create_order(store_id, items jsonb)` (prices read from `products`, status forced `pending`), `cancel_order(id)` (buyer → `cancelled` on own pending/paid), `set_order_status(id, status)` (seller → whitelisted transitions on own store). `'paid'` is set by the Stripe webhook via the **service role**. |
+| P1-2 | No false Real-Maker badge; no self-verification | `verifications` RLS = read-own + insert-request (forced `pending`); status resolution is **service-role only**. `badges`: makers may write only the `ai-transparency` badge; `real-maker` is service-role only **and** a `BEFORE INSERT/UPDATE` trigger (`enforce_real_maker_badge`) requires a same-store verification with `status='verified'` — fires for every writer incl. service role. |
+| P1-3 | A review's bound line item must belong to the buyer **and** match the reviewed product | Added `oi.product_id = reviews.product_id` to the buyer INSERT **and** UPDATE `WITH CHECK`. |
+| P1-4 | A seller may change only `reviews.maker_response` | `BEFORE UPDATE` trigger `enforce_review_seller_scope` rejects changes to rating/body/variation/expectation_accuracy/product_id/buyer_id/order_item_id when the actor is not the review's buyer (service role, null uid, unrestricted). |
+| P1-5 | No cross-store media/video hijack | `media_owner_all` / `videos_owner_all` `WITH CHECK` now requires `store_id` null **or** a store the caller owns. |
+| P2-1/2 | `profiles.role` is not client-settable | Signup trigger always seeds `'buyer'` (client metadata untrusted) and defers `handle` to null (no collision can fail the auth insert). `guard_profile_role` trigger blocks any client role change; upgrade to `'seller'` is a **service-role** step during seller onboarding. |
+| P2-3 | Buyer display name/avatar readable where they appear in public content | `public_profiles` definer **view** exposing only `{id, display_name, avatar_url, role}`; base-table PII (bio) stays gated. |
+| P2-4 | Buyers cannot write arbitrary weighted ranking signals | `buyer_signals` RLS = read-own only; inserts are service-role (engine) with a `weight` CHECK (0–100) as defence-in-depth. |
+| P2-5 | Thread/commission counterparty + no unilateral self-approval | CHECK `buyer_id <> maker_id`; `guard_thread`/`guard_commission` triggers require the maker to be a seller and (if `store_id` set) the store owner; commissions are buyer-initiated (`brief`), and status transitions are role-scoped (buyer → brief/cancelled; maker → negotiating/drafting/approved/rejected/cancelled). |
+| P2-6 | Only sellers create stores | `stores` INSERT `WITH CHECK` requires `profiles.role='seller'`. |
+| P2-7 | A mid-group failure must not block re-apply | Each of the 13 files is wrapped in `BEGIN; … COMMIT;` (atomic → clean re-apply); types are guarded with `DO … IF NOT EXISTS`; triggers/functions use `CREATE OR REPLACE` (PG14+, no DROP). |
+| P2-8 | Q&A product/store integrity + spam | `questions` INSERT `WITH CHECK` requires `store_id` = the product's store and that store published; `body` length CHECK 1–2000. |
+| P3 | misc | Indexes on `messages.media_id`, `answers.media_id`; `store_versions.critic_score` CHECK 0–1. |
+
+**New objects (9 functions, 6 triggers, 1 view):** RPCs `create_order`, `cancel_order`, `set_order_status`; triggers/fns `handle_new_user`+`on_auth_user_created`, `guard_profile_role`+`profiles_role_guard`, `enforce_review_seller_scope`+`reviews_seller_scope_guard`, `enforce_real_maker_badge`+`badges_real_maker_guard`, `guard_thread`+`threads_guard`, `guard_commission`+`commissions_guard`; view `public_profiles`. All functions are `SECURITY DEFINER` with `set search_path = ''` and fully schema-qualified; write RPCs are `REVOKE … FROM public` + `GRANT … TO authenticated`.
+
+**Actor model note:** triggers key on `auth.uid()` — `null` means the **service role** (trusted server context), which is intentionally unrestricted by the column/transition guards. All privileged server flows (Stripe webhook → `orders.status='paid'`; verification resolution; role → `seller`; signal emission) run via the service key.
+
+**Deferred (not blocking; recorded for backend-engineer):**
+- **`updated_at` auto-touch** — columns exist with `default now()` but no `moddatetime`/BEFORE-UPDATE trigger; backend-engineer to add `moddatetime` triggers (kept out of this plan to avoid extra plpgsql surface).
+- **Per-policy idempotency** — PG has no `CREATE POLICY IF NOT EXISTS` without a DROP (banned here) or a DO-guard per policy (54 wrappers). Re-apply safety is instead provided by the per-file `BEGIN/COMMIT` atomicity (a failed group rolls back wholly). Full per-policy guards deferred.
+- **Verification clip edits** — a maker changing `voice_anchor_clip_id` after requesting is now service-role only (re-request otherwise); acceptable for MVP.
+
+---
+
 ## References
 
 - `.claude/memory/DECISIONS.md` — 2026-07-19 D15 (seller brand freedom) + D16 (8 missing features); this ADR implements the Phase-4 table adds those entries name.
