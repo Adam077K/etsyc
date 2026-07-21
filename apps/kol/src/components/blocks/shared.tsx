@@ -81,7 +81,13 @@ export function groundStyle(ground: Exclude<BlockGround, null>): CSSProperties {
     backgroundColor: `var(--block-${ground})`,
     color: `var(--on-block-${ground})`,
     "--ink": `var(--on-block-${ground})`,
-    "--muted": `color-mix(in oklab, var(--on-block-${ground}) 72%, var(--block-${ground}))`,
+    // --muted = FULL on-block ink, no mix (QA cycle-2): the on-block/block
+    // pairs are the AA-certified combos (curated a/b ≥4.5:1 body, custom =
+    // the pipeline's AA-gated accentInk/accent + bg/ink pairs). Any softened
+    // mix re-fails body copy on dark grounds — the old 72% mix measured
+    // 3.32:1 on sunbaked --block-a. On a colored ground, hierarchy comes
+    // from type scale, not a second ink.
+    "--muted": `var(--on-block-${ground})`,
     "--line": `color-mix(in oklab, var(--on-block-${ground}) 24%, var(--block-${ground}))`,
     "--surface": `color-mix(in oklab, var(--on-block-${ground}) 8%, var(--block-${ground}))`,
     // Accent inverts on a colored ground: the world accent can sit adjacent

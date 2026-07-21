@@ -60,8 +60,8 @@ export function ContactCtaBlock({ block, data, state = "success", isPreview }: B
           {avatar ? <SmartImage image={avatar} className="w-24 rounded-pill" /> : null}
           <div>
             <p className="font-display text-h3">{data.maker.displayName}</p>
-            {/* full --ink (→ --on-block-* on colored grounds) — the mixed
-                muted tone fails AA at caption size on block-grounds */}
+            {/* full --ink (→ the AA-certified --on-block-* pair on colored
+                grounds; groundStyle points --muted there too) */}
             <p className="mt-0.5 text-caption uppercase tracking-[0.08em] text-ink">
               @{data.maker.handle} · {data.maker.location}
             </p>
