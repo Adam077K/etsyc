@@ -116,4 +116,19 @@ describe("safeNextPath (open-redirect guard, parse-based)", () => {
   it("drops over-long paths (3000 chars)", () => {
     expect(safeNextPath(`/${"a".repeat(3000)}`)).toBeNull();
   });
+
+  // W1-FF fix 3 — explicit next-param length bound (additive: tighter than
+  // the old 2048 parse cap; rejected values fall back to the role landing).
+  it("accepts a path at the 512-char bound and drops one char over", () => {
+    expect(safeNextPath(`/${"a".repeat(511)}`)).toBe(`/${"a".repeat(511)}`);
+    expect(safeNextPath(`/${"a".repeat(512)}`)).toBeNull();
+  });
+
+  it("bounds the NORMALIZED output too — encoding can lengthen the input", () => {
+    // Short unicode paths stay fine (the rejection below is length-driven,
+    // not charset-driven)…
+    expect(safeNextPath("/é")).toBe("/%C3%A9");
+    // …but 201 raw chars percent-encode to 1201 — over the bound, dropped.
+    expect(safeNextPath(`/${"é".repeat(200)}`)).toBeNull();
+  });
 });

@@ -45,8 +45,18 @@ const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 const ENCODED_CONTROL_CHARS = /%(?:[01][0-9a-f]|7f)/i;
 const DUMMY_ORIGIN = "https://next-path.invalid";
 
+/**
+ * Length bound for redirect paths (W1-FF fix 3). The longest real internal
+ * path today is well under 100 chars; 512 leaves generous headroom for deep
+ * store-world paths with query params while capping the URL bloat and log
+ * noise a hostile ?next= can inject. Strictly TIGHTER than the previous
+ * 2048 parse cap — an added constraint, never a relaxed one — and applied
+ * to the normalized OUTPUT too (percent-encoding can lengthen it).
+ */
+export const MAX_NEXT_PATH_LENGTH = 512;
+
 export function parseSameOriginPath(raw: string): string | null {
-  if (raw.length === 0 || raw.length > 2048) return null;
+  if (raw.length === 0 || raw.length > MAX_NEXT_PATH_LENGTH) return null;
   if (CONTROL_CHARS.test(raw) || ENCODED_CONTROL_CHARS.test(raw)) return null;
   if (!raw.startsWith("/")) return null;
   let url: URL;
@@ -61,6 +71,9 @@ export function parseSameOriginPath(raw: string): string | null {
   if (url.origin !== DUMMY_ORIGIN) return null;
 
   const result = url.pathname + url.search + url.hash;
+  // Bound the OUTPUT as well as the input — the parser percent-encodes, so
+  // normalization can lengthen a path past the bound its raw form met.
+  if (result.length > MAX_NEXT_PATH_LENGTH) return null;
   // Re-validate the OUTPUT, not just the input: normalization can launder an
   // off-origin value past the check above — "/..//evil.com" parses with the
   // dummy origin intact, but the dot-segment collapses the pathname to
