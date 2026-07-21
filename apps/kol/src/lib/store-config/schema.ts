@@ -47,6 +47,28 @@ const hexColor = z
 
 const isoDateTime = z.iso.datetime();
 
+/**
+ * Asset URLs (clip/image/voiceover src, poster, captionsSrc) accept ONLY
+ * https:// or root-relative "/…" — javascript:, data:, vbscript:, and
+ * protocol-relative "//" are rejected (these values reach src attributes).
+ */
+const assetUrl = z.string().regex(/^(?:https:\/\/\S+|\/(?!\/)\S*)$/, {
+  error:
+    'asset URL must be https:// or root-relative "/…" — javascript:, data:, vbscript:, and protocol-relative "//" are rejected',
+});
+
+/**
+ * Font family names reach CSS custom properties — bounded charset (letters,
+ * digits, spaces, hyphens, quotes) and ≤ 64 chars, so no CSS metacharacters
+ * (";", "{", "(", ":") can ride through a custom theme.
+ */
+const fontFamilyName = z
+  .string()
+  .max(64, { error: "font family must be ≤ 64 chars" })
+  .regex(/^[A-Za-z0-9 '"-]+$/, {
+    error: "font family must contain only letters, digits, spaces, hyphens, or quotes",
+  });
+
 // ---------------------------------------------------------------------------
 // §2.2 theme — discriminated union on `kind` (D9 rails | D15 seller freedom)
 // ---------------------------------------------------------------------------
@@ -112,8 +134,8 @@ export const CustomThemeSchema = z.strictObject({
     }),
   }),
   customPairing: z.strictObject({
-    displayFamily: nonEmptyString,
-    textFamily: nonEmptyString,
+    displayFamily: fontFamilyName,
+    textFamily: fontFamilyName,
     scaleRatio: z.number().positive(),
     displayWeight: z.number().positive(),
     textWeight: z.number().positive(),
@@ -194,10 +216,10 @@ export const VideoProfileSchema = z.strictObject({
 export const ClipSchema = z.strictObject({
   id: nonEmptyString,
   kind: z.literal("video"),
-  src: nonEmptyString,
-  poster: nonEmptyString,
+  src: assetUrl,
+  poster: assetUrl,
   durationMs: z.number().int().nonnegative(),
-  captionsSrc: z.string().nullable(),
+  captionsSrc: assetUrl.nullable(),
   videoProfile: VideoProfileSchema,
 });
 
@@ -205,7 +227,7 @@ export const IMAGE_ASPECTS = ["1:1", "4:5", "3:2", "16:9"] as const;
 
 export const StoreImageSchema = z.strictObject({
   id: nonEmptyString,
-  src: nonEmptyString,
+  src: assetUrl,
   alt: z.string().min(1, { error: "images[].alt is required and never empty (a11y)" }),
   aspect: z.enum(IMAGE_ASPECTS),
   focalPoint: z.strictObject({
@@ -258,7 +280,7 @@ export const VoiceoverSchema = z.strictObject({
     id: nonEmptyString,
     field: z.string().nullable(),
   }),
-  src: nonEmptyString,
+  src: assetUrl,
   durationMs: z.number().int().nonnegative(),
   transcript: z.string().nullable(),
   label: nonEmptyString,
@@ -639,8 +661,9 @@ export type StoreBlockZ = z.infer<typeof StoreBlockSchema>;
 export type StoreMetaZ = z.infer<typeof StoreMetaSchema>;
 
 // ---------------------------------------------------------------------------
-// Compile-time proof: z.infer ≡ types.ts (mutual assignability, both ways).
-// If either side drifts from store-config v1.3, `pnpm typecheck` fails here.
+// Compile-time proof: z.infer ≡ types.ts (strict type IDENTITY via the
+// invariant-function trick — catches optional-property drift, not just
+// assignability). If either side drifts from v1.3, `pnpm typecheck` fails.
 // ---------------------------------------------------------------------------
 
 import type {
@@ -658,22 +681,24 @@ import type {
   Voiceover,
 } from "./types";
 
-type MutuallyAssignable<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
+  ? true
+  : false;
 type Expect<T extends true> = T;
 
 export type _ContractProof = [
-  Expect<MutuallyAssignable<StoreConfigZ, StoreConfig>>,
-  Expect<MutuallyAssignable<ThemeZ, Theme>>,
-  Expect<MutuallyAssignable<CuratedThemeZ, CuratedTheme>>,
-  Expect<MutuallyAssignable<CustomThemeZ, CustomTheme>>,
-  Expect<MutuallyAssignable<MakerZ, Maker>>,
-  Expect<MutuallyAssignable<MediaZ, Media>>,
-  Expect<MutuallyAssignable<ClipZ, Clip>>,
-  Expect<MutuallyAssignable<StoreImageZ, StoreImage>>,
-  Expect<MutuallyAssignable<ProductZ, Product>>,
-  Expect<MutuallyAssignable<VoiceoverZ, Voiceover>>,
-  Expect<MutuallyAssignable<StoreBlockZ, StoreBlock>>,
-  Expect<MutuallyAssignable<StoreMetaZ, StoreMeta>>,
+  Expect<Equal<StoreConfigZ, StoreConfig>>,
+  Expect<Equal<ThemeZ, Theme>>,
+  Expect<Equal<CuratedThemeZ, CuratedTheme>>,
+  Expect<Equal<CustomThemeZ, CustomTheme>>,
+  Expect<Equal<MakerZ, Maker>>,
+  Expect<Equal<MediaZ, Media>>,
+  Expect<Equal<ClipZ, Clip>>,
+  Expect<Equal<StoreImageZ, StoreImage>>,
+  Expect<Equal<ProductZ, Product>>,
+  Expect<Equal<VoiceoverZ, Voiceover>>,
+  Expect<Equal<StoreBlockZ, StoreBlock>>,
+  Expect<Equal<StoreMetaZ, StoreMeta>>,
 ];
 
 // ---------------------------------------------------------------------------
