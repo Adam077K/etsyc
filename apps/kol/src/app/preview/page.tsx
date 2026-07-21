@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ReviewsBlock } from "@/components/blocks/reviews";
 import type { BlockState } from "@/components/blocks/shared";
 import { customStore } from "@/lib/store-config/fixtures/custom";
-import { previewBlocks, previewReviews } from "@/lib/store-config/fixtures/preview-blocks";
+import { matrixBlocksFor, previewReviews } from "@/lib/store-config/fixtures/preview-blocks";
 import { senaStore } from "@/lib/store-config/fixtures/sena";
 import { renderBlock, renderStore } from "@/lib/renderer/render-store";
 import { themeStyle } from "@/lib/theme/apply-theme";
@@ -15,7 +15,8 @@ const STATES: BlockState[] = ["success", "loading", "empty", "error"];
  *  1. The full world through renderStore (success), for the selected fixture
  *     (?fixture=sena|custom — curated vs any-hex custom theme path).
  *  2. A 4-state matrix: every catalog block type in success / loading /
- *     empty (seller preview) / error, inside the world's theme.
+ *     empty (seller preview) / error, inside the SELECTED fixture's theme —
+ *     so both theme.kind paths (curated / custom any-hex) get full coverage.
  */
 export default async function PreviewPage({
   searchParams,
@@ -24,11 +25,12 @@ export default async function PreviewPage({
 }) {
   const { fixture } = await searchParams;
   const config = fixture === "custom" ? customStore : senaStore;
+  const matrixBlocks = matrixBlocksFor(config);
   const matrixData = {
-    maker: senaStore.maker,
-    media: senaStore.media,
-    products: senaStore.products,
-    voiceovers: senaStore.voiceovers,
+    maker: config.maker,
+    media: config.media,
+    products: config.products,
+    voiceovers: config.voiceovers,
   };
 
   return (
@@ -63,10 +65,12 @@ export default async function PreviewPage({
         id="state-matrix"
         aria-label="Block state matrix"
         className="border-t-4 border-line"
-        style={themeStyle(senaStore.theme)}
+        style={themeStyle(config.theme)}
       >
         <div className="mx-auto w-full max-w-page px-[var(--space-2)] py-[var(--space-8)] md:px-[var(--space-6)]">
-          <h2 className="font-display text-h1">Block × state matrix</h2>
+          <h2 className="font-display text-h1">
+            Block × state matrix · theme:{config.theme.kind}
+          </h2>
           <p className="mt-2 max-w-measure text-body text-muted">
             All 11 catalog blocks in all 4 mandatory states. &ldquo;Empty&rdquo; renders the
             seller-preview ghost prompt; in a live world truly-empty optional blocks are omitted
@@ -75,7 +79,7 @@ export default async function PreviewPage({
           </p>
         </div>
         <div className="space-y-[var(--space-8)] pb-[var(--space-16)]">
-          {previewBlocks.map((block) => (
+          {matrixBlocks.map((block) => (
             <article key={block.id} className="mx-auto w-full max-w-page px-[var(--space-2)] md:px-[var(--space-6)]">
               <h3 className="mb-[var(--space-2)] font-mono text-caption uppercase tracking-[0.08em] text-muted">
                 {block.type} · {block.variant}

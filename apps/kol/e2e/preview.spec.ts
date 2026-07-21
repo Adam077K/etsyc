@@ -32,6 +32,8 @@ test("sena (curated) world renders and screenshots", async ({ page }) => {
 test("noor (custom any-hex) world renders and screenshots", async ({ page }) => {
   await page.goto("/preview?fixture=custom");
   await expect(page.locator("#world [data-theme-kind='custom']")).toBeVisible();
+  // the 4-state matrix follows the fixture — custom path gets full coverage
+  await expect(page.locator("#state-matrix")).toBeVisible();
   await revealAll(page);
   await page.screenshot({
     path: "e2e/__screenshots__/preview-custom.png",
