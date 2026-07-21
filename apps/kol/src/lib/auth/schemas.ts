@@ -59,7 +59,22 @@ export function parseSameOriginPath(raw: string): string | null {
     return null;
   }
   if (url.origin !== DUMMY_ORIGIN) return null;
-  return url.pathname + url.search + url.hash;
+
+  const result = url.pathname + url.search + url.hash;
+  // Re-validate the OUTPUT, not just the input: normalization can launder an
+  // off-origin value past the check above — "/..//evil.com" parses with the
+  // dummy origin intact, but the dot-segment collapses the pathname to
+  // "//evil.com", which is itself protocol-relative in a Location header.
+  // Any output that doesn't resolve straight back to the dummy origin (or
+  // still looks authority-relative) is rejected — this closes the whole
+  // normalization class, not one payload.
+  if (result.startsWith("//") || result.startsWith("/\\")) return null;
+  try {
+    if (new URL(result, DUMMY_ORIGIN).origin !== DUMMY_ORIGIN) return null;
+  } catch {
+    return null;
+  }
+  return result;
 }
 
 /** Strict form: invalid input is a Zod issue (for surfaces that must error). */

@@ -80,6 +80,28 @@ describe("safeNextPath (open-redirect guard, parse-based)", () => {
     expect(safeNextPath(bad)).toBeNull();
   });
 
+  // Dot-segment normalization bypass (sec-p1 round 2): "/..//evil.com"
+  // parses with the dummy origin intact, but the dot-segment collapses the
+  // pathname to "//evil.com" — itself protocol-relative in a Location
+  // header. The guard re-validates its own OUTPUT, closing the class.
+  it.each([
+    "/..//evil.com",
+    "/../..//evil.com",
+    "/a/../..//evil.com",
+    "/..//evil.com/path",
+    "/..//@evil.com",
+    "/..//evil.com?x=1",
+    "/./..//evil.com",
+  ])("drops dot-segment smuggle %j", (bad) => {
+    expect(safeNextPath(bad)).toBeNull();
+  });
+
+  it("keeps legit internal dot-segments — they normalize same-origin", () => {
+    expect(safeNextPath("/seller/../feed")).toBe("/feed");
+    expect(safeNextPath("/feed/./saved")).toBe("/feed/saved");
+    expect(safeNextPath("/feed#frag")).toBe("/feed#frag");
+  });
+
   it("proves the browser-side risk the parser guards against", () => {
     // The repro from the finding: WHATWG resolution of a tab-smuggled path.
     expect(new URL("/\t//evil.com", "https://kol.example").origin).toBe(

@@ -79,6 +79,8 @@ describe("next-path guards at the schema boundary", () => {
     "/\t//evil.com",
     "/%09//evil.com",
     "/%0a/evil.com",
+    "/..//evil.com",
+    "/a/../..//evil.com",
     `/${"a".repeat(3000)}`,
   ])("nextPathSchema (strict) rejects %j", (bad) => {
     expect(nextPathSchema.safeParse(bad).success).toBe(false);
@@ -89,6 +91,7 @@ describe("next-path guards at the schema boundary", () => {
       "/\t//evil.com",
       "/%09//evil.com",
       "//evil.com",
+      "/..//evil.com",
       "https://evil.com",
       `/${"a".repeat(3000)}`,
     ]) {
