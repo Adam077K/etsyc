@@ -138,7 +138,7 @@ export const senaStore: StoreConfig = {
       mediaIds: ["img_ridge_1"],
       model3dId: null,
       narrationClipTags: ["clip_tumbler"],
-      inventory: { status: "made-to-order", qty: null },
+      inventory: { status: "in-stock", qty: 7 },
       badges: ["made-to-order"],
     },
     {

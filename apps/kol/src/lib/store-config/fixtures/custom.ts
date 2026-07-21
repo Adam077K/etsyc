@@ -22,9 +22,9 @@ export const customStore: StoreConfig = {
     avatarMediaId: "img_noor_portrait",
     trust: {
       realMaker: {
-        status: "pending",
-        verifiedAt: null,
-        voiceAnchorClipId: null,
+        status: "verified",
+        verifiedAt: "2026-07-18T09:12:00Z",
+        voiceAnchorClipId: "clip_vat",
       },
       aiTransparency: {
         level: "ai-drafted",
@@ -104,7 +104,7 @@ export const customStore: StoreConfig = {
       mediaIds: ["img_shibori_throw"],
       model3dId: null,
       narrationClipTags: [],
-      inventory: { status: "in-stock", qty: 2 },
+      inventory: { status: "made-to-order", qty: null },
       badges: ["one-of-a-kind"],
     },
   ],
