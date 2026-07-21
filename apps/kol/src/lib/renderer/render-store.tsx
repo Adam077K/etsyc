@@ -1,66 +1,47 @@
 import type { ReactNode } from "react";
-import { BlockBoundary } from "@/components/blocks/BlockBoundary";
-import { blockRegistry } from "@/components/blocks/registry";
-import type { BlockProps, BlockState } from "@/components/blocks/shared";
-import type { StoreBlock, StoreConfig } from "@/lib/store-config/types";
-import { themeStyle } from "@/lib/theme/apply-theme";
-import { cn } from "@/lib/utils";
+import type { BlockState } from "@/components/blocks/shared";
+import type { StoreConfig } from "@/lib/store-config/types";
+import { StoreWorld } from "./StoreWorld";
+import type { WorldStage } from "./stages";
+
+export { renderBlock } from "./render-block";
+export { StoreWorld, type StoreWorldProps } from "./StoreWorld";
+export { WORLD_STAGES, type WorldStage } from "./stages";
+
+export interface RenderStoreOptions {
+  /** Fallback state for every block without a per-block override. */
+  state?: BlockState;
+  /**
+   * Per-block state control by block id — the renderer-level loading story
+   * is progressive (each block skeletons/resolves on its own), and a single
+   * failed block degrades locally while the world stays usable.
+   */
+  blockStates?: Record<string, BlockState>;
+  isPreview?: boolean;
+  /** Simulated buyer-journey stage the world starts in (default world-open). */
+  initialStage?: WorldStage;
+}
 
 /**
  * renderStore — THE one renderer (concept-lock D4): a store-config JSON in,
  * a maker world out. Handles BOTH theme kinds (curated registry lookup /
  * custom any-hex roles) by converging them onto identical CSS variables at
- * the world root; sorts blocks by `order`; maps each through the registry.
- * Referential-integrity of bindings is a write-time (Zod, P3) guarantee —
- * at render time a dangling id degrades to the block's designed error/empty.
+ * the world root; sorts blocks by `order`; maps each through the registry
+ * with per-block state + per-block crash boundary. The hero-video block
+ * mounts inside the persistent HeroStage slot (`layoutId="hero-video"`) and
+ * survives every world-stage transition without remounting or pausing —
+ * see StoreWorld. Referential integrity of bindings is a write-time (Zod,
+ * P3) guarantee — at render time a dangling id degrades to the block's
+ * designed error/empty.
  */
-export function renderStore(
-  config: StoreConfig,
-  options: { state?: BlockState; isPreview?: boolean } = {},
-): ReactNode {
-  const { state = "success", isPreview = false } = options;
-  const data = {
-    maker: config.maker,
-    media: config.media,
-    products: config.products,
-    voiceovers: config.voiceovers,
-  };
-
-  const ordered = [...config.blocks].sort((a, b) => a.order - b.order);
-
+export function renderStore(config: StoreConfig, options: RenderStoreOptions = {}): ReactNode {
   return (
-    <div
-      data-store={config.storeId}
-      data-theme-kind={config.theme.kind}
-      data-motion-preset={config.theme.motionPreset}
-      style={themeStyle(config.theme)}
-      className={cn(
-        "kol-world flex min-h-screen flex-col bg-ground font-text text-body text-ink",
-        "gap-[var(--space-section)] pb-[var(--space-section)]",
-      )}
-    >
-      {ordered.map((block) => renderBlock(block, data, state, isPreview))}
-    </div>
-  );
-}
-
-/**
- * Single-block dispatch — exported for the /preview 4-state matrix so the
- * critic screenshots the exact components the world renderer composes.
- */
-export function renderBlock(
-  block: StoreBlock,
-  data: BlockProps["data"],
-  state: BlockState = "success",
-  isPreview = false,
-): ReactNode {
-  // Correlated-union dispatch: the registry is keyed so that
-  // blockRegistry[block.type] accepts exactly `block`'s narrowed type; TS
-  // can't correlate the two generics across the index, hence the local cast.
-  const Component = blockRegistry[block.type] as React.ComponentType<BlockProps>;
-  return (
-    <BlockBoundary key={block.id} blockId={block.id}>
-      <Component block={block} data={data} state={state} isPreview={isPreview} />
-    </BlockBoundary>
+    <StoreWorld
+      config={config}
+      state={options.state}
+      blockStates={options.blockStates}
+      isPreview={options.isPreview}
+      initialStage={options.initialStage}
+    />
   );
 }

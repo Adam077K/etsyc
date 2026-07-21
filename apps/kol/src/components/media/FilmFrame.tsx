@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Captions, Volume2, VolumeX } from "lucide-react";
+import { useHeroPersistence } from "@/lib/renderer/hero-persistence";
 import type { Clip } from "@/lib/store-config/types";
 import { cn } from "@/lib/utils";
 import { PosterStill } from "./PosterStill";
@@ -11,7 +12,10 @@ import { PosterStill } from "./PosterStill";
  * process-reel. Poster-first, sound OFF until opt-in (the hard tone line),
  * captions toggle, quiet fallback to the poster frame on decode/404 failure
  * so the world stays usable around the still. Autoplay is scroll-gated
- * (catalog §6): plays on scroll-into-view, pauses on scroll-out.
+ * (catalog §6): plays on scroll-into-view, pauses on scroll-out — EXCEPT
+ * inside the renderer's persistent hero slot (HeroPersistenceContext),
+ * where the film plays on mount and is never paused by this component
+ * (spec P4: the hero never pauses across world-stage transitions).
  */
 export function FilmFrame({
   clip,
@@ -26,17 +30,25 @@ export function FilmFrame({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const persistent = useHeroPersistence();
   const [failed, setFailed] = useState(false);
   const [muted, setMuted] = useState(true);
   const [captionsOn, setCaptionsOn] = useState(false);
 
   // Scroll-gated playback: in view → play, out of view → pause (tone +
   // performance). Film is content, not decoration — but nothing plays
-  // off-screen.
+  // off-screen. In the persistent hero slot the gate is OFF: play on mount,
+  // no observer, no cleanup pause — the film survives every transition.
   useEffect(() => {
     const container = containerRef.current;
     const video = videoRef.current;
     if (!container || !video || !autoPlay || failed) return;
+    if (persistent) {
+      void video.play().catch(() => {
+        /* autoplay veto (browser policy) — poster remains, no error chrome */
+      });
+      return;
+    }
     if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       (entries) => {
@@ -54,7 +66,7 @@ export function FilmFrame({
     );
     observer.observe(container);
     return () => observer.disconnect();
-  }, [autoPlay, failed]);
+  }, [autoPlay, failed, persistent]);
 
   // <track default> is load-time only — drive the live TextTrack mode.
   useEffect(() => {
