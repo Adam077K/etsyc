@@ -58,6 +58,45 @@ describe("avatarUrlSchema", () => {
       expect(avatarUrlSchema.safeParse(bad).success).toBe(false);
     },
   );
+
+  // W1-FF fix 2 — the 2048 bound applies AFTER normalization (to what is
+  // actually persisted), not to the raw input.
+  it("accepts a URL whose normalized form sits exactly at 2048", () => {
+    const base = "https://cdn.example/";
+    const url = `${base}${"a".repeat(2048 - base.length)}`;
+    expect(url.length).toBe(2048);
+    expect(avatarUrlSchema.parse(url)).toBe(url);
+  });
+
+  it("rejects a URL one char over the bound, with the same message", () => {
+    const base = "https://cdn.example/";
+    const parsed = avatarUrlSchema.safeParse(
+      `${base}${"a".repeat(2049 - base.length)}`,
+    );
+    expect(parsed.success).toBe(false);
+    expect(parsed.success ? "" : parsed.error.issues[0]?.message).toBe(
+      "That avatar URL is too long.",
+    );
+  });
+
+  it("rejects a URL under 2048 raw that normalization pushes over the bound", () => {
+    // 720 chars in; percent-encoding expands each é to %C3%A9 (6 chars), so
+    // the persisted form is ~4220 chars. Pre-fix this passed the raw-input
+    // check and stored an over-bound value.
+    const url = `https://cdn.example/${"é".repeat(700)}`;
+    expect(url.length).toBeLessThan(2048);
+    const parsed = avatarUrlSchema.safeParse(url);
+    expect(parsed.success).toBe(false);
+    expect(parsed.success ? "" : parsed.error.issues[0]?.message).toBe(
+      "That avatar URL is too long.",
+    );
+  });
+
+  it("still normalizes what it stores", () => {
+    expect(avatarUrlSchema.parse("https://cdn.example")).toBe(
+      "https://cdn.example/",
+    );
+  });
 });
 
 describe("updateProfileSchema", () => {
