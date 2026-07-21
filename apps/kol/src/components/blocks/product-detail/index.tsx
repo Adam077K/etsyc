@@ -5,6 +5,7 @@ import { TapToHear } from "@/components/media/TapToHear";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { Skeleton, SkeletonLines } from "@/components/states/Skeleton";
 import type { StoreImage } from "@/lib/store-config/types";
 import { formatPrice } from "@/lib/utils";
@@ -31,11 +32,23 @@ const inventoryCopy = {
  * accent action in the world. Empty is n/a (route guard); a 3d-viewer variant
  * without a model silently falls back to image-gallery.
  */
-export function ProductDetailBlock({ block, data, state = "success" }: BlockProps<"product-detail">) {
+export function ProductDetailBlock({ block, data, state = "success", isPreview }: BlockProps<"product-detail">) {
   const product = productById(data, block.bindings.productIds[0] ?? "");
 
-  // Empty: n/a by route guard — nothing sensible to render without a product.
-  if (state === "empty" || !product) return null;
+  // Empty: n/a live (the route guard means buyers can never reach a
+  // product-detail without a product); seller preview still shows a guiding
+  // prompt rather than blank.
+  if (state === "empty" || !product) {
+    if (!isPreview) return null;
+    return (
+      <BlockSection>
+        <EmptyPrompt
+          prompt="Choose the piece this page carries"
+          hint="A product page always has its product — buyers can't reach this state. Link a piece to preview it here."
+        />
+      </BlockSection>
+    );
+  }
 
   const gallery = product.mediaIds
     .map((id) => imageById(data, id))

@@ -3,6 +3,7 @@
 import { MessageCircle } from "lucide-react";
 import { SmartImage } from "@/components/media/SmartImage";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
+import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { Button } from "@/components/ui/button";
 import { imageById, BlockSection, type BlockProps } from "../shared";
 
@@ -13,12 +14,23 @@ import { imageById, BlockSection, type BlockProps } from "../shared";
  * Loading is n/a (static from maker data); empty = messaging disabled →
  * block hidden (no dead CTA).
  */
-export function ContactCtaBlock({ block, data, state = "success" }: BlockProps<"contact-cta">) {
+export function ContactCtaBlock({ block, data, state = "success", isPreview }: BlockProps<"contact-cta">) {
   const ground = block.props.blockGround ?? null;
   const avatar = imageById(data, data.maker.avatarMediaId);
 
-  // Empty: messaging not enabled for this maker → no dead CTA.
-  if (state === "empty") return null;
+  // Empty: messaging not enabled → live hides the block (no dead CTA);
+  // seller preview shows the guiding prompt instead of blank.
+  if (state === "empty") {
+    if (!isPreview) return null;
+    return (
+      <BlockSection>
+        <EmptyPrompt
+          prompt="Keep the door open"
+          hint="Turn on messaging and your world ends with a way to reach you — not a dead end after the sale."
+        />
+      </BlockSection>
+    );
+  }
 
   // Error: message action unavailable → disabled with a reason, never a broken click.
   const disabled = state === "error";
