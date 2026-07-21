@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth/actions";
 import { ACCOUNT_PATH, type UserRole } from "@/lib/auth/routes";
@@ -25,12 +27,12 @@ export function AccountBar({
         {role}
       </span>
       <div className="ml-auto flex items-center gap-3">
-        <a
+        <Link
           href={ACCOUNT_PATH}
           className="font-text text-caption uppercase tracking-[0.04em] text-muted underline-offset-4 hover:underline"
         >
           Profile
-        </a>
+        </Link>
         <form action={signOut}>
           <Button type="submit" variant="quiet" size="sm">
             Sign out
