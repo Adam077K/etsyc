@@ -1,10 +1,14 @@
 /**
- * Store-config v1.2 — TYPES ONLY.
+ * Store-config v1.3 — TYPES ONLY.
  *
  * Mirrors docs/03-system-design/store-config.schema.md exactly. The runtime
- * Zod validator is a P3 backend deliverable; this file is the frontend's
- * compile-time contract and must stay field-for-field in sync with the doc.
+ * Zod validator lives in `./schema` (P3), which proves this file
+ * field-identical to `z.infer<typeof StoreConfigSchema>` at compile time;
+ * this file remains the frontend's ergonomic compile-time contract.
  * Enum ids are design-system v2 — no v1 aliases exist anywhere.
+ *
+ * v1.2 → v1.3: `thank-you` props gain an OPTIONAL maker-authored `message`
+ * (D10 honesty — never AI-generated; omitted → neutral platform fallback).
  */
 
 // ---------------------------------------------------------------------------
@@ -221,6 +225,13 @@ export type BlockType =
 /** P2-a — optional full-bleed color-block ground on 4 block types. */
 export type BlockGround = "a" | "b" | "c" | null;
 
+/**
+ * Body-copy blocks (craft-story, contact-cta): dark grounds only — the
+ * midtone `"c"` ground fails AA on body copy and is rejected at the type
+ * level and by the runtime validator.
+ */
+export type BodyBlockGround = "a" | "b" | null;
+
 export interface BlockBindings {
   /** Hint set for the video engine (engine still owns selection). */
   clipTags: string[];
@@ -251,7 +262,7 @@ export interface CraftStoryBlock extends BlockBase {
     body: string;
     pullQuote?: string;
     /** Dark grounds only for body copy — midtone --block-c rejected here. */
-    blockGround?: BlockGround;
+    blockGround?: BodyBlockGround;
   };
 }
 
@@ -300,7 +311,14 @@ export interface TrustBadgeBlock extends BlockBase {
 export interface ThankYouBlock extends BlockBase {
   type: "thank-you";
   variant: "video-message" | "text+media";
-  props: Record<string, never>;
+  props: {
+    /**
+     * v1.3 — OPTIONAL maker-authored thank-you words (D10: voice = the
+     * maker's OWN words, never AI-generated). Omitted → the renderer falls
+     * back to neutral platform copy, never a fabricated quote.
+     */
+    message?: string;
+  };
 }
 
 export interface AtmosphereBlock extends BlockBase {
@@ -318,7 +336,7 @@ export interface ContactCtaBlock extends BlockBase {
   props: {
     label: string;
     /** Body/UI copy — dark grounds only, midtone --block-c rejected. */
-    blockGround?: BlockGround;
+    blockGround?: BodyBlockGround;
   };
 }
 
@@ -354,7 +372,8 @@ export interface StoreMeta {
 }
 
 export interface StoreConfig {
-  schemaVersion: string;
+  /** Migration anchor — this contract is v1.3 exactly. */
+  schemaVersion: "1.3";
   storeId: string;
   maker: Maker;
   theme: Theme;

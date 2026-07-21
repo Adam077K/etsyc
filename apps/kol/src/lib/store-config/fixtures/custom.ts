@@ -10,7 +10,7 @@ import type { StoreConfig } from "../types";
  * meta.status/criticScore below.
  */
 export const customStore: StoreConfig = {
-  schemaVersion: "1.2",
+  schemaVersion: "1.3",
   storeId: "c2d9-tinctura",
   maker: {
     id: "mk_noor",

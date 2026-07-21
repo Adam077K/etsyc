@@ -8,7 +8,7 @@ import type { StoreConfig } from "../types";
  * hero/reel poster-fallback design honestly.
  */
 export const senaStore: StoreConfig = {
-  schemaVersion: "1.2",
+  schemaVersion: "1.3",
   storeId: "a7f3-ashwork",
   maker: {
     id: "mk_sena",
