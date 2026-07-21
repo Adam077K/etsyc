@@ -4,6 +4,17 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-21 — Wave 1 backend live: 31-table schema applied + P1 auth merged
+
+**Context:** First DB wave of the KOL MVP. Founder provided Supabase keys for the KOL staging project (ref `olwtcjzmohdhawdzlzqs`); no Docker on host + Free-plan 2-active-project cap meant no disposable throwaway, so validated+applied directly on the empty staging project with Founder sign-off.
+**Decision / what shipped (all on main, pushed):**
+- **MIG-STAGE** (QA PASS Full) — `supabase/` scaffold, 13 migrations staged, `@supabase/ssr` client layer (browser/server/service-role server-only/middleware).
+- **MIG-APPLY** (Irreversible, Founder-signed) — 31-table schema applied to staging, RLS on all 31; **9/9 security validation PASS** after a group-14 fix (Supabase default-privileges pre-grant `anon` EXECUTE; `revoke from public` doesn't cover it → added explicit `revoke execute from anon` on the 3 write RPCs + trigger fns + a default-privileges policy). Independently re-verified live by adv-migapply. Real gen-types committed.
+- **P1 Auth** (Irreversible, Founder-signed @ `22ce96e`) — email/OTP, role forced `buyer` by DB trigger (live-verified), role-gated routing, service-role server-only.
+**Security lessons (load-bearing):** (1) live 9-point validation catches what static review can't — the anon-EXECUTE default-privilege gap was invisible to static SQL review. (2) P1 QA caught TWO distinct open-redirect vectors (control-char `/%09//`, dot-segment `/..//`) that a single review pass would have shipped; the robust fix re-validates the redirect guard's OUTPUT (re-parse), closing the class. Future auth adversary briefs must include URL-parser normalization payloads.
+**New convention:** default privileges now grant NO implicit anon EXECUTE — any future anon-callable RPC needs its own explicit `grant execute ... to anon` (the get_public_profile pattern).
+**Reversibility:** hard (schema applied to real staging; auth on main). **Owner:** ceo (`ceo-phase6`). **Affects:** P2 (next, last Wave-1 unit) + all Wave 2-6 builders. Env: keys in `apps/kol/.env.local` (gitignored). Launch prompt: `docs/08-agents_work/handoffs/2026-07-21-FULL-MVP-BUILD-LAUNCH-PROMPT.md`.
+
 ## 2026-07-21 — Phase-6 Wave 0 (render spine) shipped to main; ≥300-LOC→Full tier rule established
 
 **Context:** First real build wave of the KOL MVP — the store-config render spine (mock-fixture only, zero DB), built to harden the apps/kol scaffold to spec.
