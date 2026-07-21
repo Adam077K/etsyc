@@ -6,7 +6,8 @@ import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "./database.types";
-import { getSupabaseServiceRoleKey, getSupabaseUrl } from "./env";
+import { getSupabaseUrl } from "./env";
+import { getSupabaseServiceRoleKey } from "./env.server";
 
 /**
  * Service-role Supabase client factory — BYPASSES RLS ENTIRELY.

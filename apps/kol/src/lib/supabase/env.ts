@@ -30,9 +30,6 @@ export function getSupabaseAnonKey(): string {
   );
 }
 
-export function getSupabaseServiceRoleKey(): string {
-  return requireEnv(
-    "SUPABASE_SERVICE_ROLE_KEY",
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-  );
-}
+// The service-role key accessor lives in env.server.ts (a `server-only`
+// module) so pulling it into a client bundle is a BUILD error, not a runtime
+// leak. Do not re-add it here — this module is importable from "use client".
