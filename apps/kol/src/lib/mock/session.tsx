@@ -11,8 +11,9 @@
  */
 
 import React, {
-  createContext, useCallback, useContext, useEffect, useMemo, useState,
+  createContext, useCallback, useContext, useMemo, useSyncExternalStore,
 } from "react";
+import { createPersistentStore } from "./persistent-store";
 
 export interface CartLine {
   productId: string;
@@ -60,33 +61,20 @@ const DEFAULTS: Persisted = {
 
 const KEY = "kol-mvp-session-v1";
 
+const store = createPersistentStore<Persisted>(KEY, DEFAULTS);
+
+/** Module-scoped mutator — persists and notifies, so no setState-in-effect. */
+const mutate = store.set;
+
 const Ctx = createContext<KolSession | null>(null);
 
 export function KolSessionProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<Persisted>(DEFAULTS);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(KEY);
-      if (raw) setState({ ...DEFAULTS, ...(JSON.parse(raw) as Partial<Persisted>) });
-    } catch {
-      /* first run or blocked storage — defaults are fine */
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(KEY, JSON.stringify(state));
-    } catch {
-      /* storage may be unavailable; the session still works in-memory */
-    }
-  }, [state, hydrated]);
+  // Defaults render on the server and during hydration; the persisted session
+  // lands on the first re-render after hydration commits.
+  const state = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
 
   const toggleFollow = useCallback((slug: string) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       follows: s.follows.includes(slug)
         ? s.follows.filter((f) => f !== slug)
@@ -95,14 +83,14 @@ export function KolSessionProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const toggleSave = useCallback((id: string) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       saves: s.saves.includes(id) ? s.saves.filter((x) => x !== id) : [...s.saves, id],
     }));
   }, []);
 
   const addToCart = useCallback((line: CartLine) => {
-    setState((s) => {
+    mutate((s) => {
       const existing = s.cart.find((c) => c.productId === line.productId);
       const cart = existing
         ? s.cart.map((c) =>
@@ -114,13 +102,13 @@ export function KolSessionProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const removeFromCart = useCallback((productId: string) => {
-    setState((s) => ({ ...s, cart: s.cart.filter((c) => c.productId !== productId) }));
+    mutate((s) => ({ ...s, cart: s.cart.filter((c) => c.productId !== productId) }));
   }, []);
 
-  const clearCart = useCallback(() => setState((s) => ({ ...s, cart: [] })), []);
+  const clearCart = useCallback(() => mutate((s) => ({ ...s, cart: [] })), []);
 
   const markRead = useCallback((id: string) => {
-    setState((s) =>
+    mutate((s) =>
       s.readNotifications.includes(id)
         ? s
         : { ...s, readNotifications: [...s.readNotifications, id] },
@@ -128,14 +116,14 @@ export function KolSessionProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const markAllRead = useCallback((ids: string[]) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       readNotifications: Array.from(new Set([...s.readNotifications, ...ids])),
     }));
   }, []);
 
   const completeOnboarding = useCallback((prefs: KolSession["prefs"]) => {
-    setState((s) => ({ ...s, onboarded: true, prefs }));
+    mutate((s) => ({ ...s, onboarded: true, prefs }));
   }, []);
 
   const value = useMemo<KolSession>(

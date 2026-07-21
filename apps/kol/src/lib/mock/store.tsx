@@ -16,7 +16,14 @@
  * Supabase write behind RLS; the shapes intentionally mirror ADR-0001.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
+import { createPersistentStore } from "./persistent-store";
 import {
   orders as seedOrders,
   reviews as seedReviews,
@@ -93,6 +100,7 @@ const SEED: AppState = {
 };
 
 const KEY = "kol-prototype-state-v1";
+const store = createPersistentStore<AppState>(KEY, SEED);
 const Ctx = createContext<AppStore | null>(null);
 
 /**
@@ -106,28 +114,17 @@ function localId(prefix: string): string {
   return `${prefix}-${Date.now().toString(36)}${idSeq.toString(36)}`;
 }
 
+/**
+ * Module-scoped mutator. Every writer below goes through the external store,
+ * which persists to localStorage and notifies subscribers — so the provider
+ * never has to setState from an effect.
+ */
+const mutate = store.set;
+
 export function KolStoreProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AppState>(SEED);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(KEY);
-      if (raw) setState({ ...SEED, ...(JSON.parse(raw) as Partial<AppState>) });
-    } catch {
-      /* first run or blocked storage */
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(KEY, JSON.stringify(state));
-    } catch {
-      /* non-fatal — state still works in memory */
-    }
-  }, [state, hydrated]);
+  // Seeds render on the server and during hydration; the persisted state
+  // lands on the first re-render after hydration commits.
+  const state = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
 
   /* ----- orders ----- */
   const createOrder = useCallback<AppStore["createOrder"]>((input) => {
@@ -147,12 +144,12 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
         },
       ],
     };
-    setState((s) => ({ ...s, orders: [order, ...s.orders] }));
+    mutate((s) => ({ ...s, orders: [order, ...s.orders] }));
     return id;
   }, []);
 
   const advanceOrder = useCallback<AppStore["advanceOrder"]>((id, stage) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       orders: s.orders.map((o) => (o.id === id ? { ...o, stage } : o)),
     }));
@@ -160,7 +157,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
 
   /* ----- reviews ----- */
   const addReview = useCallback<AppStore["addReview"]>((r) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       // `verified` is derived, never client-claimed (GENERATED column in the live build)
       reviews: [{ ...r, id: localId("r"), verified: true }, ...s.reviews],
@@ -169,7 +166,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
 
   /* ----- community ----- */
   const addPost = useCallback<AppStore["addPost"]>((makerSlug, body, asMaker = false) => {
-    setState((s) => {
+    mutate((s) => {
       const post: MockPost = {
         id: localId("p"),
         author: asMaker ? makerSlug.charAt(0).toUpperCase() + makerSlug.slice(1) : "You",
@@ -183,7 +180,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addComment = useCallback<AppStore["addComment"]>((makerSlug, postId, body) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       posts: {
         ...s.posts,
@@ -197,7 +194,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleHidden = useCallback((key: string) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       hidden: s.hidden.includes(key) ? s.hidden.filter((k) => k !== key) : [...s.hidden, key],
     }));
@@ -205,7 +202,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
 
   /* ----- seller ----- */
   const setOverride = useCallback<AppStore["setOverride"]>((makerSlug, patch) => {
-    setState((s) => ({
+    mutate((s) => ({
       ...s,
       storeOverride: {
         ...s.storeOverride,
@@ -215,7 +212,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const approveBlock = useCallback<AppStore["approveBlock"]>((makerSlug, blockId) => {
-    setState((s) => {
+    mutate((s) => {
       const cur = s.storeOverride[makerSlug] ?? {};
       const approved = Array.from(new Set([...(cur.approved ?? []), blockId]));
       const dirty = (cur.dirty ?? []).filter((d) => d !== blockId);
@@ -224,7 +221,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const markDirty = useCallback<AppStore["markDirty"]>((makerSlug, blockId) => {
-    setState((s) => {
+    mutate((s) => {
       const cur = s.storeOverride[makerSlug] ?? {};
       // editing removes the block from approved_sections — the critic must re-run
       return {
@@ -242,7 +239,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const publishStore = useCallback<AppStore["publishStore"]>((makerSlug) => {
-    setState((s) => {
+    mutate((s) => {
       const cur = s.storeOverride[makerSlug] ?? {};
       return {
         ...s,
@@ -254,7 +251,7 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const resetAll = useCallback(() => setState(SEED), []);
+  const resetAll = useCallback(() => store.reset(), []);
 
   const value = useMemo<AppStore>(
     () => ({
