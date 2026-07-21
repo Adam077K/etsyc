@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth/actions";
-import type { UserRole } from "@/lib/auth/routes";
+import { ACCOUNT_PATH, type UserRole } from "@/lib/auth/routes";
 
 /**
  * Signed-in identity strip for the role-correct landings (spec P1 success
@@ -24,11 +24,19 @@ export function AccountBar({
       <span className="rounded-pill border border-line px-3 py-1 font-text text-caption uppercase tracking-[0.04em] text-muted">
         {role}
       </span>
-      <form action={signOut} className="ml-auto">
-        <Button type="submit" variant="quiet" size="sm">
-          Sign out
-        </Button>
-      </form>
+      <div className="ml-auto flex items-center gap-3">
+        <a
+          href={ACCOUNT_PATH}
+          className="font-text text-caption uppercase tracking-[0.04em] text-muted underline-offset-4 hover:underline"
+        >
+          Profile
+        </a>
+        <form action={signOut}>
+          <Button type="submit" variant="quiet" size="sm">
+            Sign out
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
