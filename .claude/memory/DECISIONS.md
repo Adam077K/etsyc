@@ -176,3 +176,26 @@ anyone ever sending a legal letter.
 **Owner:** ceo
 **Affects:** all — domain, product name, outreach sending domain, survey branding, API application
 **Status:** Recommendation. Awaiting Adam's sign-off.
+
+## 2026-07-21 — D17: Buyer↔buyer social layer (Maker Community, B15)
+
+**Decision:** KOL adopts a buyer↔buyer social layer — **as a layer on the maker's community
+page, not a defining feature of the product.** The one-to-many shape (maker broadcasts) stays
+primary; buyer↔buyer interaction is contained to `/m/[maker]/community`.
+
+**Scope consequence:** Multiple MVP variants are being built in parallel: (a) the agent-built
+variant on `claude/kol-mvp-page-design-f0c090` includes ALL page additions (B15 community,
+B16 notifications, B17 collections, B18 buyer onboarding, B19 events-as-designed) as
+frontend-functional routes over a mock data layer — no Supabase (ADR-0001 migration still
+unapplied), no live Stripe; (b) Adam is building a separate variant independently.
+
+**Guardrails carried over from the B15 spec:** single-level comments only; hide-only
+moderation surface (full T&S subsystem remains post-MVP); membership rides on B13 follows;
+strictly separate tables from P15 messaging and B12 Q&A; cold-start empty state designed.
+
+**Reversibility:** reversible pre-launch (mock layer, no schema applied); becomes Irreversible
+at the point the community tables migrate.
+**Owner:** Founder team (decided in-session by Shaian; Adam ratification recommended since
+concept-lock governance assigns D-numbers to Founder).
+**Affects:** maker-community.md spec (unblocked), PAGE-MAP.md, apps/kol routes, Phase-6 scope.
+**Status:** Decided — build proceeding on the agent variant.

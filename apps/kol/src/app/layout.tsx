@@ -7,6 +7,8 @@ import {
   Space_Mono,
 } from "next/font/google";
 import "./globals.css";
+import { KolSessionProvider } from "@/lib/mock/session";
+import { Nav } from "@/components/chrome/Nav";
 
 /**
  * Font loading for the 4 curated pairings (design-system §3 — no Inter,
@@ -51,7 +53,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
         <link rel="stylesheet" href={FONTSHARE_CSS} />
       </head>
-      <body>{children}</body>
+      <body>
+        <KolSessionProvider>
+          <Nav />
+          {children}
+        </KolSessionProvider>
+      </body>
     </html>
   );
 }

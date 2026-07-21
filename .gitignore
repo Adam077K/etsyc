@@ -24,3 +24,7 @@ all_skills_stored/
 # IDE / tool caches (keep config, ignore caches)
 .claude/memory/*.local.md
 .planning/state.local.json
+
+# deps + build output (this variant installs locally)
+apps/kol/node_modules/
+apps/kol/.next/

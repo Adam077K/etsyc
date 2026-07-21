@@ -76,7 +76,7 @@ One route namespace, one continuous render, hero video persists across every tra
 | **Reviews** | *(block)* | — | [`trustworthy-reviews.md`](specs/trustworthy-reviews.md) (B6+) | 5 | Supports |
 | **Ask the Maker** | `/m/[maker]/p/[id]#ask` | — | [`ask-the-maker.md`](specs/ask-the-maker.md) (B12) | 5 | Supports |
 | **Co-Create** | `/m/[maker]/create` | — | [`guided-co-creation-commission.md`](specs/guided-co-creation-commission.md) (B14) on P15 | 5 | **Carries** |
-| **Maker Community** | `/m/[maker]/community` | — | [`maker-community.md`](specs/maker-community.md) (B15) 🆕 ⛔ | — *(blocked)* | Would carry — see §5 |
+| **Maker Community** | `/m/[maker]/community` | — | [`maker-community.md`](specs/maker-community.md) (B15) ✅ D17 | 5 | Carries (as a layer) — see §5 |
 | **Events & Live** | `/m/[maker]/live` | — | [`events-live-experiences.md`](specs/events-live-experiences.md) (B19) 🆕 🔜 | **v1.1** | Deferred (D16-8) |
 
 **Blocks available to surface B** — the 11 in [`KOL-block-catalog.md`](KOL-block-catalog.md): `hero-video · craft-story · product-showcase · product-detail · voice-quote · process-reel · reviews · trust-badge · thank-you · atmosphere · contact-cta`.
@@ -118,9 +118,9 @@ Every convention in commerce design pulls `/search` toward a results grid. **A g
 
 Scope is currently **deferred** (Wave 5), and the delivery-requirements filter has **no backing source field**. Both need resolution before design.
 
-### 5.2 Maker Community — no D#, and it changes KOL's social shape
+### 5.2 Maker Community — D17 DECIDED 2026-07-21 (adopted as a layer)
 
-⛔ **Blocked.** [`maker-community.md`](specs/maker-community.md) exists but carries no backing locked decision. The feature-tree traceability rule is explicit: *"every feature cites the D# it implements. If a build agent finds work with no D#, it is out of scope — escalate, do not build."*
+✅ **Unblocked.** D17: adopted as a *layer* on the community page, not a defining feature; single-level comments, hide-only moderation, membership on follows. Original concern preserved: [`maker-community.md`](specs/maker-community.md) exists but carries no backing locked decision. The feature-tree traceability rule is explicit: *"every feature cites the D# it implements. If a build agent finds work with no D#, it is out of scope — escalate, do not build."*
 
 Community moves KOL from **one-to-many** (maker broadcasts) to **many-to-many** (buyers talk to each other). It needs a founder decision (**proposed D17**) plus a moderation subsystem that exists nowhere in the MVP. It is the single largest genuinely-new bet on the founder page list.
 

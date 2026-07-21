@@ -2,7 +2,9 @@
 
 <!-- Page-spec pass · 2026-07-21 · CPO. Proposed feature — NOT in concept-lock, NOT in feature-tree §1B, NOT in ADR-0001. Requires founder decision (proposed D17) before build. Renders inside the maker's world (D15b). -->
 
-> **⚠️ ESCALATION — READ BEFORE ANY BUILD WORK. This feature has NO backing locked decision.**
+> **✅ D17 DECIDED 2026-07-21 — adopted as a LAYER, not a defining feature.** Buyer↔buyer interaction is contained to the community page; the one-to-many maker-broadcast shape stays primary. Decision recorded in `.claude/memory/DECISIONS.md` (Shaian, in-session; Adam ratification recommended). MVP guardrails: single-level comments, hide-only moderation, membership rides on follows. The original escalation text is preserved below for the record.
+>
+> **⚠️ ORIGINAL ESCALATION (historical) — this feature had NO backing locked decision.**
 >
 > The feature-tree traceability rule (`KOL-feature-tree.md` §preamble) is unambiguous: *"every feature cites the D# it implements. If a build agent finds work with no D#, it is out of scope — escalate, do not build."* Maker Community cites **no D#**. It came from a founder page list ("Pages To Include"), not from `KOL-v2-concept-lock.md` and not from the D16 addendum. There is no matching entry in `.claude/memory/DECISIONS.md`.
 >
@@ -25,7 +27,7 @@
 | **Reviewers** | Founder (D17 decision) → CPO + CTO → QA-Lead |
 | **Created** | 2026-07-21 |
 | **Last Updated** | 2026-07-21 |
-| **Target Sprint** | Phase 6 — Build (**BLOCKED pending D17**) |
+| **Target Sprint** | Phase 6 — Build (**unblocked — D17 decided 2026-07-21, as-a-layer**) |
 
 ---
 
