@@ -45,7 +45,9 @@
 
 ## Day 7 (Jul 20) — KOL Phase 5 COMPLETE (specs), Phases 0–4 done + Phase 3 closed
 - **Phase 5 done:** 32 build-ready per-feature specs (40 MVP features) in `docs/04-features/specs/`, CPO+CTO BUILD-READY, merged to main. Dispatch packet: `docs/08-agents_work/handoffs/2026-07-20-phase5-dispatch-packet.md`. See DECISIONS.md top entry for risk tiers, Founder decisions, and the Phase-6 build order.
-- **Next:** Phase 6 build in `apps/kol/` (Fable 5). **P15 messaging must land before B12/B14.** Deferred hardening gaps N2/N3/N4/NEW-3 accepted for seeded MVP (post-launch). B11 search scope decided at Phase-6 planning.
+- **Next:** Phase 6 build in `apps/kol/` (Fable 5). **Handoff + launch prompt ready:** `docs/08-agents_work/handoffs/2026-07-20-PHASE6-HANDOFF.md` (+ `-LAUNCH-PROMPT.md`); build sequence in `docs/03-system-design/KOL-phase6-build-plan.md` (Waves 0–6). Start = Wave 0 render spine (P3→P4/P5/P8, mock fixtures, no DB) in parallel with the migration-apply ask.
+- **P15 messaging must land before B12/B14.** Deferred hardening gaps N2/N3/N4/NEW-3 accepted for seeded MVP (post-launch, do NOT build). B11 search scope decided at Phase-6 planning.
+- **S9 voice-anchor verification:** researched (`docs/research/references/2026-07-20-voice-anchor-verification.md`) — "voice-anchored" is build-not-buy; recommended MVP = **founder human-in-the-loop for the 4 seeds** (NOT a blocker). Adam decides what the badge asserts (live-human+anchor vs legal identity) before Wave 4b.
 - **STILL DEFERRED (Founder-gated, Irreversible):** the 31-table migration is a reviewed PLAN — nothing applied to Supabase. Needs the 9-point staging validation + Adam's sign-off before apply.
 
 ## Live constraints

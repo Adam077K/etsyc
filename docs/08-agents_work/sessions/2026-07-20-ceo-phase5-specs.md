@@ -45,3 +45,9 @@ P1 auth → P3 validator → P5 `blocks` seed → P4 render; P7 tagging → P6 e
 ## Process learnings (also in LONG-TERM)
 - `technical-writer` workers have **no Bash tool** — they can't create worktrees or commit. The harness auto-isolates each in `.claude/worktrees/agent-<id>/` and they write uncommitted markdown; the CEO must gather + commit. For Phase-6 build agents, use Bash-capable worker types.
 - Workers hit a **~19-tool-use turn cap** — heavy batches (10 files) truncate mid-run. Resume-via-message recovered W4 cleanly. Size Phase-6 worker scope smaller or split heavy batches.
+
+## Phase-6 prep produced this session (pre-build close-out)
+Per Adam's "finish everything before the next phase, then write the handoff":
+- **`docs/03-system-design/KOL-phase6-build-plan.md`** — CTO build wave plan (Waves 0–6, worker types, parallelism, risk tiers, migration-apply gating, RICE effort for the 14 uncomputed features, orchestration notes).
+- **`docs/research/references/2026-07-20-voice-anchor-verification.md`** — sourced brief on S9 Real-Maker verification; MVP = founder human-in-the-loop for the 4 seeds (not a blocker); "voice-anchored" is build-not-buy.
+- **`docs/08-agents_work/handoffs/2026-07-20-PHASE6-HANDOFF.md`** + **`-PHASE6-LAUNCH-PROMPT.md`** — the paste-ready handoff for the next session to start Phase 6 (Wave 0 render spine + the migration-apply ask, in parallel).
