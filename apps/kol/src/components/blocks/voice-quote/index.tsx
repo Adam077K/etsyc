@@ -2,6 +2,7 @@
 
 import { TapToHear } from "@/components/media/TapToHear";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
+import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { Skeleton } from "@/components/states/Skeleton";
 import { BlockSection, voiceoverById, type BlockProps } from "../shared";
 
@@ -12,14 +13,25 @@ import { BlockSection, voiceoverById, type BlockProps } from "../shared";
  * block-grounds are valid here, including the two midtone --block-c grounds
  * (large-text-only).
  */
-export function VoiceQuoteBlock({ block, data, state = "success" }: BlockProps<"voice-quote">) {
+export function VoiceQuoteBlock({ block, data, state = "success", isPreview }: BlockProps<"voice-quote">) {
   const voiceover = block.bindings.voiceoverIds[0]
     ? voiceoverById(data, block.bindings.voiceoverIds[0])
     : undefined;
   const ground = block.props.blockGround ?? null;
 
-  // Empty: no quote set → block hidden entirely (never a blank quote frame).
-  if (state === "empty" || block.props.quote.length === 0) return null;
+  // Empty: live hides the block entirely (never a blank quote frame);
+  // seller preview shows the interview-beat prompt instead of blank.
+  if (state === "empty" || block.props.quote.length === 0) {
+    if (!isPreview) return null;
+    return (
+      <BlockSection>
+        <EmptyPrompt
+          prompt="One line, in your own voice"
+          hint="Say it out loud in your interview — we set the words here and buyers can tap to hear you say them."
+        />
+      </BlockSection>
+    );
+  }
 
   if (state === "loading") {
     // text shows immediately — only the audio affordance waits
@@ -66,9 +78,8 @@ function QuoteText({ quote, attribution }: { quote: string; attribution?: string
       <blockquote className="font-display text-h1 [text-wrap:balance]">
         &ldquo;{quote}&rdquo;
       </blockquote>
-      {/* attribution sets in full --ink (→ --on-block cream on grounds,
-          4.87:1 measured) — the 72% muted mix fails AA at caption size on
-          the clay band (3.33:1) */}
+      {/* attribution sets in full --ink (→ the AA-certified --on-block-*
+          pair on colored grounds; groundStyle points --muted there too) */}
       {attribution ? (
         <figcaption className="text-caption uppercase tracking-[0.08em] text-ink">
           — {attribution}

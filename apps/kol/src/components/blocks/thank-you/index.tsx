@@ -20,17 +20,14 @@ export function ThankYouBlock({
   data,
   state = "success",
   orderSummary,
-  message,
 }: BlockProps<"thank-you"> & {
   orderSummary?: React.ReactNode;
-  /**
-   * Maker-AUTHORED thank-you message, rendered plainly when present. The
-   * platform NEVER fabricates or quote-attributes words for a maker (D10
-   * voice honesty) — store-config v1.3 will carry this field (Design-Lead
-   * follow-up); until then only an explicit caller-provided message shows.
-   */
-  message?: string;
 }) {
+  // v1.3: the maker-AUTHORED thank-you message rides in `props.message`,
+  // rendered plainly when present. The platform NEVER fabricates or
+  // quote-attributes words for a maker (D10 voice honesty); omitted →
+  // neutral platform copy below.
+  const message = block.props.message;
   const clip = firstClip(data, block.bindings.clipTags);
   const portrait = imageById(data, data.maker.avatarMediaId);
   const [clipFailed, setClipFailed] = useState(false);

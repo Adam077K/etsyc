@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FilmFrame } from "@/components/media/FilmFrame";
 import { PosterStill } from "@/components/media/PosterStill";
 import { Reveal } from "@/components/motion/Reveal";
+import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { Skeleton } from "@/components/states/Skeleton";
 import type { Clip } from "@/lib/store-config/types";
 import { cn } from "@/lib/utils";
@@ -15,15 +16,26 @@ import { BlockSection, clipById, type BlockProps } from "../shared";
  * footage (distinct from hero-video): autoplays muted on scroll-into-view,
  * failed clips are skipped rather than blocking the carousel.
  */
-export function ProcessReelBlock({ block, data, state = "success" }: BlockProps<"process-reel">) {
+export function ProcessReelBlock({ block, data, state = "success", isPreview }: BlockProps<"process-reel">) {
   const clips = block.bindings.clipTags
     .map((tag) => clipById(data, tag))
     .filter((clip): clip is Clip => clip !== undefined);
   const [index, setIndex] = useState(0);
   const [failedIds, setFailedIds] = useState<string[]>([]);
 
-  // Empty: no process footage → block hidden.
-  if (state === "empty" || clips.length === 0) return null;
+  // Empty: live hides the block (no process footage); seller preview shows
+  // the guiding prompt instead of blank.
+  if (state === "empty" || clips.length === 0) {
+    if (!isPreview) return null;
+    return (
+      <BlockSection>
+        <EmptyPrompt
+          prompt="Show the making"
+          hint="A short clip of your hands at work — filmed on your phone is exactly right. It plays quietly as buyers scroll past."
+        />
+      </BlockSection>
+    );
+  }
 
   if (state === "loading") {
     return (
