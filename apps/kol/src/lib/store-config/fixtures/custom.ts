@@ -97,8 +97,8 @@ export const customStore: StoreConfig = {
   products: [
     {
       id: "p_shibori_throw",
-      title: "Shibori Throw — Third Dip",
-      price: { amount: 18500, currency: "EUR" },
+      title: "Shibori throw — deep indigo",
+      price: { amount: 24500, currency: "USD" },
       description:
         "Folded, clamped, and dipped three times over two days. The white lines are where the cloth held its breath.",
       mediaIds: ["img_shibori_throw"],

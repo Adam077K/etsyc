@@ -1,22 +1,23 @@
+"use client";
+
 /**
- * Film — the shared stand-in for real maker footage (D12 footage is
- * Phase 7). Gradient classes v1–v5 match the approved page mockups
- * one-to-one, so every surface reads as film-led without binaries.
+ * Film — the shared film surface.
+ *
+ * Real path: pass `src` (and ideally `poster`) and this renders an actual
+ * muted, inline <video>. Fallback path: with no `src`, or if the file 404s
+ * / fails to decode, it falls back to the designed gradient that matches
+ * the approved page mockups one-to-one — so a missing D12 clip degrades
+ * quietly instead of showing a broken player.
+ *
+ * Autoplay is muted-only and is suppressed under prefers-reduced-motion.
  * Scrim + on-media type follow design-system §1.1 over-media rules.
  */
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { gradientFor, usePrefersReducedMotion, type FilmVariant } from "@/lib/media/film";
 
-export type FilmVariant = "v1" | "v2" | "v3" | "v4" | "v5";
+export type { FilmVariant };
 export type FilmAspect = "tall" | "wide" | "square" | "portrait";
-
-const GRADIENTS: Record<FilmVariant, string> = {
-  v1: "linear-gradient(140deg,#8a6a4f,#3f3327 60%,#241d16)", // sena · stoneware
-  v2: "linear-gradient(140deg,#6d7a4a,#2f3a24 60%,#1a2016)", // elias · bookbinding
-  v3: "linear-gradient(140deg,#4c93a8,#26414c 60%,#16242a)", // tomas · woodwork
-  v4: "linear-gradient(140deg,#b8452a,#5c2317 60%,#2a1410)", // mira · copper
-  v5: "linear-gradient(140deg,#7a2e4a,#3d1726 60%,#1e0c13)", // noor · indigo
-};
 
 const ASPECTS: Record<FilmAspect, string> = {
   tall: "aspect-[4/5]",
@@ -33,6 +34,11 @@ export function Film({
   play = true,
   rounded = true,
   className = "",
+  src,
+  poster,
+  loop = true,
+  autoPlay = true,
+  stream,
   children,
 }: {
   variant?: FilmVariant;
@@ -42,15 +48,60 @@ export function Film({
   play?: boolean;
   rounded?: boolean;
   className?: string;
+  /** real footage; omit until D12 lands and the gradient stands in */
+  src?: string;
+  /** still frame shown before/instead of playback */
+  poster?: string;
+  loop?: boolean;
+  autoPlay?: boolean;
+  /** live MediaStream (camera preview) — takes precedence over `src` */
+  stream?: MediaStream | null;
   children?: ReactNode;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
+
+  // reset the failure latch when the source changes — a new file deserves a try
+  useEffect(() => setFailed(false), [src]);
+
+  // live camera preview: bind the stream imperatively (srcObject isn't a prop)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (stream) {
+      video.srcObject = stream;
+      void video.play().catch(() => undefined);
+    } else if (video.srcObject) {
+      video.srcObject = null;
+    }
+  }, [stream]);
+
+  const showVideo = Boolean(stream) || (Boolean(src) && !failed);
+  // a live preview and reduced-motion footage both suppress the play glyph
+  const showPlayGlyph = play && !stream;
+
   return (
     <div
       className={`relative flex items-end overflow-hidden shadow-card ${ASPECTS[aspect]} ${
         rounded ? "rounded-md" : ""
       } ${className}`}
-      style={{ background: GRADIENTS[variant] }}
+      style={{ background: gradientFor(variant) }}
     >
+      {showVideo ? (
+        <video
+          ref={videoRef}
+          {...(stream ? {} : { src, poster })}
+          muted
+          playsInline
+          preload="metadata"
+          loop={loop}
+          autoPlay={Boolean(stream) || (autoPlay && !reducedMotion)}
+          onError={() => setFailed(true)}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : null}
+
       {/* scrim — bottom-up, per §1.1 over-media type rule */}
       <div
         aria-hidden
@@ -60,7 +111,7 @@ export function Film({
             "linear-gradient(to top, color-mix(in oklab, black 55%, transparent) 0%, transparent 55%)",
         }}
       />
-      {play ? (
+      {showPlayGlyph ? (
         <div className="absolute inset-0 grid place-items-center">
           <span className="grid h-14 w-14 place-items-center rounded-pill bg-on-media/90 text-ink shadow-raised">
             ▶

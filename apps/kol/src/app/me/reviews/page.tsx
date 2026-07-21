@@ -163,7 +163,7 @@ export default function MyReviewsPage() {
                     aria-checked={stars === n}
                     aria-label={`${n} star${n > 1 ? "s" : ""}`}
                     onClick={() => setStars(n)}
-                    className={`text-h3 transition-colors duration-tap ease-kol ${
+                    className={`inline-flex min-h-11 min-w-11 items-center justify-center text-h3 transition-colors duration-tap ease-kol ${
                       n <= stars ? "text-accent" : "text-muted hover:text-ink"
                     }`}
                   >
@@ -191,7 +191,7 @@ export default function MyReviewsPage() {
                     type="button"
                     aria-pressed={accuracy === opt.label}
                     onClick={() => setAccuracy(opt.label)}
-                    className={`rounded-pill border px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
+                    className={`inline-flex min-h-11 items-center rounded-pill border px-4 text-caption transition-colors duration-state ease-kol ${
                       accuracy === opt.label
                         ? "border-accent bg-accent/10 text-ink"
                         : "border-line bg-surface text-muted hover:text-ink"
@@ -257,7 +257,7 @@ export default function MyReviewsPage() {
                   type="button"
                   aria-pressed={hasPhoto}
                   onClick={() => setHasPhoto((v) => !v)}
-                  className={`rounded-pill border border-dashed px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
+                  className={`inline-flex min-h-11 items-center rounded-pill border border-dashed px-4 text-caption transition-colors duration-state ease-kol ${
                     hasPhoto
                       ? "border-accent bg-accent/10 text-ink"
                       : "border-line bg-surface text-muted hover:text-ink"
@@ -269,7 +269,7 @@ export default function MyReviewsPage() {
                   type="button"
                   aria-pressed={hasPhoto}
                   onClick={() => setHasPhoto(true)}
-                  className={`rounded-pill border border-dashed px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
+                  className={`inline-flex min-h-11 items-center rounded-pill border border-dashed px-4 text-caption transition-colors duration-state ease-kol ${
                     hasPhoto
                       ? "border-accent bg-accent/10 text-ink"
                       : "border-line bg-surface text-muted hover:text-ink"
@@ -285,7 +285,7 @@ export default function MyReviewsPage() {
               <button
                 type="submit"
                 disabled={!canPost}
-                className="rounded-pill bg-accent px-6 py-2.5 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 items-center rounded-pill bg-accent px-6 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Post review
               </button>

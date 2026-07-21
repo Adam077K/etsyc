@@ -103,7 +103,7 @@ function CommentRow({
           <button
             type="button"
             onClick={() => onHide(commentKey)}
-            className="text-caption uppercase tracking-[0.04em] text-muted/70 transition-colors duration-state ease-kol hover:text-ink"
+            className="inline-flex min-h-11 items-center text-caption uppercase tracking-[0.04em] text-muted transition-colors duration-state ease-kol hover:text-ink"
           >
             Hide
           </button>
@@ -257,7 +257,11 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
       <header className="py-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-4">
-            <Link href={`/m/${slug}`} className="flex-none">
+            <Link
+              href={`/m/${slug}`}
+              aria-label={`Open ${maker.name}’s world`}
+              className="flex-none"
+            >
               <Film
                 variant={maker.filmClass}
                 aspect="square"

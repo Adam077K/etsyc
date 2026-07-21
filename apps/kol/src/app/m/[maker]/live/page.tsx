@@ -76,7 +76,7 @@ export default async function LivePage({
           {upcoming.length === 0 ? (
             <div className="rounded-lg border border-dashed border-line bg-surface/60 px-6 py-10">
               <p className="font-display text-h3 text-muted">Nothing on the calendar</p>
-              <p className="mt-2 max-w-measure text-body text-muted/80">
+              <p className="mt-2 max-w-measure text-body text-muted">
                 When {maker.name} schedules a workshop, a studio tour, or a first showing,
                 it appears here — and every session becomes a recording afterwards.
               </p>
@@ -255,7 +255,7 @@ export default async function LivePage({
           {vods.length === 0 && recordings.length === 0 ? (
             <div className="w-full rounded-lg border border-dashed border-line bg-surface/60 px-6 py-10">
               <p className="font-display text-h3 text-muted">No recordings yet</p>
-              <p className="mt-2 max-w-measure text-body text-muted/80">
+              <p className="mt-2 max-w-measure text-body text-muted">
                 The first session {maker.name} runs will live here afterwards, permanently.
               </p>
             </div>

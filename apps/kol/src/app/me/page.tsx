@@ -45,7 +45,7 @@ const SAVED_PATTERN: { span: string; aspect: FilmAspect }[] = [
 ];
 
 const chip = (pressed: boolean) =>
-  `rounded-pill border px-4 py-1.5 text-caption uppercase transition-colors duration-state ease-kol ${
+  `inline-flex min-h-11 items-center rounded-pill border px-4 text-caption uppercase transition-colors duration-state ease-kol ${
     pressed
       ? "border-accent bg-accent/10 text-ink"
       : "border-line bg-surface text-muted hover:text-ink"
@@ -83,13 +83,13 @@ export default function ProfilePage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/settings"
-              className="rounded-pill border border-line bg-surface px-4 py-2 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
+              className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-4 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
             >
               Settings &amp; privacy
             </Link>
             <Link
               href="/orders"
-              className="rounded-pill border border-line bg-surface px-4 py-2 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
+              className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-4 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
             >
               Order history
             </Link>
@@ -98,22 +98,25 @@ export default function ProfilePage() {
       </header>
 
       {/* ---- tab row — sectioned, not a card grid ---- */}
-      <div
-        role="tablist"
-        aria-label="Account sections"
-        className="mt-[var(--space-6)] flex flex-wrap gap-2 border-b border-line pb-3"
-      >
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-            className={chip(tab === t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* The tablist owns only tabs; "My reviews" is a route, not a tab, so it
+          sits beside the tablist rather than inside it (ARIA owned-children). */}
+      <div className="mt-[var(--space-6)] flex flex-wrap items-center gap-2 border-b border-line pb-3">
+        <div role="tablist" aria-label="Account sections" className="flex flex-wrap gap-2">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              id={`tab-${t.id}`}
+              aria-selected={tab === t.id}
+              aria-controls={`panel-${t.id}`}
+              onClick={() => setTab(t.id)}
+              className={chip(tab === t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
         {/* My reviews lives on its own private route */}
         <Link href="/me/reviews" className={chip(false)}>
           My reviews →
@@ -122,12 +125,17 @@ export default function ProfilePage() {
 
       {/* ================= SAVED ================= */}
       {tab === "saved" && (
-        <section aria-label="Saved products" className="pt-[var(--space-5)]">
+        <section
+          role="tabpanel"
+          id="panel-saved"
+          aria-labelledby="tab-saved"
+          className="pt-[var(--space-5)]"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-display text-h2 text-ink">Saved products</h2>
             <Link
               href="/me/collections"
-              className="text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+              className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
             >
               Organize into boards →
             </Link>
@@ -173,8 +181,9 @@ export default function ProfilePage() {
                         {formatPrice(p.priceMinor, p.currency)}
                       </span>
                       <button
+                        type="button"
                         onClick={() => session.toggleSave(p.id)}
-                        className="text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+                        className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
                       >
                         Unsave
                       </button>
@@ -189,7 +198,12 @@ export default function ProfilePage() {
 
       {/* ================= FOLLOWING — makers ON FILM, never avatar rows ================= */}
       {tab === "following" && (
-        <section aria-label="Followed makers" className="pt-[var(--space-5)]">
+        <section
+          role="tabpanel"
+          id="panel-following"
+          aria-labelledby="tab-following"
+          className="pt-[var(--space-5)]"
+        >
           <h2 className="font-display text-h2 text-ink">Makers you follow</h2>
           <p className="mt-1 max-w-measure text-body text-muted">
             Not a row of avatars — the people, moving, in their workshops. Tap to open their
@@ -210,8 +224,9 @@ export default function ProfilePage() {
                     <Film variant={m.filmClass} aspect="tall" craft={m.craft} title={m.name} />
                   </Link>
                   <button
+                    type="button"
                     onClick={() => session.toggleFollow(m.slug)}
-                    className="mt-2 w-full rounded-pill border border-line bg-surface px-3 py-1.5 text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+                    className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-pill border border-line bg-surface px-3 text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
                   >
                     Unfollow
                   </button>
@@ -224,7 +239,12 @@ export default function ProfilePage() {
 
       {/* ================= COMMUNITIES ================= */}
       {tab === "communities" && (
-        <section aria-label="Communities" className="pt-[var(--space-5)]">
+        <section
+          role="tabpanel"
+          id="panel-communities"
+          aria-labelledby="tab-communities"
+          className="pt-[var(--space-5)]"
+        >
           <h2 className="font-display text-h2 text-ink">Communities you&rsquo;ve joined</h2>
           <p className="mt-1 max-w-measure text-body text-muted">
             Membership rides on your follows — a community is a layer of a maker&rsquo;s world,
@@ -265,7 +285,12 @@ export default function ProfilePage() {
 
       {/* ================= PURCHASES ================= */}
       {tab === "purchases" && (
-        <section aria-label="Purchases" className="pt-[var(--space-5)]">
+        <section
+          role="tabpanel"
+          id="panel-purchases"
+          aria-labelledby="tab-purchases"
+          className="pt-[var(--space-5)]"
+        >
           <h2 className="font-display text-h2 text-ink">Recent purchases</h2>
           <div className="mt-[var(--space-4)] max-w-xl divide-y divide-line rounded-lg border border-line bg-surface shadow-subtle">
             {orders.map((o) => {
@@ -305,7 +330,12 @@ export default function ProfilePage() {
 
       {/* ================= PREFERENCES + PUBLIC TASTE IDENTITY ================= */}
       {tab === "prefs" && (
-        <section aria-label="Preferences" className="pt-[var(--space-5)]">
+        <section
+          role="tabpanel"
+          id="panel-prefs"
+          aria-labelledby="tab-prefs"
+          className="pt-[var(--space-5)]"
+        >
           <h2 className="font-display text-h2 text-ink">Preferences</h2>
           <div className="mt-[var(--space-4)] grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* --- public taste identity — explicit opt-in with live preview --- */}

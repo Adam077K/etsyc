@@ -104,7 +104,11 @@ export default function NotificationsPage() {
             <section key={slug} aria-label={`Updates from ${maker?.name ?? slug}`} className="mt-8">
               {/* maker header */}
               <div className="flex items-center gap-3">
-                <Link href={`/m/${slug}`} className="flex-none">
+                <Link
+                  href={`/m/${slug}`}
+                  aria-label={`Open ${maker?.name ?? slug}’s world`}
+                  className="flex-none"
+                >
                   <Film
                     variant={maker?.filmClass ?? "v1"}
                     aspect="square"
@@ -164,7 +168,7 @@ export default function NotificationsPage() {
                               </span>
                             ) : null}
                           </span>
-                          <span className="mt-0.5 block text-caption uppercase tracking-[0.04em] text-muted/80">
+                          <span className="mt-0.5 block text-caption uppercase tracking-[0.04em] text-muted">
                             {typeCaption(n.type)}
                           </span>
                         </span>

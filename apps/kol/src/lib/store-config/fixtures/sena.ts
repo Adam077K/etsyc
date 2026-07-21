@@ -131,8 +131,8 @@ export const senaStore: StoreConfig = {
   products: [
     {
       id: "p_ridge_tumbler",
-      title: "Ridge Tumbler",
-      price: { amount: 4200, currency: "GBP" },
+      title: "Ridge tumbler — ash glaze",
+      price: { amount: 6800, currency: "USD" },
       description:
         "Thrown with a deliberate ridge you feel under the thumb. Ash glaze pools darker where it runs.",
       mediaIds: ["img_ridge_1"],
@@ -143,8 +143,8 @@ export const senaStore: StoreConfig = {
     },
     {
       id: "p_ash_bowl",
-      title: "Ash-glaze Serving Bowl",
-      price: { amount: 12800, currency: "GBP" },
+      title: "Ash bowl — wide",
+      price: { amount: 12400, currency: "USD" },
       description: "Big enough for a shared meal. Each fires a little differently in the ash.",
       mediaIds: ["img_bowl_1"],
       model3dId: null,

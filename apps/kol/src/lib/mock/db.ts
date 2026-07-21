@@ -19,6 +19,12 @@ export interface MockMaker {
   craftLine: string;
   /** film-frame gradient class used by mock media (v1–v5) */
   filmClass: "v1" | "v2" | "v3" | "v4" | "v5";
+  /**
+   * Real maker footage (D12) — left undefined until the clips exist.
+   * When set, the film surfaces render an actual <video>; see
+   * public/media/README.md for the file contract. Undefined → gradient.
+   */
+  videoSrc?: string;
   verified: boolean;
   hasWorld: boolean; // true → /m/[slug] renders a full store config
   followers: number;

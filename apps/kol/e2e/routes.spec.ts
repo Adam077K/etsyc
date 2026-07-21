@@ -57,11 +57,17 @@ const ROUTES: string[] = [
   "/sell/voice",
 ];
 
-/** Dev-mode Next renders runtime errors into a <nextjs-portal> overlay. */
+/**
+ * Dev-mode Next always mounts a <nextjs-portal> — it hosts the dev-tools
+ * indicator, so its mere presence proves nothing. What signals a real
+ * failure is an error DIALOG inside it, or error text in the document.
+ */
 async function assertNoErrorOverlay(page: Page): Promise<void> {
-  await expect(page.locator("nextjs-portal")).toHaveCount(0);
+  await expect(page.locator("[data-nextjs-dialog], [data-nextjs-error]")).toHaveCount(0);
   const body = await page.locator("body").innerText();
-  expect(body).not.toMatch(/Unhandled Runtime Error|Application error|call stack/i);
+  expect(body).not.toMatch(
+    /Unhandled Runtime Error|Application error|Failed to compile|Build Error|call stack/i,
+  );
 }
 
 test.describe("every route renders", () => {

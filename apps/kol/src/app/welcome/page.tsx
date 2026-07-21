@@ -68,8 +68,9 @@ export default function WelcomePage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-caption uppercase text-muted">Setting up · one time only</p>
           <button
+            type="button"
             onClick={skipAll}
-            className="rounded-pill border border-line bg-surface px-4 py-2 text-caption uppercase text-ink transition-colors duration-state ease-kol hover:bg-ground"
+            className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-4 text-caption uppercase text-ink transition-colors duration-state ease-kol hover:bg-ground"
           >
             Skip all — take me to the feed
           </button>
@@ -149,9 +150,10 @@ export default function WelcomePage() {
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
+                          type="button"
                           onClick={() => session.toggleFollow(m.slug)}
                           aria-pressed={following}
-                          className={`rounded-pill px-5 py-2 text-caption uppercase transition-transform duration-tap ease-kol active:scale-[0.98] ${
+                          className={`inline-flex min-h-11 items-center rounded-pill px-5 text-caption uppercase transition-transform duration-tap ease-kol active:scale-[0.98] ${
                             following
                               ? "border border-accent bg-accent/10 text-ink"
                               : "bg-accent text-accent-ink hover:bg-accent/90"
@@ -160,6 +162,7 @@ export default function WelcomePage() {
                           {following ? `Following ${m.name} ✓` : `＋ Follow ${m.name}`}
                         </button>
                         <button
+                          type="button"
                           onClick={() =>
                             setDismissed((d) =>
                               d.includes(m.slug)
@@ -168,7 +171,7 @@ export default function WelcomePage() {
                             )
                           }
                           aria-pressed={notForMe}
-                          className="rounded-pill border border-line bg-surface px-5 py-2 text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+                          className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-5 text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
                         >
                           {notForMe ? "Changed my mind" : "Not for me"}
                         </button>
@@ -183,13 +186,13 @@ export default function WelcomePage() {
           <div className="mt-[var(--space-5)] flex items-center justify-between">
             <button
               onClick={skipAll}
-              className="text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+              className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
             >
               Skip this step
             </button>
             <button
               onClick={() => setStep(1)}
-              className="rounded-pill bg-accent px-8 py-3 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
+              className="inline-flex min-h-11 items-center rounded-pill bg-accent px-8 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
             >
               Next
             </button>
@@ -208,14 +211,17 @@ export default function WelcomePage() {
             from your follows than any of these could tell us.
           </p>
 
-          <p className="mt-[var(--space-4)] text-caption uppercase text-muted">Taste</p>
-          <div className="mt-1 flex flex-wrap gap-2">
+          <p id="taste-label" className="mt-[var(--space-4)] text-caption uppercase text-muted">
+            Taste
+          </p>
+          <div role="group" aria-labelledby="taste-label" className="mt-1 flex flex-wrap gap-2">
             {VIBES.map((v) => (
               <button
                 key={v}
+                type="button"
                 onClick={() => toggleVibe(v)}
                 aria-pressed={vibes.includes(v)}
-                className={`rounded-pill border px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
+                className={`inline-flex min-h-11 items-center rounded-pill border px-4 text-caption transition-colors duration-state ease-kol ${
                   vibes.includes(v)
                     ? "border-accent bg-accent/10 text-ink"
                     : "border-line bg-surface text-muted hover:text-ink"
@@ -227,16 +233,23 @@ export default function WelcomePage() {
           </div>
 
           <div className="mt-[var(--space-4)] rounded-lg border border-line bg-surface p-4">
-            <label htmlFor="budget" className="text-caption uppercase text-muted">
+            {/* a group of toggles, not a single form control — labelled as a
+                group so the caption isn't an orphan <label for="…"> */}
+            <span id="budget-label" className="text-caption uppercase text-muted">
               Comfortable spend (optional)
-            </label>
-            <div className="mt-2 flex flex-wrap gap-2">
+            </span>
+            <div
+              role="group"
+              aria-labelledby="budget-label"
+              className="mt-2 flex flex-wrap gap-2"
+            >
               {BUDGETS.map((b) => (
                 <button
                   key={b}
+                  type="button"
                   onClick={() => setBudget((cur) => (cur === b ? undefined : b))}
                   aria-pressed={budget === b}
-                  className={`rounded-pill border px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
+                  className={`inline-flex min-h-11 items-center rounded-pill border px-4 text-caption transition-colors duration-state ease-kol ${
                     budget === b
                       ? "border-accent bg-accent/10 text-ink"
                       : "border-line bg-surface text-muted hover:text-ink"
@@ -264,13 +277,13 @@ export default function WelcomePage() {
           <div className="mt-[var(--space-5)] flex items-center justify-between">
             <button
               onClick={() => setStep(2)}
-              className="text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+              className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
             >
               Skip this step
             </button>
             <button
               onClick={() => setStep(2)}
-              className="rounded-pill bg-accent px-8 py-3 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
+              className="inline-flex min-h-11 items-center rounded-pill bg-accent px-8 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
             >
               Next
             </button>
@@ -311,13 +324,13 @@ export default function WelcomePage() {
           <div className="mt-[var(--space-5)] flex items-center justify-between">
             <button
               onClick={skipAll}
-              className="text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+              className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
             >
               Skip — I&rsquo;ll leave it blank
             </button>
             <button
               onClick={finish}
-              className="rounded-pill bg-accent px-8 py-3 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
+              className="inline-flex min-h-11 items-center rounded-pill bg-accent px-8 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
             >
               Done — enter KOL
             </button>

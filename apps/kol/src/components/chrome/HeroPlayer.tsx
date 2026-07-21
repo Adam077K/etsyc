@@ -18,10 +18,11 @@
  */
 
 import React, {
-  createContext, useCallback, useContext, useEffect, useMemo, useState,
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
 } from "react";
 import Link from "next/link";
 import { getMaker } from "@/lib/mock/db";
+import { gradientFor, usePrefersReducedMotion } from "@/lib/media/film";
 
 export type HeroStage = "off" | "grown" | "world" | "narrate";
 
@@ -109,14 +110,6 @@ export function useHeroStage(
   }, [setHero, stage, makerSlug, context]);
 }
 
-const GRADIENTS: Record<string, string> = {
-  v1: "linear-gradient(140deg,#8a6a4f,#3f3327 60%,#241d16)",
-  v2: "linear-gradient(140deg,#6d7a4a,#2f3a24 60%,#1a2016)",
-  v3: "linear-gradient(140deg,#4c93a8,#26414c 60%,#16242a)",
-  v4: "linear-gradient(140deg,#b8452a,#5c2317 60%,#2a1410)",
-  v5: "linear-gradient(140deg,#7a2e4a,#3d1726 60%,#1e0c13)",
-};
-
 function fmt(sec: number): string {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
@@ -130,6 +123,27 @@ function fmt(sec: number): string {
 function HeroFilm() {
   const { stage, makerSlug, context, elapsed, setHero, dismiss } = useHeroPlayer();
   const maker = makerSlug ? getMaker(makerSlug) : undefined;
+
+  // Real footage path. `videoSrc` is undefined until D12 footage lands, so
+  // today this always resolves to the gradient — but the seam is real, and a
+  // 404 on a dropped-in file falls back the same way.
+  const videoSrc = maker?.videoSrc;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => setFailed(false), [videoSrc]);
+
+  // The <video> lives inside the never-unmounted film node, so playback is
+  // continuous across route changes for the same reason the clock is. Only a
+  // maker change (new src) legitimately restarts it.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoSrc || failed || reducedMotion) return;
+    void video.play().catch(() => {
+      /* autoplay veto — the poster/gradient holds, no error chrome */
+    });
+  }, [videoSrc, failed, reducedMotion]);
 
   if (stage === "off" || !maker) return null;
 
@@ -156,8 +170,22 @@ function HeroFilm() {
       <div
         data-hero-stage={stage}
         className={`fixed z-50 overflow-hidden rounded-md shadow-raised transition-all duration-unfold ease-cinematic ${frame}`}
-        style={{ background: GRADIENTS[maker.filmClass] ?? GRADIENTS.v1 }}
+        style={{ background: gradientFor(maker.filmClass) }}
       >
+        {videoSrc && !failed ? (
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            autoPlay={!reducedMotion}
+            onError={() => setFailed(true)}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : null}
+
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -167,11 +195,13 @@ function HeroFilm() {
           }}
         />
 
-        <div className="absolute inset-0 grid place-items-center">
-          <span className="grid h-12 w-12 place-items-center rounded-pill bg-on-media/90 text-ink shadow-raised">
-            ▶
-          </span>
-        </div>
+        {videoSrc && !failed ? null : (
+          <div className="absolute inset-0 grid place-items-center">
+            <span className="grid h-12 w-12 place-items-center rounded-pill bg-on-media/90 text-ink shadow-raised">
+              ▶
+            </span>
+          </div>
+        )}
 
         <div className="absolute inset-x-0 bottom-0 z-[1] p-3 text-on-media">
           <p className="text-caption uppercase opacity-85">

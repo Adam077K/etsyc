@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { LiveWave, StaticWave } from "@/components/media/LiveWave";
+import {
+  formatClock,
+  isMediaCaptureSupported,
+  useMediaRecorder,
+  type Recording,
+} from "@/lib/media/recorder";
 
 /**
  * S5 + P12 — Voiceovers (/sell/voice). KOL chrome (seller tools).
@@ -10,108 +17,163 @@ import Link from "next/link";
  * Per element: status · record · waveform · duration · playback ·
  * re-record · delete · editable transcript. Buyers get a tap-to-hear
  * pill in the maker's own palette. Voice is one element, not the whole.
+ *
+ * Capture is REAL: getUserMedia + MediaRecorder (see @/lib/media/recorder).
+ * Waveform bars are the live input level, durations are measured off the
+ * wall clock, playback plays the actual Blob. Nothing here shows a
+ * recording that did not happen — a blocked mic says so and the page
+ * stays usable.
+ *
+ * Takes are session-scoped (in-memory Blob + object URL). In the live
+ * build each take is uploaded to Supabase storage on stop and the row
+ * holds the returned object id instead of a blob URL.
  */
-
-type RowStatus = "recording" | "recorded" | "suggested";
 
 interface VoiceRow {
   id: string;
   scope: string; // "block · …" or "product · …"
   label: string;
-  status: RowStatus;
-  duration?: string;
   prompt?: string;
-  transcript?: string;
   skippable?: boolean;
 }
 
-const INITIAL_ROWS: VoiceRow[] = [
+const ROWS: VoiceRow[] = [
   {
     id: "hero",
     scope: "block · hero film",
     label: "Hero film",
-    status: "suggested",
     prompt: "Say hello — one line, the way you'd greet someone walking into the barn.",
   },
   {
     id: "craft-story",
     scope: "block · craft-story",
     label: "Craft story",
-    status: "recorded",
-    duration: "0:38",
-    transcript:
-      "I start every pot by wedging the clay by hand. You can't rush a material — it moves when it's ready, not when you are.",
+    prompt: "How do you start a pot? Talk about the material the way you'd talk to an apprentice.",
   },
   {
     id: "ridge-tumbler",
     scope: "product · Ridge tumbler",
     label: "Ridge tumbler",
-    status: "recording",
-    duration: "0:14",
     prompt: "Tell buyers what makes this glaze different.",
-    transcript:
-      "Ash glaze isn't one colour — it breaks. Where the flame hits the rim it goes amber, where it pools it goes almost black",
   },
   {
     id: "ash-bowl",
     scope: "product · Ash bowl",
     label: "Ash bowl",
-    status: "recorded",
-    duration: "0:19",
-    transcript: "The well is where the glaze gathers — every bowl pools a little differently.",
+    prompt: "The well, the pooling — why no two bowls come out the same.",
   },
   {
     id: "contact",
     scope: "block · contact strip",
     label: "Contact strip",
-    status: "suggested",
     skippable: true,
     prompt: "Optional — how you'd like people to reach you.",
   },
 ];
 
-const WAVE_TALL = [8, 20, 31, 14, 26, 9, 22, 30, 12, 18, 28, 7, 24, 16, 32, 11];
-const WAVE_SHORT = [6, 14, 9, 18, 5, 12, 16, 8, 20, 10];
+/** Playback of a real take — a single <audio> bound to the recorded Blob. */
+function TakePlayer({ take }: { take: Recording }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
 
-function Wave({ heights, tone = "muted" }: { heights: number[]; tone?: "accent" | "muted" }) {
   return (
-    <span aria-hidden className="flex items-end gap-0.5">
-      {heights.map((h, i) => (
-        <span
-          key={i}
-          style={{ height: `${h}px` }}
-          className={`w-0.5 rounded-pill ${
-            tone === "accent" ? (i % 2 === 0 ? "bg-accent" : "bg-accent/50") : "bg-ink/40"
-          }`}
-        />
-      ))}
-    </span>
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          const el = audioRef.current;
+          if (!el) return;
+          if (el.paused) void el.play().catch(() => setPlaying(false));
+          else el.pause();
+        }}
+        className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-5 py-2 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
+      >
+        {playing ? "❚❚ Pause" : "▶ Play"}
+      </button>
+      <audio
+        ref={audioRef}
+        src={take.url}
+        preload="metadata"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        className="hidden"
+      />
+    </>
   );
 }
 
 export default function SellVoicePage() {
-  const [rows, setRows] = useState<VoiceRow[]>(INITIAL_ROWS);
-  const [transcripts, setTranscripts] = useState<Record<string, string>>(() =>
-    Object.fromEntries(INITIAL_ROWS.map((r) => [r.id, r.transcript ?? ""])),
+  const recorder = useMediaRecorder({ audio: true, bars: 16 });
+  const { status, permission, levels, elapsedMs, error, start, stop, takeRecording, reset } =
+    recorder;
+
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [takes, setTakes] = useState<Record<string, Recording>>({});
+  const [transcripts, setTranscripts] = useState<Record<string, string>>({});
+  const [supported, setSupported] = useState(true);
+
+  // capability probe runs client-side only — SSR must not guess
+  useEffect(() => setSupported(isMediaCaptureSupported()), []);
+
+  // a finished take belongs to the row that started it; ownership of the
+  // object URL transfers here, so this component revokes it
+  useEffect(() => {
+    if (status !== "stopped" || !activeId) return;
+    const take = takeRecording();
+    if (!take) return;
+    const id = activeId;
+    setTakes((prev) => {
+      const previous = prev[id];
+      if (previous) URL.revokeObjectURL(previous.url);
+      return { ...prev, [id]: take };
+    });
+    setActiveId(null);
+  }, [status, activeId, takeRecording]);
+
+  // a failed attempt clears the active row — no phantom "recording" card
+  useEffect(() => {
+    if (status === "error") setActiveId(null);
+  }, [status]);
+
+  // revoke every outstanding take on unmount
+  const takesRef = useRef(takes);
+  takesRef.current = takes;
+  useEffect(
+    () => () => {
+      for (const take of Object.values(takesRef.current)) URL.revokeObjectURL(take.url);
+    },
+    [],
   );
 
-  const recordedCount = rows.filter((r) => r.status === "recorded").length;
-  const suggestedCount = rows.filter((r) => r.status !== "recorded").length;
+  const startRecording = useCallback(
+    (id: string) => {
+      setActiveId(id);
+      void start();
+    },
+    [start],
+  );
 
-  const stopRecording = (id: string) =>
-    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status: "recorded", duration: "0:22" } : r)));
-  const deleteRecording = (id: string) =>
-    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status: "suggested", duration: undefined } : r)));
-  const startRecording = (id: string) =>
-    setRows((rs) =>
-      rs.map((r) =>
-        r.id === id
-          ? { ...r, status: "recording", duration: "0:00" }
-          : r.status === "recording"
-            ? { ...r, status: "recorded", duration: r.duration ?? "0:12" }
-            : r,
-      ),
-    );
+  const deleteRecording = useCallback((id: string) => {
+    setTakes((prev) => {
+      const take = prev[id];
+      if (!take) return prev;
+      URL.revokeObjectURL(take.url);
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }, []);
+
+  const cancelRecording = useCallback(() => {
+    reset();
+    setActiveId(null);
+  }, [reset]);
+
+  const recordedCount = Object.keys(takes).length;
+  const suggestedCount = ROWS.length - recordedCount;
+
+  const blocked = !supported || permission === "denied" || permission === "unsupported";
 
   return (
     <main className="mx-auto w-full max-w-page px-6 pb-[var(--space-16)] pt-[var(--space-6)]">
@@ -161,6 +223,35 @@ export default function SellVoicePage() {
         </div>
       </div>
 
+      {/* ---- honest degradation: mic blocked or unavailable ---- */}
+      {blocked ? (
+        <div
+          role="status"
+          className="mt-[var(--space-3)] rounded-md border border-accent/30 bg-accent/10 p-[var(--space-3)]"
+        >
+          <p className="text-caption uppercase tracking-[0.04em] text-accent">
+            Microphone unavailable
+          </p>
+          <p className="mt-[var(--space-1)] max-w-measure text-body">
+            {!supported
+              ? "This browser can't record audio. Everything else on this page still works — you can come back from Chrome, Edge, Safari or Firefox and record then."
+              : (error ??
+                "We couldn't reach your microphone. Allow access in your browser's site settings, then try Record again.")}{" "}
+            Nothing has been recorded, and none of this blocks publishing.
+          </p>
+        </div>
+      ) : null}
+
+      {/* ---- a failed attempt, said plainly ---- */}
+      {!blocked && status === "error" && error ? (
+        <div
+          role="status"
+          className="mt-[var(--space-3)] rounded-md border border-accent/30 bg-accent/10 p-[var(--space-3)]"
+        >
+          <p className="max-w-measure text-body">{error} Nothing was saved.</p>
+        </div>
+      ) : null}
+
       <div className="mt-[var(--space-5)] grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
         {/* ==== LEFT: per-element recording list ==== */}
         <section className="flex flex-col gap-[var(--space-3)]">
@@ -173,8 +264,13 @@ export default function SellVoicePage() {
             </span>
           </div>
 
-          {rows.map((row) => {
-            if (row.status === "recording") {
+          {ROWS.map((row) => {
+            const take = takes[row.id];
+            const isActive = activeId === row.id;
+            const isRecording = isActive && (status === "recording" || status === "requesting");
+
+            if (isRecording) {
+              const requesting = status === "requesting";
               return (
                 <div
                   key={row.id}
@@ -186,7 +282,14 @@ export default function SellVoicePage() {
                         {row.scope}
                       </span>
                       <span className="rounded-pill border border-accent/30 bg-accent/10 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent">
-                        ● recording · <span className="font-mono">{row.duration ?? "0:14"}</span>
+                        {requesting ? (
+                          "waiting for mic permission…"
+                        ) : (
+                          <>
+                            ● recording ·{" "}
+                            <span className="font-mono">{formatClock(elapsedMs)}</span>
+                          </>
+                        )}
                       </span>
                     </span>
                     <span className="text-caption uppercase tracking-[0.04em] text-muted">
@@ -201,35 +304,27 @@ export default function SellVoicePage() {
                   <div className="mt-[var(--space-2)] flex items-center gap-[var(--space-2)]">
                     <button
                       type="button"
-                      onClick={() => stopRecording(row.id)}
-                      className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-6 py-2.5 font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98]"
+                      onClick={stop}
+                      disabled={requesting}
+                      className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-6 py-2.5 font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98] disabled:opacity-50"
                     >
                       ■ Stop
                     </button>
-                    <Wave heights={WAVE_TALL} tone="accent" />
-                  </div>
-                  <div className="mt-[var(--space-2)]">
-                    <label
-                      htmlFor={`transcript-${row.id}`}
-                      className="text-caption uppercase tracking-[0.04em] text-muted"
+                    <button
+                      type="button"
+                      onClick={cancelRecording}
+                      className="rounded-pill border border-line bg-surface px-3 py-1 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
                     >
-                      Transcript · editable, auto-drafted from your audio
-                    </label>
-                    <textarea
-                      id={`transcript-${row.id}`}
-                      rows={2}
-                      value={transcripts[row.id] ?? ""}
-                      onChange={(e) =>
-                        setTranscripts((t) => ({ ...t, [row.id]: e.target.value }))
-                      }
-                      className="mt-[var(--space-1)] w-full rounded-md border border-line bg-surface p-[var(--space-2)] text-body text-ink"
-                    />
+                      cancel
+                    </button>
+                    {/* bars are the live input level — silence reads flat */}
+                    <LiveWave levels={levels} tone="accent" />
                   </div>
                 </div>
               );
             }
 
-            if (row.status === "recorded") {
+            if (take) {
               return (
                 <div key={row.id} className="rounded-md border border-line bg-surface p-[var(--space-3)]">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -238,14 +333,16 @@ export default function SellVoicePage() {
                         {row.scope}
                       </span>
                       <span className="rounded-pill bg-accent-2/15 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-2">
-                        ✓ recorded · <span className="font-mono">{row.duration ?? "0:20"}</span>
+                        ✓ recorded ·{" "}
+                        <span className="font-mono">{formatClock(take.durationMs)}</span>
                       </span>
                     </span>
                     <span className="flex gap-[var(--space-1)]">
                       <button
                         type="button"
                         onClick={() => startRecording(row.id)}
-                        className="rounded-pill border border-line bg-surface px-3 py-1 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
+                        disabled={blocked || activeId !== null}
+                        className="rounded-pill border border-line bg-surface px-3 py-1 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground disabled:opacity-50"
                       >
                         ↻ re-record
                       </button>
@@ -259,21 +356,17 @@ export default function SellVoicePage() {
                     </span>
                   </div>
                   <div className="mt-[var(--space-2)] flex items-center gap-[var(--space-2)]">
-                    <button
-                      type="button"
-                      className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-5 py-2 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
-                    >
-                      ▶ Play
-                    </button>
-                    <Wave heights={WAVE_SHORT} />
+                    <TakePlayer take={take} />
+                    <StaticWave heights={[6, 14, 9, 18, 5, 12, 16, 8, 20, 10]} />
                   </div>
                   <label className="mt-[var(--space-2)] block">
                     <span className="text-caption uppercase tracking-[0.04em] text-muted">
-                      Transcript · editable
+                      Transcript · editable · type what you said
                     </span>
                     <textarea
                       rows={2}
                       value={transcripts[row.id] ?? ""}
+                      placeholder="Your own words, in your own spelling."
                       onChange={(e) =>
                         setTranscripts((t) => ({ ...t, [row.id]: e.target.value }))
                       }
@@ -305,9 +398,10 @@ export default function SellVoicePage() {
                     <button
                       type="button"
                       onClick={() => startRecording(row.id)}
-                      className="inline-flex items-center gap-2 rounded-pill border border-line px-4 py-1.5 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
+                      disabled={blocked || activeId !== null}
+                      className="inline-flex items-center gap-2 rounded-pill border border-line px-4 py-1.5 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground disabled:opacity-50"
                     >
-                      <Wave heights={[6, 12, 8, 14, 5]} tone="accent" />
+                      <StaticWave heights={[6, 12, 8, 14, 5]} tone="accent" />
                       Record
                     </button>
                     {row.skippable ? (
@@ -336,6 +430,10 @@ export default function SellVoicePage() {
           <p className="text-caption text-muted">
             Skipping any of these is fine — a silent block just shows without a voice pill.
           </p>
+          <p className="text-caption text-muted">
+            Takes live in this browser tab for now — on the live build each one uploads to your
+            store the moment you stop recording.
+          </p>
         </section>
 
         {/* ==== RIGHT: buyer preview + designer's note ==== */}
@@ -355,15 +453,17 @@ export default function SellVoicePage() {
               <p className="mt-1 text-body" style={{ color: "#6b6153" }}>
                 Where the flame hits it goes amber; where it pools it goes almost black.
               </p>
-              <button
-                type="button"
-                className="mt-[var(--space-2)] inline-flex min-h-11 items-center gap-2 rounded-pill border px-4 py-2 text-caption transition-transform duration-tap ease-kol active:scale-[0.98]"
+              <span
+                className="mt-[var(--space-2)] inline-flex min-h-11 items-center gap-2 rounded-pill border px-4 py-2 text-caption"
                 style={{ borderColor: "#d6c9ad", color: "#6b6153" }}
               >
-                <Wave heights={[6, 12, 8, 14, 5]} tone="accent" />
-                Hear Sena say it · <span className="font-mono">0:22</span>
-              </button>
+                <StaticWave heights={[6, 12, 8, 14, 5]} tone="accent" />
+                Hear Sena say it
+              </span>
             </div>
+            <p className="mt-[var(--space-2)] text-caption text-muted">
+              Preview only — the pill above plays nothing until you record that element.
+            </p>
           </div>
 
           <div className="rounded-md bg-ink p-[var(--space-3)] text-ground">

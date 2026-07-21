@@ -106,7 +106,10 @@ export default function CollectionsPage() {
             </span>
           </h2>
           {/* decorative in this prototype — creation is a live-build concern */}
-          <button className="rounded-pill bg-accent px-5 py-2 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]">
+          <button
+            type="button"
+            className="inline-flex min-h-11 items-center rounded-pill bg-accent px-5 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
+          >
             ＋ New board
           </button>
         </div>
@@ -159,7 +162,7 @@ export default function CollectionsPage() {
                   </p>
 
                   {/* visibility toggle — client state */}
-                  <label className="mt-3 flex cursor-pointer items-center gap-2">
+                  <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-2">
                     <input
                       type="checkbox"
                       checked={isPublic}
@@ -170,7 +173,7 @@ export default function CollectionsPage() {
                         }))
                       }
                       aria-label={`Make “${board.title}” public`}
-                      className="h-4 w-4 accent-accent"
+                      className="h-6 w-6 accent-accent"
                     />
                     <span className="text-caption text-muted">Private ↔ Public</span>
                   </label>
@@ -182,14 +185,15 @@ export default function CollectionsPage() {
                         /c/{board.slug}
                       </code>
                       <button
+                        type="button"
                         onClick={() => void copyLink(board.slug)}
-                        className="rounded-pill border border-line bg-surface px-3 py-1 text-caption uppercase text-ink transition-colors duration-state ease-kol hover:bg-ground"
+                        className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-3 text-caption uppercase text-ink transition-colors duration-state ease-kol hover:bg-ground"
                       >
                         {copiedSlug === board.slug ? "Copied ✓" : "Copy link"}
                       </button>
                       <Link
                         href={`/c/${board.slug}`}
-                        className="text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+                        className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
                       >
                         View as visitor →
                       </Link>
@@ -228,7 +232,10 @@ export default function CollectionsPage() {
             )}
           </div>
           {/* decorative — same live-build concern as “New board” above */}
-          <button className="mt-4 rounded-pill bg-accent px-6 py-2.5 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]">
+          <button
+            type="button"
+            className="mt-4 inline-flex min-h-11 items-center rounded-pill bg-accent px-6 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
+          >
             Create your first board
           </button>
         </div>

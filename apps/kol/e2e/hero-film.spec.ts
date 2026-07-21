@@ -51,7 +51,7 @@ test("film grows on a feed tap, opens the world, then narrates — one continuou
   ).toBeGreaterThanOrEqual(atGrown);
 
   /* ---------- product inside the world → NARRATE, same film ---------- */
-  await page.getByRole("link", { name: /Ridge Tumbler/i }).first().click();
+  await page.locator('a[href*="/p/p_ridge_tumbler"]').first().click();
 
   await expect(page).toHaveURL(/\/m\/sena\/p\//);
   await expect(hero).toHaveAttribute("data-hero-stage", "narrate");
@@ -72,7 +72,7 @@ test("the film keeps counting while parked on the product page", async ({ page }
     .getByRole("link", { name: /Sena throws the last of the ridge tumblers/i })
     .click();
   await page.getByRole("link", { name: /Open Sena.s world/i }).click();
-  await page.getByRole("link", { name: /Ridge Tumbler/i }).first().click();
+  await page.locator('a[href*="/p/p_ridge_tumbler"]').first().click();
   await expect(page.locator(heroStage)).toHaveAttribute("data-hero-stage", "narrate");
 
   const start = await heroElapsed(page);

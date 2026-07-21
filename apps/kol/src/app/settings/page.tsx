@@ -36,7 +36,7 @@ const SECTIONS = [
 const rowClass = "flex items-center justify-between gap-4 p-4";
 const cardClass = "divide-y divide-line rounded-lg border border-line bg-surface";
 const btnClass =
-  "rounded-pill border border-line bg-surface px-4 py-1.5 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground";
+  "inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-4 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground";
 
 export default function SettingsPage() {
   const session = useKolSession();
@@ -126,7 +126,7 @@ export default function SettingsPage() {
                     type="checkbox"
                     checked={notif[n.type]}
                     onChange={(e) => setNotif((s) => ({ ...s, [n.type]: e.target.checked }))}
-                    className="h-4 w-4 flex-none accent-accent"
+                    className="h-6 w-6 flex-none accent-accent"
                   />
                 </label>
               ))}
@@ -233,7 +233,7 @@ export default function SettingsPage() {
                     </span>
                     <button
                       onClick={resetLearned}
-                      className="rounded-pill bg-accent px-4 py-1.5 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
+                      className="inline-flex min-h-11 items-center rounded-pill bg-accent px-4 text-caption uppercase text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
                     >
                       Yes, reset
                     </button>
@@ -266,7 +266,7 @@ export default function SettingsPage() {
                 <select
                   id="who-can-message"
                   defaultValue="Makers I follow"
-                  className="rounded-sm border border-line bg-surface px-3 py-1.5 text-body text-ink focus:border-accent focus:outline-none"
+                  className="min-h-11 rounded-sm border border-line bg-surface px-3 text-body text-ink focus:border-accent focus:outline-none"
                 >
                   <option>Makers I follow</option>
                   <option>Any verified maker</option>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                 <span className="text-body text-ink">
                   Let makers @mention me in their community
                 </span>
-                <input type="checkbox" defaultChecked className="h-4 w-4 flex-none accent-accent" />
+                <input type="checkbox" defaultChecked className="h-6 w-6 flex-none accent-accent" />
               </label>
             </div>
           </section>

@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Film } from "@/components/chrome/Film";
+import {
+  formatClock,
+  isMediaCaptureSupported,
+  useMediaRecorder,
+} from "@/lib/media/recorder";
 
 /**
  * S9 — Real-Maker verification (/sell/verify). KOL chrome (seller tools).
@@ -11,6 +16,15 @@ import { Film } from "@/components/chrome/Film";
  * and what it does NOT assert (legal identity / who made a product).
  * MVP verification is founder human-in-the-loop at the n=4 seed cohort
  * (voice liveness is build-not-buy). No urgency chrome anywhere.
+ *
+ * The capture here is REAL — getUserMedia({ audio, video }) + MediaRecorder
+ * (see @/lib/media/recorder). This is the clip that mints the voice anchor,
+ * so it is the one place in the product where a simulated recording would
+ * be a lie about the trust primitive itself. If camera/mic are blocked the
+ * page says so and refuses to advance; it never fabricates a take.
+ *
+ * The take is session-scoped here. Live build: upload the Blob to Supabase
+ * storage on submit and store the returned object id as voice_anchor_clip_id.
  */
 
 type Step = "record" | "review" | "submitted";
@@ -21,11 +35,89 @@ const STEPS: { id: Step; label: string }[] = [
   { id: "submitted", label: "3 · Submitted" },
 ];
 
-const PHRASE = "The kiln opens Friday morning, and this is my own voice.";
+/** Single-use challenge phrases — one is drawn per attempt. */
+const PHRASES = [
+  "The kiln opens Friday morning, and this is my own voice.",
+  "Seven blue bowls, cooling slowly, and this is my own voice.",
+  "The rain started early on Tuesday, and this is my own voice.",
+  "Nine copper pans by the window, and this is my own voice.",
+] as const;
+
+function phraseId(index: number, nonce: number): string {
+  return `${index + 1}Q${nonce.toString(36).toUpperCase().padStart(3, "0").slice(0, 3)}-118`;
+}
+
+/** Audio-only playback of the take — same Blob, video track ignored. */
+function AudioOnly({ url, durationMs }: { url: string; durationMs: number }) {
+  const [playing, setPlaying] = useState(false);
+  const [el, setEl] = useState<HTMLAudioElement | null>(null);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          if (!el) return;
+          if (el.paused) void el.play().catch(() => setPlaying(false));
+          else el.pause();
+        }}
+        className="inline-flex min-h-11 items-center gap-2 self-start rounded-pill border border-line px-4 py-2 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink"
+      >
+        <span aria-hidden className="flex items-end gap-0.5">
+          {[6, 12, 8, 14, 5].map((h, i) => (
+            <span key={i} style={{ height: `${h}px` }} className="w-0.5 rounded-pill bg-accent" />
+          ))}
+        </span>
+        {playing ? "Pause the audio" : "Play the audio only"} ·{" "}
+        <span className="font-mono">{formatClock(durationMs)}</span>
+      </button>
+      <audio
+        ref={setEl}
+        src={url}
+        preload="metadata"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        className="hidden"
+      />
+    </>
+  );
+}
 
 export default function SellVerifyPage() {
   const [step, setStep] = useState<Step>("record");
   const stepIndex = STEPS.findIndex((s) => s.id === step);
+
+  // deterministic first render (no hydration drift); re-drawn on demand
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [nonce, setNonce] = useState(0);
+  const phrase = PHRASES[phraseIndex] ?? PHRASES[0];
+
+  const recorder = useMediaRecorder({ audio: true, video: true });
+  const { status, permission, error, elapsedMs, stream, recording, start, stop, reset } = recorder;
+
+  const [supported, setSupported] = useState(true);
+  const [submittedAt, setSubmittedAt] = useState<Date | null>(null);
+  useEffect(() => setSupported(isMediaCaptureSupported()), []);
+
+  const blocked = !supported || permission === "denied" || permission === "unsupported";
+  const isRecording = status === "recording";
+  const isRequesting = status === "requesting";
+
+  // a real take is the ONLY thing that advances to review
+  useEffect(() => {
+    if (status === "stopped" && recording) setStep("review");
+  }, [status, recording]);
+
+  const regenerate = useCallback(() => {
+    setPhraseIndex((i) => (i + 1) % PHRASES.length);
+    setNonce((n) => n + 1);
+  }, []);
+
+  const restart = useCallback(() => {
+    reset();
+    regenerate();
+    setStep("record");
+  }, [reset, regenerate]);
 
   return (
     <main className="mx-auto w-full max-w-page px-6 pb-[var(--space-16)] pt-[var(--space-8)]">
@@ -72,12 +164,24 @@ export default function SellVerifyPage() {
             <section className="rounded-md border border-accent bg-surface p-[var(--space-3)]">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-[var(--space-2)]">
-                  <span className="rounded-pill bg-accent px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-ink">
-                    Now recording
+                  <span
+                    className={`rounded-pill px-3 py-1 text-caption uppercase tracking-[0.04em] ${
+                      isRecording
+                        ? "bg-accent text-accent-ink"
+                        : "border border-line bg-surface text-muted"
+                    }`}
+                  >
+                    {isRecording
+                      ? "Now recording"
+                      : isRequesting
+                        ? "Waiting for camera & mic"
+                        : "Ready when you are"}
                   </span>
                   <h2 className="font-display text-h3">Read the phrase aloud</h2>
                 </span>
-                <span className="font-mono text-caption text-muted">0:06 / 0:12</span>
+                <span className="font-mono text-caption text-muted">
+                  {isRecording ? formatClock(elapsedMs) : "0:00"} / 0:12
+                </span>
               </div>
 
               {/* the challenge phrase */}
@@ -86,28 +190,57 @@ export default function SellVerifyPage() {
                   Your phrase — freshly generated, single use
                 </p>
                 <p className="mt-[var(--space-1)] font-display text-h2 [text-wrap:balance]">
-                  Say: &ldquo;{PHRASE}&rdquo;
+                  Say: &ldquo;{phrase}&rdquo;
                 </p>
                 <p className="mt-[var(--space-2)] text-caption text-muted">
-                  Random each attempt · <span className="font-mono">phrase_id 7Q3-118</span> · say
+                  Random each attempt ·{" "}
+                  <span className="font-mono">phrase_id {phraseId(phraseIndex, nonce)}</span> · say
                   it in your own voice, at your own pace
                 </p>
               </div>
 
-              {/* the live camera frame */}
+              {/* the live camera frame — a real preview once the stream is open */}
               <div className="relative mt-[var(--space-3)]">
                 <Film
                   variant="v1"
                   aspect="wide"
                   play={false}
-                  craft="Live camera · front-facing"
-                  title="Look at the lens and read the line"
+                  stream={stream}
+                  craft={stream ? "Live camera · front-facing" : "Camera not started"}
+                  title={
+                    stream
+                      ? "Look at the lens and read the line"
+                      : "Press record — your camera turns on then, not before"
+                  }
                 />
-                <div className="absolute left-[var(--space-2)] top-[var(--space-2)] z-10 flex items-center gap-[var(--space-1)] rounded-pill bg-ink/60 px-3 py-1">
-                  <span aria-hidden className="inline-block h-2 w-2 rounded-pill bg-accent" />
-                  <span className="text-caption uppercase tracking-[0.04em] text-on-media">REC</span>
-                </div>
+                {isRecording ? (
+                  <div className="absolute left-[var(--space-2)] top-[var(--space-2)] z-10 flex items-center gap-[var(--space-1)] rounded-pill bg-ink/60 px-3 py-1">
+                    <span aria-hidden className="inline-block h-2 w-2 rounded-pill bg-accent" />
+                    <span className="text-caption uppercase tracking-[0.04em] text-on-media">
+                      REC
+                    </span>
+                  </div>
+                ) : null}
               </div>
+
+              {/* honest degradation — blocked hardware never becomes a fake take */}
+              {blocked || (status === "error" && error) ? (
+                <div
+                  role="status"
+                  className="mt-[var(--space-3)] rounded-md border border-accent/30 bg-accent/10 p-[var(--space-2)]"
+                >
+                  <p className="text-caption uppercase tracking-[0.04em] text-accent">
+                    Can&rsquo;t reach your camera &amp; microphone
+                  </p>
+                  <p className="mt-[var(--space-1)] max-w-measure text-body">
+                    {!supported
+                      ? "This browser can't record video. Try Chrome, Edge, Safari or Firefox — everything else on this page still reads fine."
+                      : (error ??
+                        "Allow camera and microphone access in your browser's site settings, then press record again.")}{" "}
+                    Nothing has been recorded and no anchor has been created.
+                  </p>
+                </div>
+              ) : null}
 
               <div className="mt-[var(--space-3)] flex flex-wrap items-center justify-between gap-[var(--space-2)]">
                 <p className="max-w-measure text-caption text-muted">
@@ -117,24 +250,38 @@ export default function SellVerifyPage() {
                 <div className="flex gap-[var(--space-2)]">
                   <button
                     type="button"
-                    className="inline-flex min-h-11 items-center rounded-pill px-5 py-2 text-body text-muted transition-colors duration-state ease-kol hover:bg-ink/5 hover:text-ink"
+                    onClick={regenerate}
+                    disabled={isRecording || isRequesting}
+                    className="inline-flex min-h-11 items-center rounded-pill px-5 py-2 text-body text-muted transition-colors duration-state ease-kol hover:bg-ink/5 hover:text-ink disabled:opacity-50"
                   >
                     Regenerate phrase
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setStep("review")}
-                    className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-8 py-3 text-body-lg font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98]"
-                  >
-                    Stop &amp; review
-                  </button>
+                  {isRecording || isRequesting ? (
+                    <button
+                      type="button"
+                      onClick={stop}
+                      disabled={isRequesting}
+                      className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-8 py-3 text-body-lg font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98] disabled:opacity-50"
+                    >
+                      Stop &amp; review
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void start()}
+                      disabled={blocked}
+                      className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-8 py-3 text-body-lg font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98] disabled:opacity-50"
+                    >
+                      Start recording
+                    </button>
+                  )}
                 </div>
               </div>
             </section>
           ) : null}
 
           {/* STATE B — REVIEW */}
-          {step === "review" ? (
+          {step === "review" && recording ? (
             <section className="rounded-md border border-line bg-surface p-[var(--space-3)]">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-[var(--space-2)]">
@@ -143,16 +290,25 @@ export default function SellVerifyPage() {
                   </span>
                   <h2 className="font-display text-h3">Check it before you commit</h2>
                 </span>
-                <span className="font-mono text-caption text-muted">clip 0:11</span>
+                <span className="font-mono text-caption text-muted">
+                  clip {formatClock(recording.durationMs)}
+                </span>
               </div>
 
               <div className="mt-[var(--space-3)] grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
-                <Film
-                  variant="v1"
-                  aspect="square"
-                  craft="Playback · this take"
-                  title="Watch yourself back"
-                />
+                {/* the actual take — sound ON here, this is the maker checking herself */}
+                <div className="relative aspect-square overflow-hidden rounded-md bg-ink shadow-card">
+                  <video
+                    src={recording.url}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                  <p className="pointer-events-none absolute left-0 top-0 p-3 text-caption uppercase text-on-media opacity-85">
+                    Playback · this take
+                  </p>
+                </div>
                 <div className="flex flex-col gap-[var(--space-2)]">
                   <span className="self-start rounded-pill border border-line bg-surface px-3 py-1 text-caption uppercase tracking-[0.04em] text-muted">
                     • Not submitted yet
@@ -162,17 +318,7 @@ export default function SellVerifyPage() {
                     take, once submitted, becomes your permanent anchor — you can re-record now,
                     but not swap it later.
                   </p>
-                  <button
-                    type="button"
-                    className="inline-flex min-h-11 items-center gap-2 self-start rounded-pill border border-line px-4 py-2 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink"
-                  >
-                    <span aria-hidden className="flex items-end gap-0.5">
-                      {[6, 12, 8, 14, 5].map((h, i) => (
-                        <span key={i} style={{ height: `${h}px` }} className="w-0.5 rounded-pill bg-accent" />
-                      ))}
-                    </span>
-                    Play the audio only · <span className="font-mono">0:11</span>
-                  </button>
+                  <AudioOnly url={recording.url} durationMs={recording.durationMs} />
                 </div>
               </div>
 
@@ -183,14 +329,19 @@ export default function SellVerifyPage() {
                 <div className="flex gap-[var(--space-2)]">
                   <button
                     type="button"
-                    onClick={() => setStep("record")}
+                    onClick={restart}
                     className="inline-flex min-h-11 items-center rounded-pill px-5 py-2 text-body text-muted transition-colors duration-state ease-kol hover:bg-ink/5 hover:text-ink"
                   >
                     Re-record
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStep("submitted")}
+                    onClick={() => {
+                      // live build: POST the Blob to Supabase storage here and
+                      // persist the returned object id as voice_anchor_clip_id
+                      setSubmittedAt(new Date());
+                      setStep("submitted");
+                    }}
                     className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-8 py-3 text-body-lg font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98]"
                   >
                     Submit for review
@@ -210,7 +361,17 @@ export default function SellVerifyPage() {
                   </span>
                   <h2 className="font-display text-h3">We&rsquo;ve got your clip</h2>
                 </span>
-                <span className="font-mono text-caption text-muted">sent 21 Jul, 11:04</span>
+                <span className="font-mono text-caption text-muted">
+                  sent{" "}
+                  {submittedAt
+                    ? submittedAt.toLocaleString(undefined, {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "just now"}
+                </span>
               </div>
               <p className="mt-[var(--space-2)] max-w-measure text-body">
                 A founder is reviewing your clip by hand. During the seed phase (the first{" "}
@@ -241,7 +402,10 @@ export default function SellVerifyPage() {
               </p>
               <button
                 type="button"
-                onClick={() => setStep("record")}
+                onClick={() => {
+                  setSubmittedAt(null);
+                  restart();
+                }}
                 className="mt-[var(--space-2)] rounded-pill px-4 py-1.5 text-caption text-muted transition-colors duration-state ease-kol hover:bg-ink/5 hover:text-ink"
               >
                 (demo · walk through again)
