@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your world, first look — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+<style>
+  /* Sena's DERIVED custom world — any-hex, NOT one of the 5 curated palettes.
+     Scoped to the preview only; the tool chrome around it stays KOL sunbaked. */
+  .senaworld {
+    --s-bg:#efe7d8; --s-surface:#e6dcc7; --s-ink:#2c2620; --s-muted:#6b6153;
+    --s-accent:#8f5a3a; --s-accent-2:#737a63; --s-line:#d6c9ad; --s-accent-ink:#f6efe1;
+  }
+  .swatch { width:100%; aspect-ratio:1; border-radius:var(--radius-sm); border:1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ THE REVEAL FRAMING — nothing is live yet ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <div class="row-between wrap-flex">
+      <div>
+        <p class="caption reveal">First look · drafted from your interview · <b style="color:var(--accent)">not live — only you can see this</b></p>
+        <h1 class="display measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+          Here's your world, Sena.
+        </h1>
+        <p class="body-lg measure muted reveal" style="animation-delay:140ms; margin-top:var(--space-2)">
+          Every colour, every word, every piece came out of what you told us. You
+          are the author of all of it. Nothing here is published — this is yours to
+          keep, change, or send back until it's right.
+        </p>
+      </div>
+      <div class="reveal" style="animation-delay:210ms; text-align:right">
+        <span class="badge badge-pending" style="font-size:var(--fs-caption)">● Draft · v1 · nothing live</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div style="display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:var(--space-4)">
+
+    <!-- ==== LEFT: the full generated world, rendered in HER custom theme ==== -->
+    <div class="senaworld card-flush reveal" style="background:var(--s-bg); border-color:var(--s-line); overflow:hidden">
+
+      <!-- hero-video block -->
+      <div class="film film--wide" style="border-radius:0; background:linear-gradient(140deg,#8f7a5f,#4a3f2c 60%,#241d14)">
+        <div class="play"><i>▶</i></div>
+        <div class="film-meta">
+          <div class="film-craft" style="letter-spacing:.04em">Stoneware · Hudson Valley</div>
+          <div class="film-name" style="font-family:Georgia,'Times New Roman',serif">Sena, at the wheel by north light</div>
+        </div>
+      </div>
+
+      <!-- craft-story block, in her voice + her palette -->
+      <div style="padding:var(--space-5); color:var(--s-ink)">
+        <p class="caption" style="color:var(--s-accent)">Your craft, in your words</p>
+        <h2 class="h2" style="font-family:Georgia,'Times New Roman',serif; max-width:22ch; margin-top:var(--space-1)">
+          I can feel when the clay is ready before I ever centre it.
+        </h2>
+        <p class="measure" style="margin-top:var(--space-2); color:var(--s-muted)">
+          Every pot begins with wedging by hand — pushing and folding until the air
+          is out and it moves like it wants to. The ridge tumblers get three grooves
+          pulled with a thumb, so they settle into your hand.
+        </p>
+
+        <!-- product-showcase block, two pieces — NOT a uniform 3-col grid -->
+        <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:var(--space-3); margin-top:var(--space-4)">
+          <div style="background:var(--s-surface); border:1px solid var(--s-line); border-radius:var(--radius-md); overflow:hidden">
+            <div class="film film--wide" style="border-radius:0; background:linear-gradient(140deg,#7d6a52,#3d3323 60%)"><div class="film-meta"><div class="film-name" style="font-family:Georgia,serif">Ridge tumblers, pair</div></div></div>
+            <div style="padding:var(--space-3)">
+              <p style="color:var(--s-ink)">Thrown tall, thumbed with three grooves. Matte tenmoku that breaks rust where it runs thin.</p>
+              <p class="price" style="color:var(--s-accent); margin-top:var(--space-1)">$90 each</p>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:var(--space-3)">
+            <div style="background:var(--s-surface); border:1px solid var(--s-line); border-radius:var(--radius-md); padding:var(--space-3); color:var(--s-ink)">
+              <span class="badge" style="background:color-mix(in oklab,var(--s-accent-2) 18%,var(--s-surface)); color:color-mix(in oklab,var(--s-accent-2) 70%,var(--s-ink)); border:1px solid color-mix(in oklab,var(--s-accent-2) 30%,transparent)">✦ voice-quote block</span>
+              <p style="margin-top:var(--space-1); font-family:Georgia,serif">"North light is the only light I'll glaze under."</p>
+            </div>
+            <div style="background:var(--s-accent); color:var(--s-accent-ink); border-radius:var(--radius-md); padding:var(--space-3)">
+              <p class="caption" style="color:inherit; opacity:.85">atmosphere block</p>
+              <p style="margin-top:var(--space-1)">Wet clay, ash glaze, a north-facing window. Your whole shop colour-blocks into this.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="caption" style="color:var(--s-muted); margin-top:var(--space-3)">
+          Full draft continues below · hero-video · craft-story · product-showcase · voice-quote · process-reel · trust-badge · contact-cta
+        </p>
+      </div>
+    </div>
+
+    <!-- ==== RIGHT: WHERE EACH THING CAME FROM (traceability) ==== -->
+    <aside class="stack-3">
+
+      <!-- provenance -->
+      <div class="card">
+        <p class="caption">Where each piece came from</p>
+        <p class="muted" style="margin-top:var(--space-1); font-size:var(--fs-caption)">
+          Every block traces back to a moment in your own interview. Nothing was invented.
+        </p>
+        <ol style="list-style:none; margin-top:var(--space-2)" class="stack-2">
+          <li>
+            <span class="badge badge-verified">✓ Craft-story headline</span>
+            <p class="measure" style="margin-top:var(--space-0-5)">From what you said at <span class="mono">4:12</span> — <span class="muted">"I can feel when it's ready before I ever centre it."</span></p>
+          </li>
+          <li>
+            <span class="badge badge-verified">✓ Ridge-tumbler product</span>
+            <p class="measure" style="margin-top:var(--space-0-5)">From your product beat at <span class="mono">4:12</span> — the three thumbed grooves, the tenmoku that breaks rust.</p>
+          </li>
+          <li>
+            <span class="badge badge-verified">✓ Palette &amp; mood</span>
+            <p class="measure" style="margin-top:var(--space-0-5)">From your workshop beat at <span class="mono">2:38</span> — <span class="muted">"wet clay, ash glaze, north light."</span></p>
+          </li>
+          <li>
+            <span class="badge badge-verified">✓ Voice-quote block</span>
+            <p class="measure" style="margin-top:var(--space-0-5)">Your own line at <span class="mono">6:05</span>, kept verbatim.</p>
+          </li>
+        </ol>
+      </div>
+
+      <!-- derived custom design system: swatches -->
+      <div class="card">
+        <div class="row-between">
+          <p class="caption">Your design system, derived</p>
+          <span class="badge badge-ai">✦ AI-assisted</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:var(--space-1); margin-top:var(--space-2)">
+          <div><div class="swatch" style="background:#efe7d8"></div><p class="caption" style="text-align:center; margin-top:2px">bg</p></div>
+          <div><div class="swatch" style="background:#2c2620"></div><p class="caption" style="text-align:center; margin-top:2px">ink</p></div>
+          <div><div class="swatch" style="background:#8f5a3a"></div><p class="caption" style="text-align:center; margin-top:2px">clay</p></div>
+          <div><div class="swatch" style="background:#737a63"></div><p class="caption" style="text-align:center; margin-top:2px">ash</p></div>
+          <div><div class="swatch" style="background:#e6dcc7"></div><p class="caption" style="text-align:center; margin-top:2px">surf</p></div>
+        </div>
+        <div class="row wrap-flex mono" style="gap:var(--space-1); margin-top:var(--space-2); font-size:var(--fs-caption)">
+          <span class="chip" style="cursor:default">#EFE7D8</span>
+          <span class="chip" style="cursor:default">#2C2620</span>
+          <span class="chip" style="cursor:default">#8F5A3A</span>
+          <span class="chip" style="cursor:default">#737A63</span>
+        </div>
+        <div class="divide" style="margin-top:var(--space-2)">
+          <div class="row-between" style="padding-block:var(--space-1)"><span class="muted">Display</span><span style="font-family:Georgia,serif">Fraunces · warm serif</span></div>
+          <div class="row-between" style="padding-block:var(--space-1)"><span class="muted">Text</span><span>Inter · quiet grotesk</span></div>
+        </div>
+        <div class="card" style="margin-top:var(--space-2); background:color-mix(in oklab, var(--accent-2) 10%, var(--surface)); border-color:color-mix(in oklab, var(--accent-2) 28%, transparent)">
+          <p class="caption" style="color:var(--accent-2)">D15 · full brand freedom</p>
+          <p class="measure" style="margin-top:var(--space-0-5)">
+            These are <b>your</b> exact colours and fonts — any hex, any family. The 5 KOL
+            palettes are only starting points, never a cap. Nothing here was forced
+            into a house style.
+          </p>
+        </div>
+      </div>
+
+      <!-- auto-critic score: two sub-gates -->
+      <div class="card">
+        <p class="caption">Quality check · run before you ever saw this</p>
+        <div class="stack-2" style="margin-top:var(--space-2)">
+          <div class="row-between">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓ PASS</span><b>Legibility (WCAG-AA)</b></span>
+            <span class="caption">hard gate · computed, not judged</span>
+          </div>
+          <p class="measure muted" style="font-size:var(--fs-caption)">
+            Every colour pair on your shop clears the contrast floor. This gate is arithmetic —
+            no shop can publish below it.
+          </p>
+          <div class="row-between" style="border-top:1px solid var(--line); padding-top:var(--space-2)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓ PASS</span><b>Coherence &amp; fit</b></span>
+            <span class="mono"><b>0.82</b> <span class="muted">≥ 0.75</span></span>
+          </div>
+          <p class="measure muted" style="font-size:var(--fs-caption)">
+            Only runs after legibility passes. Scores hierarchy, coherence, and how
+            true it stays to <em>your</em> brand — not whether it looks conventional.
+          </p>
+        </div>
+      </div>
+
+      <!-- PRIMARY ACTIONS -->
+      <div class="card" style="border-color:var(--accent)">
+        <p><b>What now?</b></p>
+        <p class="caption" style="margin-top:var(--space-0-5)">You're the author. This only moves when you say so — and it's still not live.</p>
+        <div class="stack-2" style="margin-top:var(--space-3)">
+          <a class="btn btn-accent btn-lg" href="co-create.html" style="justify-content:center">Make it mine → co-edit together</a>
+          <button class="btn" style="justify-content:center">↺ Regenerate the whole draft</button>
+        </div>
+        <p class="caption muted" style="margin-top:var(--space-2)">
+          Co-editing keeps everything you like and changes only what you want — in plain words, with us.
+        </p>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Draft review · S3</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/draft</code> · shop preview = FULL brand freedom (<code>theme.kind:"custom"</code>); review chrome = KOL curated tool UI</dd>
+      <dt>Spec</dt><dd><code>specs/ai-store-draft.md</code> · ai-pipeline §4–§6 · Wave 4a</dd>
+      <dt>Mission</dt><dd><b>Carries</b> — the reveal moment</dd>
+      <dt>Hard AC</dt><dd class="warn">D15: any hex, any font — the 5 curated palettes are starting points, NOT a cap. Two different makers must never collapse to a house style.</dd>
+      <dt>Traceability</dt><dd>Every block traces to a transcript <code>sourceSpan</code>; extraction leaves unsupported facts <code>null</code> — never invented.</dd>
+      <dt>Auto-critic</dt><dd>Sub-gate 1 = deterministic WCAG-AA <b>hard gate</b> (PASS). Sub-gate 2 (LLM coherence) runs only after AA: <code>0.82 ≥ 0.75</code>. Unconventional-but-good is never rejected.</dd>
+      <dt>Author &amp; live</dt><dd class="warn"><code>meta.status:"draft"</code> — nothing published. Primary actions: <b>make it mine</b> (→ S4 co-edit) or <b>regenerate</b>.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

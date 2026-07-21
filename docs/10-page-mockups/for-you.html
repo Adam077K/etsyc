@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For You — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html" aria-current="page">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ TABS: one surface, two feeds ============ -->
+<div class="wrap" style="padding-top:var(--space-3)">
+  <div class="row" role="tablist" aria-label="Feed">
+    <a class="chip" role="tab" aria-selected="false" href="discover.html">Discover</a>
+    <a class="chip" role="tab" aria-selected="true" aria-pressed="true" href="for-you.html">For You</a>
+  </div>
+</div>
+
+<!-- ============ EDITORIAL OPENER ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <p class="caption reveal">Your feed · 9 makers you know, 3 you don’t yet</p>
+    <h1 class="display measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+      The people you keep coming back to.
+    </h1>
+    <p class="body-lg measure muted reveal" style="animation-delay:140ms; margin-top:var(--space-2)">
+      This is not what’s popular. Nothing here ranks because a crowd liked it —
+      it ranks because <em>you</em> followed, asked, saved or bought. A maker everyone
+      loves gets no boost in your feed until you meet them.
+    </p>
+  </div>
+</header>
+
+<!-- ============ YOUR SIGNALS STRIP ============ -->
+<section class="wrap" style="padding-bottom:var(--space-6)">
+  <div class="card-flush reveal" style="animation-delay:180ms">
+    <div class="row-between wrap-flex" style="padding:var(--space-2) var(--space-3)">
+      <div class="row wrap-flex">
+        <span class="caption">Driving your feed</span>
+        <span class="chip" aria-pressed="true">Follows <b class="mono">6</b></span>
+        <span class="chip" aria-pressed="true">Saves <b class="mono">14</b></span>
+        <span class="chip" aria-pressed="true">Questions asked <b class="mono">3</b></span>
+        <span class="chip" aria-pressed="true">Past orders <b class="mono">2</b></span>
+        <span class="chip">Visits <b class="mono">21</b> · capped</span>
+      </div>
+      <a class="btn btn-ghost" href="profile.html">Tune your signals</a>
+    </div>
+    <div class="divide">
+      <p class="muted" style="padding:var(--space-2) var(--space-3)">
+        Signals fade. Something you saved last week counts far more than something
+        you saved in spring — roughly a 30-day half-life, so your feed keeps moving.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE MAGAZINE FEED — personalised, attributed ============ -->
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div class="magazine">
+
+    <div class="m-a reveal">
+      <a href="maker.html">
+        <div class="film film--tall">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Stoneware · Hudson Valley</div>
+            <div class="film-name">Sena pulls a new glaze from the test kiln</div>
+          </div>
+        </div>
+      </a>
+      <p class="caption" style="margin-top:var(--space-1)">Because you follow Sena</p>
+    </div>
+
+    <div class="m-b reveal" style="animation-delay:70ms">
+      <a href="maker.html">
+        <div class="film film--square v2">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Natural dye</div>
+            <div class="film-name">Noor answers: “does indigo fade?”</div>
+          </div>
+        </div>
+      </a>
+      <p class="caption" style="margin-top:var(--space-1)">Because you asked Noor a question</p>
+      <div class="card" style="margin-top:var(--space-2)">
+        <span class="badge badge-verified">✓ Real Maker</span>
+        <p class="measure" style="margin-top:var(--space-1)">
+          “It fades the way a good pair of jeans fades. That’s the whole point of it.”
+        </p>
+        <button class="voice" style="margin-top:var(--space-2)">
+          <span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:5px"></b></span>
+          Hear Noor say it
+        </button>
+      </div>
+    </div>
+
+    <div class="m-d reveal" style="animation-delay:140ms">
+      <a href="maker.html">
+        <div class="film film--portrait v3">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Green woodwork</div>
+            <div class="film-name">Tomas on why he never kiln-dries</div>
+          </div>
+        </div>
+      </a>
+      <p class="caption" style="margin-top:var(--space-1)">Because you saved his spoon rack</p>
+    </div>
+
+    <!-- full-bleed colour block: the ranking promise, stated plainly -->
+    <div class="m-f block block-c reveal" style="animation-delay:210ms; border-radius:var(--radius-lg); padding:var(--space-10) var(--space-8)">
+      <p class="caption" style="color:inherit; opacity:.8">How this feed is ordered</p>
+      <h2 class="display" style="max-width:18ch; margin-top:var(--space-2)">
+        Relationship, not popularity.
+      </h2>
+      <p class="body-lg measure" style="margin-top:var(--space-3); opacity:.92">
+        KOL never counts how many strangers liked something. Your feed reads only
+        your own history with a maker — and nobody else’s. Sign out and it resets
+        to zero, because there is nothing to read.
+      </p>
+      <a class="btn" href="profile.html" style="margin-top:var(--space-4); background:transparent; border-color:currentColor; color:inherit">
+        See and edit your signals
+      </a>
+    </div>
+
+    <div class="m-c reveal">
+      <a href="maker.html">
+        <div class="film film--wide v4">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Copper · small batch</div>
+            <div class="film-name">Mira tins the pan you bought in March</div>
+          </div>
+        </div>
+      </a>
+      <p class="caption" style="margin-top:var(--space-1)">Because you ordered from Mira</p>
+    </div>
+
+    <div class="m-b reveal" style="animation-delay:70ms">
+      <a href="maker.html">
+        <div class="film film--square v5">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Bookbinding</div>
+            <div class="film-name">Elias, a spine in linen thread</div>
+          </div>
+        </div>
+      </a>
+      <p class="caption" style="margin-top:var(--space-1)">New to you · kept in so your feed doesn’t ossify</p>
+    </div>
+
+    <div class="m-e reveal" style="animation-delay:140ms">
+      <a href="maker.html">
+        <div class="film film--wide">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Stoneware</div>
+            <div class="film-name">Sena’s kiln opening, filmed at 6am</div>
+          </div>
+        </div>
+      </a>
+      <p class="caption" style="margin-top:var(--space-1)">Because you follow Sena · newest first</p>
+    </div>
+
+    <!-- non-success state: signed-out / no-signal fallback, shown in situ -->
+    <div class="m-e reveal" style="animation-delay:210ms">
+      <div class="empty" style="height:100%; display:flex; flex-direction:column; justify-content:center; gap:var(--space-2)">
+        <p class="caption">Empty state — signed out or brand new</p>
+        <p class="h3" style="color:var(--ink)">Nothing to read yet.</p>
+        <p class="measure" style="margin:0 auto">
+          For You needs a relationship to rank by. Anonymous visitors score zero —
+          so we show you Discover instead until you follow someone.
+        </p>
+        <div class="row" style="justify-content:center; margin-top:var(--space-1)">
+          <a class="btn" href="discover.html">Browse Discover</a>
+          <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row" style="justify-content:center; margin-top:var(--space-10)">
+    <button class="btn btn-lg">Show me someone new</button>
+  </div>
+  <p class="caption" style="text-align:center; margin-top:var(--space-2)">
+    Fresh discovery is always mixed in · your favourites never take the whole feed
+  </p>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>For You · B1 + P6+</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/?feed=for-you</code> · KOL chrome (D15a)</dd>
+      <dt>Spec</dt><dd><code>specs/discovery-feed.md</code> (B1) + <code>specs/relationship-based-ranking.md</code> (P6+)</dd>
+      <dt>Wave</dt><dd>3a / 5 — same surface as Discover, relationship-weighted</dd>
+      <dt>Mission</dt><dd><b>Carries</b> — Present ✓✓ Particular ✓</dd>
+      <dt>Hard AC</dt><dd class="warn">Relationship signals only. <b>No cross-buyer aggregate is ever read</b> — popularity is not a term in the score.</dd>
+      <dt>Hard AC</dt><dd class="warn">Anonymous buyers resolve to <code>Relationship = 0</code> (cold start → business + freshness only).</dd>
+      <dt>Hard AC</dt><dd>Recency decay <code>exp(-age_days / τ)</code>, τ ≈ 30d. <code>visit</code> capped ≈ 3 effective visits.</dd>
+      <dt>Hard AC</dt><dd class="warn">Not a uniform grid — mixed-size tiles, inherited from B1.</dd>
+      <dt>Weights</dt><dd>FEED = Business .30 · Situation .15 · Freshness .25 · <b>Relationship .30</b>. Signal map: commission 5.0 · purchase 4.0 · follow 3.0 · question 2.0 · save 1.5 · review 1.5 · visit 1.0.</dd>
+      <dt>Privacy</dt><dd><code>buyer_signals</code> is RLS-private; aggregation runs server-side under the service role, scoped to <code>ctx.buyerId</code>.</dd>
+      <dt>Next state</dt><dd>tap → <code>GROWN</code> (B2) → tap → <code>WORLD_OPEN</code> (B3)</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

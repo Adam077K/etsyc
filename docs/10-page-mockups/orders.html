@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orders — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html" aria-current="page">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ OPENER ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <p class="caption reveal">Your orders · someone is making these by hand</p>
+    <h1 class="h1 measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+      Not a status bar. A person, mid-work.
+    </h1>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div class="row wrap-flex" style="align-items:flex-start; gap:var(--space-6)">
+
+    <!-- ============ ORDERS INDEX (/orders) ============ -->
+    <section class="stack-3" style="flex:1 1 300px; min-width:280px" aria-labelledby="idx-h">
+      <h2 id="idx-h" class="h2 reveal">Orders</h2>
+
+      <a class="card reveal" href="#detail" style="display:block; border-color:var(--accent); animation-delay:60ms">
+        <div class="row-between wrap-flex">
+          <span class="h3">Sena · serving bowl</span>
+          <span class="caption" style="margin:0">#KOL-2049</span>
+        </div>
+        <div class="row wrap-flex" style="margin-top:var(--space-1)">
+          <span class="badge badge-verified">In production</span>
+          <span class="caption" style="margin:0">made to order · ~3 weeks</span>
+        </div>
+        <div class="row-between" style="margin-top:var(--space-2)">
+          <span class="muted">Placed 12 Jun</span><span class="price">$140.00</span>
+        </div>
+      </a>
+
+      <a class="card reveal" href="#detail" style="display:block; animation-delay:120ms">
+        <div class="row-between wrap-flex">
+          <span class="h3">Elias · journal</span>
+          <span class="caption" style="margin:0">#KOL-2031</span>
+        </div>
+        <div class="row wrap-flex" style="margin-top:var(--space-1)">
+          <span class="badge badge-pending">Materials gathered</span>
+          <span class="caption" style="margin:0">commission · balance on ship</span>
+        </div>
+        <div class="row-between" style="margin-top:var(--space-2)">
+          <span class="muted">Placed 2 Jun</span><span class="price">$310.00</span>
+        </div>
+      </a>
+
+      <a class="card reveal" href="#detail" style="display:block; animation-delay:180ms">
+        <div class="row-between wrap-flex">
+          <span class="h3">Mira · copper pan</span>
+          <span class="caption" style="margin:0">#KOL-1988</span>
+        </div>
+        <div class="row wrap-flex" style="margin-top:var(--space-1)">
+          <span class="badge badge-verified">Delivered</span>
+          <span class="caption" style="margin:0">arrived 4 Jun</span>
+        </div>
+        <div class="row-between" style="margin-top:var(--space-2)">
+          <span class="muted">Placed 20 May</span><span class="price">$265.00</span>
+        </div>
+      </a>
+
+      <!-- empty state, shown in situ -->
+      <div class="empty reveal" style="animation-delay:220ms">
+        <p class="caption">Empty state — no orders yet</p>
+        <p class="h3" style="color:var(--ink); margin-top:var(--space-1)">Nothing on the bench yet.</p>
+        <p class="measure" style="margin:var(--space-1) auto 0">
+          When you buy, this is where you’ll watch it get made — updates and photos
+          from the maker, not a tracking number.
+        </p>
+        <a class="btn btn-accent" href="discover.html" style="margin-top:var(--space-3)">Find a maker</a>
+      </div>
+    </section>
+
+    <!-- ============ ORDER DETAIL (/orders/[id]) ============ -->
+    <section id="detail" class="stack-4" style="flex:2 1 460px; min-width:320px" aria-labelledby="det-h">
+
+      <!-- THANK-YOU MOMENT (B8) -->
+      <div class="card-flush reveal">
+        <div class="film film--wide v2">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">A note from Sena</div>
+            <div class="film-name">“Thank you — I’ll film this one as I make it.”</div>
+          </div>
+        </div>
+        <div class="row-between wrap-flex" style="padding:var(--space-2) var(--space-3)">
+          <span class="badge badge-verified">✓ Maker-filmed · not AI</span>
+          <span class="caption" style="margin:0">plays once, after purchase</span>
+        </div>
+      </div>
+
+      <div class="row-between wrap-flex reveal" style="animation-delay:60ms">
+        <div>
+          <h2 id="det-h" class="h2">Serving bowl, wide</h2>
+          <p class="caption" style="margin-top:var(--space-0-5)">Order #KOL-2049 · Sena · made to order</p>
+        </div>
+        <a class="btn" href="inbox.html">Open Inbox thread</a>
+      </div>
+
+      <!-- PRODUCTION TIMELINE -->
+      <div class="card reveal" style="animation-delay:120ms">
+        <p class="caption">How it’s coming along</p>
+        <ol class="stack-3 divide" style="list-style:none; margin-top:var(--space-2)">
+
+          <li class="row wrap-flex" style="gap:var(--space-3); align-items:flex-start">
+            <span class="badge badge-verified" style="flex:0 0 auto">✓ Accepted</span>
+            <div style="flex:1; min-width:200px">
+              <p class="muted" style="font-size:var(--fs-caption)">12 Jun</p>
+              <p>Sena accepted the order and confirmed your initials placement.</p>
+            </div>
+          </li>
+
+          <li class="row wrap-flex" style="gap:var(--space-3); align-items:flex-start; padding-top:var(--space-3)">
+            <span class="badge badge-verified" style="flex:0 0 auto">✓ Materials</span>
+            <div style="flex:1; min-width:200px">
+              <p class="muted" style="font-size:var(--fs-caption)">14 Jun</p>
+              <p>Wedged the speckled stoneware body. Photo from the bench:</p>
+              <span class="film film--wide" style="margin-top:var(--space-1); display:block"></span>
+            </div>
+          </li>
+
+          <li class="row wrap-flex" style="gap:var(--space-3); align-items:flex-start; padding-top:var(--space-3)">
+            <span class="badge badge-verified" style="flex:0 0 auto">◆ In production</span>
+            <div style="flex:1; min-width:200px">
+              <p class="muted" style="font-size:var(--fs-caption)">Now · updated 18 Jun</p>
+              <p>Thrown and trimmed. Sena posted a 20-second clip of the pull.</p>
+              <span class="film film--wide v2" style="margin-top:var(--space-1); display:block">
+                <div class="play"><i>▶</i></div>
+              </span>
+              <!-- customization approval checkpoint -->
+              <div class="card" style="margin-top:var(--space-2); padding:var(--space-2); background:color-mix(in oklab, var(--accent-2) 7%, var(--surface))">
+                <p class="caption" style="margin:0">Your approval needed</p>
+                <p style="margin-top:var(--space-0-5)">Sena test-pressed <b>“R.M.”</b> under the foot. Approve the placement before she fires it.</p>
+                <div class="row" style="margin-top:var(--space-2)">
+                  <button class="btn btn-accent caption">Approve placement</button>
+                  <a class="btn btn-ghost caption" href="inbox.html" style="border:none">Ask to adjust</a>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="row wrap-flex" style="gap:var(--space-3); align-items:flex-start; padding-top:var(--space-3)">
+            <span class="badge badge-pending" style="flex:0 0 auto">Finishing</span>
+            <div class="muted" style="flex:1; min-width:200px">
+              <p style="font-size:var(--fs-caption)">Expected ~late Jun</p>
+              <p>Bisque, glaze, glaze-fire. Sena will post the kiln opening.</p>
+            </div>
+          </li>
+
+          <li class="row wrap-flex" style="gap:var(--space-3); align-items:flex-start; padding-top:var(--space-3)">
+            <span class="badge badge-pending" style="flex:0 0 auto">Shipped</span>
+            <div class="muted" style="flex:1; min-width:200px">
+              <p style="font-size:var(--fs-caption)">Not yet</p>
+              <p>Tracking appears here the moment she hands it to the carrier.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- SHIPPING TRACKING (dormant until shipped) -->
+      <div class="card reveal" style="animation-delay:180ms">
+        <div class="row-between wrap-flex">
+          <p class="caption" style="margin:0">Shipping</p>
+          <span class="badge badge-pending">Awaiting dispatch</span>
+        </div>
+        <p class="muted" style="margin-top:var(--space-1)">
+          One parcel from Sena’s studio. Carrier + tracking number land here on ship —
+          you’ll also get a notification.
+        </p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Orders · B9 + B8</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/orders</code> (index) + <code>/orders/[id]</code> (detail) · KOL chrome</dd>
+      <dt>Spec</dt><dd><code>specs/orders.md</code> (B9) + <code>specs/thank-you-film.md</code> (B8) · Wave 3b / 5</dd>
+      <dt>Mission</dt><dd><b>Supports</b> — the order stays a relationship, not a receipt.</dd>
+      <dt>Hard AC</dt><dd class="warn">Thank-you film is <b>maker-authored or neutral</b> — <b>never AI-fabricated</b>. No synthetic voice or face, ever.</dd>
+      <dt>Hard AC</dt><dd>Production timeline states are maker-posted: accepted → materials → in production → finishing → shipped.</dd>
+      <dt>Hard AC</dt><dd>Customization checkpoints block firing/ship until buyer approves; every checkpoint links into the order’s Inbox thread.</dd>
+      <dt>Empty</dt><dd>“No orders yet” routes to Discover — never a dead end.</dd>
+      <dt>Privacy</dt><dd>Order + updates are RLS-scoped to <code>buyer_id</code>; process photos owned by the maker.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

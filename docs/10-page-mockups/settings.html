@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     P2 · /settings — HYGIENE surface. Carries no mission load.
+     Correct look here is plain, legible, unglamorous. This page
+     should be forgettable: users come to change one thing and
+     leave. No film, no colour blocks, no drama. See designer's
+     note at the foot.
+     ============================================================ -->
+
+<header class="section-sm">
+  <div class="wrap-narrow">
+    <p class="caption">Account</p>
+    <h1 class="h1" style="margin-top:var(--space-1)">Settings</h1>
+  </div>
+</header>
+
+<main class="wrap-narrow" style="padding-bottom:var(--space-16)">
+  <div class="row wrap-flex" style="align-items:flex-start; gap:var(--space-6)">
+
+    <!-- ============ LEFT NAV ============ -->
+    <aside style="flex:0 0 200px; position:sticky; top:80px">
+      <nav class="stack-1" style="display:flex; flex-direction:column">
+        <a href="#account" class="caption" style="padding:var(--space-1) 0; color:var(--ink)">Account info</a>
+        <a href="#notifications" class="caption" style="padding:var(--space-1) 0">Notifications</a>
+        <a href="#payment" class="caption" style="padding:var(--space-1) 0">Payment methods</a>
+        <a href="#privacy" class="caption" style="padding:var(--space-1) 0">Privacy</a>
+        <a href="#visibility" class="caption" style="padding:var(--space-1) 0">Profile visibility</a>
+        <a href="#recs" class="caption" style="padding:var(--space-1) 0">Recommendations</a>
+        <a href="#community" class="caption" style="padding:var(--space-1) 0">Community permissions</a>
+        <a href="#data" class="caption" style="padding:var(--space-1) 0">Your data</a>
+      </nav>
+    </aside>
+
+    <!-- ============ SECTIONS ============ -->
+    <div style="flex:1 1 480px; min-width:0" class="stack-6">
+
+      <!-- ACCOUNT INFO -->
+      <section id="account" class="stack-3">
+        <h2 class="h3">Account info</h2>
+        <div class="card-flush divide">
+          <div class="row-between" style="padding:var(--space-3)">
+            <div><div class="caption">Name</div><div>Dani Osei</div></div>
+            <button class="btn">Edit</button>
+          </div>
+          <div class="row-between" style="padding:var(--space-3)">
+            <div><div class="caption">Email</div><div>dani@example.com</div></div>
+            <button class="btn">Edit</button>
+          </div>
+          <div class="row-between" style="padding:var(--space-3)">
+            <div><div class="caption">Password</div><div>Last changed 3 months ago</div></div>
+            <button class="btn">Change</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS — per-type toggles matching B16's types -->
+      <section id="notifications" class="stack-3">
+        <h2 class="h3">Notifications</h2>
+        <p class="muted">Per-type. Turn off anything that isn't useful — nothing here is required.</p>
+        <div class="card-flush divide">
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>A maker you follow posts a new film</span>
+            <input type="checkbox" checked>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Order status &amp; shipping updates</span>
+            <input type="checkbox" checked>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>A maker replied to your message</span>
+            <input type="checkbox" checked>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Your saved piece is back / made to order slot opened</span>
+            <input type="checkbox" checked>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>A maker you follow schedules a live session</span>
+            <input type="checkbox">
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Weekly “new to KOL” digest</span>
+            <input type="checkbox">
+          </label>
+        </div>
+        <p class="caption">Channels: <span class="chip" aria-pressed="true" style="pointer-events:none">In-app</span> <span class="chip" aria-pressed="true" style="pointer-events:none">Email</span> <span class="chip" style="pointer-events:none">Push</span></p>
+      </section>
+
+      <!-- PAYMENT METHODS — Stripe test mode -->
+      <section id="payment" class="stack-3">
+        <h2 class="h3">Payment methods</h2>
+        <span class="badge badge-pending">Stripe · test mode</span>
+        <div class="card-flush divide">
+          <div class="row-between" style="padding:var(--space-3)">
+            <div><div>Visa ···· 4242</div><div class="caption">Expires 04/29 · default</div></div>
+            <button class="btn">Remove</button>
+          </div>
+        </div>
+        <button class="btn">＋ Add a card</button>
+      </section>
+
+      <!-- PRIVACY -->
+      <section id="privacy" class="stack-3">
+        <h2 class="h3">Privacy</h2>
+        <div class="card-flush divide">
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Let makers see that you viewed their world</span>
+            <input type="checkbox">
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Include my purchases in aggregate maker analytics</span>
+            <input type="checkbox" checked>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Allow personalised email from KOL</span>
+            <input type="checkbox">
+          </label>
+        </div>
+      </section>
+
+      <!-- PROFILE VISIBILITY — incl. public taste-identity toggle -->
+      <section id="visibility" class="stack-3">
+        <h2 class="h3">Profile visibility</h2>
+        <div class="card-flush divide">
+          <div class="row-between" style="padding:var(--space-3)">
+            <div style="flex:1 1 auto; padding-right:var(--space-3)">
+              <div>Public taste identity</div>
+              <div class="caption" style="text-transform:none; letter-spacing:0">Show the makers you follow and your collections on your public profile.</div>
+            </div>
+            <input type="checkbox" checked>
+          </div>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Show my verified reviews publicly</span>
+            <input type="checkbox" checked>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Appear in “collectors of this maker”</span>
+            <input type="checkbox">
+          </label>
+        </div>
+      </section>
+
+      <!-- RECOMMENDATION PREFERENCES — incl. reset-what-KOL-learned -->
+      <section id="recs" class="stack-3">
+        <h2 class="h3">Recommendation preferences</h2>
+        <div class="card-flush divide">
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Use my watch &amp; follow behaviour to tune the feed</span>
+            <input type="checkbox" checked>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Include makers outside my stated materials</span>
+            <input type="checkbox" checked>
+          </label>
+        </div>
+        <div class="card">
+          <div class="row-between">
+            <div style="flex:1 1 auto; padding-right:var(--space-3)">
+              <div>Reset what KOL has learned</div>
+              <div class="caption" style="text-transform:none; letter-spacing:0">Clears your revealed-taste model. Your follows and orders stay; the feed starts fresh.</div>
+            </div>
+            <button class="btn">Reset</button>
+          </div>
+        </div>
+        <a class="btn" href="onboarding.html">Rerun onboarding →</a>
+      </section>
+
+      <!-- COMMUNITY PERMISSIONS -->
+      <section id="community" class="stack-3">
+        <h2 class="h3">Community permissions</h2>
+        <div class="card-flush divide">
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Who can message me</span>
+            <select style="padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--surface); color:var(--ink); font:inherit">
+              <option>Makers I follow</option>
+              <option>Any verified maker</option>
+              <option>No one</option>
+            </select>
+          </label>
+          <label class="row-between" style="padding:var(--space-3); cursor:pointer">
+            <span>Let makers @mention me in their world comments</span>
+            <input type="checkbox" checked>
+          </label>
+        </div>
+      </section>
+
+      <!-- YOUR DATA — export / delete -->
+      <section id="data" class="stack-3">
+        <h2 class="h3">Your data</h2>
+        <div class="card-flush divide">
+          <div class="row-between" style="padding:var(--space-3)">
+            <div><div>Export your data</div><div class="caption" style="text-transform:none; letter-spacing:0">A copy of your profile, orders, and messages.</div></div>
+            <button class="btn">Request export</button>
+          </div>
+          <div class="row-between" style="padding:var(--space-3)">
+            <div><div>Delete your account</div><div class="caption" style="text-transform:none; letter-spacing:0">Permanent. We'll ask you to confirm.</div></div>
+            <button class="btn">Delete…</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DESIGNER'S NOTE -->
+      <section class="card" style="background:transparent; border-style:dashed">
+        <p class="caption">Designer's note</p>
+        <p class="measure" style="margin-top:var(--space-1)">
+          This surface is deliberately plain, legible, and unglamorous — no film,
+          no colour blocks, no motion drama. Settings is hygiene: people arrive to
+          flip one switch and leave. Making it “beautiful” would fight that job and
+          add cost for zero mission value. Restraint here is the correct craft.
+        </p>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Settings · P2</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/settings</code> · KOL chrome</dd>
+      <dt>Spec</dt><dd><code>specs/settings.md</code> · Wave 1</dd>
+      <dt>Mission</dt><dd><b>Hygiene</b> — carries no mission load. Build cleanly and cheaply.</dd>
+      <dt>Sections</dt><dd>Account · Notifications (per-type, matches B16) · Payment (Stripe test) · Privacy · Profile visibility (incl. public taste-identity toggle) · Recommendations (incl. reset-what-KOL-learned) · Community permissions · Data export/delete</dd>
+      <dt>Entry point</dt><dd>Rerun onboarding → <code>/welcome</code> (B18)</dd>
+      <dt>Hard AC</dt><dd class="warn">Plain and unglamorous on purpose. No film / colour blocks here — that would fight the surface's job.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

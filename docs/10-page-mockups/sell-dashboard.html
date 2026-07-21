@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your store — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ OPENER: a workshop desk, not a KPI wall ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <div class="row-between wrap-flex">
+      <div>
+        <p class="caption reveal">Your store · Sena · Stoneware, Hudson Valley</p>
+        <h1 class="display measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+          Morning, Sena.
+        </h1>
+        <p class="body-lg measure muted reveal" style="animation-delay:140ms; margin-top:var(--space-2)">
+          Two things want a reply, one order needs firing. Everything else can wait
+          until you're off the wheel.
+        </p>
+      </div>
+      <div class="row reveal" style="animation-delay:210ms; gap:var(--space-2)">
+        <a class="btn" href="sell-products.html">Products</a>
+        <a class="btn btn-accent" href="sell-products.html">New product</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+
+  <div style="display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:var(--space-4)">
+
+    <!-- ==== LEFT: the things that need a human ==== -->
+    <div class="stack-4">
+
+      <!-- STORE STATUS -->
+      <section class="card reveal">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)">
+            <span class="badge badge-pending">• Draft — not public yet</span>
+            <h2 class="h3">Store status</h2>
+          </span>
+          <a class="btn btn-ghost" href="sell-products.html">Publish gate</a>
+        </div>
+        <p class="measure" style="margin-top:var(--space-2)">
+          Your store is private. Two things stand between you and publish: your voice
+          anchor is still in review, and one product has incomplete specs.
+        </p>
+        <div class="divide" style="margin-top:var(--space-2)">
+          <div class="row-between" style="padding-block:var(--space-2)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-pending">•</span><span>Real-Maker verification</span></span>
+            <a class="caption" href="sell-verify.html" style="color:var(--accent)">Finish verifying →</a>
+          </div>
+          <div class="row-between" style="padding-block:var(--space-2)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-pending">•</span><span>1 product missing required specs</span></span>
+            <a class="caption" href="sell-products.html" style="color:var(--accent)">Fix specs →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS RECEIVED -->
+      <section class="card reveal" style="animation-delay:80ms">
+        <div class="row-between">
+          <h2 class="h3">Orders received</h2>
+          <span class="caption mono">3 open · 1 needs firing</span>
+        </div>
+
+        <div class="divide" style="margin-top:var(--space-2)">
+          <!-- order row + inline set-status control -->
+          <div class="row-between wrap-flex" style="padding-block:var(--space-3)">
+            <div>
+              <b>Ridge tumbler, pair</b>
+              <p class="caption" style="margin-top:var(--space-0-5)">Order <span class="mono">#KOL-2071</span> · Daniel R. · <span class="price">$180</span></p>
+            </div>
+            <div class="row" style="gap:var(--space-2)">
+              <span class="badge badge-pending">• To make</span>
+              <select class="chip" aria-label="Set status for order KOL-2071" style="border-radius:var(--radius-pill)">
+                <option>To make</option>
+                <option>In the kiln</option>
+                <option>Curing</option>
+                <option>Shipped</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row-between wrap-flex" style="padding-block:var(--space-3)">
+            <div>
+              <b>Slate serving bowl</b>
+              <p class="caption" style="margin-top:var(--space-0-5)">Order <span class="mono">#KOL-2069</span> · Priya M. · <span class="price">$96</span></p>
+            </div>
+            <div class="row" style="gap:var(--space-2)">
+              <span class="badge badge-ai">◆ In the kiln</span>
+              <select class="chip" aria-label="Set status for order KOL-2069" style="border-radius:var(--radius-pill)">
+                <option>In the kiln</option>
+                <option>Curing</option>
+                <option>Shipped</option>
+                <option>To make</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row-between wrap-flex" style="padding-block:var(--space-3)">
+            <div>
+              <b>Tenmoku mug</b>
+              <p class="caption" style="margin-top:var(--space-0-5)">Order <span class="mono">#KOL-2064</span> · Sam O. · <span class="price">$48</span></p>
+            </div>
+            <div class="row" style="gap:var(--space-2)">
+              <span class="badge badge-verified">✓ Shipped</span>
+              <select class="chip" aria-label="Set status for order KOL-2064" style="border-radius:var(--radius-pill)">
+                <option>Shipped</option>
+                <option>Delivered</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EMPTY STATE (shown for reference) -->
+      <section class="card reveal" style="animation-delay:120ms">
+        <p class="caption">Empty state · what a new maker sees</p>
+        <div class="empty" style="margin-top:var(--space-2)">
+          <b class="h3">No orders yet.</b>
+          <p class="measure" style="margin:var(--space-1) auto 0">
+            When someone buys, it lands here with its status control. Until then, the best
+            thing you can do is film another piece.
+          </p>
+          <a class="btn btn-accent" href="sell-products.html" style="margin-top:var(--space-3)">Add a product</a>
+        </div>
+      </section>
+
+      <!-- MESSAGES / COMMISSIONS NEEDING A REPLY -->
+      <section class="card reveal" style="animation-delay:160ms">
+        <div class="row-between">
+          <h2 class="h3">Needs a reply</h2>
+          <span class="caption mono">2 waiting</span>
+        </div>
+        <div class="divide" style="margin-top:var(--space-2)">
+          <a class="row-between wrap-flex" href="inbox.html" style="padding-block:var(--space-3)">
+            <div>
+              <span class="row" style="gap:var(--space-2)"><span class="badge badge-ai">◆ Commission</span><b>A pair of tumblers, wet-slate</b></span>
+              <p class="caption" style="margin-top:var(--space-0-5)">Daniel R. · asked 6h ago · "could they land by Sept 2?"</p>
+            </div>
+            <span class="btn btn-ghost">Reply</span>
+          </a>
+          <a class="row-between wrap-flex" href="inbox.html" style="padding-block:var(--space-3)">
+            <div>
+              <span class="row" style="gap:var(--space-2)"><span class="badge">Message</span><b>Question on the serving bowl</b></span>
+              <p class="caption" style="margin-top:var(--space-0-5)">Priya M. · asked yesterday · "is it food-safe for citrus?"</p>
+            </div>
+            <span class="btn btn-ghost">Reply</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ==== RIGHT: status glances + honest figures ==== -->
+    <aside class="stack-3">
+
+      <!-- VERIFICATION STATUS -->
+      <div class="card">
+        <p class="caption">Verification</p>
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-pending">• In review</span>
+          <span class="muted">Voice anchor submitted</span>
+        </div>
+        <p class="measure" style="margin-top:var(--space-2)">
+          A founder is checking your clip. Your Real-Maker badge goes live once it clears.
+        </p>
+        <a class="btn btn-ghost" href="sell-verify.html" style="margin-top:var(--space-2)">View verification</a>
+      </div>
+
+      <!-- PRODUCTS SUMMARY -->
+      <div class="card">
+        <p class="caption">Products</p>
+        <div class="divide" style="margin-top:var(--space-2)">
+          <div class="row-between" style="padding-block:var(--space-1)"><span>Published-ready</span><span class="mono">6</span></div>
+          <div class="row-between" style="padding-block:var(--space-1)"><span>Draft</span><span class="mono">2</span></div>
+          <div class="row-between" style="padding-block:var(--space-1)"><span class="row" style="gap:var(--space-1)"><span class="badge badge-pending">•</span>Blocking publish</span><span class="mono">1</span></div>
+        </div>
+        <a class="btn btn-ghost" href="sell-products.html" style="margin-top:var(--space-2)">Manage products</a>
+      </div>
+
+      <!-- PERFORMANCE — honest, non-vanity -->
+      <div class="card">
+        <p class="caption">This week · plainly</p>
+        <div class="divide" style="margin-top:var(--space-2)">
+          <div class="row-between" style="padding-block:var(--space-2)"><span>People who opened your world</span><span class="mono">128</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Follows</span><span class="mono">14</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Saves</span><span class="mono">31</span></div>
+        </div>
+        <p class="caption" style="margin-top:var(--space-2)">
+          Counts, not scores. No streaks, no "you're on fire" — just what happened. Nothing
+          here changes what a buyer sees.
+        </p>
+      </div>
+
+      <!-- DESIGNER'S NOTE -->
+      <div class="card" style="background:var(--ground)">
+        <p class="caption">Designer's note — mockup only</p>
+        <p class="measure" style="margin-top:var(--space-1)">
+          This surface carries <b>no mission load</b>. It's honest plumbing: route the maker to
+          the interview, editor, and publish screens where the real design effort lives. Do
+          not let dashboard polish steal budget from those.
+        </p>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Dashboard · S7</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/dashboard</code> · KOL chrome (seller tools)</dd>
+      <dt>Spec</dt><dd>Maker home · orders, status, messages, figures · Wave 4a</dd>
+      <dt>Mission</dt><dd><b>Hygiene</b> — build it cleanly and cheaply. Carries no mission load.</dd>
+      <dt>Hard AC</dt><dd class="warn">Figures are honest &amp; non-vanity — counts only, no engagement-bait framing, no streaks.</dd>
+      <dt>Hard AC</dt><dd class="warn">Includes empty state ("no orders yet") and an order set-status control.</dd>
+      <dt>Hard AC</dt><dd class="warn">No urgency/scarcity chrome. No uniform 3-col card grid.</dd>
+      <dt>Links</dt><dd>publish gate → <code>/sell/products</code> · verification → <code>/sell/verify</code></dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

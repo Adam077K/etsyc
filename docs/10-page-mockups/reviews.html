@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reviews — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ OPENER ============ -->
+<header class="section-sm">
+  <div class="wrap-narrow">
+    <p class="caption reveal">Reviews · verified because you bought it, not because you clicked a box</p>
+    <h1 class="h1 measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+      Two places reviews live — and neither is a standalone feed.
+    </h1>
+    <p class="body-lg measure muted reveal" style="animation-delay:140ms; margin-top:var(--space-2)">
+      Reviews are a <b>block on the product page</b>, and a private <code>/me/reviews</code>
+      view where you write your own. There is no browsable “all reviews” route.
+    </p>
+  </div>
+</header>
+
+<main class="wrap-narrow" style="padding-bottom:var(--space-16)">
+
+  <!-- ============ (A) REVIEWS BLOCK — as it appears on a product ============ -->
+  <section class="stack-4" aria-labelledby="block-h">
+    <div class="row-between wrap-flex reveal">
+      <h2 id="block-h" class="h2">A · On the product page</h2>
+      <a class="btn btn-ghost caption" href="product.html" style="border:none">Sena · ridge tumbler ↗</a>
+    </div>
+
+    <div class="card reveal" style="animation-delay:60ms">
+      <!-- summary row: two distinct measures -->
+      <div class="row wrap-flex" style="gap:var(--space-6)">
+        <div>
+          <p class="caption" style="margin:0">Overall</p>
+          <p class="h1" style="font-size:var(--fs-h2)">4.8 <span class="muted" style="font-size:var(--fs-body)">★ · 24 reviews</span></p>
+        </div>
+        <div>
+          <p class="caption" style="margin:0">Matched expectations</p>
+          <p class="h1" style="font-size:var(--fs-h2)">92% <span class="muted" style="font-size:var(--fs-body)">“as described”</span></p>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:var(--space-2); font-size:var(--fs-caption)">
+        Every review below is from a confirmed order. Expectation-accuracy is asked
+        separately from stars — a piece can be 5★ and still surprise you.
+      </p>
+    </div>
+
+    <!-- one review WITH a maker response -->
+    <article class="card reveal" style="animation-delay:120ms">
+      <div class="row-between wrap-flex">
+        <div class="row">
+          <span class="film film--square" style="width:36px; height:36px; border-radius:var(--radius-pill)"></span>
+          <div>
+            <div class="h3" style="font-size:var(--fs-body)">Dani R.</div>
+            <div class="caption" style="margin:0">Ordered 3 Apr</div>
+          </div>
+        </div>
+        <span class="badge badge-verified">✓ Verified purchase</span>
+      </div>
+      <div class="row wrap-flex" style="margin-top:var(--space-2)">
+        <span class="chip" aria-pressed="true">★★★★★</span>
+        <span class="chip">Bought: <b>Ash glaze, pair</b></span>
+        <span class="chip">Matched expectation · <b>Exactly</b></span>
+      </div>
+      <p class="measure" style="margin-top:var(--space-2)">
+        Heavier than a factory cup in the best way. The glaze pooling Sena showed in
+        her film is exactly what turned up — no surprises, which is the point.
+      </p>
+      <div class="row" style="margin-top:var(--space-2)">
+        <span class="film film--square" style="width:64px; height:64px"></span>
+        <span class="film film--square v2" style="width:64px; height:64px"></span>
+      </div>
+
+      <!-- maker response -->
+      <div class="card" style="margin-top:var(--space-3); background:color-mix(in oklab, var(--accent) 6%, var(--surface)); border-color:color-mix(in oklab, var(--accent) 20%, var(--line))">
+        <div class="row">
+          <span class="badge badge-verified">Maker · Sena</span>
+          <span class="caption" style="margin:0">replied 6 Apr</span>
+        </div>
+        <p style="margin-top:var(--space-1)">
+          Thank you Dani — that pair came out of the same firing as the ones in the
+          video. Enjoy the morning coffee in them.
+        </p>
+      </div>
+    </article>
+
+    <!-- a review measuring expectation-gap distinctly from stars -->
+    <article class="card reveal" style="animation-delay:180ms">
+      <div class="row-between wrap-flex">
+        <div class="row">
+          <span class="film film--square v3" style="width:36px; height:36px; border-radius:var(--radius-pill)"></span>
+          <div>
+            <div class="h3" style="font-size:var(--fs-body)">Marcus T.</div>
+            <div class="caption" style="margin:0">Ordered 19 Mar</div>
+          </div>
+        </div>
+        <span class="badge badge-verified">✓ Verified purchase</span>
+      </div>
+      <div class="row wrap-flex" style="margin-top:var(--space-2)">
+        <span class="chip" aria-pressed="true">★★★★☆</span>
+        <span class="chip">Bought: <b>Speckled matte, single</b></span>
+        <span class="chip">Matched expectation · <b>Slightly smaller</b></span>
+      </div>
+      <p class="measure" style="margin-top:var(--space-2)">
+        Lovely object — the four stars are honest, not a complaint. It reads a touch
+        smaller in hand than on film, so I’m flagging that for the next buyer.
+      </p>
+    </article>
+  </section>
+
+  <!-- ============ (B) MY REVIEWS — the only standalone view ============ -->
+  <section class="stack-4" style="margin-top:var(--space-12)" aria-labelledby="me-h">
+    <div class="row-between wrap-flex reveal">
+      <h2 id="me-h" class="h2">B · Your reviews</h2>
+      <span class="caption" style="margin:0"><code>/me/reviews</code> · private to you</span>
+    </div>
+
+    <!-- awaiting-review prompt from a delivered order -->
+    <div class="card-flush reveal" style="animation-delay:60ms">
+      <div class="row-between wrap-flex" style="padding:var(--space-2) var(--space-3); background:color-mix(in oklab, var(--ink) 4%, var(--surface))">
+        <div class="row">
+          <span class="film film--square v4" style="width:44px; height:44px; border-radius:var(--radius-pill)"></span>
+          <div>
+            <div class="h3" style="font-size:var(--fs-body-lg)">Mira · copper pan</div>
+            <div class="caption" style="margin:0">Delivered 4 Jun · #KOL-1988</div>
+          </div>
+        </div>
+        <span class="badge badge-verified">✓ Verified · you own this</span>
+      </div>
+
+      <!-- SUBMIT-A-REVIEW FORM -->
+      <form class="stack-3" style="padding:var(--space-3)" aria-label="Write a review">
+        <div>
+          <p class="caption">Your rating</p>
+          <div class="row" style="margin-top:var(--space-1)">
+            <button type="button" class="chip" aria-pressed="true">★★★★★</button>
+            <span class="muted">Tap to set</span>
+          </div>
+        </div>
+
+        <!-- expectation accuracy — distinct from stars -->
+        <div>
+          <p class="caption">Did it match what you were told to expect?</p>
+          <p class="muted" style="font-size:var(--fs-caption); margin-top:2px">Separate from the stars above. This is about accuracy, not quality.</p>
+          <div class="row wrap-flex" style="margin-top:var(--space-1)">
+            <button type="button" class="chip">Better than described</button>
+            <button type="button" class="chip" aria-pressed="true">Exactly as described</button>
+            <button type="button" class="chip">A little different</button>
+            <button type="button" class="chip">Not what I expected</button>
+          </div>
+        </div>
+
+        <!-- exact variation (locked from the order) -->
+        <div>
+          <p class="caption">Exact variation you received</p>
+          <div class="row" style="margin-top:var(--space-1)">
+            <span class="chip" aria-pressed="true">Copper · 24cm · tinned interior</span>
+            <span class="caption" style="margin:0">from your order · not editable</span>
+          </div>
+        </div>
+
+        <!-- customization context -->
+        <div>
+          <p class="caption">Customization on your piece</p>
+          <div class="card" style="margin-top:var(--space-1); padding:var(--space-2); background:color-mix(in oklab, var(--accent-2) 6%, var(--surface))">
+            <p style="margin:0">Handle stamped <b>“T.”</b> — pulled from your order so readers know yours was made-to-request.</p>
+          </div>
+        </div>
+
+        <div>
+          <p class="caption">Your words</p>
+          <textarea class="btn" style="width:100%; min-height:96px; justify-content:flex-start; cursor:text; align-items:flex-start; padding:var(--space-2)" placeholder="What arrived? How does it feel in use? Anything the next buyer should know?" aria-label="Review text"></textarea>
+        </div>
+
+        <div>
+          <p class="caption">Photos or video</p>
+          <div class="row wrap-flex" style="margin-top:var(--space-1)">
+            <button type="button" class="btn btn-ghost" style="border-style:dashed">＋ Add photo</button>
+            <button type="button" class="btn btn-ghost" style="border-style:dashed">＋ Add video</button>
+            <span class="caption" style="margin:0">optional · yours, not the maker’s</span>
+          </div>
+        </div>
+
+        <div class="row wrap-flex">
+          <button type="submit" class="btn btn-accent">Post review</button>
+          <span class="badge badge-verified">✓ Verified purchase · added automatically</span>
+        </div>
+        <p class="muted" style="font-size:var(--fs-caption)">
+          You can’t tick “verified” yourself — it’s set by the system from your order.
+        </p>
+      </form>
+    </div>
+
+    <!-- a review you already left -->
+    <article class="card reveal" style="animation-delay:120ms">
+      <div class="row-between wrap-flex">
+        <div>
+          <div class="h3" style="font-size:var(--fs-body-lg)">Noor · indigo scarf</div>
+          <div class="caption" style="margin:0">Posted 2 May · #KOL-1902</div>
+        </div>
+        <span class="badge badge-verified">✓ Verified purchase</span>
+      </div>
+      <div class="row wrap-flex" style="margin-top:var(--space-2)">
+        <span class="chip" aria-pressed="true">★★★★★</span>
+        <span class="chip">Bought: <b>Deep indigo, one size</b></span>
+        <span class="chip">Matched expectation · <b>Exactly</b></span>
+      </div>
+      <p class="measure" style="margin-top:var(--space-2)">
+        Fades exactly the way Noor said it would in her film. A year in and it’s better.
+      </p>
+      <div class="row" style="margin-top:var(--space-2)">
+        <a class="btn btn-ghost caption" href="#" style="border:none">Edit</a>
+        <a class="btn btn-ghost caption" href="product.html" style="border:none">View on product ↗</a>
+      </div>
+    </article>
+  </section>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Reviews · B6+</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd class="warn">Reviews are a <b>block on <code>/product/[id]</code></b>, not a standalone route. The only legitimate standalone view is the buyer’s own <code>/me/reviews</code>.</dd>
+      <dt>Spec</dt><dd><code>specs/trustworthy-reviews.md</code> · B6+</dd>
+      <dt>Mission</dt><dd><b>Believable</b> — trust is earned by purchase, not asserted by a badge we sell.</dd>
+      <dt>Hard AC</dt><dd class="warn"><code>verified</code> is a <b>GENERATED column</b> (from a matching paid order) — never client-settable, never claimable.</dd>
+      <dt>Hard AC</dt><dd class="warn"><code>reviews</code> data lives in a <b>live table outside store-config</b> — it can’t be snapshotted into <code>store_versions</code>, so a maker can’t roll back or edit away real reviews.</dd>
+      <dt>Distinct axes</dt><dd>Star rating and <b>expectation-accuracy</b> are stored separately — a 5★ item can still be “a little different than described”.</dd>
+      <dt>Context</dt><dd>Exact variation + customization are pulled from the order, not typed by the reviewer.</dd>
+      <dt>Maker reply</dt><dd>One response per review; maker-authored, shown inline, never anonymous.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

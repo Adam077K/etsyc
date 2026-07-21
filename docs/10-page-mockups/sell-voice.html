@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your voice — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ EDITOR CHROME: KOL's fixed system ============ -->
+<header class="wrap section-sm">
+  <div class="row-between wrap-flex">
+    <div>
+      <p class="caption">Studio · Sena · Stoneware, Hudson Valley</p>
+      <h1 class="h1" style="margin-top:var(--space-1)">The one thing no one can fake for you.</h1>
+      <p class="body-lg muted measure" style="margin-top:var(--space-1)">
+        Record your own voice on the parts of your world that matter to you.
+        It’s your real voice — never cloned, never synthesised. Say as much or as
+        little as you like.
+      </p>
+    </div>
+    <div class="row" style="gap:var(--space-2)">
+      <span class="badge badge-verified">✓ Real-Maker voice · you</span>
+      <a class="btn" href="sell-edit.html">← Back to editor</a>
+      <a class="btn btn-accent" href="sell-publish.html">Review &amp; publish →</a>
+    </div>
+  </div>
+</header>
+
+<!-- explicit optionality banner -->
+<div class="wrap">
+  <div class="card" style="background:color-mix(in oklab, var(--accent-2) 10%, var(--surface)); border-color:color-mix(in oklab, var(--accent-2) 28%, transparent)">
+    <div class="row-between wrap-flex">
+      <p class="measure"><b>All optional.</b> Nothing here is required to publish. These are suggestions — record the ones that feel worth hearing in your voice, skip the rest.</p>
+      <span class="badge badge-verified">No cloning, ever · this is you</span>
+    </div>
+  </div>
+</div>
+
+<main class="wrap" style="padding-block:var(--space-6) var(--space-16)">
+  <div style="display:grid; grid-template-columns:minmax(0,2fr) minmax(300px,1fr); gap:var(--space-4); align-items:start">
+
+    <!-- ==== LEFT: per-element recording list ==== -->
+    <section class="stack-3">
+
+      <div class="row-between">
+        <p class="caption">Your world · element by element</p>
+        <span class="caption">3 recorded · 5 suggested</span>
+      </div>
+
+      <!-- ROW: ACTIVELY RECORDING -->
+      <div class="card" style="border-color:var(--accent); background:color-mix(in oklab, var(--accent) 6%, var(--surface))">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">block · voice-quote</span><span class="badge badge-pending" style="background:color-mix(in oklab,var(--accent) 16%, var(--surface)); color:var(--accent); border-color:color-mix(in oklab,var(--accent) 40%, transparent)">● recording · 0:14</span></span>
+          <span class="caption">suggested</span>
+        </div>
+        <p class="measure muted" style="margin-top:var(--space-1)">Suggested prompt · <i>“Tell buyers what makes this glaze different.”</i></p>
+
+        <!-- live waveform -->
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <button class="btn btn-accent">■ Stop</button>
+          <span class="wave" style="color:var(--accent); height:32px; gap:3px">
+            <b style="height:8px"></b><b style="height:20px"></b><b style="height:31px"></b><b style="height:14px"></b><b style="height:26px"></b><b style="height:9px"></b><b style="height:22px"></b><b style="height:30px"></b><b style="height:12px"></b><b style="height:18px"></b><b style="height:28px"></b><b style="height:7px"></b><b style="height:24px"></b><b style="height:16px"></b><b style="height:32px"></b><b style="height:11px"></b>
+          </span>
+        </div>
+
+        <!-- transcript field -->
+        <div style="margin-top:var(--space-2)">
+          <p class="caption">Transcript · editable, auto-drafted from your audio</p>
+          <div class="card" style="margin-top:var(--space-1); background:var(--surface)" contenteditable="true">
+            Tenmoku isn’t one colour — it breaks. Where it runs thin over a rim it goes
+            rust, where it pools it goes almost black<span style="color:var(--muted)">▍</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW: RECORDED (playback + re-record + delete) -->
+      <div class="card">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">block · craft-story</span><span class="badge badge-verified">✓ recorded · 0:38</span></span>
+          <span class="row" style="gap:var(--space-1)"><button class="chip">↻ re-record</button><button class="chip">🗑 delete</button></span>
+        </div>
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <button class="btn">▶ Play</button>
+          <span class="wave" style="height:20px"><b style="height:6px"></b><b style="height:14px"></b><b style="height:9px"></b><b style="height:18px"></b><b style="height:5px"></b><b style="height:12px"></b><b style="height:16px"></b><b style="height:8px"></b><b style="height:20px"></b><b style="height:10px"></b></span>
+        </div>
+        <p class="measure muted" style="margin-top:var(--space-2)">“I dig the wild clay in autumn and wedge it all winter. You can’t rush a material that took a river ten thousand years to grind.”</p>
+      </div>
+
+      <!-- ROW: RECORDED — product -->
+      <div class="card">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">product · Ridge tumblers</span><span class="badge badge-verified">✓ recorded · 0:19</span></span>
+          <span class="row" style="gap:var(--space-1)"><button class="chip">↻ re-record</button><button class="chip">🗑 delete</button></span>
+        </div>
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <button class="btn">▶ Play</button>
+          <span class="wave" style="height:20px"><b style="height:10px"></b><b style="height:6px"></b><b style="height:16px"></b><b style="height:12px"></b><b style="height:19px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:7px"></b></span>
+        </div>
+      </div>
+
+      <!-- ROW: SUGGESTED, not yet recorded -->
+      <div class="card" style="border-style:dashed">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">field · Shipping &amp; care</span><span class="badge badge-pending">• suggested</span></span>
+          <button class="voice">
+            <span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:5px"></b></span>
+            Record
+          </button>
+        </div>
+        <p class="measure muted" style="margin-top:var(--space-1)">Suggested prompt · <i>“How should someone care for a piece that’s wood-fired?”</i></p>
+      </div>
+
+      <!-- ROW: SUGGESTED, skipped -->
+      <div class="card" style="border-style:dashed; opacity:.72">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">block · atmosphere</span><span class="badge badge-pending">• suggested · optional</span></span>
+          <span class="row" style="gap:var(--space-1)"><button class="voice">Record</button><button class="chip">Skip</button></span>
+        </div>
+        <p class="measure muted" style="margin-top:var(--space-1)">Skipping is fine — a silent block just shows without a voice pill.</p>
+      </div>
+
+    </section>
+
+    <!-- ==== RIGHT: buyer preview + designer's note ==== -->
+    <aside class="stack-3" style="position:sticky; top:76px">
+
+      <div class="card">
+        <p class="caption">How buyers hear it</p>
+        <p class="measure" style="margin-top:var(--space-1)">On your live world, a recorded element shows a tap-to-hear pill in your own palette:</p>
+        <div data-world="tinctura" style="margin-top:var(--space-2); padding:var(--space-3); border-radius:var(--radius-md); background:var(--ground); color:var(--ink)">
+          <p class="measure"><b>Tenmoku, up close</b></p>
+          <p class="measure muted" style="margin-top:var(--space-0-5)">Where it runs thin it goes rust; where it pools it goes almost black.</p>
+          <button class="voice" style="margin-top:var(--space-2)">
+            <span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:5px"></b></span>
+            Hear Sena say it · 0:22
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--ink); color:var(--ground)">
+        <p class="caption" style="color:var(--ground); opacity:.7">Designer’s note</p>
+        <p class="measure" style="margin-top:var(--space-1)">
+          Voice is <b>one element</b> of the experience, not the whole thing. It anchors
+          trust — a buyer can hear a real person — but the film, the words and the work
+          still carry the world. Don’t feel you have to narrate everything.
+        </p>
+      </div>
+
+      <div class="card">
+        <p class="caption">Why this can’t be faked</p>
+        <ul class="stack-1" style="list-style:none; margin-top:var(--space-2)">
+          <li class="row" style="gap:var(--space-1)"><span class="badge badge-verified">✓</span> It’s your real recording — no clone</li>
+          <li class="row" style="gap:var(--space-1)"><span class="badge badge-verified">✓</span> Optional everywhere — never a gate</li>
+          <li class="row" style="gap:var(--space-1)"><span class="badge badge-verified">✓</span> One resolved anchor unlocks publish (S6)</li>
+        </ul>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Sell · Voice · S5 + P12</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/voice</code> · KOL chrome (seller tools)</dd>
+      <dt>Spec</dt><dd>S5 voiceover · P12 per-element recorder · Wave 4a</dd>
+      <dt>Mission</dt><dd><b>Carries</b> — the un-fakeable anchor</dd>
+      <dt>Hard AC</dt><dd class="warn">Real maker voice only — no cloning, no synthesis, ever. Recordings are OPTIONAL and SUGGESTED, never required to publish.</dd>
+      <dt>Per element</dt><dd>status · record · live waveform · duration · playback · re-record · delete · editable transcript</dd>
+      <dt>Buyer</dt><dd>renders as a tap-to-hear pill in the maker’s own palette</dd>
+      <dt>Next</dt><dd>one resolved anchor satisfies the S6 voice precondition</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

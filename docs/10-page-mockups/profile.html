@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html" aria-current="page">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ ACCOUNT HEADER — a person, not a dashboard ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <p class="caption reveal">Your account</p>
+    <div class="row-between wrap-flex reveal" style="animation-delay:70ms; margin-top:var(--space-2); align-items:flex-end">
+      <div>
+        <h1 class="display" style="letter-spacing:-.02em">Rowan Ellison</h1>
+        <p class="body-lg muted" style="margin-top:var(--space-1)">Member since 2026 · following 5 makers · 12 saves</p>
+      </div>
+      <div class="row wrap-flex">
+        <a class="btn btn-ghost" href="settings.html">Settings &amp; privacy</a>
+        <a class="btn" href="orders.html">Order history</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ TABS — sectioned, not a card grid ============ -->
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div class="row wrap-flex" role="tablist" aria-label="Account sections" style="border-bottom:1px solid var(--line); padding-bottom:var(--space-2)">
+    <button class="chip" role="tab" aria-pressed="true">Saved products</button>
+    <button class="chip" role="tab" aria-pressed="false">Followed makers</button>
+    <button class="chip" role="tab" aria-pressed="false">Communities</button>
+    <button class="chip" role="tab" aria-pressed="false">Purchases</button>
+    <button class="chip" role="tab" aria-pressed="false">My reviews</button>
+    <button class="chip" role="tab" aria-pressed="false">Preferences</button>
+  </div>
+
+  <!-- ---------- SECTION: Saved products (maker-attributed, never a bare grid) ---------- -->
+  <section class="section-sm reveal" aria-label="Saved products" style="animation-delay:70ms">
+    <div class="row-between">
+      <h2 class="h2">Saved products</h2>
+      <a class="btn btn-ghost" href="collections.html">Organize into boards →</a>
+    </div>
+    <p class="muted measure" style="margin-top:var(--space-1)">
+      Every save keeps its maker. Tap any piece to fall back into the world it came from.
+    </p>
+    <div class="magazine" style="margin-top:var(--space-3)">
+      <a class="m-a" href="maker.html">
+        <div class="film film--wide">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Sena · Stoneware</div>
+            <div class="film-name">Ridge tumbler, oatmeal glaze</div>
+          </div>
+        </div>
+      </a>
+      <div class="m-b card">
+        <span class="badge badge-verified">✓ Real Maker</span>
+        <div class="film film--square v4" style="margin-top:var(--space-2)">
+          <div class="film-meta">
+            <div class="film-craft">Mira · Copper</div>
+            <div class="film-name">Four-day pan</div>
+          </div>
+        </div>
+        <p class="row-between" style="margin-top:var(--space-2)"><span class="muted">Saved to “For the studio”</span> <span class="price">$210</span></p>
+      </div>
+      <a class="m-d" href="maker.html">
+        <div class="film film--portrait v2">
+          <div class="film-meta">
+            <div class="film-craft">Noor · Natural dye</div>
+            <div class="film-name">Indigo runner</div>
+          </div>
+        </div>
+      </a>
+      <a class="m-e" href="maker.html">
+        <div class="film film--wide v3">
+          <div class="film-meta">
+            <div class="film-craft">Elias · Bookbinding</div>
+            <div class="film-name">Quarter-bound journal, blue endpapers</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ---------- SECTION: Followed makers (ON FILM as small film cards — never avatars-in-a-row) ---------- -->
+  <section class="section-sm reveal" aria-label="Followed makers" style="animation-delay:140ms">
+    <h2 class="h2">Makers you follow</h2>
+    <p class="muted measure" style="margin-top:var(--space-1)">
+      Not a row of avatars — the people, moving, in their workshops. Tap to open their world.
+    </p>
+    <div class="rail" style="margin-top:var(--space-3)">
+      <a href="maker.html">
+        <div class="film film--tall">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta"><div class="film-craft">Stoneware</div><div class="film-name">Sena</div></div>
+        </div>
+      </a>
+      <a href="maker.html">
+        <div class="film film--tall v2">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta"><div class="film-craft">Natural dye</div><div class="film-name">Noor</div></div>
+        </div>
+      </a>
+      <a href="maker.html">
+        <div class="film film--tall v3">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta"><div class="film-craft">Green woodwork</div><div class="film-name">Tomas</div></div>
+        </div>
+      </a>
+      <a href="maker.html">
+        <div class="film film--tall v4">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta"><div class="film-craft">Copper</div><div class="film-name">Mira</div></div>
+        </div>
+      </a>
+      <a href="maker.html">
+        <div class="film film--tall v5">
+          <div class="play"><i>▶</i></div>
+          <div class="film-meta"><div class="film-craft">Bookbinding</div><div class="film-name">Elias</div></div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ---------- SECTION: Communities + Purchases (compact, honest) ---------- -->
+  <section class="section-sm reveal" style="animation-delay:210ms">
+    <div class="magazine">
+      <div class="m-e card">
+        <h2 class="h3">Communities you’ve joined</h2>
+        <div class="stack-2" style="margin-top:var(--space-2)">
+          <a class="row-between" href="community.html"><span><b>Sena’s kiln circle</b><br><span class="muted caption">Stoneware · 340 members</span></span><span class="btn btn-ghost">Open →</span></a>
+          <div class="divide"></div>
+          <a class="row-between" href="community.html"><span><b>Noor’s dye garden</b><br><span class="muted caption">Natural dye · 128 members</span></span><span class="btn btn-ghost">Open →</span></a>
+        </div>
+      </div>
+      <div class="m-d card">
+        <h2 class="h3">Recent purchases</h2>
+        <div class="stack-2" style="margin-top:var(--space-2)">
+          <a class="row-between" href="orders.html"><span>Ridge tumbler · Sena</span><span class="price">$48</span></a>
+          <a class="row-between" href="orders.html"><span>Indigo scarf · Noor</span><span class="price">$96</span></a>
+        </div>
+        <a class="btn btn-ghost" href="orders.html" style="margin-top:var(--space-2)">All orders →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- SECTION: My reviews — with EMPTY STATE ---------- -->
+  <section class="section-sm reveal" aria-label="My reviews" style="animation-delay:280ms">
+    <h2 class="h2">My reviews</h2>
+    <div class="empty" style="margin-top:var(--space-3)">
+      <p class="h3" style="color:var(--ink)">No reviews yet</p>
+      <p class="measure" style="margin:var(--space-2) auto 0">
+        When a piece arrives and you’ve lived with it a while, you can tell the maker — and other buyers —
+        what it’s like to hold. Reviews here stay tied to the maker who made the thing.
+      </p>
+      <a class="btn" href="orders.html" style="margin-top:var(--space-3)">Review something you bought</a>
+    </div>
+  </section>
+
+  <!-- ---------- SECTION: Preferences + PUBLIC TASTE IDENTITY (explicit opt-in) ---------- -->
+  <section class="section-sm reveal" aria-label="Preferences" style="animation-delay:350ms">
+    <h2 class="h2">Preferences</h2>
+    <div class="magazine" style="margin-top:var(--space-3)">
+
+      <div class="m-e card stack-2">
+        <h3 class="h3">Public taste identity <span class="badge badge-pending">Off · opt-in</span></h3>
+        <p class="measure muted">
+          Off by default. If you turn this on, other people can see a small public page of the makers
+          and crafts you gravitate toward. Nothing is shared until you flip the switch — and you choose what shows.
+        </p>
+
+        <div class="card" style="background:color-mix(in oklab, var(--ink) 4%, var(--surface))">
+          <p class="caption">Preview · what others would see</p>
+          <div class="row wrap-flex" style="margin-top:var(--space-2)">
+            <span class="chip" aria-pressed="true">Stoneware</span>
+            <span class="chip" aria-pressed="true">Natural dye</span>
+            <span class="chip" aria-pressed="true">Slow craft</span>
+          </div>
+          <div class="rail" style="margin-top:var(--space-2)">
+            <div style="flex:0 0 120px"><div class="film film--square" style="box-shadow:none"><div class="film-meta"><div class="film-name" style="font-size:var(--fs-body)">Sena</div></div></div></div>
+            <div style="flex:0 0 120px"><div class="film film--square v2" style="box-shadow:none"><div class="film-meta"><div class="film-name" style="font-size:var(--fs-body)">Noor</div></div></div></div>
+            <div style="flex:0 0 120px"><div class="film film--square v3" style="box-shadow:none"><div class="film-meta"><div class="film-name" style="font-size:var(--fs-body)">Tomas</div></div></div></div>
+          </div>
+          <p class="caption" style="margin-top:var(--space-2)">Never shown: your purchases, addresses, order history, or reviews you haven’t published.</p>
+        </div>
+
+        <div class="row-between">
+          <label class="row" style="gap:var(--space-2)">
+            <input type="checkbox" aria-label="Make taste identity public">
+            <span>Visibility: <b>Private</b> → Public</span>
+          </label>
+          <button class="btn btn-ghost">Choose what shows</button>
+        </div>
+      </div>
+
+      <div class="m-d card stack-2">
+        <h3 class="h3">Account preferences</h3>
+        <label class="row-between"><span>Show maker voice by default</span><input type="checkbox" checked aria-label="Autoplay maker voice"></label>
+        <div class="divide"></div>
+        <label class="row-between"><span>Reduce motion</span><input type="checkbox" aria-label="Reduce motion"></label>
+        <div class="divide"></div>
+        <label class="row-between"><span>Language</span><span class="muted">English</span></label>
+        <a class="btn btn-ghost" href="settings.html" style="margin-top:var(--space-1)">Data &amp; privacy settings →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Profile · P2 + B13</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/me</code> · KOL chrome (D15a)</dd>
+      <dt>Spec</dt><dd>store-engine-spine §P2 · <code>specs/follow-save.md</code> (B13) · Wave 1/5</dd>
+      <dt>Mission</dt><dd><b>Supports</b> — the buyer's persistent account home</dd>
+      <dt>Hard AC</dt><dd class="warn">Followed makers render ON FILM (small film cards), never avatars-in-a-row; every followed maker is maker-attributed and opens their world.</dd>
+      <dt>Hard AC</dt><dd class="warn">Public taste identity is OFF by default, explicit opt-in, with a visible preview of exactly what others see + a private↔public visibility toggle.</dd>
+      <dt>Hard AC</dt><dd>“My reviews” ships a designed empty state — empty ≠ blank.</dd>
+      <dt>Bans</dt><dd class="warn">No uniform product-card grid · no red count badges · no streaks/engagement bait.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

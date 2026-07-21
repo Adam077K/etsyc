@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html" aria-current="page">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     B18 · /welcome — a ONE-TIME FLOW, not a returnable page.
+     Cold-start-by-doing: the first thing a new buyer sees is a
+     FACE ON FILM they can react to, never a questionnaire.
+     A long form before the buyer has met a single maker is
+     exactly the wrong first impression — it contradicts the
+     film-led principle. So we lead with makers, keep explicit
+     preference input minimal, and make Skip loud on every step.
+     ============================================================ -->
+
+<!-- progress + persistent skip live in a slim rail above every step -->
+<header class="section-sm" style="padding-bottom:var(--space-2)">
+  <div class="wrap-narrow">
+    <div class="row-between">
+      <p class="caption">Setting up · one time only</p>
+      <a class="btn btn-ghost" href="for-you.html" style="font-size:var(--fs-caption)">Skip all → go straight to the feed</a>
+    </div>
+    <!-- 3-step progress indicator -->
+    <div class="row" style="margin-top:var(--space-2); gap:var(--space-1)">
+      <span class="chip" aria-pressed="true" style="pointer-events:none">1 · React to makers</span>
+      <span style="flex:0 0 24px; height:2px; background:var(--line)"></span>
+      <span class="chip" style="pointer-events:none; opacity:.6">2 · A little taste</span>
+      <span style="flex:0 0 24px; height:2px; background:var(--line)"></span>
+      <span class="chip" style="pointer-events:none; opacity:.6">3 · Optional details</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap-narrow" style="padding-bottom:var(--space-16)">
+
+  <!-- ============ STEP 1 · REAL MAKERS ON FILM (the cold start) ============ -->
+  <section class="reveal">
+    <h1 class="h1 measure">First, meet a few real makers.</h1>
+    <p class="body-lg measure muted" style="margin-top:var(--space-2)">
+      No questions yet. Watch a second of each, then tell us who you'd want to
+      hear more from. This is how KOL learns — by what you <em>do</em>, not what you claim.
+    </p>
+
+    <!-- deliberately NOT a uniform 3-col grid: a react-stack, one maker at a time -->
+    <div class="stack-3" style="margin-top:var(--space-4)">
+
+      <div class="card-flush reveal">
+        <div class="row wrap-flex" style="gap:0; align-items:stretch">
+          <a href="maker.html" style="flex:1 1 240px">
+            <div class="film film--wide" style="border-radius:0; height:100%">
+              <div class="play"><i>▶</i></div>
+              <div class="film-meta">
+                <div class="film-craft">Stoneware · Hudson Valley</div>
+                <div class="film-name">Sena throws the last ridge tumbler</div>
+              </div>
+            </div>
+          </a>
+          <div style="flex:1 1 240px; padding:var(--space-3); display:flex; flex-direction:column; justify-content:center">
+            <span class="badge badge-verified">✓ Real Maker</span>
+            <p class="measure" style="margin-top:var(--space-2)">
+              “I don't trim them all the same. The ridge is where my thumb was.”
+            </p>
+            <div class="row" style="margin-top:var(--space-3)">
+              <button class="btn btn-accent">＋ Follow Sena</button>
+              <button class="btn btn-ghost">Not for me</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-flush reveal" style="animation-delay:70ms">
+        <div class="row wrap-flex" style="gap:0; align-items:stretch">
+          <a href="maker.html" style="flex:1 1 240px">
+            <div class="film film--wide v3" style="border-radius:0; height:100%">
+              <div class="play"><i>▶</i></div>
+              <div class="film-meta">
+                <div class="film-craft">Green woodwork</div>
+                <div class="film-name">Tomas splits ash by hand</div>
+              </div>
+            </div>
+          </a>
+          <div style="flex:1 1 240px; padding:var(--space-3); display:flex; flex-direction:column; justify-content:center">
+            <span class="badge badge-verified">✓ Real Maker</span>
+            <button class="voice" style="margin-top:var(--space-2); align-self:flex-start">
+              <span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:5px"></b></span>
+              Hear Tomas
+            </button>
+            <div class="row" style="margin-top:var(--space-3)">
+              <button class="btn btn-accent">＋ Follow Tomas</button>
+              <button class="btn btn-ghost">Not for me</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-flush reveal" style="animation-delay:140ms">
+        <div class="row wrap-flex" style="gap:0; align-items:stretch">
+          <a href="maker.html" style="flex:1 1 240px">
+            <div class="film film--wide v4" style="border-radius:0; height:100%">
+              <div class="play"><i>▶</i></div>
+              <div class="film-meta">
+                <div class="film-craft">Copper · small batch</div>
+                <div class="film-name">Mira finishes a pan that took four days</div>
+              </div>
+            </div>
+          </a>
+          <div style="flex:1 1 240px; padding:var(--space-3); display:flex; flex-direction:column; justify-content:center">
+            <span class="badge badge-verified">✓ Real Maker</span>
+            <p class="measure" style="margin-top:var(--space-2)">
+              “Four days of planishing. You can hear where I stopped for coffee.”
+            </p>
+            <div class="row" style="margin-top:var(--space-3)">
+              <button class="btn btn-accent">＋ Follow Mira</button>
+              <button class="btn btn-ghost">Not for me</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row-between" style="margin-top:var(--space-5)">
+      <a class="btn btn-ghost" href="for-you.html">Skip this step</a>
+      <button class="btn btn-accent btn-lg">Next</button>
+    </div>
+  </section>
+
+  <hr style="border:none; border-top:1px solid var(--line); margin-block:var(--space-12)">
+
+  <!-- ============ STEP 2 · A LITTLE TASTE (minimal, chips only) ============ -->
+  <section class="reveal" style="opacity:.72">
+    <p class="caption">Step 2 · shown after you've already reacted to faces</p>
+    <h2 class="h2 measure" style="margin-top:var(--space-1)">Anything you're drawn to?</h2>
+    <p class="body-lg measure muted" style="margin-top:var(--space-2)">
+      A few taps, not a form. Tap what pulls you — or don't. We already learned
+      more from your follows above than any of these could tell us.
+    </p>
+
+    <p class="caption" style="margin-top:var(--space-4)">Materials</p>
+    <div class="row wrap-flex" style="margin-top:var(--space-1)">
+      <button class="chip" aria-pressed="true">Clay &amp; stoneware</button>
+      <button class="chip">Natural dye</button>
+      <button class="chip">Wood</button>
+      <button class="chip" aria-pressed="true">Metal &amp; copper</button>
+      <button class="chip">Paper &amp; binding</button>
+      <button class="chip">Glass</button>
+      <button class="chip">Fibre</button>
+    </div>
+
+    <p class="caption" style="margin-top:var(--space-4)">What matters to you</p>
+    <div class="row wrap-flex" style="margin-top:var(--space-1)">
+      <button class="chip">Made to order</button>
+      <button class="chip" aria-pressed="true">One of a kind</button>
+      <button class="chip">Local to me</button>
+      <button class="chip">Repairable / lasts</button>
+      <button class="chip">Traditional method</button>
+    </div>
+
+    <div class="row-between" style="margin-top:var(--space-5)">
+      <a class="btn btn-ghost" href="for-you.html">Skip this step</a>
+      <button class="btn btn-accent btn-lg">Next</button>
+    </div>
+  </section>
+
+  <hr style="border:none; border-top:1px solid var(--line); margin-block:var(--space-12)">
+
+  <!-- ============ STEP 3 · OPTIONAL DETAILS (budget / location) ============ -->
+  <section class="reveal" style="opacity:.72">
+    <p class="caption">Step 3 · every field here is optional</p>
+    <h2 class="h2 measure" style="margin-top:var(--space-1)">Two things, if you feel like it.</h2>
+
+    <div class="card" style="margin-top:var(--space-4)">
+      <label class="caption" for="budget">Comfortable spend (optional)</label>
+      <div class="row wrap-flex" style="margin-top:var(--space-1)">
+        <button class="chip">Under $50</button>
+        <button class="chip" aria-pressed="true">$50–150</button>
+        <button class="chip">$150–400</button>
+        <button class="chip">No ceiling — show me the special ones</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:var(--space-3)">
+      <label class="caption" for="loc">Roughly where are you? (optional · helps surface local makers)</label>
+      <input id="loc" placeholder="City or region — or leave blank"
+        style="margin-top:var(--space-1); width:100%; padding:var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--surface); color:var(--ink); font:inherit">
+    </div>
+
+    <div class="row-between" style="margin-top:var(--space-5)">
+      <a class="btn btn-ghost" href="for-you.html">Skip — I'll leave it blank</a>
+      <a class="btn btn-accent btn-lg" href="for-you.html">Enter KOL</a>
+    </div>
+  </section>
+
+  <!-- ============ SKIP-ALL GUARANTEE (the load-bearing promise) ============ -->
+  <div class="block block-b reveal" style="border-radius:var(--radius-lg); padding:var(--space-8); margin-top:var(--space-12)">
+    <p class="caption" style="color:inherit; opacity:.85">The guarantee</p>
+    <h2 class="h2" style="max-width:22ch; margin-top:var(--space-2); color:inherit">
+      Skip every step and you still land in a working feed.
+    </h2>
+    <p class="body-lg measure" style="margin-top:var(--space-3); opacity:.94">
+      Nothing here is a gate. A brand-new buyer who taps “Skip all” gets the same
+      editorial Discover feed as everyone else — populated from what makers filmed
+      today, not from a profile you were forced to fill in. The feed gets more
+      <em>yours</em> as you watch, follow, and buy. It never starts empty.
+    </p>
+  </div>
+
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Welcome · B18 (PROPOSED)</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/welcome</code> · KOL chrome · one-time FLOW, not a returnable page</dd>
+      <dt>Spec</dt><dd><code>specs/onboarding-flow.md</code> · Wave 1</dd>
+      <dt>Mission</dt><dd><b>Supports</b> — clears the path to Present/Particular; carries no film weight itself</dd>
+      <dt>Hard AC</dt><dd class="warn">Step 1 is REAL MAKERS ON FILM the buyer reacts to (follow / not for me) — never a questionnaire. First thing seen is a face, not a field.</dd>
+      <dt>Hard AC</dt><dd class="warn">Explicit preference input stays minimal (chips + optional budget/location). Persistent, prominent Skip on every step + Skip-all.</dd>
+      <dt>Hard AC</dt><dd class="warn">Skip-all MUST reach a working feed. No step is a gate.</dd>
+      <dt>Evidence</dt><dd>Interview say/do gap: buyers <b>exalt</b> handmade but rarely <b>buy</b> it. Stated preferences are unreliable; revealed behaviour (follows, watch-time, purchases) dominates — so we lead with doing.</dd>
+      <dt>Health signal</dt><dd>A non-zero skip rate is HEALTHY. ~90% completion would signal coercive UX, not success.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

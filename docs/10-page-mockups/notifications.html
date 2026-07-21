@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notifications — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html" aria-current="page">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ HEADER — the relationship re-entry surface ============ -->
+<header class="section-sm">
+  <div class="wrap-narrow" style="padding-inline:0">
+    <div class="wrap" style="padding-inline:var(--space-6)">
+      <div class="row-between wrap-flex reveal">
+        <div>
+          <p class="caption">Notifications</p>
+          <h1 class="h1" style="margin-top:var(--space-1)">What the makers you follow have been up to</h1>
+        </div>
+        <button class="btn btn-ghost">Mark all read</button>
+      </div>
+
+      <!-- load-bearing note: maker-voiced, one-way, NOT the inbox -->
+      <div class="card reveal" style="animation-delay:70ms; margin-top:var(--space-3); border-style:dashed">
+        <p class="measure">
+          These are <b>maker-voiced</b> — “Sena fired a new batch,” never “New product available.”
+          They’re <b>one-way</b>: read-only updates you can tap to open, but not reply to.
+          To write back, open the <a href="inbox.html" style="border-bottom:1px solid var(--accent)">Inbox</a> — that’s where conversation lives.
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ GROUPED BY MAKER, THEN BY TIME ============ -->
+<main class="wrap" style="max-width:900px; padding-bottom:var(--space-16)">
+
+  <!-- group: Sena -->
+  <section class="reveal" aria-label="Updates from Sena" style="margin-top:var(--space-4)">
+    <div class="row" style="gap:var(--space-2)">
+      <a href="maker.html"><div class="film film--square" style="width:44px; height:44px; box-shadow:none; border-radius:var(--radius-pill)"></div></a>
+      <div><b>Sena</b> <span class="badge badge-verified">✓ Real Maker</span><div class="caption" style="text-transform:none; letter-spacing:0">Stoneware · Hudson Valley</div></div>
+    </div>
+    <div class="card-flush divide" style="margin-top:var(--space-2)">
+      <!-- unread: subtle accent dot, weight — NEVER a red count badge -->
+      <a href="maker.html" class="row-between" style="padding:var(--space-3); font-weight:600">
+        <span class="row" style="gap:var(--space-2)"><span style="width:8px; height:8px; border-radius:var(--radius-pill); background:var(--accent)" aria-label="unread"></span> Sena fired a new batch — the ridge tumblers are out of the kiln</span>
+        <span class="muted caption">2h</span>
+      </a>
+      <!-- product release + grouped/collapsed repeated events -->
+      <a href="product.html" class="row-between" style="padding:var(--space-3)">
+        <span class="row" style="gap:var(--space-2)"><span style="width:8px; height:8px; border-radius:var(--radius-pill); background:var(--accent)" aria-label="unread"></span> Sena added 5 new pieces today</span>
+        <span class="muted caption">5h · grouped</span>
+      </a>
+      <a href="inbox.html" class="row-between" style="padding:var(--space-3)">
+        <span class="muted">Sena replied to your commission draft <span class="caption">· opens in Inbox</span></span>
+        <span class="muted caption">Yesterday</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- group: Noor -->
+  <section class="reveal" aria-label="Updates from Noor" style="animation-delay:70ms; margin-top:var(--space-6)">
+    <div class="row" style="gap:var(--space-2)">
+      <a href="maker.html"><div class="film film--square v2" style="width:44px; height:44px; box-shadow:none; border-radius:var(--radius-pill)"></div></a>
+      <div><b>Noor</b> <span class="badge badge-verified">✓ Real Maker</span><div class="caption" style="text-transform:none; letter-spacing:0">Natural dye</div></div>
+    </div>
+    <div class="card-flush divide" style="margin-top:var(--space-2)">
+      <a href="community.html" class="row-between" style="padding:var(--space-3)">
+        <span class="muted">Noor answered your question in the dye garden</span>
+        <span class="muted caption">3d</span>
+      </a>
+      <a href="maker.html" class="row-between" style="padding:var(--space-3)">
+        <span class="muted">Noor shared what day nine of the indigo vat looked like</span>
+        <span class="muted caption">4d</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- group: Mira — order + commission milestone -->
+  <section class="reveal" aria-label="Updates from Mira" style="animation-delay:140ms; margin-top:var(--space-6)">
+    <div class="row" style="gap:var(--space-2)">
+      <a href="maker.html"><div class="film film--square v4" style="width:44px; height:44px; box-shadow:none; border-radius:var(--radius-pill)"></div></a>
+      <div><b>Mira</b> <span class="badge badge-verified">✓ Real Maker</span><div class="caption" style="text-transform:none; letter-spacing:0">Copper · small batch</div></div>
+    </div>
+    <div class="card-flush divide" style="margin-top:var(--space-2)">
+      <a href="orders.html" class="row-between" style="padding:var(--space-3)">
+        <span class="muted">Your pan from Mira shipped — she packed it this morning</span>
+        <span class="muted caption">1d</span>
+      </a>
+      <a href="inbox.html" class="row-between" style="padding:var(--space-3)">
+        <span class="muted">Mira reached the raising stage on your commission <span class="caption">· opens in Inbox</span></span>
+        <span class="muted caption">2d</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ FIRST-RUN EMPTY STATE (common here — designed, not blank) ============ -->
+  <section class="reveal" aria-label="Empty state" style="animation-delay:210ms; margin-top:var(--space-8)">
+    <p class="caption">First-run state — shown in situ (common on this surface)</p>
+    <div class="empty" style="margin-top:var(--space-2)">
+      <p class="h3" style="color:var(--ink)">Nothing yet — and that’s fine</p>
+      <p class="measure" style="margin:var(--space-2) auto 0">
+        Follow a maker or place a commission, and this is where you’ll see them come back to you —
+        a new batch out of the kiln, a reply on your draft, your order on its way.
+      </p>
+      <div class="row" style="justify-content:center; gap:var(--space-2); margin-top:var(--space-3)">
+        <a class="btn btn-accent" href="discover.html">Find a maker to follow</a>
+        <a class="btn btn-ghost" href="collections.html">See your saves</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Notifications · B16 (PROPOSED)</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/notifications</code> · KOL chrome (D15a)</dd>
+      <dt>Spec</dt><dd><code>specs/notifications.md</code> · Wave 5</dd>
+      <dt>Mission</dt><dd><b>Supports</b> — the relationship RE-ENTRY surface</dd>
+      <dt>Hard AC</dt><dd class="warn">Maker-attributed &amp; human-voiced (“Sena fired a new batch”), never system-voiced (“New product available”). Each row shows the maker's face.</dd>
+      <dt>Hard AC</dt><dd class="warn">Rows are READ-ONLY, one-way — may deep-link into an Inbox thread but render NO reply/compose/reaction affordance. Notifications ≠ Inbox.</dd>
+      <dt>Data</dt><dd>Read-own RLS · service-role write only · retention 90d unread / 30d after read.</dd>
+      <dt>Bans</dt><dd class="warn">No red count badge (unread = a quiet <code>--accent</code> dot) · no urgency/countdown/streak chrome. Email &amp; push out of scope.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit your world — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ EDITOR CHROME: KOL's fixed system, not the maker's world ============ -->
+<header class="wrap section-sm">
+  <div class="row-between wrap-flex">
+    <div>
+      <p class="caption">Studio · Sena · Stoneware, Hudson Valley</p>
+      <h1 class="h1" style="margin-top:var(--space-1)">You arrange it. The tool just holds the frame.</h1>
+      <p class="body-lg muted measure" style="margin-top:var(--space-1)">
+        Drag the blocks you want, in the order you want. Every colour, word and clip
+        is yours — the system only checks that a buyer can actually read it.
+      </p>
+    </div>
+    <div class="row" style="gap:var(--space-2)">
+      <span class="badge badge-pending">• Draft · autosaved 12s ago</span>
+      <a class="btn" href="sell-voice.html">Add voice</a>
+      <a class="btn btn-accent" href="sell-publish.html">Review &amp; publish →</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ THREE-PANE EDITOR ============ -->
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div style="display:grid; grid-template-columns:minmax(210px,0.85fr) minmax(0,2.1fr) minmax(280px,1fr); gap:var(--space-3); align-items:start">
+
+    <!-- ==== LEFT: BLOCK PALETTE (the 11 catalog blocks, draggable) ==== -->
+    <aside class="card" style="position:sticky; top:76px">
+      <p class="caption">Block palette · drag in</p>
+      <p class="muted" style="margin-top:var(--space-0-5); font-size:var(--fs-caption)">
+        11 constrained blocks. You can’t make a blank canvas — that’s the point.
+      </p>
+      <ul class="stack-1" style="list-style:none; margin-top:var(--space-2)">
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> hero-video</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> craft-story</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> product-showcase</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> product-detail</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> voice-quote</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> process-reel</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> reviews</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> trust-badge</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> thank-you</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> atmosphere</li>
+        <li class="row" draggable="true" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:grab; background:var(--surface)"><span class="mono muted">⠿</span> contact-cta</li>
+      </ul>
+      <div class="empty" style="padding:var(--space-3); margin-top:var(--space-2)">
+        <span class="mono">＋</span><br>Drop a block anywhere in the canvas
+      </div>
+    </aside>
+
+    <!-- ==== CENTRE: LIVE CANVAS PREVIEW — inside HER world palette ==== -->
+    <section>
+      <div class="row-between" style="margin-bottom:var(--space-2)">
+        <p class="caption">Live canvas · Sena’s world</p>
+        <span class="chip" aria-pressed="true" style="pointer-events:none">Desktop</span>
+      </div>
+
+      <!-- the preview frame carries the maker's OWN palette (tinctura), not KOL chrome -->
+      <div data-world="tinctura" style="border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow-card)">
+        <div style="background:var(--ground); color:var(--ink)">
+
+          <!-- block: hero-video (approved) -->
+          <div class="row" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); justify-content:space-between; border-bottom:1px solid var(--line)">
+            <span class="row" style="gap:var(--space-1)"><span class="mono muted">⠿</span><span class="caption" style="color:var(--muted)">hero-video</span><span class="badge badge-verified">✓ approved</span></span>
+            <span class="row" style="gap:var(--space-1)"><button class="chip">⇅ reorder</button><button class="chip">⇄ swap</button></span>
+          </div>
+          <div style="padding:var(--space-3)">
+            <div class="film film--wide"><div class="play"><i>▶</i></div>
+              <div class="film-meta"><div class="film-craft">Stoneware · Hudson Valley</div><div class="film-name">A kiln opening, filmed at 6am</div></div>
+            </div>
+          </div>
+
+          <!-- block: craft-story — SELECTED + EDITED (re-review needed) -->
+          <div style="outline:2px solid var(--accent); outline-offset:-2px; background:color-mix(in oklab, var(--accent) 8%, transparent)">
+            <div class="row" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); justify-content:space-between; border-bottom:1px solid var(--line)">
+              <span class="row" style="gap:var(--space-1)"><span class="mono muted">⠿</span><span class="caption" style="color:var(--accent)">craft-story · selected</span>
+                <span class="badge badge-pending" style="background:color-mix(in oklab,var(--accent) 16%, var(--surface)); color:var(--accent); border-color:color-mix(in oklab,var(--accent) 40%, transparent)">↻ re-review needed</span>
+              </span>
+              <span class="row" style="gap:var(--space-1)"><button class="chip">⇅ reorder</button><button class="chip">⇄ swap</button></span>
+            </div>
+            <div style="padding:var(--space-3)">
+              <p class="caption" style="color:var(--muted)">The clay comes from a bank two miles from the studio</p>
+              <h2 class="h2" style="margin-top:var(--space-1)">Slate that remembers the river it came from.</h2>
+              <p class="measure" style="margin-top:var(--space-2)">
+                I dig the wild clay in autumn, wedge it through winter, and throw it
+                when it’s finally still. Nothing here is faster than the material lets it be.
+              </p>
+            </div>
+          </div>
+
+          <!-- block: product-showcase (needs review) -->
+          <div>
+            <div class="row" style="gap:var(--space-1); padding:var(--space-1) var(--space-2); justify-content:space-between; border-bottom:1px solid var(--line)">
+              <span class="row" style="gap:var(--space-1)"><span class="mono muted">⠿</span><span class="caption" style="color:var(--muted)">product-showcase</span><span class="badge badge-pending">• needs review</span></span>
+              <span class="row" style="gap:var(--space-1)"><button class="chip">⇅ reorder</button><button class="chip">⇄ swap</button></span>
+            </div>
+            <div style="padding:var(--space-3); display:grid; grid-template-columns:1.4fr 1fr; gap:var(--space-2)">
+              <div class="film film--tall v2"><div class="play"><i>▶</i></div><div class="film-meta"><div class="film-craft">Ridge tumblers</div><div class="film-name">Set of four</div></div></div>
+              <div class="film film--tall v3"><div class="play"><i>▶</i></div><div class="film-meta"><div class="film-craft">Tenmoku bowl</div><div class="film-name">One only</div></div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <p class="caption" style="text-align:center; margin-top:var(--space-2)">
+        This is exactly what a buyer sees. Editing any block clears its ✓ and sends it back through the critic.
+      </p>
+    </section>
+
+    <!-- ==== RIGHT: INSPECTOR for the selected block ==== -->
+    <aside class="stack-3" style="position:sticky; top:76px">
+
+      <div class="card" style="border-color:var(--accent)">
+        <div class="row-between">
+          <p class="caption" style="color:var(--accent)">Inspector · craft-story</p>
+          <span class="badge badge-pending" style="background:color-mix(in oklab,var(--accent) 16%, var(--surface)); color:var(--accent); border-color:color-mix(in oklab,var(--accent) 40%, transparent)">↻ re-review</span>
+        </div>
+        <p class="caption" style="margin-top:var(--space-1); text-transform:none; letter-spacing:0; color:var(--muted)">
+          You edited the headline. This block left <code class="mono">approved_sections</code> the moment you typed — the auto-critic will re-run before publish.
+        </p>
+      </div>
+
+      <!-- variant options -->
+      <div class="card">
+        <p class="caption">Variant</p>
+        <div class="row wrap-flex" style="gap:var(--space-1); margin-top:var(--space-2)">
+          <button class="chip">Full-bleed</button>
+          <button class="chip" aria-pressed="true">Text-left</button>
+          <button class="chip">Quote-lead</button>
+          <button class="chip">Two-column</button>
+        </div>
+        <div class="row-between" style="margin-top:var(--space-3)">
+          <span>Density</span>
+          <span class="row" style="gap:var(--space-1)"><button class="chip">Airy</button><button class="chip" aria-pressed="true">Standard</button><button class="chip">Dense</button></span>
+        </div>
+      </div>
+
+      <!-- bound media / clips -->
+      <div class="card">
+        <p class="caption">Bound media</p>
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <div class="film film--square" style="width:64px; height:64px; border-radius:var(--radius-sm)"></div>
+          <div>
+            <b>clip_1104 · wild-clay-dig</b>
+            <p class="caption" style="text-transform:none; letter-spacing:0">0:41 · filmed Oct 3 · your footage</p>
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:var(--space-2); width:100%">Replace clip from your reels</button>
+      </div>
+
+      <!-- theme controls — FULL brand freedom (D15) -->
+      <div class="card">
+        <p class="caption">Theme · your brand, any hex</p>
+
+        <div style="margin-top:var(--space-2)">
+          <div class="row-between"><span>Palette</span><span class="caption">tap a swatch to edit</span></div>
+          <div class="row wrap-flex" style="gap:var(--space-1); margin-top:var(--space-1)">
+            <span title="ground" style="width:28px; height:28px; border-radius:var(--radius-sm); background:#1b1418; border:2px solid var(--accent)"></span>
+            <span title="surface" style="width:28px; height:28px; border-radius:var(--radius-sm); background:#251b21; border:1px solid var(--line)"></span>
+            <span title="ink" style="width:28px; height:28px; border-radius:var(--radius-sm); background:#f3e9e5; border:1px solid var(--line)"></span>
+            <span title="accent" style="width:28px; height:28px; border-radius:var(--radius-sm); background:#b85a76; border:1px solid var(--line)"></span>
+            <span title="accent-2" style="width:28px; height:28px; border-radius:var(--radius-sm); background:#dda84e; border:1px solid var(--line)"></span>
+          </div>
+          <label class="row-between" style="margin-top:var(--space-2); gap:var(--space-2)">
+            <span>Ground · any hex</span>
+            <span class="row" style="gap:var(--space-1)"><input type="color" value="#1b1418" style="width:34px; height:28px; border:1px solid var(--line); border-radius:var(--radius-sm); background:none; cursor:pointer"><input class="mono" value="#1B1418" style="width:84px; padding:2px var(--space-1); border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--surface); color:var(--ink)"></span>
+          </label>
+        </div>
+
+        <!-- LIVE AA contrast check on her custom colours -->
+        <div class="card" style="margin-top:var(--space-2); background:color-mix(in oklab, var(--block-b) 12%, var(--surface)); border-color:color-mix(in oklab, var(--block-b) 30%, transparent)">
+          <div class="row-between">
+            <span class="badge badge-verified">✓ AA passes</span>
+            <span class="mono">7.8 : 1</span>
+          </div>
+          <p class="caption" style="text-transform:none; letter-spacing:0; margin-top:var(--space-1)">
+            ink #F3E9E5 on ground #1B1418 · checked live as you type. Fall below 4.5 : 1 and publish is blocked, not styled away.
+          </p>
+        </div>
+
+        <div class="stack-2" style="margin-top:var(--space-3)">
+          <div class="row-between"><span>Font pairing</span><button class="chip" aria-pressed="true">Clash / General Sans</button></div>
+          <div class="row-between"><span>Motion preset</span><button class="chip" aria-pressed="true">Cinematic</button></div>
+          <div class="row-between"><span>Radius identity</span><button class="chip" aria-pressed="true">Soft 16px</button></div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Sell · Edit · S4</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/edit</code> · KOL chrome (seller tools)</dd>
+      <dt>Spec</dt><dd>S4 co-edit visual editor · Wave 4a</dd>
+      <dt>Mission</dt><dd><b>Carries</b> — authorship is enforced here or nowhere</dd>
+      <dt>Layer 1</dt><dd>11 constrained block primitives only — no blank canvas, no free HTML</dd>
+      <dt>Hard AC</dt><dd class="warn">D15 full brand freedom — any hex, own fonts. AA gate is deterministic and load-bearing: &lt; 4.5 : 1 blocks publish.</dd>
+      <dt>Hard AC</dt><dd class="warn">Editing a block removes it from <code>approved_sections</code> and re-runs the critic — inline “re-review needed” marker on the block.</dd>
+      <dt>Next</dt><dd>Add voice (S5) → Review &amp; publish (S6)</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

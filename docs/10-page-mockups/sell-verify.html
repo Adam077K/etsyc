@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify you're the maker — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ OPENER: what this proves, said plainly up front ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <p class="caption reveal">Seller tools · Verification · Sena · Stoneware, Hudson Valley</p>
+    <h1 class="display measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+      Prove a real human is behind this store.
+    </h1>
+    <p class="body-lg measure muted reveal" style="animation-delay:140ms; margin-top:var(--space-2)">
+      You'll read one randomly generated phrase aloud on camera. That short clip
+      becomes your permanent voice anchor — the thing a buyer can always play back
+      to know a live person, not a bot, stood here.
+    </p>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+
+  <div style="display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:var(--space-4)">
+
+    <!-- ==== LEFT: the challenge-response flow, three states stacked ==== -->
+    <div class="stack-4">
+
+      <!-- STATE A — RECORDING -->
+      <section class="card reveal" style="border-color:var(--accent)">
+        <div class="row-between">
+          <span class="row" style="gap:var(--space-2)">
+            <span class="chip" aria-pressed="true" style="background:var(--accent); color:var(--accent-ink); border-color:var(--accent); pointer-events:none">Now recording</span>
+            <h2 class="h3">Read the phrase aloud</h2>
+          </span>
+          <span class="caption mono">0:06 / 0:12</span>
+        </div>
+
+        <!-- the randomly generated challenge phrase -->
+        <div class="card" style="margin-top:var(--space-3); background:color-mix(in oklab, var(--accent) 8%, var(--surface)); border-color:color-mix(in oklab, var(--accent) 26%, transparent)">
+          <p class="caption" style="color:var(--accent)">Your phrase — freshly generated, single use</p>
+          <p class="h2" style="margin-top:var(--space-1); letter-spacing:-.01em">
+            "Nine slate ridge tumblers, drying by the north window."
+          </p>
+          <p class="caption" style="margin-top:var(--space-2)">
+            Random each attempt · <span class="mono">phrase&#95;id 7Q3-118</span> · say it in your own voice, at your own pace
+          </p>
+        </div>
+
+        <!-- the live camera frame -->
+        <div class="film film--wide" style="margin-top:var(--space-3)">
+          <div class="play"><i>●</i></div>
+          <div class="film-meta">
+            <div class="film-craft">Live camera · front-facing</div>
+            <div class="film-name">Look at the lens and read the line</div>
+          </div>
+        </div>
+
+        <div class="row-between wrap-flex" style="margin-top:var(--space-3)">
+          <p class="caption measure">
+            Recording captures voice + face together — the two can't be spliced apart later.
+          </p>
+          <div class="row" style="gap:var(--space-2)">
+            <button class="btn btn-ghost">Regenerate phrase</button>
+            <button class="btn btn-accent btn-lg">Stop &amp; review</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATE B — REVIEW -->
+      <section class="card reveal" style="animation-delay:80ms">
+        <div class="row-between">
+          <span class="row" style="gap:var(--space-2)">
+            <span class="chip" style="pointer-events:none">Review</span>
+            <h2 class="h3">Check it before you commit</h2>
+          </span>
+          <span class="caption mono">clip 0:11</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-top:var(--space-3)">
+          <div>
+            <div class="film film--square v2">
+              <div class="play"><i>▶</i></div>
+              <div class="film-meta">
+                <div class="film-craft">Playback · this take</div>
+                <div class="film-name">Watch yourself back</div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-2">
+            <span class="badge badge-pending">• Not submitted yet</span>
+            <p class="measure">
+              Make sure your face is lit and the phrase is audible end to end. This exact
+              take, once submitted, becomes your permanent anchor — you can re-record now,
+              but not swap it later.
+            </p>
+            <button class="voice">
+              <span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:5px"></b></span>
+              Play the audio only · 0:11
+            </button>
+          </div>
+        </div>
+
+        <div class="row-between wrap-flex" style="margin-top:var(--space-3)">
+          <p class="caption measure">
+            Anchor id reserved: <span class="mono">voice&#95;anchor&#95;clip&#95;id · pending</span>
+          </p>
+          <div class="row" style="gap:var(--space-2)">
+            <button class="btn btn-ghost">Re-record</button>
+            <button class="btn btn-accent btn-lg">Submit for review</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATE C — SUBMITTED / PENDING (what the maker sees while waiting) -->
+      <section class="card reveal" style="animation-delay:160ms; background:color-mix(in oklab, var(--accent-2) 8%, var(--surface)); border-color:color-mix(in oklab, var(--accent-2) 28%, transparent)">
+        <div class="row-between">
+          <span class="row" style="gap:var(--space-2)">
+            <span class="badge badge-pending">• Submitted — pending review</span>
+            <h2 class="h3">We've got your clip</h2>
+          </span>
+          <span class="caption mono">sent 21 Jul, 11:04</span>
+        </div>
+        <p class="measure" style="margin-top:var(--space-2)">
+          A founder is reviewing your clip by hand. During the seed phase (the first
+          <span class="mono">4</span> makers) every voice anchor is checked by a human, not an
+          automated system — so this takes a little longer and gives you a real person to
+          reach if anything's off.
+        </p>
+        <ol style="list-style:none; margin-top:var(--space-3)" class="stack-2">
+          <li class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span><span>Clip received &amp; stored as your candidate anchor</span></li>
+          <li class="row" style="gap:var(--space-2)"><span class="badge badge-pending">•</span><span>Founder liveness check · <span class="muted">usually within 1 business day</span></span></li>
+          <li class="row" style="gap:var(--space-2)"><span class="badge badge-pending">•</span><span>Real-Maker badge goes live on your store &amp; every clip</span></li>
+        </ol>
+        <p class="caption" style="margin-top:var(--space-3)">
+          Your store stays in <b>draft</b> until this clears. Nothing you publish will carry the
+          badge before a human confirms the anchor.
+        </p>
+      </section>
+
+    </div>
+
+    <!-- ==== RIGHT: the honesty column + the two trust layers ==== -->
+    <aside class="stack-3">
+
+      <!-- CRITICAL HONESTY: exactly what the badge does and does NOT say -->
+      <div class="card" style="border-color:var(--ink)">
+        <p class="caption">Read this — what the badge actually claims</p>
+
+        <div class="card" style="margin-top:var(--space-2); background:color-mix(in oklab, var(--block-b) 10%, var(--surface)); border-color:color-mix(in oklab, var(--block-b) 28%, transparent)">
+          <span class="badge badge-verified">✓ It asserts</span>
+          <p class="measure" style="margin-top:var(--space-1)">
+            A live, real human recorded this, and KOL holds a reproducible voice anchor for
+            them. You can always play it back and hear the same person.
+          </p>
+        </div>
+
+        <div class="card" style="margin-top:var(--space-2); background:color-mix(in oklab, var(--accent) 8%, var(--surface)); border-color:color-mix(in oklab, var(--accent) 26%, transparent)">
+          <span class="badge" style="background:color-mix(in oklab,var(--accent) 16%,var(--surface)); color:var(--accent); border:1px solid color-mix(in oklab,var(--accent) 30%,transparent)">✕ It does NOT assert</span>
+          <ul class="measure" style="margin-top:var(--space-1); padding-left:1.1em">
+            <li>That this maker is a specific named legal person.</li>
+            <li>That she personally made any particular product in the store.</li>
+            <li>Any identity, address, or business fact we haven't independently checked.</li>
+          </ul>
+        </div>
+        <p class="caption" style="margin-top:var(--space-2)">
+          It's a proof of <b>live human presence</b>, nothing more. We'd rather claim less and
+          have it be true.
+        </p>
+      </div>
+
+      <!-- TWO TRUST LAYERS -->
+      <div class="card">
+        <p class="caption">Layer 1 · Real-Maker</p>
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-verified">✓ Real Maker</span>
+          <span class="muted">Voice-anchored, human-checked</span>
+        </div>
+        <p class="measure" style="margin-top:var(--space-2)">
+          Ties this store to your recorded voice. This is the layer everything trust-related on
+          KOL depends on.
+        </p>
+      </div>
+
+      <div class="card">
+        <p class="caption">Layer 2 · AI-Transparency</p>
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-ai">◆ AI-assisted, disclosed</span>
+        </div>
+        <p class="measure" style="margin-top:var(--space-2)">
+          An honest map of where AI helped in your store versus your own words. Buyers see it
+          plainly — assistance is fine, hiding it isn't.
+        </p>
+        <div class="divide" style="margin-top:var(--space-2)">
+          <div class="row-between" style="padding-block:var(--space-1)"><span class="badge badge-verified">✓ Your words</span><span class="muted">Narration clips, maker notes</span></div>
+          <div class="row-between" style="padding-block:var(--space-1)"><span class="badge badge-ai">◆ AI-assisted</span><span class="muted">Listing copy cleanup, alt text</span></div>
+          <div class="row-between" style="padding-block:var(--space-1)"><span class="badge badge-verified">✓ Your words</span><span class="muted">Every price &amp; spec figure</span></div>
+        </div>
+      </div>
+
+      <!-- MVP method note -->
+      <div class="card" style="background:var(--ground)">
+        <p class="caption">How verification works right now</p>
+        <p class="measure" style="margin-top:var(--space-1)">
+          Voice liveness is <b>built, not bought</b> — there's no off-the-shelf vendor we trust for
+          it yet, so MVP review is founder human-in-the-loop across the seed cohort
+          (<span class="mono">n=4</span>). Self-serve vendors get face-only verification until the
+          voice pipeline is proven.
+        </p>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Verify · S9</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/verify</code> · KOL chrome (seller tools)</dd>
+      <dt>Spec</dt><dd>Real-Maker voice-anchor verification · Wave 4b</dd>
+      <dt>Mission</dt><dd class="warn"><b>Carries</b> — Provable resolves here. Everything trust-related depends on this screen.</dd>
+      <dt>Hard AC</dt><dd class="warn">Page must state plainly what the badge asserts (a live human + reproducible anchor) and does NOT assert (named legal person / who made a given product).</dd>
+      <dt>Hard AC</dt><dd class="warn">Challenge phrase is randomly generated &amp; single-use; the recorded take becomes the permanent <code>voice&#95;anchor&#95;clip&#95;id</code>.</dd>
+      <dt>Hard AC</dt><dd class="warn">Both trust layers shown: Real-Maker + AI-Transparency. No urgency/scarcity chrome.</dd>
+      <dt>MVP</dt><dd>Founder human-in-the-loop at seed n=4. Voice liveness build-not-buy; self-serve vendors face-only.</dd>
+      <dt>States</dt><dd>recording → review → submitted-pending (maker sees pending while store stays draft)</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

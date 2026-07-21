@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sena live — KOL (Roadmap v1.1)</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     UNMISSABLE ROADMAP BANNER — read before anything else.
+     ============================================================ -->
+<div class="block block-ink" style="padding-block:var(--space-3)">
+  <div class="wrap">
+    <p class="caption" style="color:var(--ground); opacity:.9">⚠ Roadmap · not shipping now</p>
+    <h2 class="h3" style="color:var(--ground); margin-top:var(--space-1); max-width:60ch">
+      This page implements <span class="mono">D16-8</span> and is tiered <b>ROADMAP v1.1 — NOT MVP</b>.
+    </h2>
+    <p class="measure" style="color:var(--ground); opacity:.85; margin-top:var(--space-1)">
+      Nothing on this page ships in MVP. Live streaming infra does <em>not</em> gate the core
+      recorded-video loop, so it is deliberately deferred. This mockup exists only to protect
+      forward-compat seams — the routes, data shapes, and layout slots that v1.1 will need — so
+      the MVP build doesn't paint them into a corner.
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================
+     Maker's world — Sena. data-world flips to the dark jewel
+     palette (reusing tinctura tokens as the world stand-in).
+     This is NOT KOL chrome.
+     ============================================================ -->
+<div data-world="tinctura">
+
+  <!-- ============ HEADER ============ -->
+  <header class="section-sm">
+    <div class="wrap">
+      <p class="caption">Sena's world · Stoneware · Hudson Valley</p>
+      <h1 class="display" style="margin-top:var(--space-1)">Live &amp; upcoming</h1>
+      <p class="body-lg measure muted" style="margin-top:var(--space-2)">
+        The nearest thing to standing in the studio. Same recorded-video ethos —
+        just happening in real time, with no reason to rush you.
+      </p>
+    </div>
+  </header>
+
+  <!-- ============ UPCOMING EVENTS (workshop / studio tour / launch) ============ -->
+  <section class="section-sm">
+    <div class="wrap">
+      <h2 class="h2" style="margin-bottom:var(--space-3)">Upcoming</h2>
+      <!-- deliberately a mixed-size list, not a uniform 3-col card grid -->
+      <div class="stack-3">
+
+        <div class="card-flush divide reveal">
+          <div class="row wrap-flex" style="gap:0; align-items:stretch">
+            <div class="film film--wide v2" style="flex:1 1 300px; border-radius:0">
+              <div class="film-meta">
+                <div class="film-craft">Workshop</div>
+                <div class="film-name">Trimming a foot ring, start to finish</div>
+              </div>
+            </div>
+            <div style="flex:1 1 300px; padding:var(--space-3); display:flex; flex-direction:column; justify-content:center">
+              <p class="caption">Sat · 2:00 PM · runs about an hour</p>
+              <p class="measure" style="margin-top:var(--space-1)">
+                Bring a leather-hard pot if you have one. Questions welcome throughout — Sena works slowly on purpose.
+              </p>
+              <div class="row" style="margin-top:var(--space-3)">
+                <button class="btn btn-accent">RSVP</button>
+                <button class="btn btn-ghost">Add to calendar</button>
+                <span class="caption" style="margin-left:auto">18 going</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-flush divide reveal" style="animation-delay:70ms">
+          <div class="row wrap-flex" style="gap:0; align-items:stretch">
+            <div class="film film--wide v3" style="flex:1 1 300px; border-radius:0">
+              <div class="film-meta">
+                <div class="film-craft">Studio tour</div>
+                <div class="film-name">Where the ridge tumblers are born</div>
+              </div>
+            </div>
+            <div style="flex:1 1 300px; padding:var(--space-3); display:flex; flex-direction:column; justify-content:center">
+              <p class="caption">Next Wed · 9:00 AM · morning light</p>
+              <p class="measure" style="margin-top:var(--space-1)">
+                A wander through the workshop — the wheel, the drying racks, the kiln. No agenda, just the room.
+              </p>
+              <div class="row" style="margin-top:var(--space-3)">
+                <button class="btn btn-accent">RSVP</button>
+                <button class="btn btn-ghost">Add to calendar</button>
+                <span class="caption" style="margin-left:auto">7 going</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal" style="animation-delay:140ms">
+          <div class="row-between wrap-flex">
+            <div style="flex:1 1 auto">
+              <span class="badge badge-pending">Launch</span>
+              <h3 class="h3" style="margin-top:var(--space-1)">The winter glaze series, shown for the first time</h3>
+              <p class="caption" style="margin-top:var(--space-1)">In two weeks · exact date to be confirmed</p>
+              <p class="measure" style="margin-top:var(--space-1)">
+                Sena will walk each piece on camera before any of them go up in her world. No timers, no “drops” —
+                you'll simply see them, then decide in your own time.
+              </p>
+            </div>
+            <button class="btn">Remind me</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LIVE SESSION VIEW (stream + real-time chat) ============ -->
+  <section class="section-sm">
+    <div class="wrap">
+      <h2 class="h2" style="margin-bottom:var(--space-3)">Live now</h2>
+      <div class="row wrap-flex" style="align-items:stretch; gap:var(--space-3)">
+
+        <!-- the stream -->
+        <div style="flex:2 1 420px">
+          <div class="film film--wide reveal" style="aspect-ratio:16/9">
+            <div class="play"><i>▶</i></div>
+            <div class="film-meta">
+              <div class="row" style="gap:var(--space-1)">
+                <span class="badge badge-verified">● Live</span>
+                <span class="film-craft" style="opacity:.85">Sena · at the wheel</span>
+              </div>
+              <div class="film-name" style="margin-top:var(--space-1)">Centring, then a tall cylinder</div>
+            </div>
+          </div>
+          <div class="row-between" style="margin-top:var(--space-2)">
+            <span class="caption">62 watching · started 24 min ago</span>
+            <button class="voice">
+              <span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:5px"></b></span>
+              Voice-anchored · this is really Sena
+            </button>
+          </div>
+        </div>
+
+        <!-- real-time chat + moderation slot -->
+        <div style="flex:1 1 260px">
+          <div class="card-flush" style="display:flex; flex-direction:column; height:100%; min-height:320px">
+            <div class="row-between" style="padding:var(--space-2); border-bottom:1px solid var(--line)">
+              <span class="caption">Live chat</span>
+              <span class="badge badge-pending">Moderation: v1.1</span>
+            </div>
+            <div class="stack-2 divide" style="padding:var(--space-2); flex:1 1 auto; overflow:auto">
+              <div><span class="caption">Priya</span><p class="measure">How wet is the clay when you pull like that?</p></div>
+              <div><span class="caption">Sena</span><p class="measure">Softer than you'd think — I'll show you the seam.</p></div>
+              <div><span class="caption">Marco</span><p class="measure">That wobble at the top is so satisfying.</p></div>
+              <div><span class="caption">Aylin</span><p class="measure">Is the winter glaze on these?</p></div>
+            </div>
+            <div class="row" style="padding:var(--space-2); border-top:1px solid var(--line)">
+              <input placeholder="Say something…" style="flex:1; padding:var(--space-1) var(--space-2); border:1px solid var(--line); border-radius:var(--radius-pill); background:var(--surface); color:var(--ink); font:inherit">
+              <button class="btn">Send</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DESIGNER'S NOTE — the restraint, made explicit ============ -->
+  <section class="block reveal" style="background:linear-gradient(120deg, var(--block-a), color-mix(in oklab, var(--block-c) 55%, var(--block-a))); padding-block:var(--space-10)">
+    <div class="wrap-narrow">
+      <p class="caption" style="color:inherit; opacity:.85">Designer's note · the restraint</p>
+      <h2 class="h2" style="color:inherit; max-width:26ch; margin-top:var(--space-2)">
+        Live is the purest “meet the real maker” proof — so we refuse to cheapen it.
+      </h2>
+      <p class="body-lg measure" style="color:inherit; opacity:.94; margin-top:var(--space-3)">
+        Every convention of live commerce pulls the other way: countdown timers, “only 3 left,”
+        flash prices, a host manufacturing panic. The KOL design system bans that chrome and
+        <span class="mono">D16-8</span> guards it explicitly — <em>no auction, no sales pressure</em>.
+      </p>
+      <p class="body-lg measure" style="color:inherit; opacity:.94; margin-top:var(--space-2)">
+        So this page has none of it. No clock. No scarcity counter. No “buy now before it's gone.”
+        You watch someone make something, you talk to them, and you buy later in their world if you
+        want to — at the same price it would always have been. Presence is the pitch; urgency is not.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ PAST SESSIONS · VOD ARCHIVE ============ -->
+  <section class="section-sm" style="padding-top:var(--space-10)">
+    <div class="wrap">
+      <div class="row-between" style="margin-bottom:var(--space-3)">
+        <h2 class="h2">Past sessions</h2>
+        <span class="caption">Scroll →</span>
+      </div>
+      <p class="measure muted" style="margin-bottom:var(--space-3)">
+        Missed one? Every session becomes a recording — the same footage the rest of the world sees.
+        Nothing here expires.
+      </p>
+      <!-- RAIL, never a uniform 3-col grid -->
+      <div class="rail">
+        <a href="maker.html" class="reveal">
+          <div class="film film--tall v5">
+            <div class="film-meta"><div class="film-craft">Workshop · 58 min</div><div class="film-name">Pulling handles</div></div>
+          </div>
+          <div class="row-between" style="margin-top:var(--space-1)"><span class="caption">3 weeks ago</span><span class="caption">211 views</span></div>
+        </a>
+        <a href="maker.html" class="reveal" style="animation-delay:70ms">
+          <div class="film film--tall v2">
+            <div class="film-meta"><div class="film-craft">Studio tour · 22 min</div><div class="film-name">Kiln opening at 6am</div></div>
+          </div>
+          <div class="row-between" style="margin-top:var(--space-1)"><span class="caption">Last month</span><span class="caption">540 views</span></div>
+        </a>
+        <a href="maker.html" class="reveal" style="animation-delay:140ms">
+          <div class="film film--tall v3">
+            <div class="film-meta"><div class="film-craft">Launch · 41 min</div><div class="film-name">Autumn ash series</div></div>
+          </div>
+          <div class="row-between" style="margin-top:var(--space-1)"><span class="caption">Spring</span><span class="caption">318 views</span></div>
+        </a>
+        <a href="maker.html" class="reveal" style="animation-delay:210ms">
+          <div class="film film--tall v4">
+            <div class="film-meta"><div class="film-craft">Workshop · 1h 06m</div><div class="film-name">Glazing, dipped &amp; poured</div></div>
+          </div>
+          <div class="row-between" style="margin-top:var(--space-1)"><span class="caption">Spring</span><span class="caption">402 views</span></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /data-world -->
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Sena live · B19 (v1.1 · NOT MVP)</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/m/sena/live</code> · maker's world (data-world), NOT KOL chrome</dd>
+      <dt>Spec</dt><dd><code>specs/events-live-experiences.md</code></dd>
+      <dt>Tier</dt><dd class="warn">ROADMAP v1.1 — NOT MVP. Implements <code>D16-8</code>. Streaming infra does not gate the core recorded-video loop.</dd>
+      <dt>Mission</dt><dd><b>Deferred</b> — nothing here ships in MVP; page exists to protect forward-compat seams.</dd>
+      <dt>MoSCoW</dt><dd><b>Won't Have</b> (this cycle)</dd>
+      <dt>Hard AC</dt><dd class="warn">No countdown / scarcity / auction / sales-pressure chrome. D16-8 guards this — live must not become live-selling.</dd>
+      <dt>Open risk</dt><dd>Real-time chat requires a <b>moderation subsystem — required and absent</b>. Vendor options (stream + chat + VOD) <b>unverified</b>.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

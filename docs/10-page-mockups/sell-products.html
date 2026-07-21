@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Products — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ OPENER ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <div class="row-between wrap-flex">
+      <div>
+        <p class="caption reveal">Seller tools · Products · Sena · Stoneware, Hudson Valley</p>
+        <h1 class="display measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+          Your pieces.
+        </h1>
+        <p class="body-lg measure muted reveal" style="animation-delay:140ms; margin-top:var(--space-2)">
+          Every product needs its full "exactly what to expect" specs before the store can
+          go public. One piece is still short.
+        </p>
+      </div>
+      <a class="btn btn-accent reveal" href="#editor" style="animation-delay:210ms">New product</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+
+  <div style="display:grid; grid-template-columns:minmax(0,320px) minmax(0,1fr); gap:var(--space-4)">
+
+    <!-- ==== LEFT: product list (a stacked list, never a 3-col grid) ==== -->
+    <aside class="stack-3">
+      <div class="card-flush reveal">
+        <div class="row-between" style="padding:var(--space-3)">
+          <b>8 products</b>
+          <span class="caption mono">1 blocked</span>
+        </div>
+        <div class="divide">
+
+          <a class="row-between" href="#editor" style="padding:var(--space-2) var(--space-3); background:color-mix(in oklab,var(--accent) 8%,var(--surface))">
+            <span class="row" style="gap:var(--space-2)">
+              <span class="film film--square" style="width:44px; height:44px; border-radius:var(--radius-sm); box-shadow:none"></span>
+              <span>
+                <b>Ridge tumbler</b>
+                <span class="caption" style="display:block; text-transform:none; letter-spacing:0">Editing now</span>
+              </span>
+            </span>
+            <span class="badge badge-pending">•</span>
+          </a>
+
+          <a class="row-between" href="#editor" style="padding:var(--space-2) var(--space-3)">
+            <span class="row" style="gap:var(--space-2)">
+              <span class="film film--square v2" style="width:44px; height:44px; border-radius:var(--radius-sm); box-shadow:none"></span>
+              <span>
+                <b>Slate serving bowl</b>
+                <span class="caption" style="display:block; text-transform:none; letter-spacing:0"><span class="price">$96</span> · in-stock</span>
+              </span>
+            </span>
+            <span class="badge badge-verified">✓</span>
+          </a>
+
+          <a class="row-between" href="#editor" style="padding:var(--space-2) var(--space-3)">
+            <span class="row" style="gap:var(--space-2)">
+              <span class="film film--square v3" style="width:44px; height:44px; border-radius:var(--radius-sm); box-shadow:none"></span>
+              <span>
+                <b>Tenmoku mug</b>
+                <span class="caption" style="display:block; text-transform:none; letter-spacing:0"><span class="price">$48</span> · made-to-order</span>
+              </span>
+            </span>
+            <span class="badge badge-verified">✓</span>
+          </a>
+
+          <a class="row-between" href="#editor" style="padding:var(--space-2) var(--space-3)">
+            <span class="row" style="gap:var(--space-2)">
+              <span class="film film--square v4" style="width:44px; height:44px; border-radius:var(--radius-sm); box-shadow:none"></span>
+              <span>
+                <b>Ember pour-over</b>
+                <span class="caption" style="display:block; text-transform:none; letter-spacing:0"><span class="price">$120</span> · sold-out</span>
+              </span>
+            </span>
+            <span class="badge badge-verified">✓</span>
+          </a>
+
+        </div>
+      </div>
+      <p class="caption">Publish is all-or-nothing: <b>every</b> product must clear its specs before the store goes public.</p>
+    </aside>
+
+    <!-- ==== RIGHT: the product being edited (incomplete → blocks publish) ==== -->
+    <section id="editor" class="stack-4">
+
+      <!-- PUBLISH-BLOCK BANNER -->
+      <div class="card reveal" style="background:color-mix(in oklab,var(--accent) 8%,var(--surface)); border-color:color-mix(in oklab,var(--accent) 28%,transparent)">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)">
+            <span class="badge" style="background:color-mix(in oklab,var(--accent) 16%,var(--surface)); color:var(--accent); border:1px solid color-mix(in oklab,var(--accent) 30%,transparent)">• Blocking publish</span>
+            <b>“Ridge tumbler” can't go live yet — 3 required specs are empty.</b>
+          </span>
+          <button class="btn" disabled style="opacity:.5; cursor:not-allowed">Publish store</button>
+        </div>
+      </div>
+
+      <!-- CORE FIELDS -->
+      <div class="card reveal" style="animation-delay:60ms">
+        <div class="row-between">
+          <h2 class="h3">The basics</h2>
+          <span class="badge badge-pending">• Draft</span>
+        </div>
+
+        <div class="stack-3" style="margin-top:var(--space-3)">
+          <label style="display:block">
+            <span class="caption">Title</span>
+            <div class="card" style="margin-top:var(--space-1); padding:var(--space-2)">Ridge tumbler</div>
+          </label>
+
+          <label style="display:block">
+            <span class="caption">Description · your words</span>
+            <div class="card measure" style="margin-top:var(--space-1); padding:var(--space-2)">Thrown one at a time, faceted while the clay is still soft so each ridge catches the light a little differently. Meant for a heavy morning pour.</div>
+          </label>
+
+          <div class="row wrap-flex" style="gap:var(--space-3)">
+            <label style="flex:1 1 200px">
+              <span class="caption">Price · minor units, server is source of truth</span>
+              <div class="card row-between" style="margin-top:var(--space-1); padding:var(--space-2)">
+                <span class="price">$90.00</span>
+                <span class="caption mono">9000 · USD</span>
+              </div>
+              <span class="caption" style="display:block; margin-top:var(--space-0-5)">Stored as <span class="mono">amount&#95;minor 9000</span> + <span class="mono">currency USD</span>. The server, not this field, is authoritative.</span>
+            </label>
+            <label style="flex:1 1 200px">
+              <span class="caption">Inventory status</span>
+              <select class="chip" style="display:block; margin-top:var(--space-1); width:100%; padding:var(--space-2)">
+                <option>In-stock</option>
+                <option>Made-to-order</option>
+                <option>Sold-out</option>
+              </select>
+              <div class="row-between card" style="margin-top:var(--space-1); padding:var(--space-2)">
+                <span class="muted">Quantity on hand</span><span class="mono">4</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDIA: images w/ focal point, 3D, narration clips -->
+      <div class="card reveal" style="animation-delay:120ms">
+        <h2 class="h3">Media</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-top:var(--space-3)">
+          <div>
+            <div class="film film--square" style="position:relative">
+              <div class="film-meta"><div class="film-craft">Image 1 · focal point set</div><div class="film-name">Rim, three-quarter</div></div>
+              <span style="position:absolute; top:38%; left:44%; width:22px; height:22px; border-radius:var(--radius-pill); border:2px solid var(--on-media); box-shadow:var(--shadow-raised); z-index:2"></span>
+            </div>
+            <p class="caption" style="margin-top:var(--space-1)">Drag the ring to set the focal point — the crop follows it everywhere.</p>
+          </div>
+          <div class="stack-2">
+            <div class="row-between card" style="padding:var(--space-2)"><span class="row" style="gap:var(--space-1)"><span class="badge">3D</span>Optional 3D model</span><span class="badge badge-verified">✓ ridge.glb</span></div>
+            <div class="row-between card" style="padding:var(--space-2)"><span>Linked narration clip</span><button class="voice"><span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b></span>0:31</button></div>
+            <div class="row-between card" style="padding:var(--space-2)"><span>Linked narration clip</span><button class="voice"><span class="wave"><b style="height:5px"></b><b style="height:11px"></b><b style="height:7px"></b></span>0:18</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========= P14 — "EXACTLY WHAT TO EXPECT" (11 required fields) ========= -->
+      <div class="card reveal" style="animation-delay:180ms; border-color:var(--accent)">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)">
+            <span class="chip" aria-pressed="true" style="background:var(--accent); color:var(--accent-ink); border-color:var(--accent); pointer-events:none">P14 · Required</span>
+            <h2 class="h3">Exactly what to expect</h2>
+          </span>
+          <span class="caption mono">8 / 11 complete</span>
+        </div>
+
+        <!-- completion meter -->
+        <div class="skeleton" style="height:10px; margin-top:var(--space-2); animation:none; opacity:1; background:color-mix(in oklab,var(--ink) 10%,var(--surface))">
+          <div style="height:100%; width:72%; background:var(--accent); border-radius:var(--radius-sm)"></div>
+        </div>
+
+        <div class="card" style="margin-top:var(--space-2); background:color-mix(in oklab,var(--accent) 8%,var(--surface)); border-color:color-mix(in oklab,var(--accent) 26%,transparent)">
+          <p class="measure" style="color:var(--accent)">
+            <b>The store cannot publish</b> until every one of these 11 fields is filled, on
+            every product. This is what lets a buyer know precisely what will arrive — no
+            surprises, no fine print.
+          </p>
+        </div>
+
+        <div class="divide" style="margin-top:var(--space-2)">
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>1 · Dimensions</span><span class="muted mono">H 95mm · Ø 82mm</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>2 · Materials</span><span class="muted">Stoneware, tenmoku glaze</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>3 · Texture</span><span class="muted">Faceted, matte exterior</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>4 · Handmade variation</span><span class="muted">Ridges vary piece to piece</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>5 · Production time</span><span class="muted mono">2–3 weeks</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>6 · Shipping</span><span class="muted">Insured, US · <span class="price">$8</span></span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>7 · Care</span><span class="muted">Hand-wash, not dishwasher</span></div>
+          <!-- the three empty ones that block publish -->
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge" style="background:color-mix(in oklab,var(--accent) 16%,var(--surface)); color:var(--accent); border:1px solid color-mix(in oklab,var(--accent) 30%,transparent)">✕</span>8 · Repairs</span><a class="caption" href="#" style="color:var(--accent)">Add — required →</a></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge" style="background:color-mix(in oklab,var(--accent) 16%,var(--surface)); color:var(--accent); border:1px solid color-mix(in oklab,var(--accent) 30%,transparent)">✕</span>9 · Returns</span><a class="caption" href="#" style="color:var(--accent)">Add — required →</a></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge" style="background:color-mix(in oklab,var(--accent) 16%,var(--surface)); color:var(--accent); border:1px solid color-mix(in oklab,var(--accent) 30%,transparent)">✕</span>10 · Customization limits</span><a class="caption" href="#" style="color:var(--accent)">Add — required →</a></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span>11 · Variation notes</span><span class="muted">Colour breaks warmer on thin rims</span></div>
+        </div>
+      </div>
+
+      <!-- ========= P13 — PROOF OF PRODUCT (maker-declared provenance) ========= -->
+      <div class="card reveal" style="animation-delay:240ms">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)">
+            <span class="badge badge-ai">◆ P13 · Maker-declared</span>
+            <h2 class="h3">Proof of product</h2>
+          </span>
+        </div>
+        <p class="caption" style="margin-top:var(--space-1)">
+          Provenance in your own words. <b>Maker-declared, not third-party verified</b> — KOL
+          shows exactly that to buyers, so claim only what's true.
+        </p>
+        <div class="divide" style="margin-top:var(--space-2)">
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Exact role</span><span class="muted">Thrown, trimmed &amp; glazed by me</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Materials</span><span class="muted">Local stoneware body, own glaze</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Process</span><span class="muted">Wheel-thrown, faceted, single fire</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Production location</span><span class="muted">My studio · Hudson Valley, NY</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Partners</span><span class="muted">None — solo on this piece</span></div>
+          <div class="row-between" style="padding-block:var(--space-2)"><span>Process media</span><span class="row" style="gap:var(--space-1)"><span class="badge">▶ 2 clips</span><span class="badge">◱ 5 photos</span></span></div>
+        </div>
+      </div>
+
+      <div class="row-between wrap-flex reveal" style="animation-delay:300ms">
+        <p class="caption measure">Saved to draft automatically. Publish stays locked until all 11 P14 fields are filled here and on every other product.</p>
+        <div class="row" style="gap:var(--space-2)">
+          <button class="btn btn-ghost">Save draft</button>
+          <button class="btn" disabled style="opacity:.5; cursor:not-allowed">Ready to publish</button>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Products · S8</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/products</code> · KOL chrome (seller tools)</dd>
+      <dt>Spec</dt><dd>Product CRUD + P14 required-specs + P13 provenance · Wave 3b</dd>
+      <dt>Mission</dt><dd><b>Hygiene</b> — but <b>publish-blocking via P14</b>.</dd>
+      <dt>Hard AC</dt><dd class="warn">P14 "Exactly What to Expect" has all 11 required fields with a completion meter; store CANNOT publish until every product is complete. One product shown blocking.</dd>
+      <dt>Hard AC</dt><dd class="warn">Price stored as minor units + currency; server is the source of truth (noted on field).</dd>
+      <dt>Hard AC</dt><dd class="warn">P13 provenance fields labelled maker-declared, NOT third-party verified.</dd>
+      <dt>Fields</dt><dd>title · desc · price · images+focal · 3D · inventory+qty · narration clips</dd>
+      <dt>Bans</dt><dd>No urgency/scarcity chrome. No uniform 3-col card grid (list is stacked).</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

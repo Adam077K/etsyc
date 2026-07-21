@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sena’s Community — KOL (PROPOSED · BLOCKED)</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<div data-world="tinctura">
+<div style="background:var(--ground); color:var(--ink); min-height:100vh">
+
+<!-- ============ BLOCKED WARNING BANNER — unmissable, top of body ============ -->
+<div class="block block-a" style="padding-block:var(--space-4)">
+  <div class="wrap">
+    <div class="row" style="gap:var(--space-2); align-items:flex-start">
+      <span style="font-size:1.75rem; line-height:1">⚠️</span>
+      <div class="stack-1">
+        <p class="caption" style="color:inherit; opacity:.85">Blocked · not build-ready · founder decision required</p>
+        <h2 class="h2" style="max-width:24ch">This page has no backing locked decision. It requires <b>D17</b>.</h2>
+        <p class="body-lg measure" style="margin-top:var(--space-1); opacity:.94">
+          Maker Community is <b>proposed only</b>. It needs a <b>moderation subsystem that does not exist</b>,
+          and it shifts KOL from one-to-many (a maker films, buyers watch) to <b>many-to-many</b> (members
+          talk to each other). That is the single largest new bet on the entire page list.
+          Everything below is a design exploration, not a commitment.
+        </p>
+        <div class="row wrap-flex" style="margin-top:var(--space-2); gap:var(--space-1)">
+          <span class="chip" style="pointer-events:none">RICE 0.3</span>
+          <span class="chip" style="pointer-events:none">MoSCoW · Could Have</span>
+          <span class="chip" style="pointer-events:none">Moderation subsystem: absent</span>
+          <span class="chip" style="pointer-events:none">Blocked pending D17</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HEADER ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <p class="caption">Sena’s community · Stoneware, Hudson Valley</p>
+    <h1 class="display measure" style="margin-top:var(--space-2)">A room around the work.</h1>
+    <p class="body-lg measure muted" style="margin-top:var(--space-2)">
+      Where the people who own Sena’s pieces — and the people thinking about it —
+      can talk to her and to each other. Updates, discussion, first-look releases, the odd kiln-opening in person.
+    </p>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div style="display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:var(--space-4)">
+
+    <!-- LEFT: updates + discussion -->
+    <div class="stack-4">
+
+      <!-- Maker updates / posts -->
+      <section class="stack-3">
+        <div class="row-between"><h2 class="h3">Updates from Sena</h2><span class="caption">Maker → members</span></div>
+        <article class="card">
+          <div class="row" style="gap:var(--space-2)">
+            <div class="film film--square" style="flex:0 0 56px; aspect-ratio:1; border-radius:var(--radius-pill)"></div>
+            <div><b>Sena</b><p class="caption">posted · 2 days ago</p></div>
+          </div>
+          <p class="measure" style="margin-top:var(--space-2)">
+            “Loaded the September glaze kiln last night. Two tenmoku tests in there I’ve
+            never fired at this temperature — if they survive, they go to this room first.”
+          </p>
+          <div class="film film--wide v2" style="margin-top:var(--space-2)">
+            <div class="play"><i>▶</i></div>
+            <div class="film-meta"><div class="film-craft">Kiln load · 0:41</div><div class="film-name">Stacking the September fire</div></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Member discussion threads -->
+      <section class="stack-3">
+        <div class="row-between"><h2 class="h3">Discussion</h2><span class="badge badge-pending">member ↔ member</span></div>
+        <div class="card-flush divide">
+          <a class="row-between" style="padding:var(--space-3)" href="#">
+            <div><b>How do you all care for matte glaze in a dishwasher?</b><p class="caption">started by Mara · 6 replies</p></div>
+            <span class="caption">2h</span>
+          </a>
+          <a class="row-between" style="padding:var(--space-3)" href="#">
+            <div><b>Show your ridge tumblers in the wild</b><p class="caption">started by Theo · 11 replies</p></div>
+            <span class="caption">1d</span>
+          </a>
+        </div>
+        <div class="card" style="border-style:dashed; border-color:var(--accent)">
+          <p class="caption" style="color:var(--accent)">⚠ Moderation gap</p>
+          <p class="measure" style="margin-top:var(--space-1)">
+            Member-to-member posts are un-gated in this mock. Shipping this needs report/queue/removal,
+            an abuse model, and a maker mute — none of which exist. This is the core reason for the block.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT: releases, events, members -->
+    <aside class="stack-4">
+
+      <!-- Exclusive releases -->
+      <section class="card">
+        <div class="row-between"><p class="caption">Exclusive releases</p><span class="badge badge-verified">✓ members first</span></div>
+        <div class="row" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <div class="film film--square v3" style="flex:0 0 80px; aspect-ratio:1"></div>
+          <div><b>Tenmoku pair · 6 only</b><p class="caption">Opens to this room 48h early</p></div>
+        </div>
+        <button class="btn" style="margin-top:var(--space-2); width:100%; justify-content:center" disabled>Nothing released yet</button>
+      </section>
+
+      <!-- Events strip -->
+      <section class="card">
+        <p class="caption">Events</p>
+        <div class="stack-2" style="margin-top:var(--space-2)">
+          <div class="row-between"><span>Live kiln opening</span><span class="mono">Sep 4</span></div>
+          <div class="row-between"><span>Studio visit · 4 spots</span><span class="mono">Sep 18</span></div>
+        </div>
+      </section>
+
+      <!-- Members panel -->
+      <section class="card">
+        <div class="row-between"><p class="caption">Members</p><span>3</span></div>
+        <div class="row wrap-flex" style="margin-top:var(--space-2); gap:var(--space-1)">
+          <span class="chip" style="pointer-events:none">Mara</span>
+          <span class="chip" style="pointer-events:none">Theo</span>
+          <span class="chip" style="pointer-events:none">Priya</span>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- ============ COLD-START EMPTY STATE — prominent ============ -->
+  <section class="section-sm">
+    <p class="caption">The state that actually ships on day one</p>
+    <h2 class="h2" style="margin-top:var(--space-1)">Cold start · 3 members, no posts</h2>
+    <p class="body-lg measure muted" style="margin-top:var(--space-1); margin-bottom:var(--space-3)">
+      An empty community is worse than no community — it reads as abandoned. This is what launch day
+      really looks like, and why the bet is risky.
+    </p>
+    <div class="empty">
+      <p class="h3">It’s quiet in here.</p>
+      <p class="measure" style="margin:var(--space-2) auto 0">
+        3 people have joined. No one has posted yet. Sena hasn’t shared an update.
+        There are no releases and no events on the calendar.
+      </p>
+      <div class="row" style="justify-content:center; gap:var(--space-2); margin-top:var(--space-4)">
+        <span class="chip" style="pointer-events:none">Mara</span>
+        <span class="chip" style="pointer-events:none">Theo</span>
+        <span class="chip" style="pointer-events:none">Priya</span>
+      </div>
+      <div class="row" style="justify-content:center; margin-top:var(--space-4)">
+        <button class="btn btn-accent">Nudge Sena to post the first thing</button>
+      </div>
+      <p class="caption" style="margin-top:var(--space-3)">
+        Design problem this raises: who seeds it, and what happens if the maker goes quiet for a month?
+      </p>
+    </div>
+  </section>
+</main>
+
+</div><!-- /ground -->
+</div><!-- /data-world -->
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary class="warn">Community · B15 · PROPOSED / BLOCKED</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/m/sena/community</code> · maker’s world (tinctura)</dd>
+      <dt>Spec</dt><dd><code>specs/maker-community.md</code></dd>
+      <dt>Priority</dt><dd>RICE <b>0.3</b> · MoSCoW <b>Could Have</b></dd>
+      <dt>Target sprint</dt><dd class="warn"><b>BLOCKED</b> pending founder decision <b>D17</b></dd>
+      <dt>Mission</dt><dd><b>would carry</b> — conditional; earns nothing until people show up</dd>
+      <dt>Blocker</dt><dd class="warn">No locked decision backs this page. Largest single new bet on the list.</dd>
+      <dt>Blocker</dt><dd class="warn">Shifts model one-to-many → <b>many-to-many</b>; requires a <b>moderation subsystem that does not exist</b>.</dd>
+      <dt>Risk</dt><dd class="warn">Cold-start: an empty community reads as abandoned. Ships empty by default.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

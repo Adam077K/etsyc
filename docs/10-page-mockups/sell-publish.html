@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review &amp; publish — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ EDITOR CHROME: KOL's fixed system ============ -->
+<header class="wrap section-sm">
+  <div class="row-between wrap-flex">
+    <div>
+      <p class="caption">Studio · Sena · Stoneware, Hudson Valley</p>
+      <h1 class="h1" style="margin-top:var(--space-1)">You approve every block. Nothing ships that you didn’t sign off.</h1>
+      <p class="body-lg muted measure" style="margin-top:var(--space-1)">
+        The critic checks each block twice — a hard readability gate, then a coherence
+        read. You approve the survivors. Publish only opens when all four conditions are true.
+      </p>
+    </div>
+    <div class="row" style="gap:var(--space-2)">
+      <a class="btn" href="sell-edit.html">← Editor</a>
+      <a class="btn" href="sell-voice.html">Voice</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div style="display:grid; grid-template-columns:minmax(0,2fr) minmax(320px,1fr); gap:var(--space-4); align-items:start">
+
+    <!-- ==== LEFT: section-by-section approval, each with critic sub-gates ==== -->
+    <section class="stack-3">
+      <div class="row-between">
+        <p class="caption">Every block · approve to include</p>
+        <span class="caption">5 blocks · 3 approved · 1 needs review · 1 edited-since-approved</span>
+      </div>
+
+      <!-- BLOCK: APPROVED, both gates pass -->
+      <div class="card">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">hero-video</span><span class="badge badge-verified">✓ approved</span></span>
+          <button class="chip" aria-pressed="true" style="pointer-events:none">Approved by you</button>
+        </div>
+        <div class="row wrap-flex" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-verified">① WCAG-AA · pass · <span class="mono">8.1 : 1</span></span>
+          <span class="badge badge-verified">② Coherence · <span class="mono">0.91</span> ≥ 0.75</span>
+        </div>
+      </div>
+
+      <!-- BLOCK: EDITED SINCE APPROVED — approval invalidated -->
+      <div class="card" style="border-color:var(--accent)">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">craft-story</span><span class="badge badge-pending" style="background:color-mix(in oklab,var(--accent) 16%, var(--surface)); color:var(--accent); border-color:color-mix(in oklab,var(--accent) 40%, transparent)">↻ edited since approved</span></span>
+          <button class="btn btn-ghost">Re-approve</button>
+        </div>
+        <p class="caption" style="text-transform:none; letter-spacing:0; color:var(--muted); margin-top:var(--space-1)">You changed the headline in the editor — the old ✓ was cleared and the critic is re-running.</p>
+        <div class="row wrap-flex" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-verified">① WCAG-AA · pass · <span class="mono">7.8 : 1</span></span>
+          <span class="badge badge-pending">② Coherence · re-scoring…</span>
+        </div>
+      </div>
+
+      <!-- BLOCK: FAILED gate 1, AUTO-REGENERATED -->
+      <div class="card" style="background:color-mix(in oklab, var(--accent) 6%, var(--surface))">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">product-showcase</span><span class="badge badge-pending" style="background:color-mix(in oklab,var(--accent) 18%, var(--surface)); color:var(--accent); border-color:color-mix(in oklab,var(--accent) 44%, transparent)">✕ failed → auto-regenerated</span></span>
+          <span class="caption">regen attempt <span class="mono">1 of 3</span></span>
+        </div>
+        <p class="caption" style="text-transform:none; letter-spacing:0; color:var(--muted); margin-top:var(--space-1)">
+          Gate ① failed: caption <code class="mono">#8a7d6b</code> on ground <code class="mono">#1B1418</code> measured
+          <span class="mono">3.9 : 1</span> — below the 4.5 : 1 floor. The critic nudged the caption lighter and re-ran.
+        </p>
+        <div class="row wrap-flex" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-verified">① WCAG-AA · now pass · <span class="mono">4.9 : 1</span></span>
+          <span class="badge badge-verified">② Coherence · <span class="mono">0.82</span> ≥ 0.75</span>
+        </div>
+        <div class="row-between" style="margin-top:var(--space-2)">
+          <span class="caption">Regen keeps your content — it only adjusts to clear the hard gate. You still approve it.</span>
+          <button class="btn btn-ghost">Review change &amp; approve</button>
+        </div>
+      </div>
+
+      <!-- BLOCK: NEEDS REVIEW (never approved yet) -->
+      <div class="card" style="border-style:dashed">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">voice-quote</span><span class="badge badge-pending">• needs review</span></span>
+          <button class="btn btn-ghost">Open &amp; approve</button>
+        </div>
+        <div class="row wrap-flex" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-verified">① WCAG-AA · pass · <span class="mono">9.4 : 1</span></span>
+          <span class="badge badge-verified">② Coherence · <span class="mono">0.88</span> ≥ 0.75</span>
+        </div>
+      </div>
+
+      <!-- BLOCK: APPROVED -->
+      <div class="card">
+        <div class="row-between wrap-flex">
+          <span class="row" style="gap:var(--space-2)"><span class="caption" style="color:var(--muted)">contact-cta</span><span class="badge badge-verified">✓ approved</span></span>
+          <button class="chip" aria-pressed="true" style="pointer-events:none">Approved by you</button>
+        </div>
+        <div class="row wrap-flex" style="gap:var(--space-2); margin-top:var(--space-2)">
+          <span class="badge badge-verified">① WCAG-AA · pass · <span class="mono">6.7 : 1</span></span>
+          <span class="badge badge-verified">② Coherence · <span class="mono">0.79</span> ≥ 0.75</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==== RIGHT: the critic pipeline + the BLOCKED publish gate ==== -->
+    <aside class="stack-3" style="position:sticky; top:76px">
+
+      <!-- critic explainer: two sub-gates in strict order -->
+      <div class="card">
+        <p class="caption">Auto-critic · P9 · two gates, in order</p>
+        <ol style="list-style:none; margin-top:var(--space-2)" class="stack-2">
+          <li>
+            <div class="row" style="gap:var(--space-1)"><span class="badge badge-verified">①</span><b>WCAG-AA · deterministic hard gate</b></div>
+            <p class="caption" style="text-transform:none; letter-spacing:0; color:var(--muted); margin-top:var(--space-0-5)">Measured contrast per block. Below 4.5 : 1 = fail. No model judgement, no override.</p>
+          </li>
+          <li>
+            <div class="row" style="gap:var(--space-1)"><span class="badge badge-verified">②</span><b>Coherence · Sonnet score ≥ 0.75</b></div>
+            <p class="caption" style="text-transform:none; letter-spacing:0; color:var(--muted); margin-top:var(--space-0-5)">Only runs on blocks that clear gate ①. Does the block read as one intentional world?</p>
+          </li>
+        </ol>
+        <p class="caption" style="margin-top:var(--space-2)">Order is strict: ① then ②. A block failing ① is auto-regenerated (max 3) before it can reach ②.</p>
+      </div>
+
+      <!-- THE PUBLISH GATE — visibly BLOCKED -->
+      <div class="card" style="border-color:var(--accent); background:color-mix(in oklab, var(--accent) 5%, var(--surface))">
+        <div class="row-between">
+          <p class="caption" style="color:var(--accent)">Publish · four hard preconditions</p>
+          <span class="badge badge-pending" style="background:color-mix(in oklab,var(--accent) 16%, var(--surface)); color:var(--accent); border-color:color-mix(in oklab,var(--accent) 40%, transparent)">BLOCKED</span>
+        </div>
+
+        <ul class="stack-1" style="list-style:none; margin-top:var(--space-2)">
+          <li class="row-between"><span class="row" style="gap:var(--space-1)"><span class="badge badge-verified">✓</span> AA-PASS · all blocks ≥ 4.5 : 1</span></li>
+          <li class="row-between"><span class="row" style="gap:var(--space-1)"><span class="badge badge-pending" style="background:color-mix(in oklab,var(--accent) 16%, var(--surface)); color:var(--accent); border-color:color-mix(in oklab,var(--accent) 40%, transparent)">✕</span> All rendered blocks approved</span><span class="caption" style="color:var(--accent)">2 unresolved</span></li>
+          <li class="row-between"><span class="row" style="gap:var(--space-1)"><span class="badge badge-verified">✓</span> Real-Maker voice anchor resolved</span></li>
+          <li class="row-between"><span class="row" style="gap:var(--space-1)"><span class="badge badge-verified">✓</span> P14 <code class="mono">product_specs</code> complete</span></li>
+        </ul>
+
+        <!-- genuinely disabled -->
+        <button class="btn btn-accent btn-lg" disabled style="width:100%; margin-top:var(--space-3); opacity:.5; cursor:not-allowed; filter:grayscale(.4)">
+          Publish your world · locked
+        </button>
+        <p class="caption warn" style="text-align:center; margin-top:var(--space-2)">
+          Can’t publish yet — <b>craft-story</b> was edited since approval and <b>voice-quote</b> is unreviewed.
+          Re-approve both and this opens.
+        </p>
+      </div>
+
+      <div class="card" style="background:var(--ink); color:var(--ground)">
+        <p class="caption" style="color:var(--ground); opacity:.7">Why the gate can’t be waved through</p>
+        <p class="measure" style="margin-top:var(--space-1)">
+          The AA gate is deterministic and the approval gate is yours. Neither the CEO nor
+          the CTO can override a BLOCK — the tool takes the design slack, but you stay the author.
+        </p>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Sell · Publish · S6 + P9 + P10</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/publish</code> · KOL chrome (seller tools)</dd>
+      <dt>Spec</dt><dd>S6 publish · P9 auto-critic · P10 coherence · Wave 4b</dd>
+      <dt>Mission</dt><dd><b>Carries</b> — the quality gate</dd>
+      <dt>Pipeline</dt><dd>strictly serial <code>P9 → P10 → S9 → S6</code></dd>
+      <dt>Gate ①</dt><dd class="warn">Deterministic WCAG-AA per block. &lt; 4.5 : 1 = fail → auto-regen (max 3) before gate ②.</dd>
+      <dt>Gate ②</dt><dd>Sonnet coherence ≥ 0.75, only on blocks that cleared ①</dd>
+      <dt>Publish</dt><dd class="warn">Four hard preconditions, all required: AA-PASS ∧ all rendered blocks approved ∧ Real-Maker voice resolved ∧ P14 product_specs complete. One unmet → button disabled.</dd>
+      <dt>Risk</dt><dd class="warn">Irreversible tier. CEO/CTO cannot override a BLOCK.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inbox — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html" aria-current="page">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<header class="section-sm">
+  <div class="wrap">
+    <div class="row-between wrap-flex">
+      <div>
+        <p class="caption">Inbox · your conversations</p>
+        <h1 class="h1" style="margin-top:var(--space-1)">Talk to the maker directly.</h1>
+      </div>
+      <!-- the deliberate contrast note -->
+      <div class="card" style="max-width:38ch; background:color-mix(in oklab, var(--accent-2) 8%, var(--surface))">
+        <p class="caption" style="color:var(--accent-2)">Not to be confused with Notifications</p>
+        <p style="margin-top:var(--space-1)">
+          Notifications are one-way pings the system sends you. <b>Inbox is the opposite</b>:
+          two-way, written by a real person, kept forever, and you can reply.
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ TWO-PANE ============ -->
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div style="display:grid; grid-template-columns:minmax(0,340px) minmax(0,1fr); gap:var(--space-4); align-items:start">
+
+    <!-- ==== LEFT: thread list, each visibly TYPED ==== -->
+    <aside class="card-flush divide" aria-label="Conversations">
+      <a class="stack-1" style="display:block; padding:var(--space-3); background:color-mix(in oklab, var(--ink) 4%, var(--surface))" href="#">
+        <span class="row-between">
+          <span class="badge badge-ai" style="text-transform:uppercase; letter-spacing:.06em">Commission</span>
+          <span class="caption">now</span>
+        </span>
+        <span class="row" style="gap:var(--space-2); margin-top:var(--space-1)">
+          <span class="film film--square" style="flex:0 0 40px; aspect-ratio:1; border-radius:var(--radius-pill)"></span>
+          <span><b>Sena</b><span class="caption" style="display:block">Slate tumblers · v3 shared</span></span>
+        </span>
+      </a>
+
+      <a class="stack-1" style="display:block; padding:var(--space-3)" href="#">
+        <span class="row-between">
+          <span class="badge badge-verified" style="text-transform:uppercase; letter-spacing:.06em">Product question</span>
+          <span class="caption">2h</span>
+        </span>
+        <span class="row" style="gap:var(--space-2); margin-top:var(--space-1)">
+          <span class="film film--square v2" style="flex:0 0 40px; aspect-ratio:1; border-radius:var(--radius-pill)"></span>
+          <span><b>Noor</b><span class="caption" style="display:block">“Is the indigo colourfast?”</span></span>
+        </span>
+      </a>
+
+      <a class="stack-1" style="display:block; padding:var(--space-3)" href="#">
+        <span class="row-between">
+          <span class="badge badge-pending" style="text-transform:uppercase; letter-spacing:.06em">Order-related</span>
+          <span class="caption">1d</span>
+        </span>
+        <span class="row" style="gap:var(--space-2); margin-top:var(--space-1)">
+          <span class="film film--square v3" style="flex:0 0 40px; aspect-ratio:1; border-radius:var(--radius-pill)"></span>
+          <span><b>Tomas</b><span class="caption" style="display:block">Order #4471 · shipped today</span></span>
+        </span>
+      </a>
+    </aside>
+
+    <!-- ==== RIGHT: conversation pane ==== -->
+    <section class="card" aria-label="Conversation with Sena">
+      <div class="row-between" style="border-bottom:1px solid var(--line); padding-bottom:var(--space-2)">
+        <div class="row" style="gap:var(--space-2)">
+          <span class="film film--square" style="flex:0 0 44px; aspect-ratio:1; border-radius:var(--radius-pill)"></span>
+          <div>
+            <b>Sena</b> <span class="badge badge-verified">✓ Real Maker</span>
+            <p class="caption">Commission · Stoneware · this thread is just you two</p>
+          </div>
+        </div>
+        <a class="btn btn-ghost" href="co-create.html">Open commission</a>
+      </div>
+
+      <!-- messages -->
+      <div class="stack-3" style="padding-block:var(--space-3)">
+
+        <!-- text from maker -->
+        <div style="max-width:60ch">
+          <p class="caption">Sena · Mon 9:14</p>
+          <div class="card" style="margin-top:var(--space-0-5)">
+            <p>“Started the slate pair this morning. I’ll film the trimming so you can see the foot before I glaze.”</p>
+          </div>
+        </div>
+
+        <!-- text from buyer (you), right-aligned -->
+        <div style="max-width:60ch; margin-left:auto">
+          <p class="caption" style="text-align:right">You · Mon 9:31</p>
+          <div class="card" style="margin-top:var(--space-0-5); background:var(--accent-cta); color:var(--accent-ink); border-color:transparent">
+            <p>Perfect. Can we push the colour a touch darker than v2?</p>
+          </div>
+        </div>
+
+        <!-- audio message -->
+        <div style="max-width:60ch">
+          <p class="caption">Sena · Mon 14:02 · voice message</p>
+          <div class="card" style="margin-top:var(--space-0-5)">
+            <button class="voice" style="border-style:solid">
+              <span class="play" style="position:static; width:32px; height:32px; display:inline-grid"><i style="width:32px;height:32px;box-shadow:none">▶</i></span>
+              <span class="wave" style="height:20px">
+                <b style="height:8px"></b><b style="height:16px"></b><b style="height:11px"></b><b style="height:20px"></b>
+                <b style="height:9px"></b><b style="height:14px"></b><b style="height:6px"></b><b style="height:18px"></b>
+                <b style="height:10px"></b><b style="height:13px"></b>
+              </span>
+              <span class="mono">0:34</span>
+            </button>
+            <p class="caption" style="margin-top:var(--space-1)">“Darker means leaning tenmoku — here’s what that does at the rim…”</p>
+          </div>
+        </div>
+
+        <!-- shared draft card with revisions -->
+        <div style="max-width:60ch">
+          <p class="caption">Sena · Tue 11:20 · shared a draft</p>
+          <div class="card-flush" style="margin-top:var(--space-0-5)">
+            <div class="film film--wide">
+              <div class="play"><i>▶</i></div>
+              <div class="film-meta"><div class="film-craft">Draft · slate tumblers</div><div class="film-name">v3 · tenmoku test</div></div>
+            </div>
+            <div style="padding:var(--space-2)">
+              <div class="row wrap-flex" style="gap:var(--space-1)">
+                <button class="chip">v1</button>
+                <button class="chip">v2</button>
+                <button class="chip" aria-pressed="true">v3 · current</button>
+              </div>
+              <div class="row-between" style="margin-top:var(--space-2)">
+                <span class="caption">Shared draft · lives in the commission</span>
+                <a class="btn btn-accent" href="co-create.html">Review &amp; approve</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- reply composer — proof it's repliable -->
+      <div class="row" style="border-top:1px solid var(--line); padding-top:var(--space-3); gap:var(--space-2)">
+        <input class="btn" style="flex:1; justify-content:flex-start; cursor:text; color:var(--muted)" value="Reply to Sena…" readonly aria-label="Reply">
+        <button class="voice" style="border-style:solid" aria-label="Record voice reply">
+          <span class="wave"><b style="height:6px"></b><b style="height:12px"></b><b style="height:8px"></b></span> Record
+        </button>
+        <button class="btn btn-accent">Send</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Inbox · P15</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/inbox</code> · KOL chrome (default palette)</dd>
+      <dt>Spec</dt><dd>Messaging + draft-versioning · Wave 4c</dd>
+      <dt>Mission</dt><dd><b>Supports</b> — carries no object itself; holds the relationship</dd>
+      <dt>Hard AC</dt><dd class="warn">Threads are <b>1:1 counterparty only</b> (buyer ↔ maker), RLS-enforced. No group threads.</dd>
+      <dt>Boundary</dt><dd>Separate from public Q&amp;A (<code>B12</code>) and separate from Notifications (<code>B16</code>).</dd>
+      <dt>Contrast</dt><dd>Two-way · human-authored · persistent · repliable — the deliberate opposite of one-way Notifications.</dd>
+      <dt>Types</dt><dd><code>commission</code> · <code>product-question</code> · <code>order-related</code>, each labelled in the list.</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>

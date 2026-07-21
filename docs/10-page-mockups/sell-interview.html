@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your interview — KOL</title>
+<link rel="stylesheet" href="_kol.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">K<span>O</span>L</a>
+    <div class="nav-links">
+      <a href="discover.html">Discover</a>
+      <a href="for-you.html">For You</a>
+      <a href="search.html">Search</a>
+      <a href="inbox.html">Inbox</a>
+      <a href="notifications.html">Notifications</a>
+      <a href="collections.html">Saved</a>
+      <a href="orders.html">Orders</a>
+      <a href="profile.html">Profile</a>
+    </div>
+    <a class="btn" href="sell-explainer.html">Sell on KOL</a>
+    <a class="btn btn-accent" href="onboarding.html">Sign in</a>
+  </div>
+</nav>
+
+<!-- ============ OPENER: a conversation, framed warmly ============ -->
+<header class="section-sm">
+  <div class="wrap">
+    <div class="row-between wrap-flex">
+      <div>
+        <p class="caption reveal">Your interview · Sena · Stoneware, Hudson Valley</p>
+        <h1 class="h1 measure reveal" style="animation-delay:70ms; margin-top:var(--space-2)">
+          Tell me how one piece is actually made.
+        </h1>
+        <p class="body-lg measure muted reveal" style="animation-delay:140ms; margin-top:var(--space-2)">
+          Talk the way you'd tell a friend across the bench. There are no wrong
+          answers and nothing to write — I'm just listening, and I'll follow what
+          you say.
+        </p>
+      </div>
+      <!-- film / voice toggle -->
+      <div class="reveal" style="animation-delay:210ms">
+        <p class="caption" style="text-align:right">How you'd like to answer</p>
+        <div class="row" style="margin-top:var(--space-1); gap:var(--space-1)">
+          <button class="chip" aria-pressed="true">◉ On film</button>
+          <button class="chip">Voice only</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:var(--space-16)">
+  <div style="display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:var(--space-4)">
+
+    <!-- ==== LEFT: the recording frame + current question ==== -->
+    <div class="stack-3">
+
+      <!-- live recording frame, maker on camera -->
+      <div class="film film--wide reveal" style="border-radius:var(--radius-md)">
+        <!-- recording indicator -->
+        <div style="position:absolute; top:var(--space-2); left:var(--space-2); z-index:2; display:flex; gap:var(--space-1); align-items:center; background:color-mix(in oklab, var(--ink) 55%, transparent); border-radius:var(--radius-pill); padding:var(--space-0-5) var(--space-2)">
+          <span style="width:9px; height:9px; border-radius:50%; background:var(--accent); display:inline-block"></span>
+          <span class="caption" style="color:var(--on-media)">Recording · 4:12</span>
+        </div>
+        <div class="film-meta">
+          <div class="film-craft">You, at the wheel · north-light window behind you</div>
+          <div class="film-name">Sena — beat 2 of 7</div>
+        </div>
+      </div>
+
+      <!-- controls: warm, not an interrogation panel -->
+      <div class="row wrap-flex" style="gap:var(--space-2)">
+        <button class="btn">⏸ Pause</button>
+        <button class="btn">↺ Re-record this answer</button>
+        <button class="btn btn-ghost">Skip this question</button>
+        <button class="btn btn-ghost">Save &amp; come back later</button>
+      </div>
+
+      <!-- the CURRENT question, prominent -->
+      <section class="card" style="border-color:var(--accent); background:color-mix(in oklab, var(--accent) 6%, var(--surface))">
+        <p class="caption" style="color:var(--accent)">On screen now · Beat 2 · Craft</p>
+        <p class="h2" style="margin-top:var(--space-1)">
+          Walk me through how one piece is actually made.
+        </p>
+        <p class="muted" style="margin-top:var(--space-2)">
+          Take your time. When you're done, just say so — I'll only ask more if I
+          missed something.
+        </p>
+      </section>
+
+      <!-- ADAPTIVE FOLLOW-UPS: generated from what she just said, clearly marked -->
+      <section class="stack-2">
+        <div class="row" style="gap:var(--space-2)">
+          <span class="badge badge-ai">✦ Follow-ups I picked up from you</span>
+          <span class="caption">not fixed questions · max 3 per beat · 2 asked</span>
+        </div>
+
+        <div class="card reveal" style="border-left:3px solid var(--accent-2)">
+          <p class="caption" style="color:var(--accent-2)">Because you mentioned wedging the clay by hand →</p>
+          <p class="h3" style="margin-top:var(--space-1)">
+            You said you can feel when it's ready — what does your hand actually feel for?
+          </p>
+        </div>
+
+        <div class="card reveal" style="border-left:3px solid var(--accent-2); animation-delay:70ms">
+          <p class="caption" style="color:var(--accent-2)">Because you named the ridge tumblers →</p>
+          <p class="h3" style="margin-top:var(--space-1)">
+            How long does one of those take you, wheel to kiln?
+          </p>
+        </div>
+
+        <p class="caption muted">
+          I won't push past three. When your craft's covered, we move on — you're never stuck in a loop.
+        </p>
+      </section>
+
+    </div>
+
+    <!-- ==== RIGHT: story progress rail + live transcript ==== -->
+    <aside class="stack-3">
+
+      <!-- 7-beat story progress -->
+      <div class="card">
+        <div class="row-between">
+          <p class="caption">Your story so far</p>
+          <span class="caption">2 of 7</span>
+        </div>
+        <ol style="list-style:none; margin-top:var(--space-2)" class="stack-1">
+          <li class="row-between" style="padding-block:var(--space-1)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-verified">✓</span><span>1 · Story &amp; origin</span></span>
+            <span class="caption">done</span>
+          </li>
+          <li class="row-between" style="padding-block:var(--space-1); background:color-mix(in oklab, var(--accent) 8%, transparent); border-radius:var(--radius-sm); padding-inline:var(--space-1)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge" style="background:var(--accent); color:var(--accent-ink)">2</span><b>Craft</b></span>
+            <span class="caption" style="color:var(--accent)">now</span>
+          </li>
+          <li class="row-between" style="padding-block:var(--space-1)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-pending">3</span><span class="muted">Your workshop</span></span>
+          </li>
+          <li class="row-between" style="padding-block:var(--space-1)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-pending">4</span><span class="muted">What you won't compromise on</span></span>
+          </li>
+          <li class="row-between" style="padding-block:var(--space-1)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-pending">5</span><span class="muted">The feel of your shop</span></span>
+          </li>
+          <li class="row-between" style="padding-block:var(--space-1)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-pending">6</span><span class="muted">You, not just the work</span></span>
+          </li>
+          <li class="row-between" style="padding-block:var(--space-1)">
+            <span class="row" style="gap:var(--space-2)"><span class="badge badge-pending">7</span><span class="muted">The pieces you love</span></span>
+          </li>
+        </ol>
+        <p class="caption muted" style="margin-top:var(--space-2)">
+          Seven beats, always in this order. The follow-ups change; the spine doesn't.
+        </p>
+      </div>
+
+      <!-- live transcript -->
+      <div class="card">
+        <div class="row-between">
+          <p class="caption">Live transcript</p>
+          <button class="voice" style="padding-block:2px">
+            <span class="wave"><b style="height:5px"></b><b style="height:12px"></b><b style="height:8px"></b><b style="height:14px"></b><b style="height:6px"></b></span>
+            listening
+          </button>
+        </div>
+        <div class="stack-2" style="margin-top:var(--space-2)">
+          <p class="measure">
+            <span class="mono muted" style="font-size:var(--fs-caption)">3:48</span><br>
+            "I start every pot by wedging the clay by hand — you push and fold it
+            until the air's out and it moves like it wants to. I can feel when it's
+            ready, honestly, before I ever centre it on the wheel."
+          </p>
+          <p class="measure">
+            <span class="mono muted" style="font-size:var(--fs-caption)">4:12</span><br>
+            "The ridge tumblers are the ones I'm known for — I throw them tall, then
+            pull three grooves in with my thumb so they sit in your hand&hellip;"
+            <span class="skeleton" style="display:inline-block; width:120px; height:12px; vertical-align:middle"></span>
+          </p>
+        </div>
+        <p class="caption muted" style="margin-top:var(--space-2)">
+          This is exactly what you said — nothing added. It becomes the words in your shop.
+        </p>
+      </div>
+
+      <!-- designer's note: warmth, not interrogation -->
+      <div class="card" style="background:var(--ink); color:var(--ground); border-color:var(--ink)">
+        <p class="caption" style="color:var(--ground); opacity:.7">A note on how this feels</p>
+        <p class="measure" style="margin-top:var(--space-1)">
+          We built this to feel like a curious shopkeeper leaning on the counter —
+          not a form, not an interrogation. It asks, then it listens. It never
+          probes more than three times on one thing, and you can pause, redo, skip,
+          or leave and finish tomorrow. The point is that you feel <em>heard</em>,
+          maybe for the first time.
+        </p>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ============ spec annotation (mockup only) ============ -->
+<details class="spec" open>
+  <summary>Adaptive interview · S2</summary>
+  <div class="spec-body">
+    <dl>
+      <dt>Route</dt><dd><code>/sell/interview</code> · KOL chrome (curated tool UI) · film-always-wins</dd>
+      <dt>Spec</dt><dd><code>specs/adaptive-ai-interview.md</code> · ai-pipeline §3 · Wave 4a</dd>
+      <dt>Mission</dt><dd><b>Carries</b> — "finally heard," literally</dd>
+      <dt>Structure</dt><dd>7 FIXED beats in order (story→craft→workshop→values→brand→personal→product) + bounded smart follow-ups, <b>max 3/beat</b>. Follow-ups are marked as follow-ups, never as beats.</dd>
+      <dt>Guardrail</dt><dd class="warn">The interviewer only asks &amp; reflects — it never writes her story. Never "AI does it for you."</dd>
+      <dt>Writes</dt><dd><code>interviews</code> · <code>interview_answers</code> · <code>media</code> (Irreversible tier). Extraction leaves any unsupported field <code>null</code> — hallucination-guarded.</dd>
+      <dt>Ships with</dt><dd>eval harness (followup quality · beat classifier · extraction P/R/F1, hallucinationRate=0) + per-call cost log (§10.1).</dd>
+      <dt>Next</dt><dd>all 7 beats satisfied → extraction → <code>/sell/draft</code> (S3)</dd>
+    </dl>
+  </div>
+</details>
+
+</body>
+</html>
