@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  ACCOUNT_PATH,
   BUYER_LANDING,
   SELLER_LANDING,
   SIGN_IN_PATH,
@@ -20,6 +21,8 @@ describe("classifyRoute", () => {
     [`${BUYER_LANDING}/saved`, "buyer"],
     [SELLER_LANDING, "seller"],
     [`${SELLER_LANDING}/orders`, "seller"],
+    [ACCOUNT_PATH, "account"],
+    [`${ACCOUNT_PATH}/settings`, "account"],
   ] as const)("%s → %s", (path, expected) => {
     expect(classifyRoute(path)).toBe(expected);
   });
@@ -27,6 +30,7 @@ describe("classifyRoute", () => {
   it("does not class prefix look-alikes as protected", () => {
     expect(classifyRoute("/feedback")).toBe("public");
     expect(classifyRoute("/sellers-market")).toBe("public");
+    expect(classifyRoute("/accounting")).toBe("public");
   });
 });
 

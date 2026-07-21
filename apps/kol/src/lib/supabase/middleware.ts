@@ -16,7 +16,7 @@ import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
  * response cookies in sync (per @supabase/ssr App Router conventions), and
  * applies the P1 role-gated route policy (lib/auth/routes.ts):
  *
- *   - protected routes (buyer/seller) without a session → /sign-in?next=…
+ *   - protected routes (buyer/seller/account) without a session → /sign-in?next=…
  *   - /sign-in with a session → role-correct landing (buyer→feed, seller→dashboard)
  *   - seller routes as a non-seller → buyer landing (no cross-role leak)
  *
@@ -71,7 +71,7 @@ export async function updateSession(request: NextRequest) {
   const route = classifyRoute(request.nextUrl.pathname);
 
   if (!user) {
-    if (route === "buyer" || route === "seller") {
+    if (route === "buyer" || route === "seller" || route === "account") {
       return redirectTo(SIGN_IN_PATH, request.nextUrl.pathname);
     }
     return supabaseResponse;

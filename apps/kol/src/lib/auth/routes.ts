@@ -14,11 +14,12 @@ import { parseSameOriginPath } from "./schemas";
 
 export type UserRole = Database["public"]["Enums"]["user_role"];
 
-export type RouteClass = "public" | "auth-entry" | "buyer" | "seller";
+export type RouteClass = "public" | "auth-entry" | "buyer" | "seller" | "account";
 
 export const SIGN_IN_PATH = "/sign-in";
 export const BUYER_LANDING = "/feed";
 export const SELLER_LANDING = "/seller";
+export const ACCOUNT_PATH = "/account";
 
 function inPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -33,6 +34,9 @@ export function classifyRoute(pathname: string): RouteClass {
   if (inPrefix(pathname, SIGN_IN_PATH)) return "auth-entry";
   if (inPrefix(pathname, SELLER_LANDING)) return "seller";
   if (inPrefix(pathname, BUYER_LANDING)) return "buyer";
+  // Profile/settings (spec P2): requires a session but is role-neutral —
+  // buyers AND sellers both own a profiles row.
+  if (inPrefix(pathname, ACCOUNT_PATH)) return "account";
   return "public";
 }
 
