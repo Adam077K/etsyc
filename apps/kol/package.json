@@ -13,6 +13,7 @@
     "lint": "eslint src e2e"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.112.4",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
     "class-variance-authority": "^0.7.1",

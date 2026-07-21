@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { TagEditor, type ProductOption } from "@/components/tagging/TagEditor";
 import { BUYER_LANDING, SIGN_IN_PATH } from "@/lib/auth/routes";
 import { createClient } from "@/lib/supabase/server";
+import { suggestVideoProfileTags } from "@/lib/tagging/actions";
 import {
   videoIdSchema,
   videoProfileWriteSchema,
@@ -106,7 +107,12 @@ export default async function ClipTaggingPage({
         ].join(" · ")}
         . Tags decide where it appears — untagged clips stay invisible.
       </p>
-      <TagEditor videoId={video.id} initial={initial} products={products} />
+      <TagEditor
+        videoId={video.id}
+        initial={initial}
+        products={products}
+        suggest={suggestVideoProfileTags}
+      />
     </main>
   );
 }
