@@ -4,6 +4,14 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-21 — Phase-6 Wave 0 (render spine) shipped to main; ≥300-LOC→Full tier rule established
+
+**Context:** First real build wave of the KOL MVP — the store-config render spine (mock-fixture only, zero DB), built to harden the apps/kol scaffold to spec.
+**Decision:** 4 units (P3 store-config v1.3 validator · P4 renderer w/ hero-persistence · P5 block library · P8 design rails + reusable WCAG module) built by one Fable Design-Build agent each, QA'd independently at Full tier, merged to GitHub main @ `32cbeb8` (309/309 tests, typecheck, prod build green). Orchestration on Opus, all build/QA on Fable 5.
+**Tier precedent (reusable):** QA-Lead ruled ≥300 LOC changed → **Full tier regardless of surface** (auth/DB/billing not required to trigger it); Full = code-reviewer + qa-engineer + security-engineer + adversary-engineer. CEO must run the reviewers, never let QA-Lead simulate a skipped one — this session added adversary passes when a QA-Lead flagged that gap.
+**Gate proved its value:** QA caught + forced fixes on two stored-injection vectors (javascript:/data: URLs + CSS font-family breakout in P3), a P5 AA failure (3.32:1), and — via the integration smoke test — a P3 fontFamilyName regex that was ASCII-only and rejected Unicode foundry names (D15 violation), broadened to `\p{L}\p{M}\p{N}` with the injection block intact.
+**Reversibility:** merged (hard to reverse; on origin/main). **Owner:** ceo (session `ceo-phase6`). **Affects:** all Wave 1–6 builders — they extend this spine. Migration apply is the one item gating Wave 1 (Founder-gated, blocked on Docker-vs-cloud + staging keys). Full MVP launch prompt: `docs/08-agents_work/handoffs/2026-07-21-FULL-MVP-BUILD-LAUNCH-PROMPT.md`.
+
 ---
 
 ## Format
