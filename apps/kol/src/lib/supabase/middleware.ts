@@ -1,19 +1,28 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  BUYER_LANDING,
+  SIGN_IN_PATH,
+  classifyRoute,
+  landingPathFor,
+} from "@/lib/auth/routes";
+
 import type { Database } from "./database.types";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
 
 /**
- * Middleware session helper — refreshes the auth token and keeps request +
- * response cookies in sync, per @supabase/ssr App Router conventions.
+ * Middleware session helper — refreshes the auth token, keeps request +
+ * response cookies in sync (per @supabase/ssr App Router conventions), and
+ * applies the P1 role-gated route policy (lib/auth/routes.ts):
  *
- * Deliberately does NO role-gated routing (that is P1 scope). Call from
- * src/middleware.ts once auth routes exist:
+ *   - protected routes (buyer/seller) without a session → /sign-in?next=…
+ *   - /sign-in with a session → role-correct landing (buyer→feed, seller→dashboard)
+ *   - seller routes as a non-seller → buyer landing (no cross-role leak)
  *
- *   export async function middleware(request: NextRequest) {
- *     return updateSession(request);
- *   }
+ * Routing is UX; RLS remains the only trust boundary (B0). The role is read
+ * from the RLS-scoped profiles row — never from forgeable JWT user_metadata.
+ * Called from src/middleware.ts.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -41,7 +50,45 @@ export async function updateSession(request: NextRequest) {
 
   // Required: getUser() (not getSession()) revalidates the JWT with Supabase
   // and triggers the token refresh the cookie sync above persists.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Any redirect must carry the refreshed auth cookies, or the new token is
+  // dropped and the user bounces through a refresh loop.
+  const redirectTo = (pathname: string, next?: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname;
+    url.search = "";
+    if (next) url.searchParams.set("next", next);
+    const redirect = NextResponse.redirect(url);
+    supabaseResponse.cookies
+      .getAll()
+      .forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  };
+
+  const route = classifyRoute(request.nextUrl.pathname);
+
+  if (!user) {
+    if (route === "buyer" || route === "seller") {
+      return redirectTo(SIGN_IN_PATH, request.nextUrl.pathname);
+    }
+    return supabaseResponse;
+  }
+
+  if (route === "auth-entry" || route === "seller") {
+    // Own-row read under RLS; one query, only on the routes that need role.
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    const role = profile?.role ?? "buyer";
+
+    if (route === "auth-entry") return redirectTo(landingPathFor(role));
+    if (role !== "seller") return redirectTo(BUYER_LANDING);
+  }
 
   return supabaseResponse;
 }
