@@ -1,6 +1,6 @@
 import type { Database } from "@/lib/supabase/database.types";
 
-import { nextPathSchema } from "./schemas";
+import { parseSameOriginPath } from "./schemas";
 
 /**
  * Route policy for role-gated routing (spec P1 — success state = role-correct
@@ -42,11 +42,13 @@ export function landingPathFor(role: UserRole): string {
 }
 
 /**
- * Open-redirect guard for ?next=. Returns the path only if it is same-origin
- * relative; otherwise null (caller falls back to the role landing).
+ * Open-redirect guard for ?next= — the single choke point every redirect
+ * target passes through. Delegates to the parse-based validator in
+ * schemas.ts (prefix checks are bypassable via control chars the browser
+ * strips); returns the normalized same-origin path or null (caller falls
+ * back to the role landing).
  */
 export function safeNextPath(next: string | null | undefined): string | null {
   if (!next) return null;
-  const parsed = nextPathSchema.safeParse(next);
-  return parsed.success ? parsed.data : null;
+  return parseSameOriginPath(next);
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SignInForm } from "@/components/auth/SignInForm";
+import { safeNextPath } from "@/lib/auth/routes";
 
 /**
  * Logged-out entry (spec P1 empty state — curated chrome, KOL's own UI).
@@ -19,7 +20,11 @@ export default async function SignInPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const next = typeof params.next === "string" ? params.next : undefined;
+  // Sanitize ?next= before it ever reaches a hidden field — hostile values
+  // are dropped here AND at the redirect choke point (safeNextPath).
+  const next =
+    safeNextPath(typeof params.next === "string" ? params.next : null) ??
+    undefined;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-page flex-col justify-center px-[var(--space-2)] md:px-[var(--space-6)]">

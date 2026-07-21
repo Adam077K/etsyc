@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   emailSchema,
+  nextPathSchema,
   otpCodeSchema,
   requestOtpSchema,
   verifyOtpSchema,
@@ -62,5 +63,51 @@ describe("form schemas", () => {
     const keys = Object.keys(verifyOtpSchema.shape);
     expect(keys).not.toContain("role");
     expect(keys).not.toContain("handle");
+  });
+});
+
+describe("next-path guards at the schema boundary", () => {
+  it("nextPathSchema (strict) accepts and normalizes same-origin paths", () => {
+    expect(nextPathSchema.parse("/feed")).toBe("/feed");
+    expect(nextPathSchema.parse("/feed?tab=new")).toBe("/feed?tab=new");
+  });
+
+  it.each([
+    "//evil.com",
+    "/\\evil.com",
+    "https://evil.com",
+    "/\t//evil.com",
+    "/%09//evil.com",
+    "/%0a/evil.com",
+    `/${"a".repeat(3000)}`,
+  ])("nextPathSchema (strict) rejects %j", (bad) => {
+    expect(nextPathSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("verifyOtpSchema DROPS a hostile next (sign-in still succeeds, lands on role landing)", () => {
+    for (const bad of [
+      "/\t//evil.com",
+      "/%09//evil.com",
+      "//evil.com",
+      "https://evil.com",
+      `/${"a".repeat(3000)}`,
+    ]) {
+      const parsed = verifyOtpSchema.safeParse({
+        email: "x@y.dev",
+        code: "000111",
+        next: bad,
+      });
+      expect(parsed.success).toBe(true);
+      expect(parsed.success && parsed.data.next).toBeUndefined();
+    }
+  });
+
+  it("verifyOtpSchema preserves a safe next", () => {
+    const parsed = verifyOtpSchema.safeParse({
+      email: "x@y.dev",
+      code: "000111",
+      next: "/seller/orders?tab=open",
+    });
+    expect(parsed.success && parsed.data.next).toBe("/seller/orders?tab=open");
   });
 });

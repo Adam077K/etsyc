@@ -31,16 +31,60 @@ export const otpCodeSchema = z
   );
 
 /**
- * Post-sign-in destination carried through the flow (?next=). Same-origin
- * paths only — anything absolute or protocol-relative is dropped, never
- * errored (an attacker-supplied ?next must not break sign-in).
+ * Open-redirect guard for the post-sign-in destination (?next=). Validation
+ * is by PARSING, not string prefixes: browsers strip tab/newline per the
+ * WHATWG URL spec, so `/\t//evil.com` (or `?next=/%09//evil.com`, which
+ * arrives decoded) passes a startsWith("/") check yet resolves off-origin.
+ * Every redirect target must pass through this one choke point.
+ *
+ * Returns the normalized same-origin path, or null for anything hostile.
  */
+const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+// Percent-encoded control chars (%00–%1f, %7f) are never legitimate in our
+// routes — reject them raw rather than letting them ride along in a path.
+const ENCODED_CONTROL_CHARS = /%(?:[01][0-9a-f]|7f)/i;
+const DUMMY_ORIGIN = "https://next-path.invalid";
+
+export function parseSameOriginPath(raw: string): string | null {
+  if (raw.length === 0 || raw.length > 2048) return null;
+  if (CONTROL_CHARS.test(raw) || ENCODED_CONTROL_CHARS.test(raw)) return null;
+  if (!raw.startsWith("/")) return null;
+  let url: URL;
+  try {
+    // The URL parser applies the same slash/backslash and scheme handling a
+    // browser will apply to the Location header. If the resolved origin moved
+    // off the dummy base (`//evil.com`, `/\evil.com`, `https:…`), reject.
+    url = new URL(raw, DUMMY_ORIGIN);
+  } catch {
+    return null;
+  }
+  if (url.origin !== DUMMY_ORIGIN) return null;
+  return url.pathname + url.search + url.hash;
+}
+
+/** Strict form: invalid input is a Zod issue (for surfaces that must error). */
 export const nextPathSchema = z
   .string()
   .max(2048)
-  .refine(
-    (p) => p.startsWith("/") && !p.startsWith("//") && !p.startsWith("/\\"),
-    { error: "not a same-origin path" },
+  .transform((p, ctx) => {
+    const safe = parseSameOriginPath(p);
+    if (safe === null) {
+      ctx.addIssue({ code: "custom", message: "not a same-origin path" });
+      return z.NEVER;
+    }
+    return safe;
+  });
+
+/**
+ * Lenient form for the hidden `next` field: a hostile value is DROPPED (the
+ * caller falls back to the role landing) — an attacker-supplied ?next must
+ * degrade the redirect, never break a legitimate sign-in with a form error.
+ */
+export const lenientNextPathSchema = z
+  .string()
+  .optional()
+  .transform((p) =>
+    p === undefined ? undefined : (parseSameOriginPath(p) ?? undefined),
   );
 
 export const requestOtpSchema = z.object({ email: emailSchema });
@@ -48,5 +92,5 @@ export const requestOtpSchema = z.object({ email: emailSchema });
 export const verifyOtpSchema = z.object({
   email: emailSchema,
   code: otpCodeSchema,
-  next: z.string().optional(),
+  next: lenientNextPathSchema,
 });
