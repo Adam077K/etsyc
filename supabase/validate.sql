@@ -11,7 +11,13 @@
 --   ----------
 --     psql "$SUPABASE_DB_URL" -f supabase/validate.sql
 --
---   Or paste into the Supabase SQL Editor. Every check prints one row:
+--   psql is strongly preferred: Part B reports through NOTICE messages, which
+--   the dashboard SQL Editor renders inconsistently, and the `\echo` section
+--   headers below are psql meta-commands the editor rejects outright. If you
+--   must use the editor, delete every `\echo` line first and check the Logs
+--   pane for the Part B notices.
+--
+--   Every check prints one row:
 --     check | result | detail
 --   `result` is PASS, FAIL, SKIP, or MANUAL.
 --
@@ -395,7 +401,11 @@ begin
   raise notice 'CHECK 8b handle_new_user seeded 2 buyer profiles | % | found %',
     case when v_n = 2 then 'PASS' else 'FAIL' end, v_n;
 
-  -- service-role path: promote one profile to seller
+  -- service-role path: promote one profile to seller. The claim must be set
+  -- first — `guard_profile_role` tests auth.role() = 'service_role' explicitly,
+  -- and a bare psql connection has no claims at all (auth.role() → NULL), which
+  -- the guard correctly treats as "not trusted".
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
   update public.profiles set role = 'seller' where id = v_seller;
 
   insert into public.stores (owner_id, handle, name, published)

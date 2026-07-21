@@ -135,6 +135,10 @@ the whole file — it is idempotent.
 psql "$SUPABASE_DB_URL" -f supabase/validate.sql
 ```
 
+Use `psql`, not the dashboard SQL Editor: the file contains `\echo` section
+headers (a psql meta-command the editor rejects) and Part B reports through
+`NOTICE` messages the editor surfaces unreliably.
+
 ### How to read the output
 
 The file prints three parts.
