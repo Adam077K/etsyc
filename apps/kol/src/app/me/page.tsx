@@ -396,13 +396,13 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              <label className="mt-4 flex cursor-pointer items-center gap-3">
+              <label className="mt-4 flex min-h-11 cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
                   checked={tastePublic}
                   onChange={(e) => setTastePublic(e.target.checked)}
                   aria-label="Make taste identity public"
-                  className="h-4 w-4 accent-accent"
+                  className="h-6 w-6 accent-accent"
                 />
                 <span className="text-body text-ink">
                   Visibility: <b>{tastePublic ? "Public" : "Private"}</b>

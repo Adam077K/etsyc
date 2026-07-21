@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { publishPreconditions, sellerBlocks } from "@/lib/mock/db";
 import { SELLER_SLUG, WORLD_INK, useSellerDraft } from "@/lib/mock/seller-state";
-import { contrastRatio, isHexColor } from "@/lib/theme/contrast";
+import { contrastRatio, isHexColor, readableInk } from "@/lib/theme/contrast";
 
 /**
  * S6 + P9 + P10 — Publish gate (/sell/publish). KOL chrome (seller tools).
@@ -19,14 +20,112 @@ import { contrastRatio, isHexColor } from "@/lib/theme/contrast";
  * override a BLOCK.
  */
 
+/**
+ * The roles the maker does NOT tune in the editor. They ship AA-clean by
+ * construction so gate ① is only ever measuring the two colours she can
+ * actually change — her ground and her accent.
+ */
+const WORLD_INK_MUTED = "#5A5145";
+const WORLD_LINE = "#7A6E5B";
+
+/** Her real blocks, in the flat shape the critic route validates. */
+const CRITIC_BLOCKS = sellerBlocks.map((b, i) => ({
+  id: b.id,
+  order: i,
+  type: b.type,
+  variant: "rail",
+  heading: b.label,
+  body: null,
+  pullQuote: null,
+  quote: null,
+  attribution: null,
+  caption: null,
+  eyebrow: null,
+  label: null,
+  showCraftLine: null,
+  showModel3d: null,
+  toneShift: null,
+  blockGround: null,
+}));
+
+interface CriticApiResponse {
+  simulated: boolean;
+  aaPass: boolean;
+  aaFindings: { pair: string; ratio: number; threshold: number; pass: boolean }[];
+  coherence: { score: number } | null;
+  verdict: string;
+  threshold: number;
+}
+
 export default function SellPublishPage() {
   const draft = useSellerDraft();
 
   const ground = isHexColor(draft.theme.ground) ? draft.theme.ground : "#EFE7D8";
+  const accent = isHexColor(draft.theme.accent) ? draft.theme.accent : "#8F5A3A";
   const groundRatio = contrastRatio(WORLD_INK, ground);
 
+  /**
+   * Both gates come back from /api/ai/critic: ① is computed there in code
+   * from the same contrast module this page imports, ② only runs if ①
+   * passed. Until the round-trip lands we fall back to the local sum, so a
+   * slow network can never silently unblock — or block — the publish button.
+   */
+  const [critic, setCritic] = useState<CriticApiResponse | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const res = await fetch("/api/ai/critic", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            storeId: SELLER_SLUG,
+            config: {
+              theme: {
+                mode: "light",
+                roles: {
+                  bg: ground,
+                  surface: ground,
+                  ink: WORLD_INK,
+                  inkMuted: WORLD_INK_MUTED,
+                  accent,
+                  accentInk: readableInk(accent),
+                  border: WORLD_LINE,
+                },
+                displayFamily: "Fraunces",
+                textFamily: "General Sans",
+                scaleRatio: 1.25,
+                displayWeight: 600,
+                textWeight: 400,
+                motionPreset: draft.theme.motion,
+                radiusIdentity: draft.theme.radius,
+                density: "standard",
+                derivedFrom: [],
+              },
+              blocks: CRITIC_BLOCKS,
+              copy: { tagline: "Stoneware, Hudson Valley", bio: "Twelve years, one wheel." },
+            },
+          }),
+        });
+        const data: CriticApiResponse = await res.json();
+        if (live && res.ok) setCritic(data);
+      } catch {
+        // keep the local fallback — never leave the gate in an unknown state
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [ground, accent, draft.theme.motion, draft.theme.radius]);
+
   /* ---- the four preconditions, each computed ---- */
-  const aaMet = sellerBlocks.every((b) => b.aa.pass) && groundRatio >= 4.5;
+  const aaMet =
+    critic !== null
+      ? critic.aaPass && sellerBlocks.every((b) => b.aa.pass)
+      : sellerBlocks.every((b) => b.aa.pass) && groundRatio >= 4.5;
+  const criticScore = critic?.coherence?.score ?? null;
+  const criticThreshold = critic?.threshold ?? 0.75;
   const approvedMet = draft.allApproved;
   const anchorMet = true; // S9 voice anchor resolved — clip_intro verified
   const specsMet = true; // P14 spec sheets complete on both listed products
@@ -235,7 +334,23 @@ export default function SellPublishPage() {
                 <p className="mt-1 text-caption text-muted">
                   Only runs on blocks that clear gate ①. Does the block read as one intentional
                   world? Unconventional-but-good is never rejected.
+                  {criticScore !== null ? (
+                    <>
+                      {" "}
+                      Your world scores{" "}
+                      <span className="font-mono">{criticScore.toFixed(2)}</span> against a{" "}
+                      <span className="font-mono">{criticThreshold.toFixed(2)}</span> floor.
+                    </>
+                  ) : critic !== null ? (
+                    <> Gate ① has not passed, so this never ran — there is no score to show.</>
+                  ) : null}
                 </p>
+                {critic?.simulated ? (
+                  <p className="mt-1 text-caption text-accent">
+                    ⚠ Coherence is simulated — no model scored this. Gate ① above is real either
+                    way: it is arithmetic and never needed a model.
+                  </p>
+                ) : null}
               </li>
             </ol>
             <p className="mt-[var(--space-2)] text-caption text-muted">

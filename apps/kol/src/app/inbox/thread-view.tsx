@@ -67,7 +67,7 @@ function DraftCard({
                 type="button"
                 aria-pressed={current}
                 onClick={() => setRev(v)}
-                className={`rounded-pill border px-3 py-1 text-caption uppercase tracking-[0.04em] transition-colors duration-state ease-kol ${
+                className={`inline-flex min-h-11 items-center rounded-pill border px-3 text-caption uppercase tracking-[0.04em] transition-colors duration-state ease-kol ${
                   current
                     ? "border-transparent bg-accent text-accent-ink"
                     : "border-line bg-surface text-muted hover:text-ink"
@@ -91,13 +91,13 @@ function DraftCard({
           <div className="flex items-center gap-2">
             <Link
               href={`/m/${makerSlug}/create`}
-              className="rounded-pill border border-line bg-surface px-4 py-2 text-caption uppercase tracking-[0.04em] text-ink transition-colors duration-state ease-kol hover:bg-ground"
+              className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-4 text-caption uppercase tracking-[0.04em] text-ink transition-colors duration-state ease-kol hover:bg-ground"
             >
               Open commission
             </Link>
             <button
               type="button"
-              className="rounded-pill bg-accent-cta px-5 py-2 text-body font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98]"
+              className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-5 text-body font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98]"
             >
               Approve v{latest}
             </button>
@@ -226,7 +226,7 @@ export function ThreadView({ thread }: { thread: MockThread }) {
         {thread.type === "commission" ? (
           <Link
             href={`/m/${thread.makerSlug}/create`}
-            className="rounded-pill border border-line bg-ground px-4 py-1.5 text-caption uppercase tracking-[0.04em] text-ink transition-colors duration-state ease-kol hover:bg-surface"
+            className="inline-flex min-h-11 items-center rounded-pill border border-line bg-ground px-4 text-caption uppercase tracking-[0.04em] text-ink transition-colors duration-state ease-kol hover:bg-surface"
           >
             Open commission
           </Link>

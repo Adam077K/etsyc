@@ -112,7 +112,7 @@ export default function ForYouPage() {
             role="tab"
             aria-selected={false}
             href="/"
-            className="rounded-pill border border-line bg-surface px-4 py-1.5 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink"
+            className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-4 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink"
           >
             Discover
           </Link>
@@ -120,7 +120,7 @@ export default function ForYouPage() {
             role="tab"
             aria-selected={true}
             href="/for-you"
-            className="rounded-pill bg-accent-cta px-4 py-1.5 text-caption font-semibold text-accent-ink"
+            className="inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-4 text-caption font-semibold text-accent-ink"
           >
             For You
           </Link>
@@ -207,7 +207,7 @@ export default function ForYouPage() {
                   </div>
                   <Link
                     href="/settings"
-                    className="rounded-pill border border-line px-4 py-1.5 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
+                    className="inline-flex min-h-11 items-center rounded-pill border border-line px-4 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground"
                   >
                     Tune in Settings
                   </Link>

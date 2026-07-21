@@ -64,7 +64,7 @@ export default function NotificationsPage() {
               className="border-b border-accent text-ink transition-colors duration-state ease-kol hover:text-accent"
             >
               Inbox
-            </Link>{" "}
+            </Link>{/* inline prose link — exempt from the 44px target rule */}{" "}
             — that&rsquo;s where conversation lives.
           </p>
         </div>

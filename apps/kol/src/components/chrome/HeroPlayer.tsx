@@ -129,10 +129,10 @@ function HeroFilm() {
   // 404 on a dropped-in file falls back the same way.
   const videoSrc = maker?.videoSrc;
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [failed, setFailed] = useState(false);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const reducedMotion = usePrefersReducedMotion();
 
-  useEffect(() => setFailed(false), [videoSrc]);
+  const failed = Boolean(videoSrc) && failedSrc === videoSrc;
 
   // The <video> lives inside the never-unmounted film node, so playback is
   // continuous across route changes for the same reason the clock is. Only a
@@ -152,9 +152,12 @@ function HeroFilm() {
   const frame =
     stage === "grown"
       ? "left-1/2 top-1/2 w-[min(46rem,88vw)] -translate-x-1/2 -translate-y-1/2 aspect-[16/10]"
-      : stage === "world"
-        ? "right-4 top-20 w-72 aspect-video"
-        : "right-4 bottom-4 w-80 aspect-video";
+      : // Docked sizes are viewport-relative: 320px of a 375px phone would
+        // bury the page it is meant to accompany. The film stays present on
+        // mobile (the mechanic must not vanish) — it just stops dominating.
+        stage === "world"
+        ? "right-3 top-16 w-36 sm:right-4 sm:top-20 sm:w-72 aspect-video"
+        : "right-3 bottom-3 w-40 sm:right-4 sm:bottom-4 sm:w-80 aspect-video";
 
   return (
     <>
@@ -181,9 +184,11 @@ function HeroFilm() {
             playsInline
             preload="metadata"
             autoPlay={!reducedMotion}
-            onError={() => setFailed(true)}
+            onError={() => setFailedSrc(videoSrc ?? null)}
             className="absolute inset-0 h-full w-full object-cover"
-          />
+          >
+            <track kind="captions" label="Captions" />
+          </video>
         ) : null}
 
         <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Film } from "@/components/chrome/Film";
 import { interviewBeats } from "@/lib/mock/db";
 
@@ -22,20 +22,86 @@ const BEAT_LABELS: Record<string, string> = {
   "Product stories": "The pieces you love",
 };
 
-const FOLLOW_UPS = [
+/**
+ * Her transcript for the active beat. This is the literal text sent to
+ * /api/ai/interview — the follow-ups on screen are generated from these
+ * exact words and nothing else.
+ */
+const TRANSCRIPT_LINES = [
   {
-    because: "Because you mentioned wedging the clay by hand →",
-    q: "You said you can feel when it's ready — what does your hand actually feel for?",
+    at: "3:31",
+    text: "I start every pot by wedging the clay by hand — you push and fold it until the air's out and it moves like it wants to.",
   },
   {
-    because: "Because you named the ridge tumblers →",
-    q: "How long does one of those take you, wheel to kiln?",
+    at: "3:48",
+    text: "I can feel when it's ready, honestly, before I ever centre it on the wheel.",
+  },
+  {
+    at: "4:12",
+    text: "The ridge tumblers are the ones I'm known for — I throw them tall, then pull three grooves in with my thumb so they sit in your hand…",
   },
 ];
+
+const TRANSCRIPT = TRANSCRIPT_LINES.map((l) => l.text).join(" ");
+
+const PRIOR_ANSWERS = [
+  "I left restaurant kitchens twelve years ago. The wheel was the first thing that ever slowed me down.",
+];
+
+interface FollowUp {
+  because: string;
+  question: string;
+}
+
+interface InterviewApiResponse {
+  simulated: boolean;
+  followUps: FollowUp[];
+  extracted: { field: string; value: string; quote: string }[];
+  droppedFacts: { field: string; value: string; quote: string }[];
+  beatSatisfied: boolean;
+  error?: string;
+}
 
 export default function SellInterviewPage() {
   const [mode, setMode] = useState<"film" | "voice">("film");
   const [paused, setPaused] = useState(false);
+
+  /* ---- real follow-ups, generated from what she actually said ---- */
+  const [ai, setAi] = useState<InterviewApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const res = await fetch("/api/ai/interview", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            beat: "Craft",
+            transcriptSoFar: TRANSCRIPT,
+            priorAnswers: PRIOR_ANSWERS,
+            followUpsAsked: 0,
+          }),
+        });
+        const data: InterviewApiResponse = await res.json();
+        if (!live) return;
+        if (!res.ok) setFailed(true);
+        else setAi(data);
+      } catch {
+        if (live) setFailed(true);
+      } finally {
+        if (live) setLoading(false);
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const followUps = ai?.followUps ?? [];
+  const askedCount = followUps.length;
 
   const activeBeatIndex = 1; // beat 1 done, beat 2 (Craft) active
 
@@ -167,21 +233,64 @@ export default function SellInterviewPage() {
                 ✦ follow-up · from what you just said
               </span>
               <span className="text-caption uppercase tracking-[0.04em] text-muted">
-                not fixed questions · max 3 per beat · 2 asked
+                not fixed questions · max 3 per beat · {askedCount} asked
               </span>
+              {ai?.simulated ? (
+                <span className="rounded-pill border border-accent/30 bg-accent/10 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent">
+                  ⚠ simulated · no model ran
+                </span>
+              ) : null}
             </div>
 
-            {FOLLOW_UPS.map((f) => (
+            {loading ? (
+              <div className="rounded-md border border-line border-l-2 border-l-accent-2 bg-surface p-[var(--space-3)]">
+                <p className="text-caption uppercase tracking-[0.04em] text-accent-2">
+                  Listening to what you just said →
+                </p>
+                <span className="kol-skeleton mt-[var(--space-2)] inline-block h-4 w-3/4 rounded-sm" />
+              </div>
+            ) : null}
+
+            {failed ? (
+              <div className="rounded-md border border-accent bg-accent/5 p-[var(--space-3)]">
+                <p className="text-caption uppercase tracking-[0.04em] text-accent">
+                  No follow-up right now
+                </p>
+                <p className="mt-[var(--space-1)] text-body text-muted">
+                  We couldn&rsquo;t reach the interviewer. Rather than guess at a question, we
+                  won&rsquo;t ask one — keep going and we&rsquo;ll catch up.
+                </p>
+              </div>
+            ) : null}
+
+            {followUps.map((f) => (
               <div
-                key={f.q}
+                key={f.question}
                 className="rounded-md border border-line border-l-2 border-l-accent-2 bg-surface p-[var(--space-3)]"
               >
                 <p className="text-caption uppercase tracking-[0.04em] text-accent-2">
                   {f.because}
                 </p>
-                <p className="mt-[var(--space-1)] font-display text-h3">{f.q}</p>
+                <p className="mt-[var(--space-1)] font-display text-h3">{f.question}</p>
               </div>
             ))}
+
+            {!loading && !failed && followUps.length === 0 ? (
+              <div className="rounded-md border border-line bg-surface p-[var(--space-3)]">
+                <p className="text-body text-muted">
+                  Nothing more to ask on this one — your craft is covered. We move on.
+                </p>
+              </div>
+            ) : null}
+
+            {ai !== null && ai.droppedFacts.length > 0 ? (
+              <p className="text-caption text-muted">
+                {ai.droppedFacts.length} detail
+                {ai.droppedFacts.length === 1 ? " was" : "s were"} discarded because we
+                couldn&rsquo;t trace {ai.droppedFacts.length === 1 ? "it" : "them"} back to your
+                own words. Nothing gets kept that you didn&rsquo;t say.
+              </p>
+            ) : null}
 
             <p className="text-caption text-muted">
               I won&rsquo;t push past three. When your craft&rsquo;s covered, we move on —
@@ -261,25 +370,16 @@ export default function SellInterviewPage() {
               </span>
             </div>
             <div className="mt-[var(--space-2)] flex flex-col gap-[var(--space-2)]">
-              <p className="max-w-measure text-body">
-                <span className="font-mono text-caption text-muted">3:31</span>
-                <br />
-                &ldquo;I start every pot by wedging the clay by hand — you push and fold it until
-                the air&rsquo;s out and it moves like it wants to.&rdquo;
-              </p>
-              <p className="max-w-measure text-body">
-                <span className="font-mono text-caption text-muted">3:48</span>
-                <br />
-                &ldquo;I can feel when it&rsquo;s ready, honestly, before I ever centre it on the
-                wheel.&rdquo;
-              </p>
-              <p className="max-w-measure text-body">
-                <span className="font-mono text-caption text-muted">4:12</span>
-                <br />
-                &ldquo;The ridge tumblers are the ones I&rsquo;m known for — I throw them tall,
-                then pull three grooves in with my thumb so they sit in your hand&hellip;&rdquo;{" "}
-                <span className="kol-skeleton inline-block h-3 w-28 rounded-sm align-middle" />
-              </p>
+              {TRANSCRIPT_LINES.map((line, i) => (
+                <p key={line.at} className="max-w-measure text-body">
+                  <span className="font-mono text-caption text-muted">{line.at}</span>
+                  <br />
+                  &ldquo;{line.text}&rdquo;{" "}
+                  {i === TRANSCRIPT_LINES.length - 1 ? (
+                    <span className="kol-skeleton inline-block h-3 w-28 rounded-sm align-middle" />
+                  ) : null}
+                </p>
+              ))}
             </div>
             <p className="mt-[var(--space-2)] text-caption text-muted">
               This is exactly what you said — nothing added. It becomes the words in your shop.

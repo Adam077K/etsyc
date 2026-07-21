@@ -68,7 +68,7 @@ function NoorVoiceCard() {
         type="button"
         aria-disabled="true"
         title="Voice playback arrives with real maker footage"
-        className="mt-3 inline-flex items-center gap-2 rounded-pill border border-dashed border-accent px-4 py-1.5 text-caption text-accent transition-colors duration-state ease-kol hover:bg-accent/10"
+        className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-pill border border-dashed border-accent px-4 text-caption text-accent transition-colors duration-state ease-kol hover:bg-accent/10"
       >
         <span aria-hidden className="flex items-end gap-[3px]">
           {[6, 12, 8, 14, 5].map((h, i) => (

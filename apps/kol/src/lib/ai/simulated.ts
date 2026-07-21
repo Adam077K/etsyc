@@ -22,7 +22,7 @@ import type {
   DraftTheme,
   ExtractedFact,
   InterviewModelOutput,
-} from "./schemas";
+} from "./schemas.ts";
 
 /* ------------------------------------------------------------------ */
 /* small deterministic helpers                                         */
@@ -126,7 +126,7 @@ const STAND_IN_THEMES: DraftTheme[] = [
       inkMuted: "#5A5145",
       accent: "#8F5A3A",
       accentInk: "#FBF7EF",
-      border: "#8C7F6B",
+      border: "#7A6E5B",
     },
     displayFamily: "Fraunces",
     textFamily: "General Sans",
@@ -147,7 +147,7 @@ const STAND_IN_THEMES: DraftTheme[] = [
       inkMuted: "#A9B4BE",
       accent: "#C7973F",
       accentInk: "#14181C",
-      border: "#4A5763",
+      border: "#75828F",
     },
     displayFamily: "Space Grotesk",
     textFamily: "IBM Plex Sans",
@@ -168,7 +168,7 @@ const STAND_IN_THEMES: DraftTheme[] = [
       inkMuted: "#544C43",
       accent: "#5C4A7D",
       accentInk: "#FFFFFF",
-      border: "#9A8E7E",
+      border: "#857A6C",
     },
     displayFamily: "Playfair Display",
     textFamily: "Inter",

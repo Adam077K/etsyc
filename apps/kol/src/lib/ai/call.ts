@@ -12,8 +12,8 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import type { z } from "zod";
-import { getClient, type AiFeature, type ModelId } from "./client";
-import { logCall, type CallOutcome } from "./cost-log";
+import { getClient, type AiFeature, type ModelId } from "./client.ts";
+import { logCall, type CallOutcome } from "./cost-log.ts";
 
 export interface ToolSpec {
   name: string;
@@ -45,12 +45,14 @@ export interface StructuredCallResult<T> {
 }
 
 export class AiCallError extends Error {
-  constructor(
-    message: string,
-    readonly kind: "invalid_output" | "api_error",
-  ) {
+  // plain field, not a parameter property — the eval harness runs this file
+  // through node's strip-only TypeScript support, which rejects those
+  readonly kind: "invalid_output" | "api_error";
+
+  constructor(message: string, kind: "invalid_output" | "api_error") {
     super(message);
     this.name = "AiCallError";
+    this.kind = kind;
   }
 }
 

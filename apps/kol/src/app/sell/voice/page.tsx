@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { LiveWave, StaticWave } from "@/components/media/LiveWave";
 import {
@@ -104,41 +104,43 @@ function TakePlayer({ take }: { take: Recording }) {
 }
 
 export default function SellVoicePage() {
-  const recorder = useMediaRecorder({ audio: true, bars: 16 });
-  const { status, permission, levels, elapsedMs, error, start, stop, takeRecording, reset } =
-    recorder;
-
   const [activeId, setActiveId] = useState<string | null>(null);
   const [takes, setTakes] = useState<Record<string, Recording>>({});
-  const [transcripts, setTranscripts] = useState<Record<string, string>>({});
-  const [supported, setSupported] = useState(true);
 
-  // capability probe runs client-side only — SSR must not guess
-  useEffect(() => setSupported(isMediaCaptureSupported()), []);
-
-  // a finished take belongs to the row that started it; ownership of the
-  // object URL transfers here, so this component revokes it
+  // The take is harvested where it happens — the recorder hands it back on
+  // settle, so nothing has to watch `status` from an effect. A failed
+  // attempt settles with null and simply clears the active row.
+  const activeIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (status !== "stopped" || !activeId) return;
-    const take = takeRecording();
-    if (!take) return;
-    const id = activeId;
+    activeIdRef.current = activeId;
+  }, [activeId]);
+
+  const onSettled = useCallback((take: Recording | null) => {
+    const id = activeIdRef.current;
+    setActiveId(null);
+    if (!take || !id) return;
     setTakes((prev) => {
       const previous = prev[id];
       if (previous) URL.revokeObjectURL(previous.url);
       return { ...prev, [id]: take };
     });
-    setActiveId(null);
-  }, [status, activeId, takeRecording]);
+  }, []);
 
-  // a failed attempt clears the active row — no phantom "recording" card
-  useEffect(() => {
-    if (status === "error") setActiveId(null);
-  }, [status]);
+  const recorder = useMediaRecorder({ audio: true, bars: 16, onSettled });
+  const { status, permission, levels, elapsedMs, error, start, stop, reset } = recorder;
+  const [transcripts, setTranscripts] = useState<Record<string, string>>({});
+  // capability is a browser fact, read once on the client (SSR assumes yes)
+  const supported = useSyncExternalStore(
+    () => () => undefined,
+    isMediaCaptureSupported,
+    () => true,
+  );
 
   // revoke every outstanding take on unmount
   const takesRef = useRef(takes);
-  takesRef.current = takes;
+  useEffect(() => {
+    takesRef.current = takes;
+  }, [takes]);
   useEffect(
     () => () => {
       for (const take of Object.values(takesRef.current)) URL.revokeObjectURL(take.url);

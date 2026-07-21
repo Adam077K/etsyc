@@ -34,6 +34,13 @@ export interface UseMediaRecorderOptions {
   video?: boolean;
   /** number of waveform bars to expose (levels are 0–1) */
   bars?: number;
+  /**
+   * Fired once, with the finished take, the moment recording stops — and
+   * once with null if the attempt failed. Consumers harvest here instead of
+   * watching `status` from an effect, which is what a media state machine
+   * wants and what keeps callers free of setState-in-effect.
+   */
+  onSettled?: (recording: Recording | null) => void;
 }
 
 export interface UseMediaRecorderApi {
@@ -104,7 +111,12 @@ export function formatClock(ms: number): string {
 }
 
 export function useMediaRecorder(options: UseMediaRecorderOptions = {}): UseMediaRecorderApi {
-  const { audio = true, video = false, bars = 16 } = options;
+  const { audio = true, video = false, bars = 16, onSettled } = options;
+  // hold the newest callback so the recorder never has to be rebuilt for it
+  const onSettledRef = useRef(onSettled);
+  useEffect(() => {
+    onSettledRef.current = onSettled;
+  }, [onSettled]);
 
   const [permission, setPermission] = useState<PermissionState>("idle");
   const [status, setStatus] = useState<RecorderStatus>("idle");
@@ -286,18 +298,22 @@ export function useMediaRecorder(options: UseMediaRecorderOptions = {}): UseMedi
         setStatus("error");
         setError("Nothing was captured — no audio reached the recorder.");
         teardownStream();
+        onSettledRef.current?.(null);
         return;
       }
       const url = URL.createObjectURL(blob);
       urlRef.current = url;
-      setRecording({ blob, url, durationMs, mimeType: type });
+      const take: Recording = { blob, url, durationMs, mimeType: type };
+      setRecording(take);
       setStatus("stopped");
       teardownStream();
+      onSettledRef.current?.(take);
     };
 
     recorder.onerror = () => {
       setStatus("error");
       setError("The recorder stopped unexpectedly.");
+      onSettledRef.current?.(null);
       teardownStream();
     };
 

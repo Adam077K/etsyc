@@ -86,7 +86,7 @@ function Chip({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`rounded-pill border px-3 py-1 text-caption transition-colors duration-state ease-kol ${
+      className={`inline-flex min-h-11 items-center rounded-pill border px-3 text-caption transition-colors duration-state ease-kol ${
         active
           ? "border-accent bg-accent text-accent-ink"
           : "border-line bg-surface text-ink hover:bg-ground"
@@ -338,7 +338,7 @@ export default function SearchPage() {
                           )}
                           <Link
                             href={`/m/${maker.slug}`}
-                            className="text-caption uppercase text-accent transition-colors duration-state ease-kol hover:text-ink"
+                            className="inline-flex min-h-11 items-center text-caption uppercase text-accent transition-colors duration-state ease-kol hover:text-ink"
                           >
                             Enter {maker.name}’s world →
                           </Link>

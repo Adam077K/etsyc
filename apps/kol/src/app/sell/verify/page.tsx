@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Film } from "@/components/chrome/Film";
 import {
   formatClock,
   isMediaCaptureSupported,
   useMediaRecorder,
+  type Recording,
 } from "@/lib/media/recorder";
 
 /**
@@ -92,21 +93,28 @@ export default function SellVerifyPage() {
   const [nonce, setNonce] = useState(0);
   const phrase = PHRASES[phraseIndex] ?? PHRASES[0];
 
-  const recorder = useMediaRecorder({ audio: true, video: true });
-  const { status, permission, error, elapsedMs, stream, recording, start, stop, reset } = recorder;
+  // Only a real take advances to review — the recorder reports the take
+  // when it settles, so nothing watches `status` from an effect.
+  const onSettled = useCallback((take: Recording | null) => {
+    if (take) setStep("review");
+  }, []);
+  const recorder = useMediaRecorder({ audio: true, video: true, onSettled });
+  const { status, permission, error, elapsedMs, stream, recording, start, stop, reset } =
+    recorder;
 
-  const [supported, setSupported] = useState(true);
+  // capability is a browser fact, read on the client (SSR assumes yes)
+  const supported = useSyncExternalStore(
+    () => () => undefined,
+    isMediaCaptureSupported,
+    () => true,
+  );
   const [submittedAt, setSubmittedAt] = useState<Date | null>(null);
-  useEffect(() => setSupported(isMediaCaptureSupported()), []);
 
   const blocked = !supported || permission === "denied" || permission === "unsupported";
   const isRecording = status === "recording";
   const isRequesting = status === "requesting";
 
-  // a real take is the ONLY thing that advances to review
-  useEffect(() => {
-    if (status === "stopped" && recording) setStep("review");
-  }, [status, recording]);
+
 
   const regenerate = useCallback(() => {
     setPhraseIndex((i) => (i + 1) % PHRASES.length);

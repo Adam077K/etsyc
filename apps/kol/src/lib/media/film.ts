@@ -10,7 +10,7 @@
  * public/media/README.md for the file contract.
  */
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export type FilmVariant = "v1" | "v2" | "v3" | "v4" | "v5";
 
@@ -32,15 +32,32 @@ export function gradientFor(variant: string | undefined): string {
  * Tracks `prefers-reduced-motion`. Film never autoplays when it's set —
  * the poster (or gradient) holds and the viewer presses play.
  */
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function subscribeReducedMotion(onChange: () => void): () => void {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return () => undefined;
+  }
+  const mq = window.matchMedia(REDUCED_MOTION_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getReducedMotion(): boolean {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
+/** The server can't know the preference; assume motion is allowed. */
+const getReducedMotionServer = (): boolean => false;
+
 export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
+  // An external browser preference is exactly what useSyncExternalStore is
+  // for — subscribing in an effect and mirroring it into state would tear
+  // during hydration and trips react-hooks/set-state-in-effect.
+  return useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotion,
+    getReducedMotionServer,
+  );
 }

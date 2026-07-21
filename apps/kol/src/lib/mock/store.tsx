@@ -108,6 +108,19 @@ const Ctx = createContext<AppStore | null>(null);
  * records are created in the same tick — which multi-maker checkout does
  * by definition (one order per maker, synchronously).
  */
+/**
+ * What the maker's timeline says at each stage. Neutral, factual, and
+ * NOT attributed as a maker quote — D10 forbids fabricating maker voice,
+ * so these read as status, not as something Sena said.
+ */
+const STAGE_NOTE: Record<MockOrder["stage"], string> = {
+  0: "Order accepted.",
+  1: "Materials pulled for this piece.",
+  2: "In production now.",
+  3: "Finishing — glazing, curing, final checks.",
+  4: "Shipped. Tracking is attached to this order.",
+};
+
 let idSeq = 0;
 function localId(prefix: string): string {
   idSeq += 1;
@@ -151,7 +164,20 @@ export function KolStoreProvider({ children }: { children: React.ReactNode }) {
   const advanceOrder = useCallback<AppStore["advanceOrder"]>((id, stage) => {
     mutate((s) => ({
       ...s,
-      orders: s.orders.map((o) => (o.id === id ? { ...o, stage } : o)),
+      orders: s.orders.map((o) => {
+        if (o.id !== id || o.stage === stage) return o;
+        // Moving an order is an EVENT the buyer should see, not just a state
+        // flip — so it posts a timeline entry. Existing entries stop reading
+        // "just now" once something newer lands on top of them.
+        const aged = o.updates.map((u) =>
+          u.when === "just now" ? { ...u, when: "earlier" } : u,
+        );
+        return {
+          ...o,
+          stage,
+          updates: [...aged, { stage, note: STAGE_NOTE[stage] ?? "Moved along.", when: "just now" }],
+        };
+      }),
     }));
   }, []);
 

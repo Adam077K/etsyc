@@ -12,7 +12,7 @@
  * they carry `cache_control` at the call site).
  */
 
-import type { ToolSpec } from "./call";
+import type { ToolSpec } from "./call.ts";
 
 const str = (maxLength?: number) =>
   maxLength === undefined ? { type: "string" } : { type: "string", maxLength };

@@ -366,7 +366,7 @@ export default function MyReviewsPage() {
               <div className="mt-3">
                 <Link
                   href={r.productHref}
-                  className="text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+                  className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
                 >
                   View on product ↗
                 </Link>

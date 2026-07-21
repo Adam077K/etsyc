@@ -47,7 +47,7 @@ export const aaGoldenExamples: GoldenExample<DraftTheme, AaExpectation>[] = [
       inkMuted: "#5A5145",
       accent: "#8F5A3A",
       accentInk: "#FBF7EF",
-      border: "#8C7F6B",
+      border: "#7A6E5B",
     }),
     expected: { pass: true, failingPairs: [] },
   },
@@ -62,7 +62,7 @@ export const aaGoldenExamples: GoldenExample<DraftTheme, AaExpectation>[] = [
       inkMuted: "#A9B4BE",
       accent: "#C7973F",
       accentInk: "#14181C",
-      border: "#4A5763",
+      border: "#75828F",
     }),
     expected: { pass: true, failingPairs: [] },
   },
@@ -80,7 +80,7 @@ export const aaGoldenExamples: GoldenExample<DraftTheme, AaExpectation>[] = [
       accentInk: "#14181C",
       border: "#333E48",
     }),
-    expected: { pass: false, failingPairs: ["border on surface"] },
+    expected: { pass: false, failingPairs: ["border on surface", "border on bg"] },
   },
   {
     id: "aa-04-muted-too-light",
@@ -93,13 +93,14 @@ export const aaGoldenExamples: GoldenExample<DraftTheme, AaExpectation>[] = [
       inkMuted: "#96897A",
       accent: "#8F5A3A",
       accentInk: "#FBF7EF",
-      border: "#8C7F6B",
+      border: "#7A6E5B",
     }),
     expected: { pass: false, failingPairs: ["inkMuted on bg", "inkMuted on surface"] },
   },
   {
     id: "aa-05-accent-ink-unreadable",
-    description: "White label on a mid-tone accent CTA — button text fails",
+    description:
+      "White label on a mid-tone accent CTA — the button text AND the accent heading fail",
     tags: ["adversarial"],
     input: theme("light", {
       bg: "#FFFFFF",
@@ -110,7 +111,10 @@ export const aaGoldenExamples: GoldenExample<DraftTheme, AaExpectation>[] = [
       accentInk: "#FFFFFF",
       border: "#767676",
     }),
-    expected: { pass: false, failingPairs: ["accentInk on accent"] },
+    expected: {
+      pass: false,
+      failingPairs: ["accentInk on accent", "accent heading on bg"],
+    },
   },
   {
     id: "aa-06-low-contrast-everything",
@@ -180,7 +184,7 @@ export const aaGoldenExamples: GoldenExample<DraftTheme, AaExpectation>[] = [
       inkMuted: "#5A5145",
       accent: "#8F5A3A",
       accentInk: "#FBF7EF",
-      border: "#8C7F6B",
+      border: "#7A6E5B",
     }),
     expected: {
       pass: false,
@@ -198,7 +202,7 @@ export const aaGoldenExamples: GoldenExample<DraftTheme, AaExpectation>[] = [
       inkMuted: "#5A5145",
       accent: "#A15F32",
       accentInk: "#FBF7EF",
-      border: "#8C7F6B",
+      border: "#7A6E5B",
     }),
     expected: { pass: true, failingPairs: [] },
   },

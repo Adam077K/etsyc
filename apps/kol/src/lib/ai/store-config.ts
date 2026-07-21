@@ -17,8 +17,8 @@ import type {
   CustomTheme,
   StoreBlock,
   BlockGround,
-} from "../store-config/types";
-import type { DraftBlock, DraftTheme } from "./schemas";
+} from "../store-config/types.ts";
+import type { DraftBlock, DraftTheme } from "./schemas.ts";
 
 /** The variant vocabulary per block type, from store-config types.ts. */
 const VARIANTS: Record<BlockType, string[]> = {

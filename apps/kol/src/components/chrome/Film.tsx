@@ -59,11 +59,10 @@ export function Film({
   children?: ReactNode;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [failed, setFailed] = useState(false);
+  // Track WHICH src failed rather than a boolean — a new src is then
+  // automatically "not failed" with no reset effect (and no setState-in-effect).
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const reducedMotion = usePrefersReducedMotion();
-
-  // reset the failure latch when the source changes — a new file deserves a try
-  useEffect(() => setFailed(false), [src]);
 
   // live camera preview: bind the stream imperatively (srcObject isn't a prop)
   useEffect(() => {
@@ -77,6 +76,7 @@ export function Film({
     }
   }, [stream]);
 
+  const failed = Boolean(src) && failedSrc === src;
   const showVideo = Boolean(stream) || (Boolean(src) && !failed);
   // a live preview and reduced-motion footage both suppress the play glyph
   const showPlayGlyph = play && !stream;
@@ -97,9 +97,14 @@ export function Film({
           preload="metadata"
           loop={loop}
           autoPlay={Boolean(stream) || (autoPlay && !reducedMotion)}
-          onError={() => setFailed(true)}
+          onError={() => setFailedSrc(src ?? null)}
           className="absolute inset-0 h-full w-full object-cover"
-        />
+        >
+          {/* D12 clips ship with a captions file alongside them; until then an
+              empty track keeps the element conformant rather than silently
+              caption-less. See public/media/README.md. */}
+          <track kind="captions" label="Captions" />
+        </video>
       ) : null}
 
       {/* scrim — bottom-up, per §1.1 over-media type rule */}

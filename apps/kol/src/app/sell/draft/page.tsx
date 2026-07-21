@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { Film } from "@/components/chrome/Film";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import { formatPrice, productsByMaker } from "@/lib/mock/db";
@@ -15,6 +17,7 @@ import { formatPrice, productsByMaker } from "@/lib/mock/db";
  * not KOL chrome) — scoped to the preview frame only via local CSS vars.
  */
 
+/** The world as it arrived from the first derivation run. */
 const SENA_WORLD = {
   "--s-bg": "#efe7d8",
   "--s-surface": "#e6dcc7",
@@ -33,6 +36,57 @@ const SWATCHES: { hex: string; label: string }[] = [
   { hex: "#737A63", label: "ash" },
   { hex: "#E6DCC7", label: "surf" },
 ];
+
+/**
+ * Her interview, beat by beat — the only input regeneration is allowed to
+ * derive from. Every colour that comes back has to trace to one of these
+ * sentences.
+ */
+const SENA_ANSWERS: Record<string, string> = {
+  "Story & origin":
+    "I left restaurant kitchens twelve years ago and never went back. The wheel was the first thing that ever slowed me down.",
+  Craft:
+    "I wedge the clay by hand until the air's out, throw it tall, then pull three grooves with my thumb so it sits in your hand.",
+  Workshop:
+    "A converted barn with one big north-facing window. Ash glaze bucket by the door, clay dust on everything, grey even light all day.",
+  Values: "Nothing leaves here that I wouldn't eat off myself. No decals, no shortcuts.",
+  Brand: "Walking in should feel like a quiet kitchen on a Sunday morning.",
+};
+
+interface DerivedTheme {
+  mode: "light" | "dark";
+  roles: {
+    bg: string;
+    surface: string;
+    ink: string;
+    inkMuted: string;
+    accent: string;
+    accentInk: string;
+    border: string;
+  };
+  displayFamily: string;
+  textFamily: string;
+  derivedFrom: string[];
+}
+
+interface DraftApiResponse {
+  simulated: boolean;
+  theme: DerivedTheme;
+  rawBlocks: unknown[];
+  copy: { tagline: string; bio: string };
+  rationale: string;
+  aa: { pass: boolean; findings: { pair: string; ratio: number; pass: boolean }[] };
+  qualityFlag?: string | null;
+  error?: string;
+}
+
+interface CriticApiResponse {
+  simulated: boolean;
+  aaPass: boolean;
+  coherence: { score: number } | null;
+  verdict: string;
+  threshold: number;
+}
 
 const TRACE: { block: string; note: string; at: string }[] = [
   {
@@ -59,6 +113,77 @@ const TRACE: { block: string; note: string; at: string }[] = [
 
 export default function SellDraftPage() {
   const senaProducts = productsByMaker("sena");
+
+  /* ---- regeneration: a real derivation run, not a re-render ---- */
+  const [derived, setDerived] = useState<DraftApiResponse | null>(null);
+  const [critic, setCritic] = useState<CriticApiResponse | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
+  const [regenError, setRegenError] = useState<string | null>(null);
+
+  async function regenerate(): Promise<void> {
+    setRegenerating(true);
+    setRegenError(null);
+    try {
+      const res = await fetch("/api/ai/draft", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ interviewAnswers: SENA_ANSWERS, storeId: "sena" }),
+      });
+      const data: DraftApiResponse = await res.json();
+      if (!res.ok) {
+        setRegenError(data.error ?? "Derivation failed.");
+        return;
+      }
+      setDerived(data);
+
+      // gate ① then gate ②, in that order — the critic route enforces it
+      const criticRes = await fetch("/api/ai/critic", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          config: { theme: data.theme, blocks: data.rawBlocks, copy: data.copy },
+          storeId: "sena",
+        }),
+      });
+      setCritic((await criticRes.json()) as CriticApiResponse);
+    } catch {
+      setRegenError("Couldn't reach the derivation service.");
+    } finally {
+      setRegenerating(false);
+    }
+  }
+
+  const world: CSSProperties =
+    derived === null
+      ? SENA_WORLD
+      : ({
+          "--s-bg": derived.theme.roles.bg,
+          "--s-surface": derived.theme.roles.surface,
+          "--s-ink": derived.theme.roles.ink,
+          "--s-muted": derived.theme.roles.inkMuted,
+          "--s-accent": derived.theme.roles.accent,
+          "--s-accent2": derived.theme.roles.accent,
+          "--s-line": derived.theme.roles.border,
+          "--s-accent-ink": derived.theme.roles.accentInk,
+        } as CSSProperties);
+
+  const swatches =
+    derived === null
+      ? SWATCHES
+      : [
+          { hex: derived.theme.roles.bg, label: "bg" },
+          { hex: derived.theme.roles.ink, label: "ink" },
+          { hex: derived.theme.roles.accent, label: "accent" },
+          { hex: derived.theme.roles.border, label: "line" },
+          { hex: derived.theme.roles.surface, label: "surf" },
+        ];
+
+  const displayFamily = derived?.theme.displayFamily ?? "Fraunces · warm serif";
+  const textFamily = derived?.theme.textFamily ?? "General Sans · quiet grotesk";
+  const aaPass = derived === null ? true : derived.aa.pass;
+  const coherenceScore = critic?.coherence?.score ?? 0.82;
+  const coherenceThreshold = critic?.threshold ?? 0.75;
+  const simulated = derived?.simulated ?? false;
 
   return (
     <main className="mx-auto w-full max-w-page px-6 pb-[var(--space-16)] pt-[var(--space-8)]">
@@ -95,7 +220,7 @@ export default function SellDraftPage() {
         {/* ==== LEFT: the generated world, scoped in a bordered preview frame ==== */}
         <Reveal>
           <div
-            style={SENA_WORLD}
+            style={world}
             className="overflow-hidden rounded-md border border-line shadow-card"
           >
             <div className="flex items-center justify-between border-b border-line bg-surface px-[var(--space-3)] py-[var(--space-1)]">
@@ -216,12 +341,18 @@ export default function SellDraftPage() {
                 <p className="text-caption uppercase tracking-[0.04em] text-muted">
                   Your design system, derived
                 </p>
-                <span className="inline-flex items-center gap-1.5 rounded-pill border border-accent-2/30 bg-accent-2/10 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-2">
-                  ✦ AI-assisted
-                </span>
+                {simulated ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-pill border border-accent/30 bg-accent/10 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent">
+                    ⚠ simulated · no model ran
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-pill border border-accent-2/30 bg-accent-2/10 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-2">
+                    ✦ AI-assisted
+                  </span>
+                )}
               </div>
               <div className="mt-[var(--space-2)] grid grid-cols-5 gap-[var(--space-1)]">
-                {SWATCHES.map((s) => (
+                {swatches.map((s) => (
                   <div key={s.hex}>
                     <div
                       className="aspect-square w-full rounded-sm border border-line"
@@ -232,7 +363,7 @@ export default function SellDraftPage() {
                 ))}
               </div>
               <div className="mt-[var(--space-2)] flex flex-wrap gap-[var(--space-1)]">
-                {SWATCHES.slice(0, 4).map((s) => (
+                {swatches.slice(0, 4).map((s) => (
                   <span
                     key={s.hex}
                     className="rounded-pill border border-line bg-ground px-3 py-1 font-mono text-caption text-ink"
@@ -244,11 +375,11 @@ export default function SellDraftPage() {
               <div className="mt-[var(--space-2)] border-t border-line">
                 <div className="flex items-baseline justify-between py-[var(--space-1)]">
                   <span className="text-muted">Display</span>
-                  <span className="font-display">Fraunces · warm serif</span>
+                  <span className="font-display">{displayFamily}</span>
                 </div>
                 <div className="flex items-baseline justify-between border-t border-line py-[var(--space-1)]">
                   <span className="text-muted">Text</span>
-                  <span>General Sans · quiet grotesk</span>
+                  <span>{textFamily}</span>
                 </div>
               </div>
               <div className="mt-[var(--space-2)] rounded-md border border-accent-2/30 bg-accent-2/10 p-[var(--space-2)]">
@@ -273,8 +404,14 @@ export default function SellDraftPage() {
               <div className="mt-[var(--space-2)] flex flex-col gap-[var(--space-2)]">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-[var(--space-2)]">
-                    <span className="rounded-pill bg-accent-2/15 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-2">
-                      ✓ PASS
+                    <span
+                      className={`rounded-pill px-3 py-1 text-caption uppercase tracking-[0.04em] ${
+                        aaPass
+                          ? "bg-accent-2/15 text-accent-2"
+                          : "border border-accent/30 bg-accent/10 text-accent"
+                      }`}
+                    >
+                      {aaPass ? "✓ PASS" : "✕ FAIL"}
                     </span>
                     <b>① Legibility (WCAG-AA)</b>
                   </span>
@@ -288,13 +425,26 @@ export default function SellDraftPage() {
                 </p>
                 <div className="flex items-center justify-between border-t border-line pt-[var(--space-2)]">
                   <span className="flex items-center gap-[var(--space-2)]">
-                    <span className="rounded-pill bg-accent-2/15 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-2">
-                      ✓ PASS
+                    <span
+                      className={`rounded-pill px-3 py-1 text-caption uppercase tracking-[0.04em] ${
+                        !aaPass
+                          ? "border border-line bg-surface text-muted"
+                          : coherenceScore >= coherenceThreshold
+                            ? "bg-accent-2/15 text-accent-2"
+                            : "border border-accent/30 bg-accent/10 text-accent"
+                      }`}
+                    >
+                      {!aaPass
+                        ? "— not run"
+                        : coherenceScore >= coherenceThreshold
+                          ? "✓ PASS"
+                          : "✕ FAIL"}
                     </span>
                     <b>② Coherence &amp; fit</b>
                   </span>
                   <span className="font-mono">
-                    <b>0.82</b> <span className="text-muted">≥ 0.75</span>
+                    <b>{aaPass ? coherenceScore.toFixed(2) : "—"}</b>{" "}
+                    <span className="text-muted">≥ {coherenceThreshold.toFixed(2)}</span>
                   </span>
                 </div>
                 <p className="max-w-measure text-caption text-muted">
@@ -322,10 +472,26 @@ export default function SellDraftPage() {
                 </Link>
                 <button
                   type="button"
-                  className="inline-flex min-h-11 items-center justify-center rounded-pill border border-line bg-surface px-6 py-2.5 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
+                  onClick={() => void regenerate()}
+                  disabled={regenerating}
+                  aria-busy={regenerating}
+                  className="inline-flex min-h-11 items-center justify-center rounded-pill border border-line bg-surface px-6 py-2.5 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
                 >
-                  ↺ Regenerate the whole draft
+                  {regenerating ? "Deriving your world…" : "↺ Regenerate the whole draft"}
                 </button>
+                {regenError !== null ? (
+                  <p className="text-caption text-accent">
+                    {regenError} Nothing changed — your draft is exactly as it was.
+                  </p>
+                ) : null}
+                {derived !== null && regenError === null ? (
+                  <p className="text-caption text-muted">
+                    Regenerated from your interview{simulated ? " (simulated — no model ran)" : ""}.
+                    {derived.theme.derivedFrom.length > 0
+                      ? ` Colours traced to: ${derived.theme.derivedFrom.slice(0, 3).join("; ")}.`
+                      : ""}
+                  </p>
+                ) : null}
               </div>
               <p className="mt-[var(--space-2)] text-caption text-muted">
                 Co-editing keeps everything you like and changes only what you want — in plain

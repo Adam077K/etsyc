@@ -11,8 +11,8 @@
  */
 
 // relative, not "@/", so the eval harness can run this file under plain node
-import { contrastRatio, isHexColor } from "../theme/contrast";
-import type { AaFinding, DraftTheme } from "./schemas";
+import { contrastRatio, isHexColor } from "../theme/contrast.ts";
+import type { AaFinding, DraftTheme } from "./schemas.ts";
 
 export const AA_TEXT_MIN = 4.5;
 export const AA_LARGE_TEXT_MIN = 3;

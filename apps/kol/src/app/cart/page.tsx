@@ -78,7 +78,9 @@ function CartLineRow({ line, product }: ResolvedLine) {
       />
       <div className="min-w-[200px] flex-1">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <p className="font-display text-h3 text-ink">{product.title}</p>
+          {/* a real heading, not a styled <p> — the cart needs a traversable
+              structure for screen readers, and each line is a section of it */}
+          <h3 className="font-display text-h3 text-ink">{product.title}</h3>
           <p className="font-mono text-body text-ink">{formatPrice(lineTotal)}</p>
         </div>
         <p className="mt-1 text-caption text-muted">{productionTruth(product)}</p>

@@ -157,7 +157,7 @@ export default function CoCreatePage({ params }: { params: Promise<{ maker: stri
               </span>
               <Link
                 href="/inbox/t-quilt"
-                className="text-caption uppercase tracking-[0.04em] text-muted transition-colors duration-state ease-kol hover:text-ink"
+                className="inline-flex min-h-11 items-center text-caption uppercase tracking-[0.04em] text-muted transition-colors duration-state ease-kol hover:text-ink"
               >
                 Open thread
               </Link>
@@ -194,7 +194,7 @@ export default function CoCreatePage({ params }: { params: Promise<{ maker: stri
                     type="button"
                     aria-pressed={current}
                     onClick={() => setRev(v)}
-                    className={`rounded-pill border px-3 py-1 text-caption uppercase tracking-[0.04em] transition-colors duration-state ease-kol ${
+                    className={`inline-flex min-h-11 items-center rounded-pill border px-3 text-caption uppercase tracking-[0.04em] transition-colors duration-state ease-kol ${
                       current
                         ? "border-transparent bg-accent text-accent-ink"
                         : "border-line bg-surface text-muted hover:text-ink"

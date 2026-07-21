@@ -169,7 +169,7 @@ export default function SettingsPage() {
                   checked={profilePublic}
                   onChange={(e) => setProfilePublic(e.target.checked)}
                   aria-label="Make profile public"
-                  className="h-4 w-4 flex-none accent-accent"
+                  className="h-6 w-6 flex-none accent-accent"
                 />
               </label>
               <label className={`${rowClass} cursor-pointer`}>
@@ -185,7 +185,7 @@ export default function SettingsPage() {
                   checked={tastePublic}
                   onChange={(e) => setTastePublic(e.target.checked)}
                   aria-label="Make taste identity public"
-                  className="h-4 w-4 flex-none accent-accent"
+                  className="h-6 w-6 flex-none accent-accent"
                 />
               </label>
             </div>

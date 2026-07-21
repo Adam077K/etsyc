@@ -9,6 +9,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
+    "eval": "node src/lib/ai/evals/run.ts",
     "lint": "eslint src e2e --max-warnings=0"
   },
   "engines": {

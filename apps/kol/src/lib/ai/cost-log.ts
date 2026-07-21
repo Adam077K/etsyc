@@ -10,7 +10,7 @@
  * — only ids, token counts, money and timing.
  */
 
-import type { AiFeature, ModelId } from "./client";
+import type { AiFeature, ModelId } from "./client.ts";
 
 /** USD per 1M tokens, per the May-2026 rate card in CLAUDE.md / the spec. */
 const RATES: Record<string, { input: number; output: number }> = {

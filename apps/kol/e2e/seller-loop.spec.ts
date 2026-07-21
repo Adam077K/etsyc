@@ -61,7 +61,7 @@ test("publish is genuinely locked until every block is approved, then genuinely 
   await expect(approveButtons).toHaveCount(0);
 
   /* ---------- the gate opens ---------- */
-  await expect(page.getByText("OPEN")).toBeVisible();
+  await expect(page.getByText("OPEN", { exact: true })).toBeVisible();
   await expect(publishButton).toBeEnabled();
 
   await publishButton.click();

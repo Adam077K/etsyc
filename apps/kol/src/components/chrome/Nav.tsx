@@ -5,11 +5,12 @@
  * Mirrors the approved page-mockup nav 1:1. Unread state is a quiet
  * accent dot — never a red count badge (B16 AC).
  *
- * Below md the eight links drop to their own horizontally scrollable
- * rail so the row can never overflow a 375px viewport; from md up the
- * layout is the approved single row, unchanged. Every link and pill
- * carries a 44px hit box while the active underline still hugs the
- * text (the underline lives on an inner span, not the tall anchor).
+ * Below xl the eight links drop to their own horizontally scrollable
+ * rail so the row can never overflow a 375px viewport (and never wraps
+ * into a chunky two-line bar on tablet); from xl up the layout is the
+ * approved single row, unchanged. Every link and pill carries a 44px
+ * hit box while the active underline still hugs the text (the
+ * underline lives on an inner span, not the tall anchor).
  */
 
 import Link from "next/link";
@@ -92,7 +93,7 @@ export function Nav() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-line bg-ground/85 backdrop-blur-md">
-      <div className="mx-auto max-w-page px-6 py-2 md:py-2.5">
+      <div className="mx-auto max-w-page px-6 py-2 xl:py-2.5">
         <div className="flex items-center gap-6">
           <Link
             href="/"
@@ -101,12 +102,12 @@ export function Nav() {
             K<span className="text-accent">O</span>L
           </Link>
 
-          {/* md+ : the approved single-row link set */}
-          <div className="hidden flex-1 flex-wrap items-center gap-x-5 gap-y-1 md:flex">
+          {/* xl+ : the approved single-row link set */}
+          <div className="hidden flex-1 flex-wrap items-center gap-x-5 gap-y-1 xl:flex">
             {links}
           </div>
 
-          <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <div className="ml-auto flex items-center gap-2 xl:ml-0">
             <Link
               href="/cart"
               className={`${PILL} border border-line bg-surface text-ink hover:bg-ground`}
@@ -128,8 +129,8 @@ export function Nav() {
           </div>
         </div>
 
-        {/* below md : the same eight links on their own scroll rail */}
-        <div className="-mx-6 overflow-x-auto px-6 md:hidden">
+        {/* below xl : the same eight links on their own scroll rail */}
+        <div className="-mx-6 overflow-x-auto px-6 xl:hidden">
           <div className="flex min-w-max items-center gap-x-5">{links}</div>
         </div>
       </div>
