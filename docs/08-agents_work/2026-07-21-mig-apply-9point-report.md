@@ -1,0 +1,45 @@
+# MIG-APPLY — ADR-0001 9-Point Staging Validation Report
+
+- **Date:** 2026-07-21
+- **Agent:** database-engineer (`db-mig-apply`, branch `feat/kol-w1-mig-apply`)
+- **Target:** KOL Supabase project `olwtcjzmohdhawdzlzqs` (Founder-signed direct apply — project verified empty pre-apply: 0 tables/views/enums in `public`, 0 `auth.users` rows; only the platform `rls_auto_enable`/`ensure_rls` helper present)
+- **Route:** psql over the session pooler (`aws-1-us-east-2`), files applied as-authored with `ON_ERROR_STOP=1`. (`supabase db push`, curl, node fetch and npm were unavailable in the session sandbox; psql was the sanctioned alternate route in the Founder GO-signal.)
+- **Bundle:** groups 01→13 as authored (untouched) **+ group 14 hardening fix** (`20260721000014_grants_hardening.sql`) authored during this validation after points 2+3 failed on the original bundle. **Applied: 14/14.** `supabase_migrations.schema_migrations` seeded with all 14 versions.
+- **Verdict: GO — 9/9 PASS (post-group-14).**
+
+## The fix cycle (why group 14 exists)
+
+First run (groups 01–13 only): points 2 and 3 **FAILED** with one shared root cause. Supabase provisions `ALTER DEFAULT PRIVILEGES` so every new function in `public` gets EXECUTE granted to `anon`, `authenticated`, and `service_role` **explicitly** at `CREATE FUNCTION` time. The bundle's `revoke execute … from public` does not remove `anon`'s own explicit grant, so `proacl` retained `anon=X/postgres` on `create_order`, `cancel_order`, `set_order_status` (and the trigger functions). Anon calls failed **closed** at runtime (P0001 `authentication required` / no matching row; 0 rows written, verified) — but the ADR requires the EXECUTE-layer gate. Group 14 revokes anon on the 3 write RPCs, strips `public/anon/authenticated` from the 6 trigger functions, and flips default privileges so future functions are anon-opt-in. `get_public_profile`'s anon grant is untouched (regression-verified below).
+
+## 9-point results (post-fix state)
+
+| # | Check | Verdict | Evidence (query → output) |
+|---|-------|---------|---------------------------|
+| 1 | Full bundle applies clean, in order | **PASS** | Each of 01→13 via `psql -v ON_ERROR_STOP=1 -f`, rc=0, no search_path/DDL/ordering errors; group 14 likewise. 31 tables created; `select count(*) filter (where rowsecurity), count(*) from pg_tables where schemaname='public'` → `31 | 31` (RLS on every table). |
+| 2 | pg_proc audit: definer fns pin empty search_path; no anon/public EXECUTE except `get_public_profile` | **PASS** | `select proname, prosecdef, proconfig from pg_proc … where prosecdef` → all 10 KOL fns `{"search_path=\"\""}`. `has_function_privilege('anon', oid,'execute')` across all public functions → **only** `get_public_profile` = true (pg_trgm operator helpers aside). Write RPCs' proacl now `{postgres,authenticated,service_role}`; trigger fns `{postgres,service_role}`. |
+| 3 | Anon → definer write RPCs = permission denied | **PASS** | As `role anon` + anon claims: `create_order(...)` → **42501 permission denied for function create_order**; `cancel_order(...)` → **42501**; `set_order_status(...)` → **42501**. Denial is now at the EXECUTE layer (was P0001 runtime raise pre-fix). Side-effect check: 0 orders. |
+| 4 | Anon `get_public_profile(known_id)` returns only that row; no enumeration shape (NEW-1) | **PASS** | Known buyer id → exactly 1 row `{id, display_name, avatar_url, role}` (no bio). Unknown id → 0 rows. `select … from profiles` as anon → seller rows only, `count(*) where role='buyer'` → **0**. Function takes a single uuid — no set-returning/unfiltered call shape exists. Regression after group 14: still returns the row (probe user, rolled back). |
+| 5 | Buyer `create_order`: server-side price, bound buyer, rejects | **PASS** | Buyer JWT, items json carrying hostile `"unit_price_amount":1,"subtotal_amount":1` → order `subtotal_amount=5000` (2 × 2500 read from `products`), `buyer_id` = JWT `sub`, `status='pending'`. Unpublished store → `store not found or not published`; cross-store item → `product … is not in store …`; `quantity:0` → `invalid quantity`; direct `INSERT into orders` → 42501 RLS violation. |
+| 6 | Buyer denials: badge mint / review.verified / foreign order | **PASS** | Insert review with `verified=true` → **428C9** `cannot insert a non-DEFAULT value into column "verified"` (generated column). Review without purchase → 42501 RLS. Badge insert by buyer → 42501 RLS. Buyer2 vs buyer1's order: SELECT sees 0 rows, direct UPDATE hits 0 rows, `cancel_order(foreign_id)` → `order not cancellable`; order unchanged (`pending`, 5000). |
+| 7 | Seller `set_order_status`: own store + whitelist only | **PASS** | Foreign seller → `order not found for this seller`. Own-store seller sets `'paid'` → `status paid not settable by seller`. Direct UPDATE of `subtotal_amount` → 0 rows (no policy). Own-store `'fulfilled'` → succeeds; amount untouched (5000). |
+| 8 | Triggers fire on correct events; guards raise | **PASS** | Inventory exact: `on_auth_user_created` AFTER INSERT `auth.users`; `profiles_role_guard` BEFORE UPDATE; `reviews_seller_scope_guard` BEFORE UPDATE; `badges_real_maker_guard` / `threads_guard` / `commissions_guard` BEFORE INSERT OR UPDATE. Behavioral: signup with hostile metadata `role:"seller"` → profile forced `'buyer'`; role self-change → `profiles.role may not be changed…`; seller edits rating → raise, `maker_response` → allowed; real-maker badge without/with-pending verification → raise (even as service role), verified same-store → OK, UPDATE nulling verification → raise; thread maker=buyer / foreign store → raise, valid → OK; commission opened non-`brief` → raise, buyer self-approve → raise, maker approve → OK. |
+| 9 | Definer-function owner is non-superuser | **PASS** | All fns + 31 tables owned by `postgres`; `pg_roles` → `rolsuper = f` (note: `rolbypassrls = t` is the Supabase-managed default for `postgres`; definer fns + RLS remain the intended boundary — FORCE RLS consideration acknowledged). |
+
+## B0 · Global contract rules (restated verbatim)
+
+- **RLS is the ONLY boundary.** Any authed user hits PostgREST directly with their JWT. No restriction may be "app-side only." Column allow-lists, price-binding, status transitions, role escalation are ALL DB-enforced (SECURITY DEFINER RPC / BEFORE trigger / service-role). Never propose a client-set price, client-set `buyer_id`, client-set `role`, or client-set order `status`.
+- **10 SECURITY DEFINER fns:** `create_order`, `cancel_order`, `set_order_status`, `get_public_profile`, `handle_new_user`, `guard_profile_role`, `enforce_review_seller_scope`, `enforce_real_maker_badge`, `guard_thread`, `guard_commission`. All `SET search_path=''`, schema-qualified. Writes `REVOKE EXECUTE FROM public` + `GRANT EXECUTE TO authenticated`; `get_public_profile` also `GRANT ... TO anon`.
+- **6 triggers:** `on_auth_user_created`→`handle_new_user`; `profiles_role_guard`→`guard_profile_role`; `reviews_seller_scope_guard`→`enforce_review_seller_scope`; `badges_real_maker_guard`→`enforce_real_maker_badge`; `threads_guard`→`guard_thread`; `commissions_guard`→`guard_commission`.
+- **Service-role escape hatch tests `auth.role()='service_role'` — never `auth.uid() IS NULL`** (anon is also null uid; N1). Privileged flows on service key: `orders.status='paid'` (Stripe webhook), verification resolution, role→`seller`, `buyer_signals` inserts (engine).
+- **Money = integer minor units + `char(3) currency` (default GBP).** No floats.
+- **camelCase (store-config) ↔ snake_case (tables)** are the same fields at the sync boundary; engine queries snake_case tables.
+- **Video config↔table sync (OQ-2):** `videos`/`video_profiles` are the CANONICAL queryable source. `stores.config.media.clips[].id` MUST equal a `videos.id` owned by the same store — enforced by the P3 Zod validator at write time (DB can't enforce ids in jsonb). Config persist + `videos`/`video_profiles` upsert in ONE transaction.
+
+## Method + state notes
+
+- JWT matrix ran in-DB via `set local role anon|authenticated` + `set_config('request.jwt.claims', …)` — byte-identical to the GUCs PostgREST sets per request; asserted at the DB layer, which is the boundary under test. No LOCAL-CAVEAT.
+- All test fixtures (deterministic `a0000000-…`/`b0000000-…` ids, `kol-test-*@example.com` users) deleted post-validation; verified 0 rows in every table and 0 `auth.users`. Staging is schema-only + 14 bookkeeping rows.
+- `apps/kol/src/lib/supabase/database.types.ts` replaced with `supabase gen types typescript --linked` output from the applied schema; `pnpm typecheck` green.
+- Bundle idempotency note for the fix-cycle backlog: `CREATE POLICY` statements in 01–13 carry no `IF NOT EXISTS`-style guard, so re-running an already-applied group errors (harmless for the one-shot runner flow; do not paste into the SQL editor).
+
+**Go/no-go: GO.** P1 (auth) may build on this schema.
