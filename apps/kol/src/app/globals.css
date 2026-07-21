@@ -177,6 +177,57 @@
     background: var(--scrim);
     pointer-events: none;
   }
+
+  /* ---- P4 world-stage choreography — the film always wins.
+          Transform/opacity only; the hero <video> itself is never
+          touched (HeroStage keeps its DOM identity). The global
+          reduced-motion block below collapses every transition
+          here to instant — the hero still persists. ---- */
+  .kol-hero-stage {
+    view-transition-name: hero-video;
+  }
+  .kol-hero-stage-inner {
+    transform-origin: 50% 0;
+    transition: transform var(--dur-cinema) var(--ease-cinematic);
+    will-change: transform;
+  }
+  /* feed/grown: the film at card scale, the world folded away around it */
+  [data-world-stage="feed"] .kol-hero-stage-inner {
+    transform: scale(0.55);
+  }
+  [data-world-stage="grown"] .kol-hero-stage-inner {
+    transform: scale(0.82);
+  }
+  .kol-world-body {
+    transition: opacity var(--dur-unfold) var(--ease-kol);
+  }
+  [data-world-stage="feed"] .kol-world-body,
+  [data-world-stage="grown"] .kol-world-body {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* narrate-shrink: the film docks to a corner (FLIP transform in
+     HeroStage); the docked frame fills its box edge-to-edge, overriding
+     the hero block's in-flow page gutters without the block knowing */
+  .kol-hero-docked {
+    position: fixed;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    z-index: 40;
+    width: clamp(240px, 32vw, 320px);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-raised);
+  }
+  .kol-hero-docked section {
+    padding: 0;
+  }
+  .kol-hero-docked section > div {
+    margin: 0;
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

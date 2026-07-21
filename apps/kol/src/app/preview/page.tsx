@@ -53,9 +53,11 @@ export default async function PreviewPage({
         </div>
       </header>
 
-      {/* 1 · the world, whole, through the one renderer */}
+      {/* 1 · the world, whole, through the one renderer. isPreview also
+          mounts the stage rail — walk FEED→…→NARRATE_SHRINK and watch the
+          hero film survive every transition (P4 invariant). */}
       <section id="world" aria-label="Rendered world">
-        {renderStore(config)}
+        {renderStore(config, { isPreview: true })}
       </section>
 
       {/* 2 · the 4-state matrix — every block type, every state */}
