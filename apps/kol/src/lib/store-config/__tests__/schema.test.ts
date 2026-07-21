@@ -448,6 +448,46 @@ describe("font family charset — no CSS metacharacters (QA cycle-2 F2)", () => 
     expectGreen(config);
   });
 
+  // D15: international/foundry names are legitimate — Unicode letters pass.
+  const foundryNames = [
+    "Söhne",
+    "Ogg",
+    "Neue Größe",
+    "Noto Sans JP",
+    "Fraunces",
+    "General Sans",
+  ] as const;
+  for (const name of foundryNames) {
+    it(`accepts foundry name "${name}" on both fields (green)`, () => {
+      const config = cloneCustom();
+      setFamily(config, "displayFamily", name);
+      setFamily(config, "textFamily", name);
+      expectGreen(config);
+    });
+  }
+
+  // Every CSS-breakout metacharacter stays blocked even next to Unicode letters.
+  const cssMetachars = [";", "{", "}", "(", ")", ":", "<", ">", "/", "\\", "`", ","] as const;
+  for (const ch of cssMetachars) {
+    it(`rejects a family containing ${JSON.stringify(ch)}, naming the field`, () => {
+      const config = cloneCustom();
+      setFamily(config, "displayFamily", `Söhne${ch}X`);
+      expectReject(
+        config,
+        /^theme\.customPairing\.displayFamily: .*letters, digits, spaces, hyphens, or quotes/m,
+      );
+    });
+  }
+
+  it("rejects a CSS font stack — comma means stack injection, makers give ONE family", () => {
+    const config = cloneCustom();
+    setFamily(config, "textFamily", "Arial, sans-serif");
+    expectReject(
+      config,
+      /^theme\.customPairing\.textFamily: .*letters, digits, spaces, hyphens, or quotes/m,
+    );
+  });
+
   it("rejects a family name over 64 chars, naming the field", () => {
     const config = cloneCustom();
     setFamily(config, "displayFamily", "A".repeat(65));

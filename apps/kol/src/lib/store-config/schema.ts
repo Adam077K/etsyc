@@ -58,15 +58,19 @@ const assetUrl = z.string().regex(/^(?:https:\/\/\S+|\/(?!\/)\S*)$/, {
 });
 
 /**
- * Font family names reach CSS custom properties — bounded charset (letters,
- * digits, spaces, hyphens, quotes) and ≤ 64 chars, so no CSS metacharacters
- * (";", "{", "(", ":") can ride through a custom theme.
+ * Font family names reach CSS custom properties — bounded charset (Unicode
+ * letters/marks/numbers, spaces, hyphens, quotes) and ≤ 64 chars, so no CSS
+ * metacharacters (";", "{", "(", ":", ",") can ride through a custom theme.
+ * Unicode letters are allowed on purpose (D15): real foundry names like
+ * "Söhne" or "Noto Sans JP" must pass. Comma is NOT allowed — makers give a
+ * single family name, not a CSS stack (theme/custom.ts sets it as one
+ * --font-* value with its own fallback).
  */
 const fontFamilyName = z
   .string()
   .max(64, { error: "font family must be ≤ 64 chars" })
-  .regex(/^[A-Za-z0-9 '"-]+$/, {
-    error: "font family must contain only letters, digits, spaces, hyphens, or quotes",
+  .regex(/^[\p{L}\p{M}\p{N} '"-]+$/u, {
+    error: "font family must contain only letters, digits, spaces, hyphens, or quotes (any script)",
   });
 
 // ---------------------------------------------------------------------------
