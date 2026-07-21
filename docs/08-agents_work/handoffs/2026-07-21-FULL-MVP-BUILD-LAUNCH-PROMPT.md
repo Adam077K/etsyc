@@ -1,5 +1,5 @@
 # KOL — Full MVP Build Launch Prompt (paste-ready)
-*From session `ceo-phase6` · 2026-07-21. Hands off the ACTUAL PRODUCT BUILD (Phase 6, Waves 1–6) to the next CEO session. Wave 0 (render spine) is DONE — merged to GitHub main @ `32cbeb8`, 4/4 PASS Full tier, 309/309 tests. Build plan: [`../../03-system-design/KOL-phase6-build-plan.md`](../../03-system-design/KOL-phase6-build-plan.md).*
+*From session `ceo-phase6` · 2026-07-21. Hands off the ACTUAL PRODUCT BUILD to the next CEO session. **Waves 0 AND 1 are DONE + merged to GitHub main @ `cba62ff`.** The backend is LIVE (31-table schema applied to Supabase, RLS on all 31, 9/9 security-validated) and the app has real auth + profiles. **Start at Wave 2 (video engine).** Build plan: [`../../03-system-design/KOL-phase6-build-plan.md`](../../03-system-design/KOL-phase6-build-plan.md).*
 
 > **Where the product becomes real:** Wave 0 = the engine (renders maker worlds from mock fixtures, no backend). The usable product is Waves 1–6. Buyer-side goes live at **Wave 3** (browse + buy), seller-side at **Wave 4** (AI-built stores). **Full working MVP = end of Wave 4**, polished at **Wave 6**. Per D13 the competition is a checkpoint on this production build (4 seeded teammate worlds), then cutover to real buyers + sellers.
 
@@ -21,25 +21,42 @@ Wave 4 and polished at Wave 6. The 4 teammate worlds are the competition checkpo
 to real users (D13).
 
 STATE AT HANDOFF (verify with `git log main`):
-- Phases 0–5 DONE + merged: 32 build-ready specs (40 MVP features), concept-lock D1–D16, the
-  31-table data-model PLAN, AI-pipeline + video-engine specs, store-config v1.3, apps/kol scaffold.
-- Phase 6 Wave 0 (render spine) DONE — MERGED to GitHub main @ 32cbeb8, 4/4 PASS at Full tier:
-  P3 store-config validator, P4 renderer (hero-persistence), P5 block library, P8 design rails.
-  309/309 unit tests + typecheck + production build green on the integrated main; /preview renders
-  both the Sena (curated) and Noor (custom) worlds. A post-QA integration bug was caught + fixed +
-  re-verified (P3 fontFamilyName was ASCII-only, rejecting foundry names like "Söhne" → broadened
-  to Unicode letters while keeping the CSS-injection block; sec re-verified).
-- NOT yet done: the migration apply (Founder-gated, Irreversible) — the ONE thing gating Wave 1.
+- Phases 0–5 DONE: 32 build-ready specs (40 MVP features), concept-lock D1–D16, AI-pipeline +
+  video-engine specs, store-config v1.3.
+- Wave 0 (render spine) DONE: P3 validator, P4 renderer (hero-persistence), P5 block library,
+  P8 design rails. /preview renders the Sena (curated) + Noor (custom) worlds.
+- Wave 1 DONE — the BACKEND IS LIVE and the app has real auth:
+  * MIG-STAGE: supabase/ scaffold + 13 migrations staged + @supabase/ssr client layer.
+  * MIG-APPLY (Irreversible, Founder-signed): 31-table schema APPLIED to the Supabase project
+    (ref olwtcjzmohdhawdzlzqs), RLS on all 31, **9/9 security validation PASS** + independent
+    adversary re-verify. A group-14 hardening migration was added (Supabase default-privileges
+    pre-grant anon EXECUTE; revoke-from-public doesn't cover it → explicit revoke). REAL generated
+    types at apps/kol/src/lib/supabase/database.types.ts.
+  * P1 Auth (Irreversible, Founder-signed): email/OTP, role FORCED 'buyer' by handle_new_user
+    trigger (live-verified), role-gated routing in proxy.ts (Next 16 middleware successor), sessions.
+    QA caught + closed TWO open-redirect vectors (control-char + dot-segment) — the guard
+    (parseSameOriginPath) re-validates its OUTPUT; do NOT weaken it.
+  * P2 Account: profile CRUD, get_public_profile(uuid) no-enumeration lookup, buyer_signals
+    server-only write path.
+- KEYS ARE SET: apps/kol/.env.local (gitignored) holds the Founder's Supabase keys (anon,
+  service_role, access token, db password). Workers that need the live DB copy it into their
+  worktree: `cp /Users/adamks/VibeCoding/etsyc/apps/kol/.env.local apps/kol/.env.local` (never commit/print).
+- NEW CONVENTION from Wave 1: default privileges grant NO implicit anon EXECUTE — any future
+  anon-callable RPC needs its own explicit `grant execute ... to anon` (the get_public_profile pattern).
 
-YOUR FIRST ACTION (gates all of Wave 1):
-   APPLY THE MIGRATION (Founder-gated, Irreversible). The 31-table bundle
-   (docs/03-system-design/migrations-plan/, 13 FK-ordered groups) is a reviewed PLAN — nothing has
-   touched Supabase. Local validation is blocked: this host has NO Docker runtime. Resolve with
-   Adam: either (A) he installs Docker → a database-engineer runs the ADR-0001 9-point validation
-   on a local throwaway DB, or (B) validate on a disposable cloud Supabase (NOT the registered
-   staging project_ref=olwtcjzmohdhawdzlzqs). On 9-point PASS → Founder-gated apply to shared
-   staging = the go-signal that unblocks all Wave-1 merges. Adam must also provision staging
-   anon + service-role keys as env vars for apps/kol/.env.local + CI.
+YOUR FIRST ACTION: START WAVE 2 (video engine). No keys/decisions needed from Adam for this wave.
+   Have the CTO return a Wave-2 dispatch packet, then spawn workers:
+   - P7 video-profile tagging (ai-engineer): manual (checkboxes + product picker + anti_repetition_key)
+     + AI TagSuggestion (Haiku, confirm-before-publish, thankyou-only guardrail, 429/529 fallback,
+     cost-log, tagging_accuracy eval ≥0.80 F1). Writes video_profiles. Full tier.
+   - P6 video engine (backend-engineer): selectVideos(ctx)=antiRepetition(rank(eligible(ctx))),
+     the 8-state query map, seeded jitter (NO Math.random), anti-repetition signed-cookie ring N=50,
+     RulesRanker seam. **Split into 2 units** (6a eligibility+ranker+state-map; 6b anti-repetition
+     ring + reshuffle + structural tests). Full tier. Reads video_profiles → untagged footage is
+     invisible, so P7 tag-write contract lands first, then P6a+P6b run 2-way parallel.
+   Serial edge: P7 → P6. AI features (P7) ship with eval + cost-log or they don't ship.
+   (Also queue the P5/P8 blocks+categories SEED step — build-plan §1 Wave 1 tail, database-engineer,
+   service-role write — it was deferred out of the Wave-1 packet; do it before Wave 3 needs catalog data.)
 
 READ FIRST (all written + merged — do NOT re-derive):
 1. docs/KOL-START-HERE.md — canonical entry point
@@ -52,11 +69,14 @@ READ FIRST (all written + merged — do NOT re-derive):
 6. Contracts every builder cites: adr/0001 (data model + 9-point validation) · adr/0002 +
    KOL-ai-pipeline-spec.md (AI + evals/cost-log) · adr/0003 + KOL-video-engine-spec.md (8-state
    query map) · store-config.schema.md v1.3 · docs/04-features/KOL-block-catalog.md
-7. .claude/memory/DECISIONS.md (top = Wave-0 close) + LONG-TERM.md
+7. .claude/memory/DECISIONS.md (top = Wave-1 close, backend live) + LONG-TERM.md
+8. Wave-1 session files (docs/08-agents_work/sessions/2026-07-21-*): the 9-point PASS report,
+   the P1/P2 QA verdicts, and the exact schema/auth state you build on.
 
 BUILD SEQUENCE (locked — full detail in the build plan):
-- WAVE 1 — Auth + schema: migration apply (database-engineer, Irreversible) → P1 auth
-  (email/OTP, profiles.role forced buyer, RLS anchor, middleware) → P2 account/profile. Serial head.
+- WAVE 1 — DONE ✅ (migration applied 9/9 · P1 auth · P2 profile — all merged to main @ cba62ff).
+- WAVE 2 ← START HERE — P7 video-profile tagging (manual + AI Haiku, thankyou-only guardrail, eval ≥0.80 F1) →
+  P6 video engine (selectVideos = antiRepetition(rank(eligible(ctx))), 8-state map, split into 2 units).
 - WAVE 2 — P7 video-profile tagging (manual + AI Haiku, thankyou-only guardrail, eval ≥0.80 F1) →
   P6 video engine (selectVideos = antiRepetition(rank(eligible(ctx))), 8-state map, split into 2 units).
 - WAVE 3 — Buyer core (3a parallel: B1 discovery feed [AC forbids uniform grid] · B2 grow · B3
@@ -97,6 +117,13 @@ ORCHESTRATION MODEL (Founder-specified, carry forward):
 - NOTE: agents share the account spend limit — if agents die with "monthly spend limit", pause and
   tell Adam; resume-via-message once raised (no work lost, all committed to branches).
 
+WAVE-1 FAST-FOLLOW QUEUE (from P1/P2 QA — pick up early in Wave 2, non-blocking):
+- FIRST: account/page.tsx read-error falls through to empty-state form → a save could overwrite
+  a real profile with blanks (needs a transient DB read error at load + user submitting) → frontend-engineer.
+- AccountBar Profile link plain <a> → next/link; avatar URL .max(2048) checked pre-normalization → backend.
+- P1 P3s: next-param length/UX bound, 2 redirect UX edges, case-sensitive route classify (mitigated
+  by page re-check + RLS) → backend-engineer.
+
 WAVE-0 DEFERRED LEDGER (open before production deploy; do NOT block the build):
 - P2-a: sunbaked page-muted token 3.62:1 (EmptyPrompt/ErrorInline) → P8/design-system → MUST clear
   before any Wave-0 production deploy (ship-blocker ticket).
@@ -110,6 +137,13 @@ WAVE-0 DEFERRED LEDGER (open before production deploy; do NOT block the build):
 - P9 integration constraint: wrap contrast.ts calls in try/catch, treat throw as FAIL (it signals
   bad input by throwing).
 
+SKILLS + CONTEXT (how each agent gets the right expertise on demand): CLAUDE.md (auto-loaded every
+session) documents the 147-skill library at .claude/skills/. Discovery = read .claude/skills/MANIFEST.json,
+filter by tags, load 3-5 SKILL.md files per CEO/lead, 2-3 per worker — NEVER preload. For Wave 2:
+ai-engineer + llm-app-patterns + prompt-engineering-patterns + llm-evaluation (P7 tagging), and
+supabase-rls-conventions + postgresql + nodejs-backend-patterns (P6 engine). All product context is
+in the READ-FIRST docs above; the KOL-video-engine-spec.md (adr/0003) is P6's contract.
+
 RULES: worktrees for all code (off main, from main-repo root via git -C); conventional commits;
 NO merge without QA-Lead PASS + Founder confirm; migrations/auth/billing = Full/Irreversible;
 deferred hardening gaps N2/N3/N4/NEW-3 stay deferred (do NOT build); leave a session file +
@@ -117,6 +151,6 @@ DECISIONS breadcrumb per wave; store-config v1.3 + design-system v2 are source o
 the apps/kol scaffold, never fork. Name/trademark: "KOL" is a working name, "Etsyc" has live
 trademark risk (DECISIONS 2026-07-14) — clear before any public/API use.
 
-Start with the migration apply (resolve the Docker-vs-cloud validation with Adam + get staging
-keys), then Wave 1.
+Start with Wave 2: have the CTO return the P7→P6 dispatch packet, then spawn workers. The backend
+is live and the keys are set — no Founder decision is needed to begin Wave 2.
 ```
