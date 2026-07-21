@@ -32,6 +32,28 @@ describe("classifyRoute", () => {
     expect(classifyRoute("/sellers-market")).toBe("public");
     expect(classifyRoute("/accounting")).toBe("public");
   });
+
+  // W1-FF fix 4 — classification is case-insensitive: the middleware gate
+  // must class odd-cased paths correctly instead of falling through to
+  // "public" (previously mitigated only by the page re-check + RLS).
+  it.each([
+    ["/Sign-In", "auth-entry"],
+    ["/SIGN-IN/anything", "auth-entry"],
+    ["/Feed", "buyer"],
+    ["/FEED/Saved", "buyer"],
+    ["/Seller", "seller"],
+    ["/SELLER/Orders", "seller"],
+    ["/Account", "account"],
+    ["/ACCOUNT/Settings", "account"],
+  ] as const)("%s → %s (case-insensitive)", (path, expected) => {
+    expect(classifyRoute(path)).toBe(expected);
+  });
+
+  it("keeps mixed-case look-alikes public", () => {
+    expect(classifyRoute("/FeedBack")).toBe("public");
+    expect(classifyRoute("/Accounting")).toBe("public");
+    expect(classifyRoute("/Sellers-Market")).toBe("public");
+  });
 });
 
 describe("landingPathFor", () => {
