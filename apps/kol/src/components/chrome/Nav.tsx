@@ -15,6 +15,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthMenu } from "@/lib/auth/AuthMenu";
 import { useKolSession } from "@/lib/mock/session";
 import { notifications } from "@/lib/mock/db";
 
@@ -120,12 +121,9 @@ export function Nav() {
             >
               Sell on KOL
             </Link>
-            <Link
-              href="/welcome"
-              className={`${PILL} bg-accent-cta font-semibold text-accent-ink transition-transform duration-tap active:scale-[0.98]`}
-            >
-              Sign in
-            </Link>
+            {/* real session when Supabase is configured; the same pill,
+                pointing at onboarding, when it isn't */}
+            <AuthMenu />
           </div>
         </div>
 

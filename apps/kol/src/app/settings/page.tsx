@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { NotificationType } from "@/lib/mock/db";
 import { useKolSession } from "@/lib/mock/session";
+import { AccountSection } from "@/lib/auth/AccountSection";
 
 /* the six B16 notification types, human-labelled */
 const NOTIFICATION_TYPES: { type: NotificationType; label: string; defaultOn: boolean }[] = [
@@ -84,32 +85,11 @@ export default function SettingsPage() {
 
         {/* ---- sections ---- */}
         <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-8)]">
-          {/* ACCOUNT — decorative rows */}
+          {/* ACCOUNT — real email / display name / sign-out where a session
+              exists; the original decorative rows where it doesn't (P2). */}
           <section id="account" className="scroll-mt-24">
             <h2 className="font-display text-h3 text-ink">Account info</h2>
-            <div className={`mt-3 ${cardClass}`}>
-              <div className={rowClass}>
-                <div>
-                  <p className="text-caption uppercase text-muted">Name</p>
-                  <p className="text-body text-ink">Rowan Ellison</p>
-                </div>
-                <button className={btnClass}>Edit</button>
-              </div>
-              <div className={rowClass}>
-                <div>
-                  <p className="text-caption uppercase text-muted">Email</p>
-                  <p className="text-body text-ink">rowan@example.com</p>
-                </div>
-                <button className={btnClass}>Edit</button>
-              </div>
-              <div className={rowClass}>
-                <div>
-                  <p className="text-caption uppercase text-muted">Password</p>
-                  <p className="text-body text-ink">Last changed 3 months ago</p>
-                </div>
-                <button className={btnClass}>Change</button>
-              </div>
-            </div>
+            <AccountSection />
           </section>
 
           {/* NOTIFICATIONS — per-type toggles matching the six B16 types */}

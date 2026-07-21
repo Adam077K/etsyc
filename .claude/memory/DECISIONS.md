@@ -199,3 +199,32 @@ at the point the community tables migrate.
 concept-lock governance assigns D-numbers to Founder).
 **Affects:** maker-community.md spec (unblocked), PAGE-MAP.md, apps/kol routes, Phase-6 scope.
 **Status:** Decided — build proceeding on the agent variant.
+
+## 2026-07-21 — D18: Founder approvals (Adam, in person with Shaian)
+
+**Decision:** Adam approved, in person, the items previously blocked on Founder sign-off:
+1. **Apply the ADR-0001 data model** to a real Supabase project — the prototype moves off
+   localStorage so two real humans can interact. This is the Irreversible-tier item that
+   `DECISIONS.md` 2026-07-14 and the Phase-6 plan gate on Founder sign-off.
+2. **D17 ratified** — the buyer↔buyer social layer stands as recorded on 2026-07-21.
+3. **Design system v2** — palettes/pairings/motion accepted as built; the "taste calls gating
+   on Founder sign-off before any UI is built" note in `KOL-design-system.md` is cleared.
+
+**Naming — NOT settled by this entry.** The 2026-07-14 trademark recommendation is *partly*
+resolved: the product is "KOL", which contains no Etsy mark, so the Etsy trademark/API-rejection
+risk does not attach to the product name. Two things remain open:
+- The **repository and any derived deploy URL** are still `etsyc*`. A Vercel project defaulting to
+  the repo name would publish `etsyc.vercel.app` — public use of the contested string. Deploy under
+  a neutral project name until the repo is renamed.
+- **"KOL" itself has never had a trademark/domain check** (flagged in `KOL-START-HERE.md`). Not an
+  Etsy problem; an unverified-name problem. Run it before the name goes on anything public.
+
+**Validation is NOT waived.** Founder approval authorizes the apply; it does not skip the mandatory
+9-point staging validation (ADR-0001). Sequence stays: provision staging → validate → apply.
+
+**Reversibility:** the migration apply is irreversible; the approvals themselves are reversible
+until applied.
+**Owner:** Founder (Adam), relayed in session by Shaian.
+**Affects:** Phase-6 Wave 1 unblocked; auth (P1), account (P2), and every persistence-dependent
+feature; deploy naming.
+**Status:** Approved — build proceeding.

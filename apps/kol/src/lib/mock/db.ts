@@ -155,7 +155,12 @@ export interface MockProduct {
   makerSlug: string;
   title: string;
   priceMinor: number;
-  currency: "USD";
+  /**
+   * ISO-4217. The prototype seeds USD, but real rows can carry any
+   * currency the maker sells in — pinning this to "USD" made the
+   * Supabase adapter throw on perfectly valid data.
+   */
+  currency: CurrencyCode;
   description: string;
   inventory: { status: "in-stock" | "made-to-order" | "sold-out"; qty?: number; leadWeeks?: number };
   filmClass: MockMaker["filmClass"];
@@ -169,6 +174,9 @@ export interface MockProduct {
   expect: Record<string, string>; // the 11 P14 fields, keyed by label
   voiceoverLine?: string;
 }
+
+/** Widened deliberately: a maker in Lisbon does not price in dollars. */
+export type CurrencyCode = string;
 
 const EXPECT_KEYS = [
   "Dimensions", "Materials", "Texture", "Handmade variation", "Production time",
