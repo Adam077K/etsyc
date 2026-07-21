@@ -4,6 +4,18 @@
  * 2 densities. Source of truth: docs/03-system-design/KOL-design-system.md §§1–4.
  * Hex values are transcribed verbatim; AA notes carried where the doc scopes
  * a ground to large-text-only.
+ *
+ * THE D9→D15 REFRAME — read before "fixing" anything here:
+ * These rails are FIXED for KOL's own product UI and hand-built curated
+ * worlds, and STARTING POINTS for sellers — NOT a cap. Palette-capping a
+ * `theme.kind:"custom"` shop is FORBIDDEN (D15); a custom shop's anti-slop
+ * guarantee is the AA gate + auto-critic (P9) + maker approval (P10), never
+ * these enums. Tokens live in `stores.config.theme` (jsonb) — there is NO
+ * design_tokens table, and no table proposal is accepted.
+ *
+ * Enum membership is single-sourced from store-config v1.3: the id types come
+ * from `@/lib/store-config/types` and the registries below are runtime-locked
+ * against `@/lib/store-config/schema` tuples in `rails.test.ts` — no drift.
  */
 
 import type {
