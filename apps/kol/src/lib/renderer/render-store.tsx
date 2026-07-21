@@ -16,9 +16,9 @@ import { cn } from "@/lib/utils";
  */
 export function renderStore(
   config: StoreConfig,
-  options: { state?: BlockState; isPreview?: boolean } = {},
+  options: { state?: BlockState; isPreview?: boolean; linkBase?: string } = {},
 ): ReactNode {
-  const { state = "success", isPreview = false } = options;
+  const { state = "success", isPreview = false, linkBase } = options;
   const data = {
     maker: config.maker,
     media: config.media,
@@ -39,7 +39,7 @@ export function renderStore(
         "gap-[var(--space-section)] pb-[var(--space-section)]",
       )}
     >
-      {ordered.map((block) => renderBlock(block, data, state, isPreview))}
+      {ordered.map((block) => renderBlock(block, data, state, isPreview, linkBase))}
     </div>
   );
 }
@@ -53,6 +53,7 @@ export function renderBlock(
   data: BlockProps["data"],
   state: BlockState = "success",
   isPreview = false,
+  linkBase?: string,
 ): ReactNode {
   // Correlated-union dispatch: the registry is keyed so that
   // blockRegistry[block.type] accepts exactly `block`'s narrowed type; TS
@@ -60,7 +61,13 @@ export function renderBlock(
   const Component = blockRegistry[block.type] as React.ComponentType<BlockProps>;
   return (
     <BlockBoundary key={block.id} blockId={block.id}>
-      <Component block={block} data={data} state={state} isPreview={isPreview} />
+      <Component
+        block={block}
+        data={data}
+        state={state}
+        isPreview={isPreview}
+        linkBase={linkBase}
+      />
     </BlockBoundary>
   );
 }

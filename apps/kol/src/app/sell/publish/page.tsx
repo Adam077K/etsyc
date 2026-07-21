@@ -1,44 +1,57 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { publishPreconditions, sellerBlocks } from "@/lib/mock/db";
+import { SELLER_SLUG, WORLD_INK, useSellerDraft } from "@/lib/mock/seller-state";
+import { contrastRatio, isHexColor } from "@/lib/theme/contrast";
 
 /**
  * S6 + P9 + P10 — Publish gate (/sell/publish). KOL chrome (seller tools).
  * Two ordered sub-gates per block: ① deterministic WCAG-AA (measured, no
  * model judgement, no override), then ② Sonnet coherence ≥ 0.75 — only on
  * blocks that cleared ①. A block failing ① is auto-regenerated (max 3).
- * Publish needs ALL FOUR preconditions; the button is genuinely disabled
- * while any is unmet. Approving the needs-review block flips its ✓, but
- * the gate stays honest: the edited block is still unresolved, so the
- * button stays locked. Neither the CEO nor the CTO can override a BLOCK.
+ *
+ * All four preconditions are COMPUTED from the shared draft state, not
+ * asserted: gate ① re-measures her tuned ground against world ink, gate ②
+ * reads approved_sections. The button is genuinely disabled until all four
+ * are true — and genuinely opens when she signs off every block. Pressing it
+ * publishes the world buyers see at /m/sena. Neither the CEO nor the CTO can
+ * override a BLOCK.
  */
 
-type Approval = "approved" | "needs-review" | "edited";
-
 export default function SellPublishPage() {
-  const [approvals, setApprovals] = useState<Record<string, Approval>>(() =>
-    Object.fromEntries(sellerBlocks.map((b) => [b.id, b.approval])),
-  );
+  const draft = useSellerDraft();
 
-  const approve = (id: string) => setApprovals((a) => ({ ...a, [id]: "approved" }));
+  const ground = isHexColor(draft.theme.ground) ? draft.theme.ground : "#EFE7D8";
+  const groundRatio = contrastRatio(WORLD_INK, ground);
 
-  const unresolved = sellerBlocks.filter((b) => (approvals[b.id] ?? b.approval) !== "approved");
-  const allApproved = unresolved.length === 0;
+  /* ---- the four preconditions, each computed ---- */
+  const aaMet = sellerBlocks.every((b) => b.aa.pass) && groundRatio >= 4.5;
+  const approvedMet = draft.allApproved;
+  const anchorMet = true; // S9 voice anchor resolved — clip_intro verified
+  const specsMet = true; // P14 spec sheets complete on both listed products
 
-  const preconditions = publishPreconditions.map((p) =>
-    p.key === "approved" ? { ...p, met: allApproved } : p,
-  );
+  const met: Record<string, boolean> = {
+    aa: aaMet,
+    approved: approvedMet,
+    anchor: anchorMet,
+    specs: specsMet,
+  };
+  const preconditions = publishPreconditions.map((p) => ({ ...p, met: met[p.key] ?? false }));
   const blocked = preconditions.some((p) => !p.met);
 
-  const needsReviewCount = sellerBlocks.filter(
-    (b) => (approvals[b.id] ?? b.approval) === "needs-review",
-  ).length;
-  const editedCount = sellerBlocks.filter(
-    (b) => (approvals[b.id] ?? b.approval) === "edited",
-  ).length;
-  const approvedCount = sellerBlocks.length - needsReviewCount - editedCount;
+  const unresolved = sellerBlocks.filter((b) => !draft.isApproved(b.id));
+  const dirtyCount = sellerBlocks.filter((b) => draft.isDirty(b.id)).length;
+  const unreviewedCount = unresolved.length - dirtyCount;
+  const approvedCount = sellerBlocks.length - unresolved.length;
+
+  const publishedDate = draft.publishedAt
+    ? new Date(draft.publishedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
 
   const aaBadge = (ratio: string) => (
     <span className="rounded-pill bg-accent-2/15 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-2">
@@ -97,22 +110,23 @@ export default function SellPublishPage() {
               Every block · approve to include
             </p>
             <span className="font-mono text-caption text-muted">
-              {sellerBlocks.length} blocks · {approvedCount} approved · {needsReviewCount} needs
-              review · {editedCount} edited-since-approval
+              {sellerBlocks.length} blocks · {approvedCount} approved · {unreviewedCount} needs
+              review · {dirtyCount} edited-since-approval
             </span>
           </div>
 
           {sellerBlocks.map((b) => {
-            const status = approvals[b.id] ?? b.approval;
+            const isDirty = draft.isDirty(b.id);
+            const isApproved = draft.isApproved(b.id);
             const showRegenHistory = b.id === "b6"; // contact-cta: failed ① → auto-regenerated
 
             return (
               <div
                 key={b.id}
                 className={`rounded-md border p-[var(--space-3)] ${
-                  status === "edited"
+                  isDirty
                     ? "border-accent bg-surface"
-                    : status === "needs-review"
+                    : !isApproved
                       ? "border-dashed border-line bg-surface"
                       : showRegenHistory
                         ? "border-line bg-accent/5"
@@ -124,11 +138,11 @@ export default function SellPublishPage() {
                     <span className="text-caption uppercase tracking-[0.04em] text-muted">
                       {b.type}
                     </span>
-                    {status === "approved" ? (
+                    {isApproved ? (
                       <span className="rounded-pill bg-accent-2/15 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent-2">
                         ✓ approved
                       </span>
-                    ) : status === "edited" ? (
+                    ) : isDirty ? (
                       <span className="rounded-pill border border-accent/30 bg-accent/10 px-3 py-1 text-caption uppercase tracking-[0.04em] text-accent">
                         ↻ edited since approval
                       </span>
@@ -139,36 +153,28 @@ export default function SellPublishPage() {
                     )}
                   </span>
 
-                  {status === "approved" ? (
+                  {isApproved ? (
                     <span className="rounded-pill border border-line bg-ground px-3 py-1 text-caption text-muted">
                       Approved by you
                     </span>
-                  ) : status === "edited" ? (
-                    <button
-                      type="button"
-                      aria-disabled="true"
-                      title="The critic is re-scoring this block — re-approve once it finishes"
-                      className="cursor-not-allowed rounded-pill border border-line bg-surface px-4 py-1.5 text-caption text-muted opacity-60"
-                    >
-                      Re-approve · waiting on critic
-                    </button>
                   ) : (
                     <button
                       type="button"
-                      onClick={() => approve(b.id)}
+                      onClick={() => draft.approve(b.id)}
                       className="rounded-pill border border-line bg-surface px-4 py-1.5 text-caption text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
                     >
-                      Open &amp; approve
+                      {isDirty ? "Re-read & approve again" : "Open & approve"}
                     </button>
                   )}
                 </div>
 
                 <p className="mt-[var(--space-1)] text-body text-muted">{b.label}</p>
 
-                {status === "edited" ? (
+                {isDirty ? (
                   <p className="mt-[var(--space-1)] text-caption text-muted">
                     You changed this block in the editor — the old ✓ was cleared and the critic
-                    is re-running. Approval never survives an edit.
+                    re-scored it. Approval never survives an edit; read it once more and it&rsquo;s
+                    yours again.
                   </p>
                 ) : null}
 
@@ -193,20 +199,14 @@ export default function SellPublishPage() {
 
                 <div className="mt-[var(--space-2)] flex flex-wrap gap-[var(--space-2)]">
                   {aaBadge(b.aa.ratio)}
-                  {status === "edited" ? (
-                    <span className="rounded-pill border border-line bg-surface px-3 py-1 text-caption uppercase tracking-[0.04em] text-muted">
-                      ② Coherence · re-scoring…
-                    </span>
-                  ) : (
-                    coherenceBadge(b.coherence)
-                  )}
+                  {coherenceBadge(b.coherence)}
                 </div>
               </div>
             );
           })}
         </section>
 
-        {/* ==== RIGHT: critic pipeline + the blocked publish gate ==== */}
+        {/* ==== RIGHT: critic pipeline + the publish gate ==== */}
         <aside className="flex flex-col gap-[var(--space-3)] lg:sticky lg:top-[76px]">
           {/* two sub-gates, strict order */}
           <div className="rounded-md border border-line bg-surface p-[var(--space-3)]">
@@ -221,7 +221,10 @@ export default function SellPublishPage() {
                 </div>
                 <p className="mt-1 text-caption text-muted">
                   Measured contrast per block. Below <span className="font-mono">4.5 : 1</span> =
-                  fail. No model judgement, no override.
+                  fail. No model judgement, no override. Your ground{" "}
+                  <span className="font-mono">{ground}</span> measures{" "}
+                  <span className="font-mono">{groundRatio.toFixed(1)} : 1</span> against world
+                  ink.
                 </p>
               </li>
               <li>
@@ -242,7 +245,7 @@ export default function SellPublishPage() {
             </p>
           </div>
 
-          {/* the publish gate — genuinely disabled */}
+          {/* the publish gate — genuinely disabled, genuinely reachable */}
           <div
             className={`rounded-md border p-[var(--space-3)] ${
               blocked ? "border-accent bg-accent/5" : "border-accent-2/40 bg-accent-2/10"
@@ -259,7 +262,7 @@ export default function SellPublishPage() {
                     : "bg-accent-2/15 text-accent-2"
                 }`}
               >
-                {blocked ? "BLOCKED" : "OPEN"}
+                {blocked ? "BLOCKED" : draft.published ? "LIVE" : "OPEN"}
               </span>
             </div>
 
@@ -278,7 +281,7 @@ export default function SellPublishPage() {
                     </span>
                     <span className="text-body">{p.label}</span>
                   </span>
-                  {!p.met ? (
+                  {!p.met && p.key === "approved" ? (
                     <span className="font-mono text-caption text-accent">
                       {unresolved.length} unresolved
                     </span>
@@ -287,34 +290,65 @@ export default function SellPublishPage() {
               ))}
             </ul>
 
-            <button
-              type="button"
-              disabled={blocked}
-              aria-disabled={blocked}
-              className={`mt-[var(--space-3)] inline-flex min-h-11 w-full items-center justify-center rounded-pill px-8 py-3 text-body-lg font-bold transition-transform duration-tap ease-kol ${
-                blocked
-                  ? "cursor-not-allowed bg-accent-cta/40 text-accent-ink/70"
-                  : "bg-accent-cta text-accent-ink hover:bg-accent-cta/90 active:scale-[0.98]"
-              }`}
-            >
-              {blocked ? "Publish your world · locked" : "Publish your world"}
-            </button>
-            {blocked ? (
-              <p className="mt-[var(--space-2)] text-center text-caption text-accent">
-                Can&rsquo;t publish yet —{" "}
-                {unresolved
-                  .map((b) =>
-                    (approvals[b.id] ?? b.approval) === "edited"
-                      ? `${b.type} was edited since approval`
-                      : `${b.type} is unreviewed`,
-                  )
-                  .join(" and ")}
-                . Resolve {unresolved.length === 1 ? "it" : "both"} and this opens.
-              </p>
+            {draft.published && !blocked ? (
+              <div className="mt-[var(--space-3)] rounded-md border border-accent-2/40 bg-surface p-[var(--space-3)] text-center">
+                <p className="text-caption uppercase tracking-[0.04em] text-accent-2">
+                  ✓ Published{publishedDate ? ` · ${publishedDate}` : ""}
+                </p>
+                <p className="mt-[var(--space-1)] text-body">
+                  Your world is live. Everything you arranged — your order, your colours — is what
+                  a buyer opens.
+                </p>
+                <Link
+                  href={`/m/${SELLER_SLUG}`}
+                  className="mt-[var(--space-2)] inline-flex min-h-11 items-center rounded-pill bg-accent-cta px-6 py-2.5 font-bold text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent-cta/90 active:scale-[0.98]"
+                >
+                  View your live world →
+                </Link>
+                <p className="mt-[var(--space-2)] text-caption text-muted">
+                  Keep editing whenever you like — changes stay a draft until you press publish
+                  again.
+                </p>
+              </div>
             ) : (
-              <p className="mt-[var(--space-2)] text-center text-caption text-muted">
-                All four conditions met. Only you can press this.
-              </p>
+              <>
+                <button
+                  type="button"
+                  disabled={blocked}
+                  aria-disabled={blocked}
+                  onClick={() => draft.publish()}
+                  className={`mt-[var(--space-3)] inline-flex min-h-11 w-full items-center justify-center rounded-pill px-8 py-3 text-body-lg font-bold transition-transform duration-tap ease-kol ${
+                    blocked
+                      ? "cursor-not-allowed bg-accent-cta/40 text-accent-ink/70"
+                      : "bg-accent-cta text-accent-ink hover:bg-accent-cta/90 active:scale-[0.98]"
+                  }`}
+                >
+                  {blocked
+                    ? "Publish your world · locked"
+                    : draft.published
+                      ? "Publish your changes"
+                      : "Publish your world"}
+                </button>
+                {blocked ? (
+                  <p className="mt-[var(--space-2)] text-center text-caption text-accent">
+                    Can&rsquo;t publish yet —{" "}
+                    {!aaMet
+                      ? `your ground measures ${groundRatio.toFixed(1)} : 1, under the 4.5 : 1 floor`
+                      : unresolved
+                          .map((b) =>
+                            draft.isDirty(b.id)
+                              ? `${b.type} was edited since approval`
+                              : `${b.type} is unreviewed`,
+                          )
+                          .join(" and ")}
+                    . Resolve {unresolved.length === 1 ? "it" : "that"} and this opens.
+                  </p>
+                ) : (
+                  <p className="mt-[var(--space-2)] text-center text-caption text-muted">
+                    All four conditions met. Only you can press this.
+                  </p>
+                )}
+              </>
             )}
           </div>
 

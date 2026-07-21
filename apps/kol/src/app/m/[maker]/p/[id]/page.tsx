@@ -8,7 +8,9 @@
  * Surface B: still inside the maker's world (D15b) — for makers with a
  * store-config fixture the fixture's theme vars are applied at this page's
  * root so the same semantic utilities paint the maker's palette. The
- * NARRATE_SHRINK dock keeps the world's film "playing" bottom-right.
+ * page declares the NARRATE_SHRINK stage via useHeroStage; the persistent
+ * film itself lives in HeroPlayer (root layout) and docks bottom-right
+ * still playing, having never remounted since the feed (P4).
  *
  * Client page pattern: React 19 `use(params)` unwraps the Next 16 params
  * Promise so cart state lives in the same file.
@@ -18,6 +20,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { use, useState } from "react";
 import { Film } from "@/components/chrome/Film";
+import { useHeroStage } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import {
   expectKeys,
@@ -25,13 +28,13 @@ import {
   getMaker,
   getProduct,
   questions,
-  reviewsForProduct,
   type MockMaker,
   type MockProduct,
   type MockQA,
   type MockReview,
 } from "@/lib/mock/db";
 import { useKolSession } from "@/lib/mock/session";
+import { useKolStore } from "@/lib/mock/store";
 import { customStore } from "@/lib/store-config/fixtures/custom";
 import { senaStore } from "@/lib/store-config/fixtures/sena";
 import { themeStyle } from "@/lib/theme/apply-theme";
@@ -43,8 +46,15 @@ export default function ProductPage({
   params: Promise<{ maker: string; id: string }>;
 }) {
   const { maker: makerSlug, id } = use(params);
+  // Reviews come from the mutable store, so a review written in /me/reviews
+  // lands here. Everything else on this page still reads the immutable seed.
+  const store = useKolStore();
   const maker = getMaker(makerSlug);
   const product = getProduct(id);
+  // NARRATE_SHRINK: the same film that grew on the feed moves to the corner
+  // and starts narrating this piece. HeroPlayer owns the element; this only
+  // declares the stage. Kept above the notFound guard so hooks stay ordered.
+  useHeroStage("narrate", maker?.slug ?? null, product?.title ?? null);
   if (!maker || !product || product.makerSlug !== maker.slug) notFound();
 
   // Maker-world theming (D15b): fixture worlds carry their palette onto the
@@ -58,7 +68,7 @@ export default function ProductPage({
         : null;
 
   const productQuestions = questions.filter((q) => q.productId === product.id);
-  const productReviews = reviewsForProduct(product.id);
+  const productReviews = store.reviewsFor(product.id);
 
   return (
     <div
@@ -221,15 +231,8 @@ export default function ProductPage({
         )}
       </Section>
 
-      {/* ---- NARRATE_SHRINK dock: the world's film, still playing ---- */}
-      <div className="fixed bottom-4 right-4 z-40 hidden w-80 rounded-md shadow-raised md:block">
-        <Film
-          variant={maker.filmClass}
-          aspect="wide"
-          craft="Still playing · narrating this piece"
-          title={maker.name}
-        />
-      </div>
+      {/* NARRATE_SHRINK dock is rendered by HeroPlayer (root layout) — the
+          film is one element across feed → world → product, never remounted. */}
     </div>
   );
 }
@@ -422,6 +425,11 @@ function ReviewCard({ review, product }: { review: MockReview; product: MockProd
             {review.buyer}
             {review.variation ? <> · {review.variation}</> : null} · {review.when}
           </p>
+          {review.customization ? (
+            <p className="mt-1 text-caption text-muted">
+              Made differently for them: <b>{review.customization}</b>
+            </p>
+          ) : null}
           {review.makerResponse ? (
             <div className="mt-[var(--space-2)] rounded-md bg-accent/10 p-[var(--space-2)]">
               <p className="text-caption uppercase tracking-[0.08em] text-muted">

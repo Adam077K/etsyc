@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { SmartImage } from "@/components/media/SmartImage";
 import { TapToHear } from "@/components/media/TapToHear";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
@@ -25,7 +26,7 @@ import {
  * featured-single. Prices in mono tabular figures; hover lifts on the card
  * shadow; inventory truth as a quiet chip.
  */
-export function ProductShowcaseBlock({ block, data, state = "success", isPreview }: BlockProps<"product-showcase">) {
+export function ProductShowcaseBlock({ block, data, state = "success", isPreview, linkBase }: BlockProps<"product-showcase">) {
   const products = block.bindings.productIds
     .map((id) => productById(data, id))
     .filter((p): p is Product => p !== undefined);
@@ -92,13 +93,13 @@ export function ProductShowcaseBlock({ block, data, state = "success", isPreview
         {header}
         <div className="grid gap-[var(--space-6)] md:grid-cols-[3fr_2fr] md:items-end">
           <Reveal>
-            <ProductCard product={featured} data={data} oversized voiceoverIds={block.bindings.voiceoverIds} />
+            <ProductCard product={featured} data={data} oversized voiceoverIds={block.bindings.voiceoverIds} linkBase={linkBase} />
           </Reveal>
           {rest.length > 0 ? (
             <div className="grid gap-[var(--space-3)]">
               {rest.map((product, i) => (
                 <Reveal key={product.id} delayMs={STAGGER_MS * (i + 1)}>
-                  <ProductCard product={product} data={data} voiceoverIds={block.bindings.voiceoverIds} />
+                  <ProductCard product={product} data={data} voiceoverIds={block.bindings.voiceoverIds} linkBase={linkBase} />
                 </Reveal>
               ))}
             </div>
@@ -115,7 +116,7 @@ export function ProductShowcaseBlock({ block, data, state = "success", isPreview
         <div className="columns-1 gap-[var(--space-3)] sm:columns-2 lg:columns-3 [&>*]:mb-[var(--space-3)] [&>*]:break-inside-avoid">
           {products.map((product, i) => (
             <Reveal key={product.id} delayMs={STAGGER_MS * i}>
-              <ProductCard product={product} data={data} voiceoverIds={block.bindings.voiceoverIds} />
+              <ProductCard product={product} data={data} voiceoverIds={block.bindings.voiceoverIds} linkBase={linkBase} />
             </Reveal>
           ))}
         </div>
@@ -130,7 +131,7 @@ export function ProductShowcaseBlock({ block, data, state = "success", isPreview
       <ul className="-mx-[var(--space-2)] flex snap-x gap-[var(--space-3)] overflow-x-auto px-[var(--space-2)] pb-[var(--space-2)] md:-mx-[var(--space-6)] md:px-[var(--space-6)]">
         {products.map((product, i) => (
           <Reveal as="li" key={product.id} delayMs={STAGGER_MS * i} className="w-72 shrink-0 snap-start">
-            <ProductCard product={product} data={data} voiceoverIds={block.bindings.voiceoverIds} />
+            <ProductCard product={product} data={data} voiceoverIds={block.bindings.voiceoverIds} linkBase={linkBase} />
           </Reveal>
         ))}
       </ul>
@@ -143,18 +144,20 @@ function ProductCard({
   data,
   voiceoverIds = [],
   oversized = false,
+  linkBase,
 }: {
   product: Product;
   data: StoreData;
   voiceoverIds?: string[];
   oversized?: boolean;
+  linkBase?: string;
 }) {
   const image = imageById(data, product.mediaIds[0]);
   const voiceover = voiceoverIds
     .map((id) => voiceoverById(data, id))
     .find((vo) => vo?.elementRef.kind === "product" && vo.elementRef.id === product.id);
 
-  return (
+  const card = (
     <article className="group transition-transform duration-state ease-kol hover:-translate-y-0.5">
       <div className="overflow-hidden rounded-md transition-shadow duration-state ease-kol group-hover:shadow-card">
         {image ? (
@@ -180,5 +183,15 @@ function ProductCard({
         <TapToHear src={voiceover.src} label={voiceover.label} className="mt-2 px-3 py-1.5" />
       ) : null}
     </article>
+  );
+
+  // In a live world the card opens the product page (WORLD_BROWSE →
+  // PRODUCT_PAGE). In /preview there is no route to open, so it stays inert.
+  return linkBase ? (
+    <Link href={`${linkBase}/p/${product.id}`} className="block">
+      {card}
+    </Link>
+  ) : (
+    card
   );
 }

@@ -14,7 +14,8 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { getMaker, getProduct, reviews as dbReviews } from "@/lib/mock/db";
+import { getMaker, getProduct, type MockReview } from "@/lib/mock/db";
+import { useKolStore } from "@/lib/mock/store";
 
 interface DisplayReview {
   id: string;
@@ -26,6 +27,7 @@ interface DisplayReview {
   body: string;
   variation?: string;
   customization?: string;
+  hasPhoto: boolean;
   makerResponse?: string;
   when: string;
 }
@@ -38,12 +40,32 @@ const ACCURACY_FROM_SCORE: Record<number, string> = {
   1: "Not what I expected",
 };
 
-const ACCURACY_OPTIONS = [
-  "Better than described",
-  "Exactly as described",
-  "A little different",
-  "Not what I expected",
+/** Label ↔ score, so the picker writes the same axis the product page reads. */
+const ACCURACY_OPTIONS: { label: string; score: MockReview["expectationAccuracy"] }[] = [
+  { label: "Better than described", score: 5 },
+  { label: "Exactly as described", score: 5 },
+  { label: "A little different", score: 3 },
+  { label: "Not what I expected", score: 1 },
 ];
+
+function toDisplay(r: MockReview): DisplayReview {
+  const p = getProduct(r.productId);
+  const m = p ? getMaker(p.makerSlug) : undefined;
+  return {
+    id: r.id,
+    productTitle: p?.title ?? r.productId,
+    productHref: p ? `/m/${p.makerSlug}/p/${p.id}` : "/",
+    makerName: m?.name ?? "",
+    stars: r.stars,
+    accuracyLabel: ACCURACY_FROM_SCORE[r.expectationAccuracy] ?? "As described",
+    body: r.body,
+    variation: r.variation,
+    customization: r.customization,
+    hasPhoto: r.hasPhoto,
+    makerResponse: r.makerResponse,
+    when: r.when,
+  };
+}
 
 /* the delivered order item awaiting a review (order o-1041 in mock db) */
 const AWAITING = {
@@ -53,33 +75,14 @@ const AWAITING = {
   lockedVariation: "Ash glaze · pair (×2)",
 };
 
-function initialReviews(): DisplayReview[] {
-  // The mock db's reviews stand in as "yours" for this prototype.
-  return dbReviews.map((r) => {
-    const p = getProduct(r.productId);
-    const m = p ? getMaker(p.makerSlug) : undefined;
-    return {
-      id: r.id,
-      productTitle: p?.title ?? r.productId,
-      productHref: p ? `/m/${p.makerSlug}/p/${p.id}` : "/",
-      makerName: m?.name ?? "",
-      stars: r.stars,
-      accuracyLabel: ACCURACY_FROM_SCORE[r.expectationAccuracy] ?? "As described",
-      body: r.body,
-      variation: r.variation,
-      makerResponse: r.makerResponse,
-      when: r.when,
-    };
-  });
-}
-
 const star = (filled: boolean) => (filled ? "★" : "☆");
 
 export default function MyReviewsPage() {
-  const [myReviews, setMyReviews] = useState<DisplayReview[]>(initialReviews);
-  const [stars, setStars] = useState(0);
+  const store = useKolStore();
+  const [stars, setStars] = useState<0 | MockReview["stars"]>(0);
   const [accuracy, setAccuracy] = useState<string | null>(null);
   const [body, setBody] = useState("");
+  const [hasPhoto, setHasPhoto] = useState(false);
   const [customization, setCustomization] = useState("");
   const [confirmation, setConfirmation] = useState<string | null>(null);
 
@@ -87,27 +90,30 @@ export default function MyReviewsPage() {
   const maker = product ? getMaker(product.makerSlug) : undefined;
   const canPost = stars > 0 && body.trim().length > 0;
 
+  // The store's reviews stand in as "yours" for this prototype — reading them
+  // here (rather than a local copy) is what makes a submit show up everywhere.
+  const myReviews: DisplayReview[] = store.reviews.map(toDisplay);
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!canPost) return;
-    setMyReviews((rs) => [
-      {
-        id: `local-${Date.now()}`,
-        productTitle: product?.title ?? AWAITING.productId,
-        productHref: product ? `/m/${product.makerSlug}/p/${product.id}` : "/",
-        makerName: maker?.name ?? "",
-        stars,
-        accuracyLabel: accuracy ?? "Exactly as described",
-        body: body.trim(),
-        variation: AWAITING.lockedVariation,
-        customization: customization.trim() || undefined,
-        when: "just now",
-      },
-      ...rs,
-    ]);
+    if (stars === 0 || body.trim().length === 0) return;
+    const picked = ACCURACY_OPTIONS.find((o) => o.label === accuracy);
+    store.addReview({
+      productId: AWAITING.productId,
+      buyer: "You",
+      stars,
+      // `verified` is never passed — the store derives it from the order.
+      expectationAccuracy: picked?.score ?? 5,
+      body: body.trim(),
+      variation: AWAITING.lockedVariation, // locked from the order, never typed
+      ...(customization.trim() ? { customization: customization.trim() } : {}),
+      hasPhoto,
+      when: "just now",
+    });
     setStars(0);
     setAccuracy(null);
     setBody("");
+    setHasPhoto(false);
     setCustomization("");
     setConfirmation(
       `Posted — thank you. It's tied to order #${AWAITING.orderId} and now lives on the product page.`,
@@ -149,7 +155,7 @@ export default function MyReviewsPage() {
             <div>
               <p className="text-caption uppercase text-muted">Your rating</p>
               <div className="mt-1 flex items-center gap-1" role="radiogroup" aria-label="Star rating">
-                {[1, 2, 3, 4, 5].map((n) => (
+                {([1, 2, 3, 4, 5] as MockReview["stars"][]).map((n) => (
                   <button
                     key={n}
                     type="button"
@@ -181,17 +187,17 @@ export default function MyReviewsPage() {
               <div className="mt-2 flex flex-wrap gap-2">
                 {ACCURACY_OPTIONS.map((opt) => (
                   <button
-                    key={opt}
+                    key={opt.label}
                     type="button"
-                    aria-pressed={accuracy === opt}
-                    onClick={() => setAccuracy(opt)}
+                    aria-pressed={accuracy === opt.label}
+                    onClick={() => setAccuracy(opt.label)}
                     className={`rounded-pill border px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
-                      accuracy === opt
+                      accuracy === opt.label
                         ? "border-accent bg-accent/10 text-ink"
                         : "border-line bg-surface text-muted hover:text-ink"
                     }`}
                   >
-                    {opt}
+                    {opt.label}
                   </button>
                 ))}
               </div>
@@ -208,18 +214,24 @@ export default function MyReviewsPage() {
               </div>
             </div>
 
-            {/* customization context */}
+            {/* customization context (B6+) — optional, buyer-authored */}
             <div>
-              <label htmlFor="customization" className="text-caption uppercase text-muted">
-                Customization on your piece (optional)
+              <label
+                htmlFor="review-customization"
+                className="text-caption uppercase text-muted"
+              >
+                Anything made differently for you?
               </label>
               <input
-                id="customization"
+                id="review-customization"
                 value={customization}
                 onChange={(e) => setCustomization(e.target.value)}
-                placeholder="e.g. matched pair from the same firing — so readers know yours was made-to-request"
-                className="mt-1 w-full rounded-sm border border-line bg-surface px-3 py-2 text-body text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+                placeholder="e.g. sized up, matched to a set, custom glaze depth"
+                className="mt-1 w-full rounded-sm border border-line bg-surface px-3 py-2 text-body text-ink placeholder:text-muted"
               />
+              <p className="mt-1 text-caption text-muted">
+                Optional. Helps the next buyer read your rating in context.
+              </p>
             </div>
 
             {/* your words */}
@@ -240,15 +252,28 @@ export default function MyReviewsPage() {
             <div>
               <p className="text-caption uppercase text-muted">Photos or video</p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
+                {/* dropzone stays decorative — it only records that media rode along */}
                 <button
                   type="button"
-                  className="rounded-pill border border-dashed border-line bg-surface px-4 py-1.5 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink"
+                  aria-pressed={hasPhoto}
+                  onClick={() => setHasPhoto((v) => !v)}
+                  className={`rounded-pill border border-dashed px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
+                    hasPhoto
+                      ? "border-accent bg-accent/10 text-ink"
+                      : "border-line bg-surface text-muted hover:text-ink"
+                  }`}
                 >
-                  ＋ Add photo
+                  {hasPhoto ? "✓ Photo attached" : "＋ Add photo"}
                 </button>
                 <button
                   type="button"
-                  className="rounded-pill border border-dashed border-line bg-surface px-4 py-1.5 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink"
+                  aria-pressed={hasPhoto}
+                  onClick={() => setHasPhoto(true)}
+                  className={`rounded-pill border border-dashed px-4 py-1.5 text-caption transition-colors duration-state ease-kol ${
+                    hasPhoto
+                      ? "border-accent bg-accent/10 text-ink"
+                      : "border-line bg-surface text-muted hover:text-ink"
+                  }`}
                 >
                   ＋ Add video
                 </button>
@@ -316,12 +341,15 @@ export default function MyReviewsPage() {
                 <span className="rounded-pill border border-line bg-surface px-3 py-1 text-caption text-muted">
                   Matched expectation · <b className="text-ink">{r.accuracyLabel}</b>
                 </span>
+                {r.customization && (
+                  <span className="rounded-pill border border-line bg-surface px-3 py-1 text-caption text-muted">
+                    Made for you: <b className="text-ink">{r.customization}</b>
+                  </span>
+                )}
               </div>
 
-              {r.customization && (
-                <p className="mt-2 text-caption text-muted">
-                  Customization: {r.customization}
-                </p>
+              {r.hasPhoto && (
+                <p className="mt-2 text-caption text-muted">Your photo is attached</p>
               )}
 
               <p className="mt-3 max-w-measure text-body text-ink">{r.body}</p>

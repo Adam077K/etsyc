@@ -20,6 +20,7 @@ import {
 } from "@/lib/mock/db";
 import { useKolSession, type KolSession } from "@/lib/mock/session";
 import { Film } from "@/components/chrome/Film";
+import { useHeroPlayer } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 
 const SPAN: Record<FeedSize, string> = {
@@ -56,6 +57,9 @@ function SignalChip({ children }: { children: React.ReactNode }) {
 
 export default function ForYouPage() {
   const session = useKolSession();
+  // Same handoff as Discover: a tap grows the persistent film (B2), it does
+  // not jump straight to the world.
+  const { setHero } = useHeroPlayer();
 
   const followedNames = session.follows
     .map((slug) => getMaker(slug)?.name)
@@ -75,7 +79,15 @@ export default function ForYouPage() {
     if (!maker) return [];
     return [
       <Reveal key={item.id} delayMs={(i % 4) * STAGGER_MS} className={SPAN[item.size]}>
-        <Link href={`/m/${maker.slug}`} className="group block">
+        <Link
+          href={`/m/${maker.slug}`}
+          onClick={(e) => {
+            e.preventDefault();
+            setHero({ stage: "grown", makerSlug: maker.slug });
+          }}
+          aria-label={`Play — ${item.title}`}
+          className="group block"
+        >
           <Film
             variant={maker.filmClass}
             aspect={item.aspect}

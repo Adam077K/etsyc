@@ -140,6 +140,12 @@ export const forYouReasons: Record<string, string> = {
 
 export interface MockProduct {
   id: string;
+  /**
+   * The same product's id inside the store-config fixture. Worlds render
+   * from the fixture, so links they emit carry THIS id; the product page
+   * resolves either. One product, two id spaces, reconciled in getProduct.
+   */
+  configId?: string;
   makerSlug: string;
   title: string;
   priceMinor: number;
@@ -167,6 +173,7 @@ export const expectKeys = EXPECT_KEYS;
 export const products: MockProduct[] = [
   {
     id: "shibori-throw",
+    configId: "p_shibori_throw",
     makerSlug: "noor",
     title: "Shibori throw — deep indigo",
     priceMinor: 24500,
@@ -199,6 +206,7 @@ export const products: MockProduct[] = [
   },
   {
     id: "ridge-tumbler",
+    configId: "p_ridge_tumbler",
     makerSlug: "sena",
     title: "Ridge tumbler — ash glaze",
     priceMinor: 6800,
@@ -231,6 +239,7 @@ export const products: MockProduct[] = [
   },
   {
     id: "ash-bowl",
+    configId: "p_ash_bowl",
     makerSlug: "sena",
     title: "Ash bowl — wide",
     priceMinor: 12400,
@@ -292,7 +301,7 @@ export const products: MockProduct[] = [
 ];
 
 export function getProduct(id: string): MockProduct | undefined {
-  return products.find((p) => p.id === id);
+  return products.find((p) => p.id === id || p.configId === id);
 }
 export function productsByMaker(slug: string): MockProduct[] {
   return products.filter((p) => p.makerSlug === slug);
@@ -314,6 +323,8 @@ export interface MockReview {
   expectationAccuracy: 1 | 2 | 3 | 4 | 5;
   body: string;
   variation?: string;
+  /** B6+ customization context — what the buyer had made differently */
+  customization?: string;
   hasPhoto: boolean;
   makerResponse?: string;
   when: string;

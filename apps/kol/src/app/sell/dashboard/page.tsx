@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { formatPrice, getProduct, orders, productsByMaker } from "@/lib/mock/db";
+import {
+  formatPrice,
+  getProduct,
+  productsByMaker,
+  sellerBlocks,
+  type MockOrder,
+} from "@/lib/mock/db";
+import { SELLER_SLUG, useSellerDraft } from "@/lib/mock/seller-state";
+import { useKolStore } from "@/lib/mock/store";
 
 /**
  * S7 — Maker dashboard (/sell/dashboard). KOL chrome (seller tools).
@@ -30,19 +37,32 @@ function stageToStatus(stage: number): OrderStatus {
   return "accepted";
 }
 
+/** and back — the only stages this control is allowed to write */
+const STATUS_STAGE: Record<OrderStatus, MockOrder["stage"]> = {
+  accepted: 0,
+  "in-production": 2,
+  finishing: 3,
+  shipped: 4,
+};
+
 export default function SellDashboardPage() {
+  const { orders, advanceOrder } = useKolStore();
   const senaOrders = orders.filter((o) => o.makerSlug === "sena");
   const senaProducts = productsByMaker("sena");
 
-  const [statuses, setStatuses] = useState<Record<string, OrderStatus>>(() =>
-    Object.fromEntries(senaOrders.map((o) => [o.id, stageToStatus(o.stage)])),
-  );
+  // store status reads the same draft the editor writes and the gate checks
+  const draft = useSellerDraft();
+  const pendingBlocks = sellerBlocks.filter((b) => !draft.isApproved(b.id)).length;
+  const publishedDate = draft.publishedAt
+    ? new Date(draft.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    : null;
 
   const setStatus = (id: string, value: string) => {
     // whitelist only — anything else is dropped, never stored
     const match = STATUS_OPTIONS.find((s) => s === value);
     if (!match) return;
-    setStatuses((s) => ({ ...s, [id]: match }));
+    // real mutation: the buyer's order page reads the same store
+    advanceOrder(id, STATUS_STAGE[match]);
   };
 
   return (
@@ -83,26 +103,37 @@ export default function SellDashboardPage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex items-center gap-[var(--space-2)]">
                 <span className="rounded-pill border border-line bg-surface px-3 py-1 text-caption uppercase tracking-[0.04em] text-muted">
-                  • Draft — not public yet
+                  {draft.published
+                    ? `✓ Live${publishedDate ? ` since ${publishedDate}` : ""}`
+                    : "• Draft — not public yet"}
                 </span>
                 <h2 className="font-display text-h3">Store status</h2>
               </span>
               <Link
-                href="/sell/publish"
+                href={draft.published ? `/m/${SELLER_SLUG}` : "/sell/publish"}
                 className="rounded-pill px-4 py-1.5 text-body text-muted transition-colors duration-state ease-kol hover:bg-ink/5 hover:text-ink"
               >
-                Open the publish gate →
+                {draft.published ? "View your world →" : "Open the publish gate →"}
               </Link>
             </div>
             <p className="mt-[var(--space-2)] max-w-measure text-body">
-              Your store is private. Two blocks still need your sign-off before the publish gate
-              opens — nothing goes live until you press the button yourself.
+              {draft.published
+                ? "Your world is public. Anything you change stays a draft until you publish again — nothing goes live behind your back."
+                : pendingBlocks > 0
+                  ? `Your store is private. ${pendingBlocks} ${pendingBlocks === 1 ? "block" : "blocks"} still ${pendingBlocks === 1 ? "needs" : "need"} your sign-off before the publish gate opens — nothing goes live until you press the button yourself.`
+                  : "Your store is private. Every block is signed off, so the publish gate is open — nothing goes live until you press the button yourself."}
             </p>
             <div className="mt-[var(--space-2)] border-t border-line">
               <div className="flex items-center justify-between py-[var(--space-2)]">
                 <span className="flex items-center gap-[var(--space-2)]">
-                  <span className="rounded-pill border border-line bg-surface px-2.5 py-0.5 text-caption text-muted">•</span>
-                  <span>2 blocks awaiting your approval</span>
+                  <span className="rounded-pill border border-line bg-surface px-2.5 py-0.5 text-caption text-muted">
+                    {pendingBlocks > 0 ? "•" : "✓"}
+                  </span>
+                  <span>
+                    {pendingBlocks > 0
+                      ? `${pendingBlocks} ${pendingBlocks === 1 ? "block awaits" : "blocks await"} your approval`
+                      : "All blocks approved by you"}
+                  </span>
                 </span>
                 <Link href="/sell/publish" className="text-caption uppercase tracking-[0.04em] text-accent">
                   Review blocks →
@@ -129,7 +160,7 @@ export default function SellDashboardPage() {
 
             <div className="mt-[var(--space-2)] border-t border-line">
               {senaOrders.map((o) => {
-                const status = statuses[o.id] ?? stageToStatus(o.stage);
+                const status = stageToStatus(o.stage);
                 const firstItem = o.items[0];
                 return (
                   <div

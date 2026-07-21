@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Film } from "@/components/chrome/Film";
 import { blockRegistry } from "@/components/blocks/registry";
 import { sellerBlocks, type SellerBlockRow } from "@/lib/mock/db";
+import { SELLER_SLUG, WORLD_INK, useSellerDraft } from "@/lib/mock/seller-state";
+import { contrastRatio, isHexColor } from "@/lib/theme/contrast";
 
 /**
  * S4 — Co-edit (/sell/edit). KOL chrome (seller tools). Three panes:
@@ -14,31 +16,11 @@ import { sellerBlocks, type SellerBlockRow } from "@/lib/mock/db";
  * and load-bearing: < 4.5:1 blocks publish. Editing anything removes
  * the block from approved_sections and re-runs the critic — surfaced
  * here as the inline "re-review needed" marker. She stays the author.
+ *
+ * Every mutation here writes the SHARED store override, not local state:
+ * the order and the theme she lands on are what /m/sena renders and what
+ * /sell/publish gates. That loop is the product.
  */
-
-/* ---- deterministic WCAG contrast math (gate ① is arithmetic) ---- */
-function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-  const n = Number.parseInt(full, 16);
-  if (Number.isNaN(n) || full.length !== 6) return [0, 0, 0];
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-function luminance(hex: string): number {
-  const [r, g, b] = hexToRgb(hex);
-  const lin = (v: number) => {
-    const s = v / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  };
-  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-}
-function contrastRatio(a: string, b: string): number {
-  const la = luminance(a);
-  const lb = luminance(b);
-  const hi = Math.max(la, lb);
-  const lo = Math.min(la, lb);
-  return (hi + 0.05) / (lo + 0.05);
-}
 
 const VARIANTS = ["Full-bleed", "Text-left", "Quote-lead", "Two-column"] as const;
 const FONT_PAIRINGS = [
@@ -52,74 +34,71 @@ const RADII = ["sharp", "soft", "round"] as const;
 const DENSITIES = ["airy", "standard", "dense"] as const;
 
 const SENA_SWATCHES = ["#EFE7D8", "#E6DCC7", "#2C2620", "#8F5A3A", "#737A63"] as const;
-const WORLD_INK = "#2C2620";
+const ACCENT_SWATCHES = ["#8F5A3A", "#B0663C", "#737A63", "#2C2620", "#C8582F"] as const;
 
 export default function SellEditPage() {
   // the 11 constrained primitives, straight from the D4 registry seam
   const blockTypes = useMemo(() => Object.keys(blockRegistry), []);
 
-  const [order, setOrder] = useState<string[]>(() => sellerBlocks.map((b) => b.id));
+  const draft = useSellerDraft();
   const [selectedId, setSelectedId] = useState<string>(sellerBlocks[0]?.id ?? "b1");
-  /** ids edited this session → cleared from approved_sections, critic re-runs */
-  const [dirty, setDirty] = useState<Record<string, boolean>>({});
 
-  // inspector state (D15: any hex — not capped to the curated palettes)
-  const [groundHex, setGroundHex] = useState("#EFE7D8");
+  // variant + density stay per-session inspector controls (they aren't part
+  // of the published StoreOverride yet) — but editing them still dirties the
+  // block, because approval never survives an edit.
   const [variant, setVariant] = useState<string>("Text-left");
-  const [pairing, setPairing] = useState<string>("warm-serif");
-  const [motion, setMotion] = useState<string>("fluid");
-  const [radius, setRadius] = useState<string>("soft");
   const [density, setDensity] = useState<string>("standard");
 
   const blocks = useMemo(
     () =>
-      order
+      draft.order
         .map((id) => sellerBlocks.find((b) => b.id === id))
         .filter((b): b is SellerBlockRow => Boolean(b)),
-    [order],
+    [draft.order],
   );
   const selected = blocks.find((b) => b.id === selectedId) ?? blocks[0];
 
-  const ratio = contrastRatio(WORLD_INK, groundHex);
+  const groundHex = draft.theme.ground;
+  const accentHex = draft.theme.accent;
+  const ratio = contrastRatio(WORLD_INK, isHexColor(groundHex) ? groundHex : "#EFE7D8");
   const aaPass = ratio >= 4.5;
 
   /** any inspector edit clears the selected block's approval */
   const touch = () => {
-    if (selected) setDirty((d) => ({ ...d, [selected.id]: true }));
+    if (selected) draft.touch(selected.id);
+  };
+
+  /** theme edits are world-wide, so they dirty the block she's looking at */
+  const setTheme = (patch: Parameters<typeof draft.setTheme>[0]) => {
+    draft.setTheme(patch);
+    touch();
   };
 
   const move = (id: string, dir: -1 | 1) => {
-    setOrder((prev) => {
-      const i = prev.indexOf(id);
-      const j = i + dir;
-      if (i < 0 || j < 0 || j >= prev.length) return prev;
-      const next = [...prev];
-      const a = next[i];
-      const b = next[j];
-      if (a === undefined || b === undefined) return prev;
-      next[i] = b;
-      next[j] = a;
-      return next;
-    });
+    const prev = draft.order;
+    const i = prev.indexOf(id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= prev.length) return;
+    const next = [...prev];
+    const a = next[i];
+    const b = next[j];
+    if (a === undefined || b === undefined) return;
+    next[i] = b;
+    next[j] = a;
+    draft.setOrder(next);
   };
 
   const statusChip = (b: SellerBlockRow) => {
-    if (dirty[b.id])
+    if (draft.isDirty(b.id))
       return (
         <span className="rounded-pill border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-caption uppercase tracking-[0.04em] text-accent">
           ↻ re-review needed
         </span>
       );
-    if (b.approval === "approved")
+    if (draft.isApproved(b.id))
       return (
         <span className="rounded-pill bg-accent-2/15 px-2.5 py-0.5 text-caption uppercase tracking-[0.04em] text-accent-2">
           ✓ approved
-        </span>
-      );
-    if (b.approval === "edited")
-      return (
-        <span className="rounded-pill border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-caption uppercase tracking-[0.04em] text-accent">
-          ↻ edited — re-review
         </span>
       );
     return (
@@ -154,8 +133,14 @@ export default function SellEditPage() {
         </div>
         <div className="flex flex-wrap items-center gap-[var(--space-2)]">
           <span className="rounded-pill border border-line bg-surface px-3 py-1 text-caption uppercase tracking-[0.04em] text-muted">
-            • Draft · autosaved 12s ago
+            {draft.published ? "• Published · edits save as draft" : "• Draft · saved as you go"}
           </span>
+          <Link
+            href={`/m/${SELLER_SLUG}`}
+            className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-5 py-2 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground"
+          >
+            Preview your world →
+          </Link>
           <Link
             href="/sell/voice"
             className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-5 py-2 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground"
@@ -216,7 +201,10 @@ export default function SellEditPage() {
 
           <div
             className="overflow-hidden rounded-md border border-line shadow-card"
-            style={{ background: groundHex, color: WORLD_INK }}
+            style={{
+              background: isHexColor(groundHex) ? groundHex : "#EFE7D8",
+              color: WORLD_INK,
+            }}
           >
             {blocks.map((b, i) => {
               const isSelected = selected?.id === b.id;
@@ -291,7 +279,13 @@ export default function SellEditPage() {
                     ) : b.type === "contact-cta" ? (
                       <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line p-[var(--space-3)]">
                         <p className="font-display text-h3">Follow the kiln, or just say hello.</p>
-                        <span className="rounded-pill bg-ink px-5 py-2 text-caption uppercase tracking-[0.04em] text-ground">
+                        <span
+                          className="rounded-pill px-5 py-2 text-caption uppercase tracking-[0.04em]"
+                          style={{
+                            background: isHexColor(accentHex) ? accentHex : "#8F5A3A",
+                            color: "#FFFFFF",
+                          }}
+                        >
                           {b.label}
                         </span>
                       </div>
@@ -316,8 +310,11 @@ export default function SellEditPage() {
             })}
           </div>
           <p className="mt-[var(--space-2)] text-center text-caption text-muted">
-            This is exactly what a buyer sees. Editing any block clears its ✓ and sends it back
-            through the critic.
+            This is exactly what a buyer sees —{" "}
+            <Link href={`/m/${SELLER_SLUG}`} className="underline underline-offset-2 hover:text-ink">
+              open your world
+            </Link>{" "}
+            to check. Editing any block clears its ✓ and sends it back through the critic.
           </p>
         </section>
 
@@ -328,14 +325,14 @@ export default function SellEditPage() {
               <p className="text-caption uppercase tracking-[0.04em] text-accent">
                 Inspector · {selected?.type ?? "—"}
               </p>
-              {selected && dirty[selected.id] ? (
+              {selected && draft.isDirty(selected.id) ? (
                 <span className="rounded-pill border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-caption uppercase tracking-[0.04em] text-accent">
                   ↻ re-review
                 </span>
               ) : null}
             </div>
             <p className="mt-[var(--space-1)] text-caption text-muted">
-              {selected && dirty[selected.id]
+              {selected && draft.isDirty(selected.id)
                 ? "You edited this block. It left approved_sections the moment you touched it — the auto-critic re-runs before publish."
                 : "Change anything here — the moment you do, this block leaves approved_sections and the critic re-runs. You stay the author."}
             </p>
@@ -408,7 +405,7 @@ export default function SellEditPage() {
 
             <div className="mt-[var(--space-2)]">
               <div className="flex items-baseline justify-between">
-                <span className="text-body">Palette</span>
+                <span className="text-body">Ground</span>
                 <span className="text-caption text-muted">tap a swatch to apply</span>
               </div>
               <div className="mt-[var(--space-1)] flex flex-wrap gap-[var(--space-1)]">
@@ -418,10 +415,7 @@ export default function SellEditPage() {
                     type="button"
                     title={hex}
                     aria-label={`Set ground to ${hex}`}
-                    onClick={() => {
-                      setGroundHex(hex);
-                      touch();
-                    }}
+                    onClick={() => setTheme({ ground: hex })}
                     className={`h-7 w-7 rounded-sm border ${
                       groundHex.toUpperCase() === hex ? "border-accent" : "border-line"
                     }`}
@@ -434,21 +428,55 @@ export default function SellEditPage() {
                 <span className="flex items-center gap-[var(--space-1)]">
                   <input
                     type="color"
-                    value={groundHex.length === 7 ? groundHex : "#EFE7D8"}
-                    onChange={(e) => {
-                      setGroundHex(e.target.value.toUpperCase());
-                      touch();
-                    }}
+                    value={isHexColor(groundHex) ? groundHex : "#EFE7D8"}
+                    onChange={(e) => setTheme({ ground: e.target.value.toUpperCase() })}
                     aria-label="Pick any ground colour"
                     className="h-7 w-9 cursor-pointer rounded-sm border border-line bg-transparent"
                   />
                   <input
                     value={groundHex}
-                    onChange={(e) => {
-                      setGroundHex(e.target.value.toUpperCase());
-                      touch();
-                    }}
+                    onChange={(e) => setTheme({ ground: e.target.value.toUpperCase() })}
                     aria-label="Ground hex value"
+                    className="w-24 rounded-sm border border-line bg-ground px-2 py-1 font-mono text-caption text-ink"
+                  />
+                </span>
+              </label>
+            </div>
+
+            <div className="mt-[var(--space-3)]">
+              <div className="flex items-baseline justify-between">
+                <span className="text-body">Accent</span>
+                <span className="text-caption text-muted">buttons, links, waveform</span>
+              </div>
+              <div className="mt-[var(--space-1)] flex flex-wrap gap-[var(--space-1)]">
+                {ACCENT_SWATCHES.map((hex) => (
+                  <button
+                    key={hex}
+                    type="button"
+                    title={hex}
+                    aria-label={`Set accent to ${hex}`}
+                    onClick={() => setTheme({ accent: hex })}
+                    className={`h-7 w-7 rounded-sm border ${
+                      accentHex.toUpperCase() === hex ? "border-accent" : "border-line"
+                    }`}
+                    style={{ background: hex }}
+                  />
+                ))}
+              </div>
+              <label className="mt-[var(--space-2)] flex items-center justify-between gap-[var(--space-2)]">
+                <span className="text-body">Accent · any hex</span>
+                <span className="flex items-center gap-[var(--space-1)]">
+                  <input
+                    type="color"
+                    value={isHexColor(accentHex) ? accentHex : "#8F5A3A"}
+                    onChange={(e) => setTheme({ accent: e.target.value.toUpperCase() })}
+                    aria-label="Pick any accent colour"
+                    className="h-7 w-9 cursor-pointer rounded-sm border border-line bg-transparent"
+                  />
+                  <input
+                    value={accentHex}
+                    onChange={(e) => setTheme({ accent: e.target.value.toUpperCase() })}
+                    aria-label="Accent hex value"
                     className="w-24 rounded-sm border border-line bg-ground px-2 py-1 font-mono text-caption text-ink"
                   />
                 </span>
@@ -483,11 +511,8 @@ export default function SellEditPage() {
               <label className="flex items-center justify-between gap-2">
                 <span className="text-body">Font pairing</span>
                 <select
-                  value={pairing}
-                  onChange={(e) => {
-                    setPairing(e.target.value);
-                    touch();
-                  }}
+                  value={draft.theme.pairing}
+                  onChange={(e) => setTheme({ pairing: e.target.value })}
                   className="rounded-sm border border-line bg-ground px-3 py-1.5 text-caption text-ink"
                 >
                   {FONT_PAIRINGS.map((f) => (
@@ -498,11 +523,8 @@ export default function SellEditPage() {
               <label className="flex items-center justify-between gap-2">
                 <span className="text-body">Motion preset</span>
                 <select
-                  value={motion}
-                  onChange={(e) => {
-                    setMotion(e.target.value);
-                    touch();
-                  }}
+                  value={draft.theme.motion}
+                  onChange={(e) => setTheme({ motion: e.target.value })}
                   className="rounded-sm border border-line bg-ground px-3 py-1.5 text-caption text-ink"
                 >
                   {MOTION_PRESETS.map((m) => (
@@ -517,12 +539,9 @@ export default function SellEditPage() {
                     <button
                       key={r}
                       type="button"
-                      aria-pressed={radius === r}
-                      onClick={() => {
-                        setRadius(r);
-                        touch();
-                      }}
-                      className={chip(radius === r)}
+                      aria-pressed={draft.theme.radius === r}
+                      onClick={() => setTheme({ radius: r })}
+                      className={chip(draft.theme.radius === r)}
                     >
                       {r}
                     </button>

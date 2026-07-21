@@ -20,6 +20,7 @@ import {
   type MockProduct,
 } from "@/lib/mock/db";
 import { Film } from "@/components/chrome/Film";
+import { useHeroPlayer } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 
 /* ------------------------------------------------------------------ */
@@ -108,6 +109,9 @@ function FilterGroup({ label, children }: { label: string; children: React.React
 const SUGGESTED_SLUGS = ["noor", "sena", "mira"] as const;
 
 export default function SearchPage() {
+  // A result's film enters GROWN like any other tile; the "Enter world" link
+  // and the piece rail still navigate.
+  const { setHero } = useHeroPlayer();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null); // craft name
   const [material, setMaterial] = useState<string | null>(null); // keyword
@@ -303,7 +307,15 @@ export default function SearchPage() {
                       key={maker.slug}
                       className="overflow-hidden rounded-md border border-line bg-surface shadow-card"
                     >
-                      <Link href={`/m/${maker.slug}`} className="group block">
+                      <Link
+                        href={`/m/${maker.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setHero({ stage: "grown", makerSlug: maker.slug });
+                        }}
+                        aria-label={`Play — ${maker.name}`}
+                        className="group block"
+                      >
                         <Film
                           variant={maker.filmClass}
                           aspect="wide"

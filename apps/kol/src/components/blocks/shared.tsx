@@ -32,6 +32,13 @@ export interface BlockProps<K extends BlockType = BlockType> {
   data: StoreData;
   state?: BlockState;
   isPreview?: boolean;
+  /**
+   * Route prefix for this world (e.g. `/m/sena`). When present, products
+   * become links into the product page — the WORLD_BROWSE → PRODUCT_PAGE
+   * step of the buyer state machine. Absent in /preview, where the block
+   * matrix renders standalone and must not navigate.
+   */
+  linkBase?: string;
 }
 
 // ---------------------------------------------------------------------------

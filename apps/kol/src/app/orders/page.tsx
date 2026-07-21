@@ -1,16 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { Film } from "@/components/chrome/Film";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
-import { formatPrice, getMaker, getProduct, orders, orderStages } from "@/lib/mock/db";
+import { formatPrice, getMaker, getProduct, orderStages } from "@/lib/mock/db";
+import { useKolStore } from "@/lib/mock/store";
 
 /**
  * Orders index (B9) — the order stays a relationship, not a receipt.
  * Stage is a plain chip; no progress-bar theatre, no urgency chrome.
+ *
+ * Reads the mutable store, so an order placed at checkout shows up here
+ * at the top of the list rather than only the seeded ones.
  */
 
-export const metadata = { title: "Orders — KOL" };
-
 export default function OrdersPage() {
+  const { orders } = useKolStore();
+
   return (
     <main className="mx-auto w-full max-w-[840px] px-[var(--space-3)] pb-[var(--space-16)] pt-[var(--space-8)]">
       <header>

@@ -1,22 +1,28 @@
+"use client";
+
+import { Suspense, use } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Film } from "@/components/chrome/Film";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import {
   formatPrice,
   getMaker,
-  getOrder,
   getProduct,
   orderStages,
   type MockMaker,
   type MockOrder,
 } from "@/lib/mock/db";
+import { useKolStore } from "@/lib/mock/store";
 
 /**
  * Order detail (B9) + thank-you moment (B8).
  * Hard AC (D10): the thank-you film + message are maker-authored or neutral —
  * never AI-fabricated. No synthetic voice or face, ever.
  * With ?placed=1 the thank-you leads the page; otherwise it closes it, quietly.
+ *
+ * Client component: the order comes from the mutable store, so a freshly
+ * placed order resolves here and the maker's stage changes show through.
  */
 
 function ThankYouMoment({
@@ -28,15 +34,19 @@ function ThankYouMoment({
   order: MockOrder;
   prominent: boolean;
 }) {
+  // D10: with no maker-authored note yet we say so plainly. We never
+  // synthesise a quote to fill the space.
+  const hasNote = Boolean(order.thankYou);
+
   return (
     <Reveal as="section" className={prominent ? "" : "mt-[var(--space-8)]"}>
       {prominent ? (
         <p className="mb-[var(--space-2)] text-caption uppercase tracking-[0.08em] text-muted">
-          Order placed · a note from {maker.name}
+          {hasNote ? `Order placed · a note from ${maker.name}` : "Order placed"}
         </p>
       ) : (
         <p className="mb-[var(--space-2)] text-caption uppercase tracking-[0.04em] text-muted">
-          The note {maker.name} sent with this order
+          {hasNote ? `The note ${maker.name} sent with this order` : "Your thank-you note"}
         </p>
       )}
       <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-card">
@@ -44,8 +54,8 @@ function ThankYouMoment({
           variant={maker.filmClass}
           aspect="wide"
           rounded={false}
-          craft={`A note from ${maker.name}`}
-          title={prominent ? "Thank you" : undefined}
+          craft={hasNote ? `A note from ${maker.name}` : `${maker.name} at the wheel`}
+          title={prominent && hasNote ? "Thank you" : undefined}
         />
         <div className="p-[var(--space-3)]">
           {order.thankYou ? (
@@ -55,7 +65,8 @@ function ThankYouMoment({
             </p>
           ) : (
             <p className="max-w-measure text-body text-muted">
-              Your order is confirmed. {maker.name} will post updates here as the work moves.
+              {maker.name} will record your thank-you when this ships. Until then, this is her
+              bench — and updates land here as the work moves.
             </p>
           )}
           <p className="mt-[var(--space-2)] text-caption text-muted">
@@ -67,22 +78,38 @@ function ThankYouMoment({
   );
 }
 
-export default async function OrderDetailPage({
-  params,
-  searchParams,
-}: {
-  // Next 16: both route params and search params arrive as Promises.
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ placed?: string }>;
-}) {
-  const { id } = await params;
-  const { placed } = await searchParams;
-  const justPlaced = placed === "1";
+function OrderNotFound() {
+  return (
+    <main className="mx-auto w-full max-w-[840px] px-[var(--space-3)] pb-[var(--space-16)] pt-[var(--space-8)]">
+      <div className="rounded-lg border border-dashed border-line bg-surface/60 px-[var(--space-6)] py-[var(--space-8)]">
+        <p className="text-caption uppercase tracking-[0.04em] text-muted">Order not found</p>
+        <p className="mt-[var(--space-1)] font-display text-h3 text-ink">
+          We couldn&rsquo;t find that order.
+        </p>
+        <p className="mt-2 max-w-measure text-body text-muted">
+          The link may be old, or the order belongs to another account. Your orders are all in
+          one place.
+        </p>
+        <Link
+          href="/orders"
+          className="mt-[var(--space-3)] inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-6 py-2.5 text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
+        >
+          Back to your orders
+        </Link>
+      </div>
+    </main>
+  );
+}
+
+function OrderDetail({ id }: { id: string }) {
+  const { getOrder } = useKolStore();
+  const searchParams = useSearchParams();
+  const justPlaced = searchParams.get("placed") === "1";
 
   const order = getOrder(id);
-  if (!order) notFound();
-  const maker = getMaker(order.makerSlug);
-  if (!maker) notFound();
+  const maker = order ? getMaker(order.makerSlug) : undefined;
+  // notFound() is server-only, so an unknown id renders its own quiet state.
+  if (!order || !maker) return <OrderNotFound />;
 
   const itemsSummary = order.items
     .map((item) => {
@@ -219,5 +246,16 @@ export default async function OrderDetailPage({
       {/* quiet thank-you at the end on ordinary visits */}
       {justPlaced ? null : <ThankYouMoment maker={maker} order={order} prominent={false} />}
     </main>
+  );
+}
+
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // Next 16: route params arrive as a Promise, unwrapped with `use`.
+  const { id } = use(params);
+  // useSearchParams needs a Suspense boundary in the App Router.
+  return (
+    <Suspense fallback={null}>
+      <OrderDetail id={id} />
+    </Suspense>
   );
 }

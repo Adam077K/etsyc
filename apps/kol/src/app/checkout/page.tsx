@@ -12,6 +12,7 @@ import {
   type MockProduct,
 } from "@/lib/mock/db";
 import { useKolSession, type CartLine } from "@/lib/mock/session";
+import { cartTotalMinor, useKolStore } from "@/lib/mock/store";
 
 /**
  * Checkout (B7) — quiet, narrow column: where it goes, how you pay.
@@ -48,26 +49,44 @@ const inputClass =
 
 function CheckoutInner() {
   const { cart, clearCart } = useKolSession();
+  const { createOrder } = useKolStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [placing, setPlacing] = useState(false);
 
   const placedParam = searchParams.get("placed");
   const groups = groupByMaker(cart);
-  const total = groups.reduce(
-    (sum, g) => sum + g.lines.reduce((s, { line, product }) => s + product.priceMinor * line.qty, 0),
-    0,
-  );
+  // Totals are derived from the catalogue, never from anything typed here.
+  const total = groups.reduce((sum, g) => sum + cartTotalMinor(g.lines.map((l) => l.line)), 0);
 
   const handlePlaceOrder = () => {
-    // Mock-only shortcut: the seeded order o-1041 stands in for the created
-    // one. In the live build `create_order` re-reads every price server-side
-    // at charge time — the client never sets price, buyer_id, or status
-    // (B7 hard AC), and the charge carries a Stripe idempotency key so a
-    // refresh or double-tap can never bill twice.
+    if (placing || groups.length === 0) return;
+    // One order per maker — a parcel per workshop, exactly as grouped above.
+    // In the live build `create_order` re-reads every price server-side at
+    // charge time — the client never sets price, buyer_id, or status (B7 hard
+    // AC), and the charge carries a Stripe idempotency key so a refresh or
+    // double-tap can never bill twice.
     setPlacing(true);
+    const ids: string[] = [];
+    // One order per maker — a cart can span several workshops.
+    // (Order ids are collision-safe in the store; the live build issues
+    // them server-side from create_order.)
+    groups.forEach((g) => {
+      ids.push(
+        createOrder({
+          makerSlug: g.maker.slug,
+          items: g.lines.map(({ line }) => ({
+            productId: line.productId,
+            qty: line.qty,
+            ...(line.customization ? { customization: line.customization } : {}),
+          })),
+          totalMinor: cartTotalMinor(g.lines.map((l) => l.line)),
+        }),
+      );
+    });
+    const first = ids[0];
     clearCart();
-    router.push("/orders/o-1041?placed=1");
+    router.push(first ? `/orders/${first}?placed=1` : "/orders");
   };
 
   if (groups.length === 0 && !placedParam && !placing) {
@@ -110,10 +129,7 @@ function CheckoutInner() {
           <div className="mt-[var(--space-2)] flex flex-col divide-y divide-line">
             {groups.map((g) => {
               const count = g.lines.reduce((n, { line }) => n + line.qty, 0);
-              const sub = g.lines.reduce(
-                (s, { line, product }) => s + product.priceMinor * line.qty,
-                0,
-              );
+              const sub = cartTotalMinor(g.lines.map((l) => l.line));
               return (
                 <div key={g.maker.slug} className="flex items-center justify-between gap-3 py-2">
                   <span className="text-body text-ink">

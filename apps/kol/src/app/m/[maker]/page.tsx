@@ -6,9 +6,11 @@
  * Surface split (D15): the slim strip up top is KOL chrome (app palette,
  * never themed); everything below it belongs to the maker. For makers with
  * a store-config fixture the world renders through renderStore, which
- * applies the world's own theme at its root — this page never re-themes it.
- * Makers without a fixture (hasWorld: false) get an honest composed page
- * from db data, not a fake world.
+ * applies the world's own theme at its root. The only thing layered on top
+ * is the MAKER'S OWN draft override from /sell/edit — her block order and
+ * her tuned hexes, merged onto that same world root. KOL never re-themes a
+ * world; she does. Makers without a fixture (hasWorld: false) get an honest
+ * composed page from db data, not a fake world.
  *
  * Client page pattern: React 19 `use(params)` unwraps the Next 16 params
  * Promise so session state (follow) and the unfold entrance live in one file.
@@ -16,20 +18,34 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  use,
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Film } from "@/components/chrome/Film";
+import { useHeroStage } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import {
   formatPrice,
   getMaker,
   productsByMaker,
+  sellerBlocks,
   type MockMaker,
   type MockProduct,
 } from "@/lib/mock/db";
 import { useKolSession } from "@/lib/mock/session";
+import { SELLER_SLUG } from "@/lib/mock/seller-state";
+import { useKolStore, type StoreOverride } from "@/lib/mock/store";
 import { renderStore } from "@/lib/renderer/render-store";
 import { customStore } from "@/lib/store-config/fixtures/custom";
 import { senaStore } from "@/lib/store-config/fixtures/sena";
+import type { StoreBlock, StoreConfig } from "@/lib/store-config/types";
+import { isHexColor, readableInk } from "@/lib/theme/contrast";
 import { cn } from "@/lib/utils";
 
 export default function MakerWorldPage({
@@ -39,21 +55,131 @@ export default function MakerWorldPage({
 }) {
   const { maker: slug } = use(params);
   const maker = getMaker(slug);
-  if (!maker) notFound();
+  // WORLD_OPEN: the persistent film docks top-right and keeps playing — it is
+  // the same node that grew on the feed, so the clock never resets. Declared
+  // before the notFound guard so the hook order stays unconditional.
+  useHeroStage("world", maker?.slug ?? null);
 
-  const worldConfig =
-    maker.slug === "sena" ? senaStore : maker.slug === "noor" ? customStore : null;
+  // The maker's own draft state — what she arranged in /sell/edit is what a
+  // buyer opens here. Hooks stay above the notFound guard.
+  const override = useKolStore().overrideFor(slug);
+  const baseConfig = slug === "sena" ? senaStore : slug === "noor" ? customStore : null;
+  const worldConfig = useMemo(
+    () =>
+      baseConfig && slug === SELLER_SLUG && override.order
+        ? reorderBlocks(baseConfig, override.order)
+        : baseConfig,
+    [baseConfig, slug, override.order],
+  );
+
+  if (!maker) notFound();
 
   return (
     <div className="min-h-screen">
-      <MakerStrip maker={maker} showWorldLinks={maker.hasWorld} />
+      <MakerStrip
+        maker={maker}
+        showWorldLinks={maker.hasWorld}
+        override={maker.hasWorld ? override : null}
+      />
       {maker.hasWorld && worldConfig ? (
-        <WorldUnfold>{renderStore(worldConfig, { state: "success" })}</WorldUnfold>
+        <WorldUnfold>
+          <ThemedWorld config={worldConfig} theme={override.theme} linkBase={`/m/${slug}`} />
+        </WorldUnfold>
       ) : (
         <StubWorld maker={maker} />
       )}
     </div>
   );
+}
+
+/* ------------------------------------------------------------------ */
+/* Seller → buyer seam: her draft override, applied at render time.    */
+/* The imported fixtures are cloned, never mutated — with no override  */
+/* the pristine world renders exactly as before.                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The editor exposes six of the world's blocks and orders them by id; the
+ * config carries every block, including ones it doesn't expose (atmosphere,
+ * trust-badge). What travels is her PERMUTATION — how far she moved things
+ * from where the editor handed them to her — applied to the config's own
+ * controlled blocks, in the slots they already occupy. An untouched order is
+ * therefore a no-op: nothing she never moved gets displaced, and blocks the
+ * editor doesn't expose keep their place.
+ */
+function reorderBlocks(config: StoreConfig, order: string[]): StoreConfig {
+  const defaultOrder = sellerBlocks.map((b) => b.id);
+  const permutation = order
+    .map((id) => defaultOrder.indexOf(id))
+    .filter((index) => index >= 0);
+  // an order that doesn't describe the seed exactly is not a permutation we
+  // can trust — leave her world exactly as the fixture renders it
+  if (permutation.length !== defaultOrder.length) return config;
+
+  const sellerTypes = new Set(sellerBlocks.map((b) => b.type));
+  const base = [...config.blocks].sort((a, b) => a.order - b.order);
+
+  const slots: number[] = [];
+  const controlled: StoreBlock[] = [];
+  base.forEach((block, i) => {
+    if (sellerTypes.has(block.type)) {
+      slots.push(i);
+      controlled.push(block);
+    }
+  });
+  if (controlled.length !== permutation.length) return config;
+
+  const next = [...base];
+  slots.forEach((slot, i) => {
+    const from = permutation[i];
+    const block = from === undefined ? undefined : controlled[from];
+    if (block) next[slot] = block;
+  });
+
+  return { ...config, blocks: next.map((block, i) => ({ ...block, order: i })) };
+}
+
+/** Her tuned hexes, as the same CSS variables every block already consumes. */
+function themeVarsFrom(theme: StoreOverride["theme"]): CSSProperties | null {
+  if (!theme) return null;
+  const vars: Record<string, string> = {};
+
+  if (theme.ground && isHexColor(theme.ground)) {
+    vars["--ground"] = theme.ground;
+    vars["--scrim"] =
+      `linear-gradient(to top, color-mix(in oklab, ${theme.ground} 45%, black) 0%, transparent 55%)`;
+  }
+  if (theme.accent && isHexColor(theme.accent)) {
+    vars["--accent"] = theme.accent;
+    vars["--accent-2"] = theme.accent;
+    vars["--accent-3"] = theme.accent;
+    vars["--accent-cta"] = theme.accent;
+    // her hue, but the type on it stays readable — AA is arithmetic, not taste
+    vars["--accent-ink"] = readableInk(theme.accent);
+  }
+
+  return Object.keys(vars).length > 0 ? (vars as CSSProperties) : null;
+}
+
+/**
+ * renderStore themes the world at its own root, so the override is merged
+ * onto that exact element — never onto a wrapper the KOL chrome shares.
+ */
+function ThemedWorld({
+  config,
+  theme,
+  linkBase,
+}: {
+  config: StoreConfig;
+  theme: StoreOverride["theme"];
+  linkBase: string;
+}) {
+  // linkBase makes the world's products clickable — the WORLD_BROWSE →
+  // PRODUCT_PAGE step. /preview omits it so the block matrix stays inert.
+  const world = renderStore(config, { state: "success", linkBase });
+  const vars = themeVarsFrom(theme);
+  if (!vars || !isValidElement<{ style?: CSSProperties }>(world)) return world;
+  return cloneElement(world, { style: { ...(world.props.style ?? {}), ...vars } });
 }
 
 /* ------------------------------------------------------------------ */
@@ -63,9 +189,11 @@ export default function MakerWorldPage({
 function MakerStrip({
   maker,
   showWorldLinks,
+  override,
 }: {
   maker: MockMaker;
   showWorldLinks: boolean;
+  override: StoreOverride | null;
 }) {
   const session = useKolSession();
   const following = session.isFollowing(maker.slug);
@@ -78,6 +206,7 @@ function MakerStrip({
           <p className="text-caption uppercase tracking-[0.08em] text-muted">
             {maker.craft} · {maker.location}
           </p>
+          {override ? <PublishChip override={override} /> : null}
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {showWorldLinks ? (
@@ -103,6 +232,33 @@ function MakerStrip({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Honest publish state, in KOL chrome — never inside the themed world.
+ * Draft until she presses publish at /sell/publish; nothing pretends
+ * otherwise.
+ */
+function PublishChip({ override }: { override: StoreOverride }) {
+  if (!override.published) {
+    return (
+      <span className="rounded-pill border border-line bg-ground px-3 py-1 text-caption uppercase tracking-[0.04em] text-muted">
+        • Draft — not yet published
+      </span>
+    );
+  }
+  const date = override.publishedAt
+    ? new Date(override.publishedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+  return (
+    <span className="rounded-pill border border-line bg-ground px-3 py-1 text-caption uppercase tracking-[0.04em] text-ink">
+      ✓ Published{date ? ` ${date}` : ""}
+    </span>
   );
 }
 

@@ -9,12 +9,58 @@
  * Cold start is designed, never blank.
  */
 
-import { use, useState } from "react";
+import { use, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { communityFor, getMaker, type MockPost } from "@/lib/mock/db";
 import { useKolSession } from "@/lib/mock/session";
+import { useKolStore } from "@/lib/mock/store";
 import { Film } from "@/components/chrome/Film";
+
+/** Single-level comment composer. There is no reply-to-a-reply — nesting is a
+ *  moderation-cost multiplier and the spec keeps discussion one level deep. */
+function CommentComposer({
+  postId,
+  makerName,
+  onSubmit,
+}: {
+  postId: string;
+  makerName: string;
+  onSubmit: (body: string) => void;
+}) {
+  const [draft, setDraft] = useState("");
+  const inputId = `comment-${postId}`;
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    const body = draft.trim();
+    if (!body) return;
+    onSubmit(body);
+    setDraft("");
+  };
+
+  return (
+    <form onSubmit={submit} className="mt-2 flex items-center gap-2 border-l border-line pl-5">
+      <label htmlFor={inputId} className="sr-only">
+        Reply to this post
+      </label>
+      <input
+        id={inputId}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        placeholder={`Reply to ${makerName}'s room…`}
+        className="min-h-11 w-full rounded-sm border border-line bg-surface px-3 text-body text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+      />
+      <button
+        type="submit"
+        disabled={draft.trim().length === 0}
+        className="min-h-11 flex-none rounded-pill border border-line bg-surface px-4 text-caption uppercase tracking-[0.04em] text-ink transition-colors duration-state ease-kol hover:bg-ground disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Reply
+      </button>
+    </form>
+  );
+}
 
 function CommentRow({
   comment,
@@ -68,10 +114,82 @@ function CommentRow({
   );
 }
 
+/** Member post composer, gated on membership — joining reveals it at once. */
+function PostComposer({
+  member,
+  makerName,
+  onJoin,
+  onPost,
+}: {
+  member: boolean;
+  makerName: string;
+  onJoin: () => void;
+  onPost: (body: string) => void;
+}) {
+  const [draft, setDraft] = useState("");
+
+  if (!member) {
+    return (
+      <div className="rounded-md border border-dashed border-line bg-surface/60 p-5">
+        <p className="text-body text-ink">Join to post</p>
+        <p className="mt-1 max-w-measure text-caption text-muted">
+          Members can start threads here. Joining follows {makerName}
+          {" — that’s the same action, not a second one."}
+        </p>
+        <button
+          type="button"
+          onClick={onJoin}
+          className="mt-4 min-h-11 rounded-pill bg-accent-cta px-6 text-body font-bold text-accent-ink transition-transform duration-tap ease-kol active:scale-[0.98]"
+        >
+          Join to post
+        </button>
+      </div>
+    );
+  }
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    const body = draft.trim();
+    if (!body) return;
+    onPost(body);
+    setDraft("");
+  };
+
+  return (
+    <form
+      onSubmit={submit}
+      className="rounded-md border border-line bg-surface p-5 shadow-subtle"
+    >
+      <label htmlFor="community-post" className="text-caption uppercase tracking-[0.04em] text-muted">
+        Start a thread
+      </label>
+      <textarea
+        id="community-post"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        placeholder={`Something you noticed, asked, or want other members of ${makerName}'s room to know…`}
+        className="mt-2 min-h-24 w-full rounded-sm border border-line bg-surface px-3 py-2 text-body text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+      />
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          disabled={draft.trim().length === 0}
+          className="min-h-11 rounded-pill bg-accent-cta px-6 text-body font-bold text-accent-ink transition-transform duration-tap ease-kol active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Post
+        </button>
+        <span className="text-caption text-muted">
+          Posts sit under {makerName}&rsquo;s updates — replies stay one level deep.
+        </span>
+      </div>
+    </form>
+  );
+}
+
 export default function CommunityPage({ params }: { params: Promise<{ maker: string }> }) {
   const { maker: slug } = use(params);
   const session = useKolSession();
-  const [hiddenKeys, setHiddenKeys] = useState<string[]>([]);
+  const store = useKolStore();
 
   const maker = getMaker(slug);
   if (!maker) notFound();
@@ -79,10 +197,15 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
   const community = communityFor(slug);
   const member = session.isFollowing(slug);
 
-  const hide = (key: string) => setHiddenKeys((k) => (k.includes(key) ? k : [...k, key]));
-  const unhide = (key: string) => setHiddenKeys((k) => k.filter((x) => x !== key));
+  // Hide-only moderation lives in the shared store, so a hide survives a reload.
+  const hide = (key: string) => {
+    if (!store.isHidden(key)) store.toggleHidden(key);
+  };
+  const unhide = (key: string) => {
+    if (store.isHidden(key)) store.toggleHidden(key);
+  };
   const isHidden = (key: string, dbHidden?: boolean) =>
-    Boolean(dbHidden) || hiddenKeys.includes(key);
+    Boolean(dbHidden) || store.isHidden(key);
 
   // no community entry — quiet, not an error
   if (!community) {
@@ -107,15 +230,21 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
     );
   }
 
-  const makerPosts = community.posts
+  // Posts come from the mutable store — the seed lives in db.ts, everything
+  // written in this room since then lives here.
+  const posts = store.postsFor(slug);
+  const makerPosts = posts
     .filter((p) => p.isMaker)
     .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)));
-  const memberPosts = community.posts.filter((p) => !p.isMaker);
-  const coldStart = community.posts.length === 0;
+  const memberPosts = posts.filter((p) => !p.isMaker);
+  const coldStart = posts.length === 0;
+
+  const submitPost = (body: string) => store.addPost(slug, body);
+  const submitComment = (postId: string, body: string) => store.addComment(slug, postId, body);
 
   const memberNames = Array.from(
     new Set(
-      community.posts.flatMap((p: MockPost) => [
+      posts.flatMap((p: MockPost) => [
         ...(p.isMaker ? [] : [p.author]),
         ...p.comments.filter((c) => c.author !== maker.name).map((c) => c.author),
       ]),
@@ -192,6 +321,15 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
               ))}
             </div>
           </div>
+          {/* the cold start is meant to be resolvable — posting clears it */}
+          <div className="mt-4 text-left">
+            <PostComposer
+              member={member}
+              makerName={maker.name}
+              onJoin={() => session.toggleFollow(slug)}
+              onPost={submitPost}
+            />
+          </div>
         </section>
       ) : (
         <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
@@ -241,7 +379,7 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
                     {post.comments.length > 0 ? (
                       <div className="mt-4 flex flex-col gap-1">
                         {post.comments.map((c, i) => {
-                          const key = `${post.id}-${i}`;
+                          const key = `${slug}-${post.id}-${i}`;
                           return (
                             <CommentRow
                               key={key}
@@ -256,6 +394,13 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
                         })}
                       </div>
                     ) : null}
+                    {member ? (
+                      <CommentComposer
+                        postId={post.id}
+                        makerName={maker.name}
+                        onSubmit={(body) => submitComment(post.id, body)}
+                      />
+                    ) : null}
                   </article>
                 ))
               )}
@@ -268,6 +413,12 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
                   member ↔ member
                 </span>
               </div>
+              <PostComposer
+                member={member}
+                makerName={maker.name}
+                onJoin={() => session.toggleFollow(slug)}
+                onPost={submitPost}
+              />
               {memberPosts.length === 0 ? (
                 <p className="rounded-md border border-dashed border-line bg-surface/60 p-4 text-body text-muted">
                   No member threads yet — the maker&rsquo;s updates carry the room for now.
@@ -287,7 +438,7 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
                     {post.comments.length > 0 ? (
                       <div className="mt-3 flex flex-col gap-1">
                         {post.comments.map((c, i) => {
-                          const key = `${post.id}-${i}`;
+                          const key = `${slug}-${post.id}-${i}`;
                           return (
                             <CommentRow
                               key={key}
@@ -301,6 +452,13 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
                           );
                         })}
                       </div>
+                    ) : null}
+                    {member ? (
+                      <CommentComposer
+                        postId={post.id}
+                        makerName={maker.name}
+                        onSubmit={(body) => submitComment(post.id, body)}
+                      />
                     ) : null}
                   </article>
                 ))

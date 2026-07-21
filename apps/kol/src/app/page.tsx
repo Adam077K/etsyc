@@ -4,12 +4,13 @@
  * Discover feed (B1) — route `/`, KOL chrome (D15a).
  * Mirrors docs/10-page-mockups/discover.html: editorial opener, mixed-size
  * magazine feed (never a uniform grid), full-bleed statement block, voice
- * card, in-situ skeleton, reshuffle. Tap → GROWN (B2) overlay; second tap →
- * WORLD_OPEN at /m/[slug].
+ * card, in-situ skeleton, reshuffle. Tap → GROWN (B2); the film itself lives
+ * in HeroPlayer (root layout) so it survives the hop to WORLD_OPEN at
+ * /m/[slug] without ever remounting (P4).
  */
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   feedItems,
   getMaker,
@@ -18,6 +19,7 @@ import {
   type MockMaker,
 } from "@/lib/mock/db";
 import { Film } from "@/components/chrome/Film";
+import { useHeroPlayer } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import { Skeleton } from "@/components/states/Skeleton";
 
@@ -92,16 +94,17 @@ function FeedTile({
   item: FeedItem;
   maker: MockMaker;
   index: number;
-  onGrow: (item: FeedItem) => void;
+  onGrow: (makerSlug: string) => void;
 }) {
   return (
     <Reveal delayMs={(index % 4) * STAGGER_MS} className={SPAN[item.size]}>
       <Link
         href={`/m/${maker.slug}`}
         onClick={(e) => {
-          // GROWN (B2): first tap expands in place; the overlay link opens the world.
+          // GROWN (B2): first tap grows the persistent film in place — the
+          // world is the *second* step, opened from the player itself.
           e.preventDefault();
-          onGrow(item);
+          onGrow(maker.slug);
         }}
         className="group block"
         aria-label={`Play — ${item.title}`}
@@ -145,25 +148,18 @@ function StatementBlock() {
 
 export default function DiscoverPage() {
   const [seed, setSeed] = useState(0);
-  const [grown, setGrown] = useState<FeedItem | null>(null);
+  // The feed declares no stage of its own: the film is entered by tapping a
+  // tile and left via the player's own dismiss, so nothing here can reset it.
+  const { setHero } = useHeroPlayer();
 
   const items = useMemo(() => seededShuffle(feedItems, seed), [seed]);
-  const grownMaker = grown ? getMaker(grown.makerSlug) : undefined;
 
-  // Esc returns from GROWN to the feed.
-  useEffect(() => {
-    if (!grown) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setGrown(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [grown]);
+  const grow = (makerSlug: string) => setHero({ stage: "grown", makerSlug });
 
   const tiles = items.flatMap((item, i) => {
     const maker = getMaker(item.makerSlug);
     if (!maker) return [];
-    return [<FeedTile key={item.id} item={item} maker={maker} index={i} onGrow={setGrown} />];
+    return [<FeedTile key={item.id} item={item} maker={maker} index={i} onGrow={grow} />];
   });
 
   return (
@@ -220,44 +216,8 @@ export default function DiscoverPage() {
           Different people every visit · anti-repetition holds for 50 clips
         </p>
       </main>
-
-      {/* ============ GROWN (B2): tap → expand in place; tap again → world ============ */}
-      {grown && grownMaker ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={grown.title}
-          className="fixed inset-0 z-[60] grid place-items-center p-4 md:p-10"
-        >
-          <button
-            type="button"
-            aria-label="Back to the feed"
-            onClick={() => setGrown(null)}
-            className="absolute inset-0 cursor-zoom-out bg-ink/70 backdrop-blur-sm"
-          />
-          <div className="relative w-full max-w-4xl">
-            <Link
-              href={`/m/${grownMaker.slug}`}
-              className="block shadow-overlay transition-transform duration-enter ease-cinematic hover:scale-[1.005]"
-              aria-label={`Enter ${grownMaker.name}’s world`}
-            >
-              <Film
-                variant={grownMaker.filmClass}
-                aspect="wide"
-                craft={`${grownMaker.craft} · ${grownMaker.location}`}
-                title={grown.title}
-              >
-                <p className="mt-1 text-caption text-on-media/85">
-                  Playing · tap the film again to enter {grownMaker.name}’s world
-                </p>
-              </Film>
-            </Link>
-            <p className="mt-3 text-center text-caption text-on-media/80">
-              Esc or tap outside to return to the feed
-            </p>
-          </div>
-        </div>
-      ) : null}
+      {/* GROWN (B2) and everything after it is rendered by HeroPlayer, which
+          is mounted above the router so the film never restarts. */}
     </>
   );
 }

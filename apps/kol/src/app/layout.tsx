@@ -8,6 +8,8 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { KolSessionProvider } from "@/lib/mock/session";
+import { KolStoreProvider } from "@/lib/mock/store";
+import { HeroPlayerProvider } from "@/components/chrome/HeroPlayer";
 import { Nav } from "@/components/chrome/Nav";
 
 /**
@@ -55,8 +57,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <KolSessionProvider>
-          <Nav />
-          {children}
+          <KolStoreProvider>
+            {/* HeroPlayer lives ABOVE the router so the maker's film
+                survives every route change (P4: never unmounts, never pauses) */}
+            <HeroPlayerProvider>
+              <Nav />
+              {children}
+            </HeroPlayerProvider>
+          </KolStoreProvider>
         </KolSessionProvider>
       </body>
     </html>
