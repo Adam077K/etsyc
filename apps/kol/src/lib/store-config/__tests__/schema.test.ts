@@ -343,3 +343,114 @@ describe("custom-theme gate — kind:custom cannot leave draft uncritiqued (D9�
     expectGreen(config);
   });
 });
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function firstClip(config: StoreConfig) {
+  const clip = config.media.clips[0];
+  if (!clip) throw new Error("fixture needs a clip");
+  return clip;
+}
+
+function firstImage(config: StoreConfig) {
+  const image = config.media.images[0];
+  if (!image) throw new Error("fixture needs an image");
+  return image;
+}
+
+function firstVoiceover(config: StoreConfig) {
+  const vo = config.voiceovers[0];
+  if (!vo) throw new Error("fixture needs a voiceover");
+  return vo;
+}
+
+describe("asset URL allowlist — https:// or root-relative only (QA cycle-2 F1)", () => {
+  const maliciousUrls = [
+    "javascript:alert(1)",
+    "data:text/html,x",
+    "vbscript:x",
+    "//evil.com/x",
+  ] as const;
+
+  const urlFields: { key: string; set: (config: StoreConfig, value: string) => void }[] = [
+    { key: "media.clips.0.src", set: (c, v) => { firstClip(c).src = v; } },
+    { key: "media.clips.0.poster", set: (c, v) => { firstClip(c).poster = v; } },
+    { key: "media.clips.0.captionsSrc", set: (c, v) => { firstClip(c).captionsSrc = v; } },
+    { key: "media.images.0.src", set: (c, v) => { firstImage(c).src = v; } },
+    { key: "voiceovers.0.src", set: (c, v) => { firstVoiceover(c).src = v; } },
+  ];
+
+  for (const { key, set } of urlFields) {
+    for (const url of maliciousUrls) {
+      it(`rejects "${url}" at ${key}, naming the exact key`, () => {
+        const config = cloneSena();
+        set(config, url);
+        expectReject(config, new RegExp(`^${escapeRegExp(key)}: .*rejected`, "m"));
+      });
+    }
+  }
+
+  it("accepts https:// absolute URLs on all five fields (green)", () => {
+    const config = cloneSena();
+    for (const { set } of urlFields) set(config, "https://cdn.kol.example/media/a.mp4");
+    expectGreen(config);
+  });
+
+  it("keeps captionsSrc nullable (green)", () => {
+    const config = cloneSena();
+    firstClip(config).captionsSrc = null;
+    expectGreen(config);
+  });
+
+  it("still accepts root-relative fixture URLs (green — sena + custom unchanged)", () => {
+    expectGreen(cloneSena());
+    expectGreen(cloneCustom());
+  });
+});
+
+describe("font family charset — no CSS metacharacters (QA cycle-2 F2)", () => {
+  const injections = [
+    "x; } body{display:none} .a{",
+    "Arial'; background:url(//evil.com)",
+  ] as const;
+
+  function setFamily(
+    config: StoreConfig,
+    field: "displayFamily" | "textFamily",
+    value: string,
+  ): void {
+    if (config.theme.kind !== "custom") throw new Error("fixture must be custom");
+    config.theme.customPairing[field] = value;
+  }
+
+  for (const field of ["displayFamily", "textFamily"] as const) {
+    for (const payload of injections) {
+      it(`rejects CSS injection in ${field}, naming the field`, () => {
+        const config = cloneCustom();
+        setFamily(config, field, payload);
+        expectReject(
+          config,
+          new RegExp(
+            `^theme\\.customPairing\\.${field}: .*letters, digits, spaces, hyphens, or quotes`,
+            "m",
+          ),
+        );
+      });
+    }
+  }
+
+  it('accepts catalog families "Fraunces" and "General Sans" (green)', () => {
+    const config = cloneCustom();
+    setFamily(config, "displayFamily", "Fraunces");
+    setFamily(config, "textFamily", "General Sans");
+    expectGreen(config);
+  });
+
+  it("rejects a family name over 64 chars, naming the field", () => {
+    const config = cloneCustom();
+    setFamily(config, "displayFamily", "A".repeat(65));
+    expectReject(config, /^theme\.customPairing\.displayFamily: .*64 chars/m);
+  });
+});
