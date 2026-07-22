@@ -4,6 +4,23 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-22 — E5 hero-line ruling: a maker's NAME is identity, not her words (unblocks B3)
+
+**Context:** Gate 1 filed E5 — screen-specs §3.2 and world-unfold's binding AC both said an absent `statement` leaves the world with **no hero line at all**, while the shipped `hero-video` render (pre-dating Wave 3) puts `maker.displayName` in that slot at `--fs-display-hero`. Two independent reviewers had already cleared the code as in-scope and non-D10. So this was never a defect — it was a product decision nobody had made, and B3's completion bar cited the text that contradicts what ships.
+
+**Decision — the hero frame is never nameless; the name only changes tier.** Exactly one display-tier line per world in both cases. `statement` present → statement holds display tier (weight 400–500, `-0.01em`) and `maker.displayName` **leads the caption line directly beneath it**, with `showCraftLine` true or false. `statement` absent → `maker.displayName` holds display tier (weight 700, `-0.03em`, the shipped render, unchanged). The weight/tracking split is the load-bearing part: bold-and-tight reads as a **nameplate**, light-and-open reads as **speech**, so the name is never read as words the maker said.
+
+**Why the name is not a D10 fallback:** `maker.displayName` is **stored identity, not attributed speech**. D10 bans *fabricating words in a maker's voice*; naming the human is the product's promise, not a fabrication of it. The three §3.2 bans (generated line / promoted craft line / store name) stand unchanged — nothing is ever promoted into the display tier **as the maker's words**.
+
+**Why identity never yields to voice (the half nobody had ruled):** B3 is deep-linkable. A buyer landing cold — no feed, no `GROWN` pass at the name — would read *"Vessels blown in one breath"* and be unable to name the person whose world they are in. An **unattributed** statement is the weaker D10 posture, not the stronger one. Platform owns attribution; seller owns the words (D15: *"the platform owns time and space, the seller owns light and voice"* — a name is neither light nor voice).
+
+**Seed reality:** all 4 seeded makers authored statements (25–29 chars), so the absent path is unexercised by seed data. **Seeds are NOT changed** — the four worlds are the competition demo and a nameplate world is the strictly weaker impression. The path is exercised by fixture instead: unit tests already cover it, and the B3 eyes-on gate must toggle a `/preview` fixture's `statement` off and view both worlds.
+
+**Eyes-on gate (does not block dispatch, blocks merge):** the statement-present caption line is a **new visual change to a shipped surface** (`hero-video/index.tsx`), and Design-Lead's direction was code-read, never `/preview`'d. Both hero variants must be viewed at world scale under a real theme before B3 merges — crowding at the bottom-left inset and `--on-media`/`--scrim` contrast on the caption line are the two failure modes. Third such gate filed this wave.
+
+**Files changed:** `docs/06-design/KOL-wave3-screen-specs.md` §3.2 (rewritten), `docs/04-features/specs/world-unfold.md` (AC block + changelog), `docs/04-features/KOL-block-catalog.md` (hero-video props + Success state), `docs/06-design/KOL-wave3-design-direction.md` §display-budget table row.
+**Reversibility:** reversible (spec text + one caption-line render). **Owner:** cpo (`cpo-e5-heroline`). **Affects:** B3 (dispatch-blocking), B2 §2.2 (same two-tier read), B5 dock chrome, `hero-video.test.tsx` (one new assertion, one amended), QA-Lead's B3 completion bar.
+
 ## 2026-07-22 — Wave-3 Gate 1: two Irreversible migrations, and the "RLS gates rows, not values" class
 
 **Context:** Wave-3 T0a (W2-WIRE, FILM-LAYER, P3-EXT, SEED-W3) went through a 5-reviewer Full-tier panel. Three BLOCKed, six P1s. Two of the P1s were the same root cause the project has now hit twice.

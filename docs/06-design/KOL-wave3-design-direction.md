@@ -105,7 +105,7 @@ The design-system §1.1 scale is unchanged. What Wave 3 adds is **role assignmen
 |---|---|---|
 | **B1 feed** | 1 (the feed's own masthead line) | Masthead `--fs-h1`, weight 500. Card maker name `--fs-h3`. Card craft-line `--fs-caption`, uppercase, `0.08em`. **No card headline larger than `h3`** — the film is the headline. |
 | **B2 grown** | 1 (the maker's name) | Name `--fs-display`, weight 500, over `--scrim`. Craft-line `--fs-caption`. Nothing else. |
-| **B3 world open** | 1 (the maker's statement, per §2.1) | `--fs-display-hero`, weight 400–500 over film. This is the world's one hero statement. |
+| **B3 world open** | 1 (the maker's statement, per §2.1 — or her name when no statement is authored) | `--fs-display-hero` over film. Statement: weight 400–500, `-0.01em`. Name holding the tier instead: weight 700, `-0.03em`. Either way the budget is one line — see screen-specs §3.2. |
 | **B4 world browse** | per the seller's block composition | Governed by block catalog + §2.2. Platform adds nothing. |
 | **B5 narrate + product** | 1 (the product title) | Title `--fs-h1`, weight per pairing. Price `--font-mono`, tabular, `--fs-h3`. Dock carries **no type at all** except captions. |
 
