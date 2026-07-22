@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
 import { FeedMagazine } from "@/components/feed/FeedMagazine";
 import { GrowProvider, useGrow } from "@/components/grow/GrowProvider";
@@ -56,14 +57,28 @@ function GrowingMagazine({ result }: { result: FeedResult }) {
 }
 
 export function FeedGrowExperience({ result }: { result: FeedResult }) {
-  const handleOpenWorld = useCallback((handoff: GrowHandoff) => {
-    // GROWN → WORLD_OPEN is B3's edge (the unfold + the world route),
-    // and B3 is deliberately not in this tree yet — no world route
-    // exists to navigate to. The second tap keeps the grown column: a
-    // boundary no-op, never a broken navigation. The B3 integration
-    // replaces this handler; grep for GrowHandoff to find both ends.
-    void handoff;
-  }, []);
+  const router = useRouter();
+
+  // GROWN → WORLD_OPEN (the third seam): the second tap opens the maker's
+  // world at B3's /w/[handle] route. GrowSource carries storeId, not the
+  // handle — the handle rides the result set the card came from, so the
+  // composition resolves it here (the same place it mapped card →
+  // GrowSource on the way in). The root-layout Film Layer persists across
+  // the route change; the world's HeroStage re-claims the parked frame.
+  const handleByStoreId = useMemo(
+    () => new Map(result.cards.map((card) => [card.storeId, card.storeSlugOrId])),
+    [result.cards],
+  );
+  const handleOpenWorld = useCallback(
+    (handoff: GrowHandoff) => {
+      const handle = handleByStoreId.get(handoff.source.storeId);
+      // A grown card always came from this result set; a missing handle
+      // would mean a stale handoff — keep the grown column rather than
+      // navigate somewhere broken.
+      if (handle !== undefined) router.push(`/w/${handle}`);
+    },
+    [handleByStoreId, router],
+  );
   return (
     <GrowProvider onOpenWorld={handleOpenWorld}>
       <GrowingMagazine result={result} />
