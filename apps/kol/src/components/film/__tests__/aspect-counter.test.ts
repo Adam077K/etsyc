@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ASPECT_EPSILON,
+  FRAME_MEDIA_SELECTOR,
   counterFor,
   parseMatrixScale,
   startAspectCounter,
@@ -83,12 +84,23 @@ describe("counterFor — cover semantics under a non-uniform frame scale", () =>
 });
 
 describe("startAspectCounter — the sampling loop", () => {
+  // fixture classnames derive from the SOURCE selector — re-typing
+  // "kol-film-buffer" here made a renamed classname invisible: the counter
+  // no-opped against the real frame while this rig kept matching its own
+  // private copy
+  const [bufferClass, posterClass] = FRAME_MEDIA_SELECTOR.split(",").map((part) =>
+    part.trim().replace(/^\./, ""),
+  );
+  if (!bufferClass || !posterClass) {
+    throw new Error("FRAME_MEDIA_SELECTOR no longer lists the buffer + poster classes");
+  }
+
   function rig(frameTransform: () => string) {
     const frame = document.createElement("div");
     const bufferA = document.createElement("video");
-    bufferA.className = "kol-film-buffer";
+    bufferA.className = bufferClass!;
     const poster = document.createElement("img");
-    poster.className = "kol-film-poster";
+    poster.className = posterClass!;
     frame.append(bufferA, poster);
     document.body.append(frame);
     Object.defineProperty(frame, "offsetWidth", { value: 720 });
@@ -160,9 +172,10 @@ describe("startAspectCounter — the sampling loop", () => {
     stop();
   });
 
-  it("epsilon gate matches the FLIP wiring threshold", () => {
-    // the layer engages the counter at |sx/sy − 1| ≥ ASPECT_EPSILON —
-    // grow's 4:5 → 16:9 ratio is far past it, same-aspect edges are not
+  it("grow geometry clears ASPECT_EPSILON; uniform scale sits under it (arithmetic sanity only)", () => {
+    // arithmetic on the constants, nothing more — the layer-side wiring
+    // (that FilmLayer actually engages the counter at this threshold and
+    // disposes it) is pinned in film-layer.test.tsx, against the real frame
     expect(Math.abs(320 / 720 / (400 / 405) - 1)).toBeGreaterThan(ASPECT_EPSILON);
     expect(Math.abs(0.7 / 0.7 - 1)).toBeLessThan(ASPECT_EPSILON);
   });

@@ -26,8 +26,13 @@
  * cancellation of the scale component.
  */
 
-/** Media inside the frame that must never distort: A/B buffers + poster. */
-const FRAME_MEDIA_SELECTOR = ".kol-film-buffer, .kol-film-poster";
+/**
+ * Media inside the frame that must never distort: A/B buffers + poster.
+ * Exported so the test rig derives its fixture classnames from THIS string
+ * — a re-typed copy let a renamed classname no-op the counter (zero
+ * matches → noop) while the rig stayed green.
+ */
+export const FRAME_MEDIA_SELECTOR = ".kol-film-buffer, .kol-film-poster";
 
 /** Below this x/y scale-ratio delta the frame scale is effectively uniform. */
 export const ASPECT_EPSILON = 0.01;
