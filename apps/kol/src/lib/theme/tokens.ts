@@ -24,6 +24,7 @@ import type {
   MotionPreset,
   PaletteId,
   RadiusIdentity,
+  StrokeClass,
   ThemeMode,
 } from "@/lib/store-config/types";
 
@@ -173,14 +174,17 @@ export function getPaletteTokens(id: PaletteId, mode: ThemeMode): PaletteModeTok
 // ---------------------------------------------------------------------------
 
 /**
- * Stroke-contrast class of a pairing's display face (design-direction §2.1a,
- * R1). Optical mass is size × weight × STROKE CONTRAST, not a number: at the
- * same 700, a modulated serif (Fraunces) reads airy while a uniform-stroke
- * grotesk reads as a logotype stamped on the maker's face. The nameplate
- * register resolves from this class — the renderer reads the emitted
- * --nameplate-* custom properties and NEVER branches on a font name.
+ * Stroke class (design-direction §2.1a) — optical mass over film is a
+ * property of stroke CONTRAST, not of a numeric weight. `modulated` faces
+ * (real thick/thin variation — optical serifs) stay airy at display-hero/700;
+ * `uniform` faces (geometric / neo-grotesque, near-equal stems) at the same
+ * numbers read as a stamped logotype, so their nameplate drops a size role
+ * AND a weight step. The renderer reads the derived --nameplate-* vars and
+ * never branches on a font name. The type lives in store-config/types
+ * (custom pairings declare it at authoring time, v1.3 additive-optional);
+ * re-exported here as part of the token vocabulary.
  */
-export type StrokeClass = "modulated" | "uniform";
+export type { StrokeClass };
 
 export interface FontPairing {
   id: FontPairingId;
