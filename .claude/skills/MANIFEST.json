@@ -2,7 +2,7 @@
   "version": "3.0.0",
   "generated": "2026-05-25",
   "note": "Regenerated after Beamix \u2192 template scrub. 3 Beamix-only skills archived; 2 renamed (-beamix \u2192 -conventions).",
-  "totalSkills": 154,
+  "totalSkills": 155,
   "skills": [
     {
       "name": "agent-evaluation",
@@ -1017,6 +1017,21 @@
       "description": "This skill should be used when the user asks to \\\"test for XSS vulnerabilities\\\", \\\"perform cross-site scripting attacks\\\", \\\"identify HTML injection flaws\\\", \\\"exploit client-side injection...",
       "tags": [],
       "path": ".agent/skills/xss-html-injection/SKILL.md"
+    },
+    {
+      "name": "impeccable",
+      "description": "Award-winning frontend design director skillset (v4.0.1, pbakaus/impeccable). Out-of-distribution craft, anti-slop detectors, craft-floor, PRODUCT.md/DESIGN.md context, 23 commands (craft/shape/audit/critique/animate/bolder/polish/harden/live). Use for any UI/UX design, redesign, or polish task.",
+      "tags": [
+        "ui",
+        "design",
+        "frontend",
+        "motion",
+        "craft",
+        "anti-slop",
+        "design-system",
+        "user-invocable"
+      ],
+      "path": ".claude/skills/impeccable/SKILL.md"
     }
   ]
 }
