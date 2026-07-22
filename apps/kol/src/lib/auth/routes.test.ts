@@ -17,8 +17,9 @@ describe("classifyRoute", () => {
     ["/some-store-world", "public"],
     [SIGN_IN_PATH, "auth-entry"],
     [`${SIGN_IN_PATH}/anything`, "auth-entry"],
-    [BUYER_LANDING, "buyer"],
-    [`${BUYER_LANDING}/saved`, "buyer"],
+    // W3-B1a: /feed is the public front door — reclassified from "buyer".
+    [BUYER_LANDING, "public"],
+    [`${BUYER_LANDING}/saved`, "public"],
     [SELLER_LANDING, "seller"],
     [`${SELLER_LANDING}/orders`, "seller"],
     [ACCOUNT_PATH, "account"],
@@ -39,8 +40,9 @@ describe("classifyRoute", () => {
   it.each([
     ["/Sign-In", "auth-entry"],
     ["/SIGN-IN/anything", "auth-entry"],
-    ["/Feed", "buyer"],
-    ["/FEED/Saved", "buyer"],
+    // W3-B1a: public at any casing — /feed carries no auth gate to bypass.
+    ["/Feed", "public"],
+    ["/FEED/Saved", "public"],
     ["/Seller", "seller"],
     ["/SELLER/Orders", "seller"],
     ["/Account", "account"],
@@ -53,6 +55,47 @@ describe("classifyRoute", () => {
     expect(classifyRoute("/FeedBack")).toBe("public");
     expect(classifyRoute("/Accounting")).toBe("public");
     expect(classifyRoute("/Sellers-Market")).toBe("public");
+  });
+});
+
+// W3-B1a — /feed opens to anonymous visitors (dispatch packet §7 conflict 2).
+// These tests pin the POLICY, not just the classification: the front door is
+// public, the protected surfaces stay protected, sign-in still round-trips,
+// and neither open-redirect vector re-opens with the reclassification.
+describe("B1a: anonymous /feed policy", () => {
+  it("classes /feed (and subpaths, any casing) as public — no sign-in gate", () => {
+    expect(classifyRoute(BUYER_LANDING)).toBe("public");
+    expect(classifyRoute(`${BUYER_LANDING}/saved`)).toBe("public");
+    expect(classifyRoute("/Feed")).toBe("public");
+    expect(classifyRoute("/FEED")).toBe("public");
+  });
+
+  it("keeps /account and /seller protected — an anon request still redirects", () => {
+    // The middleware maps these classes to /sign-in?next=<pathname> when
+    // there is no user; the class is the policy input under test here.
+    expect(classifyRoute(ACCOUNT_PATH)).toBe("account");
+    expect(classifyRoute(`${ACCOUNT_PATH}/settings`)).toBe("account");
+    expect(classifyRoute(SELLER_LANDING)).toBe("seller");
+    expect(classifyRoute(`${SELLER_LANDING}/orders`)).toBe("seller");
+  });
+
+  it("a buyer signing in with no ?next still lands on /feed", () => {
+    expect(safeNextPath(null)).toBeNull(); // caller falls back to the landing
+    expect(landingPathFor("buyer")).toBe(BUYER_LANDING);
+  });
+
+  it("?next=/feed still round-trips through the redirect guard", () => {
+    expect(safeNextPath(BUYER_LANDING)).toBe(BUYER_LANDING);
+    expect(safeNextPath(`${BUYER_LANDING}?tab=new`)).toBe(
+      `${BUYER_LANDING}?tab=new`,
+    );
+  });
+
+  it("both QA-caught redirect vectors still fail closed after the change", () => {
+    expect(safeNextPath("/%09//evil.com")).toBeNull(); // control-char smuggle
+    expect(safeNextPath("/\t//evil.com")).toBeNull();
+    expect(safeNextPath("/..//evil.com")).toBeNull(); // dot-segment smuggle
+    expect(safeNextPath("/../..//evil.com")).toBeNull();
   });
 });
 

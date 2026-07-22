@@ -14,6 +14,12 @@ import { parseSameOriginPath } from "./schemas";
 
 export type UserRole = Database["public"]["Enums"]["user_role"];
 
+/**
+ * "buyer" is retained for future buyer-only surfaces (e.g. /orders) even
+ * though no route currently classifies as buyer: W3-B1a reclassified /feed
+ * as public (see classifyRoute). The middleware policy branch for it stays
+ * live so re-adding a buyer-only route is a one-line change here.
+ */
 export type RouteClass = "public" | "auth-entry" | "buyer" | "seller" | "account";
 
 export const SIGN_IN_PATH = "/sign-in";
@@ -39,7 +45,12 @@ export function classifyRoute(pathname: string): RouteClass {
   const path = pathname.toLowerCase();
   if (inPrefix(path, SIGN_IN_PATH)) return "auth-entry";
   if (inPrefix(path, SELLER_LANDING)) return "seller";
-  if (inPrefix(path, BUYER_LANDING)) return "buyer";
+  // W3-B1a (dispatch packet §7 conflict 2, CTO decision): /feed is PUBLIC.
+  // The marketplace front door cannot demand sign-up, and the engine is
+  // designed for `buyerId: null` cold start (Relationship term = 0).
+  // BUYER_LANDING still points at /feed — a signed-in buyer lands there —
+  // it just no longer classifies as a protected prefix. This RECLASSIFIES a
+  // route; it relaxes no validation (parseSameOriginPath is untouched).
   // Profile/settings (spec P2): requires a session but is role-neutral —
   // buyers AND sellers both own a profiles row.
   if (inPrefix(path, ACCOUNT_PATH)) return "account";
