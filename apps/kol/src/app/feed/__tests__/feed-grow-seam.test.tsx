@@ -23,8 +23,9 @@ const requestGrownSelection = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/grow/actions", () => ({ requestGrownSelection }));
 
 const refresh = vi.fn();
+const push = vi.fn();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh }),
+  useRouter: () => ({ refresh, push }),
 }));
 
 beforeEach(() => {
@@ -36,6 +37,7 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   requestGrownSelection.mockReset();
+  push.mockReset();
 });
 
 function makeCard(i: number): FeedCard {
@@ -93,6 +95,34 @@ describe("feed → grow seam — the tapped card reaches B2's machinery", () => 
     // the REAL rendered cards carry B2's selector (B2's own suite plants
     // its own attribute, so only this composition can see a severed join).
     expect(container.querySelectorAll(`[${FEED_CARD_ATTRIBUTE}]`)).toHaveLength(4);
+  });
+
+  it("grow → world seam: the SECOND tap opens the maker's world at /w/[handle]", async () => {
+    // The third seam: GrowProvider's onOpenWorld was a documented no-op
+    // until B3's /w/[handle] route existed. This walks the FULL journey —
+    // card tap → grown column → tap the film — and fails if the second
+    // tap ever stops reaching the world route with the tapped maker's
+    // handle again.
+    const { container } = render(
+      <FilmLayerProvider>
+        <FeedGrowExperience result={success(4)} />
+      </FilmLayerProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Watch Marta Ferreira/ }));
+    await waitFor(() => {
+      expect(container.querySelector("[data-grow-column]")).not.toBeNull();
+    });
+
+    // the second tap: on the FILM itself (GrownColumn's advance surface —
+    // any film-layer click outside a button advances a video-kind column)
+    const filmVideo = container.querySelector<HTMLElement>("[data-film-layer] video");
+    expect(filmVideo).not.toBeNull();
+    fireEvent.click(filmVideo!);
+
+    // the buyer lands in Marta's world — the handle from HER card
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith("/w/store-2");
   });
 
   it("card render sites DERIVE the parting attribute from B2's constant — never re-type it", async () => {
