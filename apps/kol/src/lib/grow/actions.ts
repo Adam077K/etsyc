@@ -3,29 +3,31 @@
 import { cookies } from "next/headers";
 import { z } from "zod";
 
+import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { createClient } from "@/lib/supabase/server";
-import {
-  ENGINE_RING_COOKIE,
-  getGrownSelection,
-  GROW_SESSION_COOKIE,
-} from "./select";
+import { getGrownSelection } from "./select";
 import type { GrownSelection } from "./types";
 
 /**
  * The grow surface's server boundary (B2). A tap on a feed card calls this
- * to resolve the engine's GROWN preset for the tapped clip's store. It
- * derives identity server-side — buyer from the Supabase session (null =
- * anonymous, Relationship term 0), session id from a first-party cookie
- * generated on first use — and owns the engine's signed ring cookie
- * writes, which a Server Action (unlike an RSC render) is allowed to make.
+ * to resolve the engine's GROWN preset for the tapped clip's store.
+ *
+ * Identity is the FEED's identity — one buyer, one session, one ring
+ * across the whole journey (DECISIONS.md canonical cookie names): buyer
+ * from the Supabase session (null = anonymous, Relationship term 0),
+ * session id read via `resolveFeedSessionId` off `kol_sid` — the proxy
+ * middleware is the SOLE minter; this action never sets it — and the
+ * signed `kol_ring` anti-repetition cookie, which a Server Action (unlike
+ * an RSC render) is allowed to persist. B1a's feed read documents exactly
+ * this split: "Ring persistence happens where the engine runs inside a
+ * Server Action (the B2+ journey states)."
  */
 
 const grownRequestSchema = z.object({
   storeId: z.string().min(1).max(128),
   tappedVideoId: z.string().min(1).max(128).nullable(),
 });
-
-const YEAR_SECONDS = 60 * 60 * 24 * 365;
 
 export async function requestGrownSelection(input: {
   storeId: string;
@@ -35,18 +37,7 @@ export async function requestGrownSelection(input: {
   if (!parsed.success) return { status: "error", grown: null, peers: [] };
 
   const jar = await cookies();
-
-  // engine session identity — first-party, works signed-out, never Math.random
-  let sessionId = jar.get(GROW_SESSION_COOKIE)?.value ?? "";
-  if (sessionId.length === 0 || sessionId.length > 64) {
-    sessionId = crypto.randomUUID();
-    jar.set(GROW_SESSION_COOKIE, sessionId, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: YEAR_SECONDS,
-    });
-  }
+  const sessionId = resolveFeedSessionId(jar.get(FEED_SESSION_COOKIE)?.value);
 
   const supabase = await createClient();
   const {
@@ -59,13 +50,14 @@ export async function requestGrownSelection(input: {
     buyerId: user?.id ?? null,
     sessionId,
     cookies: {
-      read: () => jar.get(ENGINE_RING_COOKIE)?.value,
+      read: () => jar.get(FEED_RING_COOKIE)?.value,
       write: (value) =>
-        jar.set(ENGINE_RING_COOKIE, value, {
+        // same attributes as the feed's ring write (lib/feed/select.ts)
+        jar.set(FEED_RING_COOKIE, value, {
           httpOnly: true,
           sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
           path: "/",
-          maxAge: YEAR_SECONDS,
         }),
     },
   });

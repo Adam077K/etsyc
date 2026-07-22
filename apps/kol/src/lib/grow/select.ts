@@ -13,16 +13,11 @@ import type { GrownClip, GrownSelection } from "./types";
  */
 export const GROWN_LIMIT = 6;
 
-/**
- * First-party session cookie the grow surface reads/sets for engine
- * identity (seeded jitter + anti-repetition scope). NOT the auth session —
- * it must exist for anonymous buyers too. B1a's feed data layer derives
- * the same identity; converge on one name at feed integration.
- */
-export const GROW_SESSION_COOKIE = "kol_session";
-
-/** Signed anti-repetition ring cookie (value shape is the engine's). */
-export const ENGINE_RING_COOKIE = "kol_engine_ring";
+// Cookie identity deliberately declares NOTHING here: the canonical names
+// live in lib/feed/ (kol_sid — minted by the proxy middleware only — and
+// kol_ring; DECISIONS.md). This module takes injected read/write so one
+// identity carries across the whole FEED → GROWN → … journey, and a
+// second identifier for the same cookie can never drift.
 
 /**
  * The engine's GROWN read for a tapped clip's store: returns the grown
