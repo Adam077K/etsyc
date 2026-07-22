@@ -56,10 +56,20 @@ describe("nameplate register — §2.1a strokeClass → emitted custom propertie
     },
   );
 
-  it('kind:"custom" defaults to uniform — the lower-optical-mass fail-safe for any face', () => {
+  it('kind:"custom" undeclared defaults to uniform — the lower-optical-mass fail-safe for any face', () => {
     const theme = customStore.theme;
     if (theme.kind !== "custom") throw new Error("noor fixture must be custom-themed");
-    expect(customThemeVars(theme)).toMatchObject(UNIFORM);
+    const { strokeClass: _declared, ...pairing } = theme.customPairing;
+    expect(
+      customThemeVars({ ...theme, customPairing: pairing }),
+    ).toMatchObject(UNIFORM);
+  });
+
+  it("noor fixture DECLARES modulated (Fraunces, authoring-time §2.1a) and the custom path honors it", () => {
+    const theme = customStore.theme;
+    if (theme.kind !== "custom") throw new Error("noor fixture must be custom-themed");
+    expect(theme.customPairing.strokeClass).toBe("modulated");
+    expect(customThemeVars(theme)).toMatchObject(MODULATED);
   });
 
   it("every pairing declares a strokeClass — a new pairing cannot ship without one", () => {

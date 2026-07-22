@@ -54,6 +54,12 @@ export const customStore: StoreConfig = {
       scaleRatio: 1.28,
       displayWeight: 650,
       textWeight: 400,
+      // §2.1a authoring-time declaration: Fraunces is a genuinely modulated
+      // face (optical serif, real thick/thin), so noor declares it — this
+      // fixture is also the eyes-on surface for the MODULATED register on
+      // the custom path (sena/statement-grotesk covers uniform). Absent,
+      // it would take the uniform fail-safe.
+      strokeClass: "modulated",
     },
     motionPreset: "liquid", // signature beat is Phase 6 — preset must not error
     radiusIdentity: "sharp",
