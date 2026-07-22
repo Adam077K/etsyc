@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FEED_RING_COOKIE } from "@/lib/feed/select";
 import { FEED_SESSION_COOKIE } from "@/lib/feed/session";
@@ -6,10 +6,15 @@ import { FEED_SESSION_COOKIE } from "@/lib/feed/session";
 /**
  * The NARRATE_SHRINK server boundary: one engine read, zero throw paths.
  * The engine's own fallback chain is covered by the engine suites — these
- * tests pin what the BOUNDARY owns: input hygiene, cookie wiring (session
- * mint + ring names), the exact EngineContext, the serializable clip
- * mapping, and the everything-degrades-to-null guarantee.
+ * tests pin what the BOUNDARY owns: input hygiene, session identity
+ * (validated read-only — the middleware is the sole minter), ring cookie
+ * wiring with the FULL shared attribute set, the exact EngineContext, the
+ * serializable clip mapping, and the everything-degrades-to-null
+ * guarantee.
  */
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SESSION_ID = "7c1f4b3a-2d5e-4f60-8a9b-1c2d3e4f5a6b";
 
 const mocks = vi.hoisted(() => {
   const jarStore = new Map<string, string>();
@@ -64,6 +69,15 @@ beforeEach(() => {
   mocks.getUser.mockReset().mockResolvedValue({ data: { user: null } });
 });
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+/** kol_sid writes are the middleware's alone — this action never sets one. */
+function expectNoSessionWrite() {
+  expect(mocks.setCalls.filter((call) => call.name === FEED_SESSION_COOKIE)).toHaveLength(0);
+}
+
 describe("selectNarration — input hygiene", () => {
   it("a non-uuid store id (preview fixtures) degrades to null without touching the engine", async () => {
     await expect(selectNarration({ storeId: "sena", productId: null })).resolves.toEqual({
@@ -82,7 +96,7 @@ describe("selectNarration — input hygiene", () => {
 });
 
 describe("selectNarration — the one engine read", () => {
-  it("builds the NARRATE_SHRINK context: product-scoped, limit 1, minted session", async () => {
+  it("builds the NARRATE_SHRINK context: product-scoped, limit 1, ephemeral session when the cookie is absent", async () => {
     mocks.selectVideos.mockResolvedValue({ clips: [ENGINE_CLIP] });
 
     const result = await selectNarration({ storeId: STORE_ID, productId: PRODUCT_ID });
@@ -92,17 +106,16 @@ describe("selectNarration — the one engine read", () => {
     expect(ctx).toEqual({
       state: "NARRATE_SHRINK",
       buyerId: null,
-      sessionId: mocks.jarStore.get(FEED_SESSION_COOKIE),
+      // no cookie → resolveFeedSessionId's ephemeral fallback: a real
+      // uuid, and NOT written back — the middleware re-mints on response
+      sessionId: expect.stringMatching(UUID_RE),
       storeScope: STORE_ID,
       productId: PRODUCT_ID,
       moodHint: null,
       limit: 1,
     });
     expect(deps).toEqual({ deps: "stub" });
-
-    // the session cookie was minted HttpOnly on first read
-    const minted = mocks.setCalls.find((call) => call.name === FEED_SESSION_COOKIE);
-    expect(minted?.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });
+    expectNoSessionWrite();
 
     // the clip crosses the boundary as the serializable 4-field slice only
     expect(result).toEqual({
@@ -115,22 +128,36 @@ describe("selectNarration — the one engine read", () => {
     });
   });
 
-  it("reuses an existing session cookie and passes the signed-in buyer", async () => {
-    mocks.jarStore.set(FEED_SESSION_COOKIE, "session-existing");
+  it("reuses a VALID existing session cookie and passes the signed-in buyer", async () => {
+    mocks.jarStore.set(FEED_SESSION_COOKIE, SESSION_ID);
     mocks.getUser.mockResolvedValue({ data: { user: { id: "buyer-7" } } });
 
     await selectNarration({ storeId: STORE_ID, productId: null });
 
     const [ctx] = mocks.selectVideos.mock.calls[0]!;
     expect(ctx).toMatchObject({
-      sessionId: "session-existing",
+      sessionId: SESSION_ID,
       buyerId: "buyer-7",
       productId: null,
     });
-    expect(mocks.setCalls.find((call) => call.name === FEED_SESSION_COOKIE)).toBeUndefined();
+    expectNoSessionWrite();
   });
 
-  it("wires the ring cookie by its canonical name, read AND write", async () => {
+  it("a malformed kol_sid never reaches the engine's jitter seed and is never re-minted here (gate-2 F1)", async () => {
+    // a cookie is client input — B2/B3/B4 reject this via
+    // resolveFeedSessionId, and B5 must resolve the SAME identity they do
+    mocks.jarStore.set(FEED_SESSION_COOKIE, "notauuid");
+
+    await selectNarration({ storeId: STORE_ID, productId: PRODUCT_ID });
+
+    const [ctx] = mocks.selectVideos.mock.calls[0]!;
+    expect(ctx).toMatchObject({ sessionId: expect.stringMatching(UUID_RE) });
+    expect((ctx as { sessionId: string }).sessionId).not.toBe("notauuid");
+    // the middleware is the sole minter — no competing Set-Cookie from here
+    expectNoSessionWrite();
+  });
+
+  it("wires the ring cookie by its canonical name, read AND write, with the FULL shared attribute set", async () => {
     mocks.jarStore.set(FEED_RING_COOKIE, "signed-ring-value");
 
     await selectNarration({ storeId: STORE_ID, productId: PRODUCT_ID });
@@ -142,7 +169,31 @@ describe("selectNarration — the one engine read", () => {
     cookieOpts.write("next-ring");
     const written = mocks.setCalls.find((call) => call.name === FEED_RING_COOKIE);
     expect(written?.value).toBe("next-ring");
-    expect(written?.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });
+    // exact set, not a subset — a missing attribute is how F2 shipped
+    expect(written?.options).toEqual({
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false, // NODE_ENV=test here; the production case is below
+      path: "/",
+    });
+  });
+
+  it("ring writes carry `secure` in production — an attribute-stripping replace is the F2 defect (gate-2 F2)", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    await selectNarration({ storeId: STORE_ID, productId: PRODUCT_ID });
+
+    const [cookieOpts] = mocks.createEngineDeps.mock.calls[0]! as [
+      { read: () => string | undefined; write: (value: string) => void },
+    ];
+    cookieOpts.write("prod-ring");
+    const written = mocks.setCalls.find((call) => call.name === FEED_RING_COOKIE);
+    expect(written?.options).toEqual({
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      path: "/",
+    });
   });
 });
 

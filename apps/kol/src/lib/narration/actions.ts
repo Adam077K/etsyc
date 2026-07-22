@@ -1,15 +1,12 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-
 import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { createEngineDeps, selectVideos } from "@/lib/engine";
-import { createClient } from "@/lib/supabase/server";
-
 import { FEED_RING_COOKIE } from "@/lib/feed/select";
-import { FEED_SESSION_COOKIE } from "@/lib/feed/session";
+import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * NARRATE_SHRINK selection boundary (B5, contextual-narration-shrink spec).
@@ -39,6 +36,24 @@ const narrationInputSchema = z.object({
   productId: z.uuid().nullable(),
 });
 
+/**
+ * The shared first-party cookie attribute set — B4's RING_COOKIE_OPTIONS
+ * shape; the proxy middleware, B1a and every other writer set exactly
+ * these. Cookie identity is (name, domain, path) — `Secure` is NOT part of
+ * the key — so a write WITHOUT it would REPLACE the middleware's cookie
+ * and strip the attribute, putting the HMAC-bearing ring on plaintext
+ * http:// requests in production (gate-2 F2). A function, not a module
+ * const: NODE_ENV must resolve at write time, never freeze at import.
+ */
+function ringCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  } as const;
+}
+
 /** Serializable slice of SelectedClip the dock swap needs. */
 export interface NarrationClip {
   videoId: string;
@@ -60,16 +75,14 @@ export async function selectNarration(input: {
 
     const jar = await cookies();
 
-    // Session scope for jitter + the ring — minted on first engine read.
-    let sessionId = jar.get(FEED_SESSION_COOKIE)?.value;
-    if (!sessionId) {
-      sessionId = randomUUID();
-      jar.set(FEED_SESSION_COOKIE, sessionId, {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-      });
-    }
+    // Session identity is READ-ONLY here: the proxy middleware is the SOLE
+    // kol_sid minter. resolveFeedSessionId validates the client-supplied
+    // value (a cookie is untrusted input — a malformed id must never seed
+    // the engine's jitter, gate-2 F1) and falls back to an ephemeral id
+    // for the one request before the middleware's re-mint lands. Writing
+    // kol_sid here would race the middleware's Set-Cookie on the same
+    // response (last-write-wins) and could strip its attribute set.
+    const sessionId = resolveFeedSessionId(jar.get(FEED_SESSION_COOKIE)?.value);
 
     // Relationship term only — selection reads stay on the engine's own
     // anon client (createEngineDeps wires that internally; W2-WIRE).
@@ -80,12 +93,7 @@ export async function selectNarration(input: {
 
     const deps = createEngineDeps({
       read: () => jar.get(FEED_RING_COOKIE)?.value,
-      write: (value) =>
-        jar.set(FEED_RING_COOKIE, value, {
-          httpOnly: true,
-          sameSite: "lax",
-          path: "/",
-        }),
+      write: (value) => jar.set(FEED_RING_COOKIE, value, ringCookieOptions()),
     });
 
     const selection = await selectVideos(
