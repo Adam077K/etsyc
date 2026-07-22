@@ -239,6 +239,53 @@
     max-width: none;
     border-radius: 0;
   }
+
+  /* ---- the Film Layer (design-direction §6.2, Amendment A) — ONE film,
+          mounted once at app root, FLIPping between published rects.
+          Geometry (position/left/top/size + the FLIP transform) is
+          imperative in FilmLayer.tsx; these classes carry the paint.
+          bg surface means a decode gap can never read as a black frame. ---- */
+  .kol-film-layer {
+    position: fixed; /* pre-claim default; the layer flips absolute/fixed per slot */
+    top: 0;
+    left: 0;
+    z-index: var(--z-film);
+    overflow: hidden;
+    background-color: var(--surface);
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  /* parked (no slot claimed): hidden but never unmounted */
+  .kol-film-layer[data-film-parked] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+  /* docked (viewport-fixed) slots read as the corner film card */
+  .kol-film-layer[data-film-docked] {
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-raised);
+  }
+  .kol-film-poster {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+  /* A/B buffers — a clip swap cross-fades INSIDE the frame over --dur-swap;
+     same-source transitions never touch these (true element persistence) */
+  .kol-film-buffer {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity var(--dur-swap) linear;
+  }
+  .kol-film-front {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
