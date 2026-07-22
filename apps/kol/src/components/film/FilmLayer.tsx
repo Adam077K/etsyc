@@ -121,14 +121,21 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
     b: null,
   });
   const buffersRef = useRef(buffers);
-  buffersRef.current = buffers;
   const [front, setFront] = useState<BufferKey>("a");
   const frontRef = useRef<BufferKey>("a");
   const [pendingSwap, setPendingSwap] = useState<{ buffer: BufferKey; gen: number } | null>(null);
   const pendingRef = useRef(pendingSwap);
-  pendingRef.current = pendingSwap;
   const swapGenRef = useRef(0);
   const currentSrcRef = useRef<string | null>(null);
+
+  // ref mirrors for DOM-event readers (buffer onError, autoplay-veto
+  // recovery) — updated post-commit, which is when those events can fire
+  useEffect(() => {
+    buffersRef.current = buffers;
+  }, [buffers]);
+  useEffect(() => {
+    pendingRef.current = pendingSwap;
+  }, [pendingSwap]);
 
   const [posterSrc, setPosterSrc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -173,6 +180,8 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
         frame.style.transform = "";
         void frame.getBoundingClientRect();
         frame.style.transition = "";
+        delete frame.dataset.filmEdge;
+        delete frame.dataset.filmEdgeMs;
       };
 
       if (
@@ -215,6 +224,9 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
           springLinearEasing(readSpringVideoParams(), durationMs),
         );
       }
+      // observable edge record — QA and e2e assert choreography off these
+      frame.dataset.filmEdge = edge;
+      frame.dataset.filmEdgeMs = String(durationMs);
       frame.style.transform = "";
     },
     [],
