@@ -21,18 +21,28 @@ import {
   DESKTOP_ASPECT_CLASS,
   FeedCardView,
   MOBILE_ASPECT_CLASS,
-  SLOT_LAYOUT_CLASS,
+  MOBILE_CAPTION_CLASS,
+  MOBILE_MEDIA_CLASS,
+  MOBILE_RHYTHM_CLASS,
+  SLOT_PLACEMENT_CLASS,
+  slotLiftProps,
 } from "./FeedCard";
-import { ambientIndicesFor, FOCUS_DEBOUNCE_MS, pickFocusIndex } from "./focus";
-import { composeFeed, mobileAspectFor } from "./spreads";
+import {
+  ambientCountForVisible,
+  ambientIndicesFor,
+  FOCUS_DEBOUNCE_MS,
+  pickFocusIndex,
+} from "./focus";
+import { composeFeed, composeMobileFeed, MOBILE_SLOTS } from "./spreads";
 
 /**
  * FeedMagazine (W3-B1b) — the discovery feed's magazine composition. A
- * magazine index of PEOPLE, not a catalogue of things: cards land in
- * named slots (spreads.ts), the card nearest viewport centre carries the
- * shared Film Layer, its neighbours run ambient loops, everything else is
- * a focalPoint-cropped poster still. KOL chrome only — the feed never
- * adopts a seller theme (Invariant I7).
+ * magazine index of PEOPLE, not a catalogue of things: cards are placed
+ * by the content-aware assignment in spreads.ts (cost-based, deterministic,
+ * period-gated — never a cycle), the card nearest viewport centre carries
+ * the shared Film Layer, and ambient loops scale with how many cards are
+ * actually in view. KOL chrome only — the feed never adopts a seller
+ * theme (Invariant I7).
  *
  * All four states render here:
  *   success — the live composition + Focus Film.
@@ -55,11 +65,11 @@ export const FEED_CACHE_KEY = "kol:feed:last-selection:v1";
 const INITIAL_FOCUS_DELAY_MS = 700;
 
 /**
- * The loading skeleton renders the N=4 (S1+S3) composition: the seed
- * period serves exactly 4 makers (one clip per store × 4 published seed
- * worlds), so this is the real final geometry today. The opening S1
- * spread is identical for every N≥2, so the first viewport stays CLS-0
- * even after the pool grows; bump alongside the seed pool.
+ * The loading skeleton renders the N=4 (R-LEAD + R-INSET) composition:
+ * the seed period serves exactly 4 makers (one clip per store × 4
+ * published seed worlds), so this is the real final geometry today. The
+ * opening R-LEAD row is identical for every N≥2, so the first viewport
+ * stays CLS-0 even after the pool grows; bump alongside the seed pool.
  */
 const SKELETON_CARD_COUNT = 4;
 
@@ -111,7 +121,7 @@ export function FeedMagazine({
           <ErrorInline
             message="Showing you the last set — we couldn’t reach the new one."
             onRetry={retry}
-            className="mb-[var(--space-6)] w-fit"
+            className="mb-[var(--space-6)] w-fit mx-[var(--space-4)] md:mx-0"
           />
           <MagazineBody cards={cachedCards} onGrow={onGrow} />
         </section>
@@ -131,7 +141,7 @@ export function FeedMagazine({
   );
 }
 
-/** The live composition: masthead + spreads + Focus Film selection. */
+/** The live composition: masthead + rows + Focus Film selection. */
 function MagazineBody({
   cards,
   onGrow,
@@ -139,18 +149,30 @@ function MagazineBody({
   cards: FeedCard[];
   onGrow?: (card: FeedCard, element: HTMLElement | null) => void;
 }) {
-  const spreads = useMemo(() => composeFeed(cards.length), [cards.length]);
+  // Content-aware assignment (spreads.ts): FeedCard is structurally a
+  // ComposableCard, so the view-model passes straight through. Mobile
+  // runs the same rule over the §1.6 slot table; both are card-ordered,
+  // so one DOM order serves both compositions.
+  const rows = useMemo(() => composeFeed(cards), [cards]);
+  const mobileSlots = useMemo(
+    () => composeMobileFeed(cards).map(({ slot }) => slot),
+    [cards],
+  );
   const cardEls = useRef<(HTMLElement | null)[]>([]);
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(0);
 
   const evaluateFocus = useCallback(() => {
     const viewportCentre = window.innerHeight / 2;
+    let inView = 0;
     const distances = cards.map((_, index) => {
       const element = cardEls.current[index];
       if (!element) return Number.POSITIVE_INFINITY;
       const rect = element.getBoundingClientRect();
+      if (rect.bottom > 0 && rect.top < window.innerHeight) inView += 1;
       return Math.abs(rect.top + rect.height / 2 - viewportCentre);
     });
+    setVisibleCount(inView);
     const next = pickFocusIndex(distances);
     if (next !== null) setFocusIndex(next);
   }, [cards]);
@@ -175,12 +197,21 @@ function MagazineBody({
     };
   }, [evaluateFocus]);
 
+  // Ambient budget is a function of cards in view (gate-2 ruling):
+  // 0 at ≤2 in view · 1 at 3 · 2 at ≥4. Everything-moving is the
+  // TikTok-Shop register §2.4 bans.
   const ambient = useMemo(
     () =>
       new Set(
-        focusIndex === null ? [] : ambientIndicesFor(focusIndex, cards.length),
+        focusIndex === null
+          ? []
+          : ambientIndicesFor(
+              focusIndex,
+              cards.length,
+              ambientCountForVisible(visibleCount),
+            ),
       ),
-    [focusIndex, cards.length],
+    [focusIndex, cards.length, visibleCount],
   );
 
   // Tap: promote to focus immediately (claim snaps + --dur-swap in-frame
@@ -197,14 +228,14 @@ function MagazineBody({
   return (
     <>
       <Masthead count={cards.length} />
-      <div className="mt-[var(--space-12)] flex flex-col gap-[var(--space-16)]">
-        {spreads.map((spread, spreadIndex) => (
+      <div className="mt-[var(--space-12)] flex flex-col md:gap-[var(--space-16)]">
+        {rows.map((row, rowIndex) => (
           <div
-            key={spreadIndex}
-            data-feed-spread={spread.pattern}
-            className="grid grid-cols-1 items-start gap-y-[var(--space-10)] md:grid-cols-12 md:gap-x-[var(--space-6)]"
+            key={rowIndex}
+            data-feed-row={row.pattern}
+            className="grid grid-cols-1 items-start md:grid-cols-12 md:gap-x-[var(--space-6)]"
           >
-            {spread.slots.map(({ slot, cardIndex }, indexInSpread) => {
+            {row.slots.map(({ slot, cardIndex, raisePct }, indexInRow) => {
               const card = cards[cardIndex];
               if (card === undefined) return null; // composeFeed covers 0..N-1 exactly
               return (
@@ -212,8 +243,9 @@ function MagazineBody({
                   key={card.videoId}
                   card={card}
                   slot={slot}
-                  mobileAspect={mobileAspectFor(cardIndex)}
-                  indexInSpread={indexInSpread}
+                  raisePct={raisePct}
+                  mobileSlot={mobileSlots[cardIndex] ?? MOBILE_SLOTS["M-FULL"]}
+                  indexInRow={indexInRow}
                   isFocus={focusIndex === cardIndex}
                   isAmbient={ambient.has(cardIndex)}
                   cardRef={(element) => {
@@ -233,7 +265,7 @@ function MagazineBody({
 /** The feed's single display moment (§1.4) — live, honest count. */
 function Masthead({ count }: { count: number }) {
   return (
-    <header className="flex flex-col gap-[var(--space-1)]">
+    <header className="flex flex-col gap-[var(--space-1)] px-[var(--space-4)] md:px-0">
       <p className="font-text text-caption uppercase tracking-[0.08em] text-muted">
         KOL · Today
       </p>
@@ -247,7 +279,10 @@ function Masthead({ count }: { count: number }) {
 /** Empty ≠ blank: a warm invitation in the interface's voice (§1.5). */
 function FeedInvitation() {
   return (
-    <section aria-label="No makers yet" className="flex flex-col gap-[var(--space-2)]">
+    <section
+      aria-label="No makers yet"
+      className="flex flex-col gap-[var(--space-2)] px-[var(--space-4)] md:px-0"
+    >
       <p className="font-text text-caption uppercase tracking-[0.08em] text-muted">
         KOL · Today
       </p>
@@ -271,7 +306,10 @@ function FeedInvitation() {
 /** Error with no cache: the invitation layout carrying error copy + retry. */
 function FeedUnreachable({ onRetry }: { onRetry: () => void }) {
   return (
-    <section aria-label="Feed unavailable" className="flex flex-col gap-[var(--space-2)]">
+    <section
+      aria-label="Feed unavailable"
+      className="flex flex-col gap-[var(--space-2)] px-[var(--space-4)] md:px-0"
+    >
       <p className="font-text text-caption uppercase tracking-[0.08em] text-muted">
         KOL · Today
       </p>
@@ -288,44 +326,68 @@ function FeedUnreachable({ onRetry }: { onRetry: () => void }) {
 }
 
 /**
- * Route-level loading state (app/feed/loading.tsx): the full spread
- * geometry renders immediately with skeletons at the exact slot aspects —
- * the COMPOSITION is visible before the content is, which is itself the
- * identity statement. Name/craft lines are two shimmer bars at real line
- * lengths. No spinner anywhere; posters then resolve per card in place.
+ * Route-level loading state (app/feed/loading.tsx): the full row geometry
+ * renders immediately with skeletons at the exact slot aspects — the
+ * COMPOSITION is visible before the content is, which is itself the
+ * identity statement. Raise geometry is slot-derived (spreads.test.ts
+ * "skeleton parity"), so the skeleton matches the live layout to the
+ * pixel. Name/craft lines are two shimmer bars at real line lengths. No
+ * spinner anywhere; posters then resolve per card in place.
  */
 export function FeedMagazineSkeleton() {
-  const spreads = composeFeed(SKELETON_CARD_COUNT);
+  const synthetic = Array.from({ length: SKELETON_CARD_COUNT }, (_, i) => ({
+    videoId: `skeleton-${i}`,
+    aspect: "4:5" as const,
+    focalPoint: null,
+  }));
+  const rows = composeFeed(synthetic);
+  const mobileSlots = composeMobileFeed(synthetic).map(({ slot }) => slot);
   return (
     <section aria-label="Loading makers" aria-busy="true" className="flex flex-col">
-      <div className="flex flex-col gap-[var(--space-1)]">
+      <div className="flex flex-col gap-[var(--space-1)] px-[var(--space-4)] md:px-0">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-10 w-full max-w-md md:h-14" />
       </div>
-      <div className="mt-[var(--space-12)] flex flex-col gap-[var(--space-16)]">
-        {spreads.map((spread, spreadIndex) => (
+      <div className="mt-[var(--space-12)] flex flex-col md:gap-[var(--space-16)]">
+        {rows.map((row, rowIndex) => (
           <div
-            key={spreadIndex}
-            className="grid grid-cols-1 items-start gap-y-[var(--space-10)] md:grid-cols-12 md:gap-x-[var(--space-6)]"
+            key={rowIndex}
+            className="grid grid-cols-1 items-start md:grid-cols-12 md:gap-x-[var(--space-6)]"
           >
-            {spread.slots.map(({ slot, cardIndex }) => (
-              <div
-                key={slot.name}
-                className={cn("min-w-0 self-start", SLOT_LAYOUT_CLASS[slot.name])}
-              >
-                <Skeleton
+            {row.slots.map(({ slot, cardIndex, raisePct }) => {
+              const mobileSlot = mobileSlots[cardIndex] ?? MOBILE_SLOTS["M-FULL"];
+              const lift = slotLiftProps(slot, raisePct);
+              return (
+                <div
+                  key={slot.name}
                   className={cn(
-                    "w-full rounded-md",
-                    MOBILE_ASPECT_CLASS[mobileAspectFor(cardIndex)],
-                    DESKTOP_ASPECT_CLASS[slot.aspect],
+                    "min-w-0 self-start",
+                    SLOT_PLACEMENT_CLASS[slot.name],
+                    lift.className,
+                    MOBILE_RHYTHM_CLASS[mobileSlot.name],
                   )}
-                />
-                <div className="mt-[var(--space-2)] flex flex-col gap-[var(--space-0-5)]">
-                  <Skeleton className="h-5 w-40" />
-                  <Skeleton className="h-3 w-28" />
+                  style={lift.style}
+                >
+                  <Skeleton
+                    className={cn(
+                      "rounded-md",
+                      MOBILE_ASPECT_CLASS[mobileSlot.aspect],
+                      MOBILE_MEDIA_CLASS[mobileSlot.name],
+                      DESKTOP_ASPECT_CLASS[slot.aspect],
+                    )}
+                  />
+                  <div
+                    className={cn(
+                      "mt-[var(--space-2)] flex flex-col gap-[var(--space-0-5)]",
+                      MOBILE_CAPTION_CLASS[mobileSlot.name],
+                    )}
+                  >
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ))}
       </div>

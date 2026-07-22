@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { ambientIndicesFor, pickFocusIndex } from "./focus";
+import {
+  ambientCountForVisible,
+  ambientIndicesFor,
+  pickFocusIndex,
+} from "./focus";
 
 describe("pickFocusIndex — nearest viewport centre wins", () => {
   it("picks the minimum distance", () => {
@@ -23,7 +27,24 @@ describe("pickFocusIndex — nearest viewport centre wins", () => {
   });
 });
 
-describe("ambientIndicesFor — the ≥2-in-motion floor (CPO Ruling 2)", () => {
+describe("ambientCountForVisible — loops scale with cards in view (gate-2)", () => {
+  it("≤2 in view → 0 ambient: focus alone carries the life", () => {
+    expect(ambientCountForVisible(0)).toBe(0);
+    expect(ambientCountForVisible(1)).toBe(0);
+    expect(ambientCountForVisible(2)).toBe(0);
+  });
+
+  it("3 in view → 1 ambient", () => {
+    expect(ambientCountForVisible(3)).toBe(1);
+  });
+
+  it("≥4 in view → 2 ambient, never more (everything-moving is banned)", () => {
+    expect(ambientCountForVisible(4)).toBe(2);
+    expect(ambientCountForVisible(18)).toBe(2);
+  });
+});
+
+describe("ambientIndicesFor — spending the ambient budget", () => {
   it("takes the composition-order neighbours around a mid-feed focus", () => {
     expect(ambientIndicesFor(5, 18)).toEqual([6, 4]);
   });
@@ -36,20 +57,25 @@ describe("ambientIndicesFor — the ≥2-in-motion floor (CPO Ruling 2)", () => 
     expect(ambientIndicesFor(3, 4)).toEqual([2, 1]);
   });
 
+  it("a zero budget yields no ambient at all", () => {
+    expect(ambientIndicesFor(5, 18, 0)).toEqual([]);
+  });
+
   it("N=1 is exempt — no neighbours exist", () => {
     expect(ambientIndicesFor(0, 1)).toEqual([]);
   });
 
-  it("floor: for every N≥2 and every focus, ≥1 ambient neighbour exists", () => {
+  it("never includes focus, never exceeds the budget, always in range", () => {
     for (let count = 2; count <= 19; count += 1) {
       for (let focus = 0; focus < count; focus += 1) {
-        const ambient = ambientIndicesFor(focus, count);
-        expect(ambient.length).toBeGreaterThanOrEqual(1);
-        expect(ambient.length).toBeLessThanOrEqual(2);
-        expect(ambient).not.toContain(focus);
-        for (const index of ambient) {
-          expect(index).toBeGreaterThanOrEqual(0);
-          expect(index).toBeLessThan(count);
+        for (let budget = 0; budget <= 2; budget += 1) {
+          const ambient = ambientIndicesFor(focus, count, budget);
+          expect(ambient.length).toBeLessThanOrEqual(budget);
+          expect(ambient).not.toContain(focus);
+          for (const index of ambient) {
+            expect(index).toBeGreaterThanOrEqual(0);
+            expect(index).toBeLessThan(count);
+          }
         }
       }
     }

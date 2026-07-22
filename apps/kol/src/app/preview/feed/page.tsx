@@ -31,7 +31,9 @@ export default async function FeedPreviewPage({
   const cards = buildFixtureCards(count);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-page flex-col gap-[var(--space-4)] px-[var(--space-2)] py-[var(--space-4)] md:px-[var(--space-6)]">
+    // px-0 below md, mirroring app/feed/page.tsx — the §1.6 mobile slots
+    // own their own edges, so the harness must not add a page margin.
+    <main className="mx-auto flex min-h-screen w-full max-w-page flex-col gap-[var(--space-4)] px-0 py-[var(--space-4)] md:px-[var(--space-6)]">
       {grid === "1" ? (
         <UniformGridControl cards={cards} />
       ) : (

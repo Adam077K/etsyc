@@ -48,15 +48,20 @@ export default async function FeedPage() {
   });
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-page flex-col gap-[var(--space-4)] px-[var(--space-2)] py-[var(--space-4)] md:px-[var(--space-6)]">
+    // Below md the page carries NO horizontal padding — the §1.6 mobile
+    // slots own their own edges (M-BLEED runs viewport edge to edge, the
+    // rest carry asymmetric insets). Chrome rows pad themselves.
+    <main className="mx-auto flex min-h-screen w-full max-w-page flex-col gap-[var(--space-4)] px-0 py-[var(--space-4)] md:px-[var(--space-6)]">
       {user ? (
-        <AccountBar
-          email={user.email ?? ""}
-          displayName={profile?.display_name ?? ""}
-          role={profile?.role ?? "buyer"}
-        />
+        <div className="px-[var(--space-4)] md:px-0">
+          <AccountBar
+            email={user.email ?? ""}
+            displayName={profile?.display_name ?? ""}
+            role={profile?.role ?? "buyer"}
+          />
+        </div>
       ) : (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end px-[var(--space-4)] md:px-0">
           {/* Quiet affordance — the front door never demands sign-up. */}
           <Link
             href={SIGN_IN_PATH}

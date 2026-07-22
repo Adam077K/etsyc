@@ -11,7 +11,7 @@ import type { FeedCard, FeedCardAspect } from "@/lib/feed/select";
 import { cn } from "@/lib/utils";
 
 import { AMBIENT_LOOP_SECONDS } from "./focus";
-import type { SlotName, SlotSpec } from "./spreads";
+import type { MobileSlotName, MobileSlotSpec, SlotAspect, SlotName, SlotSpec } from "./spreads";
 
 /**
  * One maker card (W3-B1b — screen-specs §1.2). Media-first, caption-
@@ -27,7 +27,14 @@ import type { SlotName, SlotSpec } from "./spreads";
  *             --dur-swap cross-fade. ≤200ms total, per the AC.
  *   ambient — a disposable low-fi loop (muted, ≤6s replay window, never
  *             the shared element) so the page reads alive around focus.
+ *             How many run is a function of cards in view (focus.ts).
  *   rest    — the poster still, focalPoint-cropped to the slot aspect.
+ *
+ * Below md the card sits in one of the four mobile slots (§1.6): insets
+ * are asymmetric, one slot bleeds past both margins, and the caption
+ * aligns to its own media's LEFT EDGE — the zig-zagging text column is
+ * the mobile anti-grid mechanism, so a fixed page-margin caption would
+ * undo it.
  *
  * Stacking contract note: nothing in this card needs to paint OVER the
  * film — the caption sits below the media box, and the :focus-visible
@@ -36,16 +43,48 @@ import type { SlotName, SlotSpec } from "./spreads";
  * (globals.css film contract; DECISIONS 2026-07-22).
  */
 
-/** md+ slot placement — literal class strings so Tailwind sees them. */
-export const SLOT_LAYOUT_CLASS: Record<SlotName, string> = {
+/** md+ column placement — literal class strings so Tailwind sees them. */
+export const SLOT_PLACEMENT_CLASS: Record<SlotName, string> = {
   LEAD: "md:col-start-1 md:col-span-7",
-  SIDE: "md:col-start-9 md:col-span-4 md:mt-[var(--space-12)]",
+  SIDE: "md:col-start-9 md:col-span-4",
   WIDE: "md:col-start-3 md:col-span-8",
-  INSET: "md:col-start-1 md:col-span-5 md:mt-[var(--space-8)]",
+  INSET: "md:col-start-1 md:col-span-5",
   TALL: "md:col-start-8 md:col-span-5",
+  COLUMN: "md:col-start-5 md:col-span-4",
 };
 
-/** Single-column aspect (< md) — variety carried by height (§1.6). */
+/** md+ drop-Y — applied only when the air pass leaves the plain rhythm. */
+export const SLOT_DROP_CLASS: Record<SlotName, string> = {
+  LEAD: "",
+  SIDE: "md:mt-[var(--space-12)]",
+  WIDE: "",
+  INSET: "md:mt-[var(--space-8)]",
+  TALL: "",
+  COLUMN: "md:mt-[var(--space-6)]",
+};
+
+/**
+ * Vertical placement for a slot at md+: the plain drop, or — when the
+ * composition pulls the card up into the previous row's void — a lift of
+ * `calc(dropPx − raise%)`. The raise is a percentage of the card's own
+ * grid-area width because every height in the layout is width-derived,
+ * so the cluster survives viewport scaling. Shared with the skeleton so
+ * the loading state is CLS-0 against the live composition.
+ */
+export function slotLiftProps(
+  slot: SlotSpec,
+  raisePct: number,
+): { className: string; style?: React.CSSProperties } {
+  if (raisePct <= 0) return { className: SLOT_DROP_CLASS[slot.name] };
+  return {
+    className: "md:mt-[var(--feed-lift)]",
+    style: {
+      "--feed-lift": `calc(${slot.dropYPx}px - ${raisePct}%)`,
+    } as React.CSSProperties,
+  };
+}
+
+/** Aspect at the single-column breakpoint (< md), keyed by slot aspect. */
 export const MOBILE_ASPECT_CLASS: Record<FeedCardAspect, string> = {
   "4:5": "aspect-[4/5]",
   "16:9": "aspect-video",
@@ -54,18 +93,47 @@ export const MOBILE_ASPECT_CLASS: Record<FeedCardAspect, string> = {
 };
 
 /** Desktop slot aspect override at md+. */
-export const DESKTOP_ASPECT_CLASS: Record<FeedCardAspect, string> = {
+export const DESKTOP_ASPECT_CLASS: Record<SlotAspect, string> = {
   "4:5": "md:aspect-[4/5]",
   "16:9": "md:aspect-video",
   "1:1": "md:aspect-square",
   "3:2": "md:aspect-[3/2]",
+  "3:4": "md:aspect-[3/4]",
+};
+
+/** §1.6 slot insets on the MEDIA box — the page carries no margin below
+ *  md; slots own their edges, and M-BLEED runs viewport edge to edge. */
+export const MOBILE_MEDIA_CLASS: Record<MobileSlotName, string> = {
+  "M-BLEED": "rounded-none md:rounded-md",
+  "M-FULL": "ml-[var(--space-4)] mr-[var(--space-4)] md:ml-0 md:mr-0",
+  "M-OFF-L": "ml-[var(--space-4)] mr-[var(--space-16)] md:ml-0 md:mr-0",
+  "M-OFF-R": "ml-[var(--space-16)] mr-[var(--space-4)] md:ml-0 md:mr-0",
+};
+
+/** The caption aligns to its own media's left edge (§1.6 load-bearing
+ *  detail); a bleed's caption indents --space-4 from the viewport edge. */
+export const MOBILE_CAPTION_CLASS: Record<MobileSlotName, string> = {
+  "M-BLEED": "pl-[var(--space-4)] md:pl-0",
+  "M-FULL": "pl-[var(--space-4)] md:pl-0",
+  "M-OFF-L": "pl-[var(--space-4)] md:pl-0",
+  "M-OFF-R": "pl-[var(--space-16)] md:pl-0",
+};
+
+/** §1.6 rhythm: --space-8 after an inset card, --space-12 after a bleed —
+ *  a bleed needs more air on the far side of it than an inset does. */
+export const MOBILE_RHYTHM_CLASS: Record<MobileSlotName, string> = {
+  "M-BLEED": "mb-[var(--space-12)] md:mb-0",
+  "M-FULL": "mb-[var(--space-8)] md:mb-0",
+  "M-OFF-L": "mb-[var(--space-8)] md:mb-0",
+  "M-OFF-R": "mb-[var(--space-8)] md:mb-0",
 };
 
 export function FeedCardView({
   card,
   slot,
-  mobileAspect,
-  indexInSpread,
+  raisePct,
+  mobileSlot,
+  indexInRow,
   isFocus,
   isAmbient,
   cardRef,
@@ -73,9 +141,11 @@ export function FeedCardView({
 }: {
   card: FeedCard;
   slot: SlotSpec;
-  mobileAspect: FeedCardAspect;
-  /** Position within the spread — drives the 70ms reveal stagger. */
-  indexInSpread: number;
+  /** Upward pull into the previous row's void at md+ (spreads.ts). */
+  raisePct: number;
+  mobileSlot: MobileSlotSpec;
+  /** Position within the row — drives the 70ms reveal stagger. */
+  indexInRow: number;
   isFocus: boolean;
   isAmbient: boolean;
   /** FeedMagazine's rect handle for focus selection. */
@@ -126,19 +196,27 @@ export function FeedCardView({
   const showAmbient = isAmbient && !isFocus && !ambientFailed;
   const mediaMotionClass =
     "transition-transform duration-state ease-kol motion-safe:group-hover:scale-[1.02] motion-safe:group-has-[:focus-visible]:scale-[1.02]";
+  const lift = slotLiftProps(slot, raisePct);
 
   return (
     <article
       ref={setArticleRef}
       data-feed-card=""
       data-feed-slot={slot.name}
+      data-feed-mobile-slot={mobileSlot.name}
       data-feed-focus={isFocus ? "" : undefined}
       data-feed-ambient={showAmbient ? "" : undefined}
       data-feed-motion={isFocus || showAmbient ? "" : undefined}
-      className={cn("group relative min-w-0 self-start", SLOT_LAYOUT_CLASS[slot.name])}
+      className={cn(
+        "group relative min-w-0 self-start",
+        SLOT_PLACEMENT_CLASS[slot.name],
+        lift.className,
+        MOBILE_RHYTHM_CLASS[mobileSlot.name],
+      )}
+      style={lift.style}
       onTransitionEnd={handleTransitionEnd}
     >
-      <Reveal delayMs={indexInSpread * STAGGER_MS}>
+      <Reveal delayMs={indexInRow * STAGGER_MS}>
         <div
           ref={filmSlotRef}
           data-feed-media=""
@@ -146,8 +224,9 @@ export function FeedCardView({
             // bg-ground is the designed fallback beneath a loading or
             // failed poster (PosterStill hides itself on 404) — never a
             // black hole, never a spinner
-            "relative w-full overflow-hidden rounded-md bg-ground",
-            MOBILE_ASPECT_CLASS[mobileAspect],
+            "relative overflow-hidden rounded-md bg-ground",
+            MOBILE_ASPECT_CLASS[mobileSlot.aspect],
+            MOBILE_MEDIA_CLASS[mobileSlot.name],
             DESKTOP_ASPECT_CLASS[slot.aspect],
           )}
         >
@@ -195,8 +274,11 @@ export function FeedCardView({
       </Reveal>
       {/* media leads, text follows — one stagger step behind (§4.2) */}
       <Reveal
-        delayMs={indexInSpread * STAGGER_MS + STAGGER_MS}
-        className="mt-[var(--space-2)] flex flex-col gap-[var(--space-0-5)]"
+        delayMs={indexInRow * STAGGER_MS + STAGGER_MS}
+        className={cn(
+          "mt-[var(--space-2)] flex flex-col gap-[var(--space-0-5)]",
+          MOBILE_CAPTION_CLASS[mobileSlot.name],
+        )}
       >
         <h2
           className={cn(

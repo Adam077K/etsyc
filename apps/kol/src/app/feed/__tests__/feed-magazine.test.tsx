@@ -69,12 +69,28 @@ describe("success — the live composition", () => {
     ).toBeTruthy();
   });
 
-  it("N=4 lands in the S1+S3 termination with one card per slot", () => {
+  it("N=4 lands in the R-LEAD + R-INSET termination with one card per slot", () => {
     const { container } = render(<FeedMagazine result={success(4)} />);
     const slots = Array.from(container.querySelectorAll("[data-feed-slot]")).map(
       (el) => el.getAttribute("data-feed-slot"),
     );
     expect(slots).toEqual(["LEAD", "SIDE", "INSET", "TALL"]);
+  });
+
+  it("every card carries the §1.6 mobile slot the composer assigned it", async () => {
+    const { composeMobileFeed } = await import("@/components/feed/spreads");
+    const cards = success(8).cards;
+    const expected = composeMobileFeed(cards).map(({ slot }) => slot.name);
+    const { container } = render(
+      <FeedMagazine result={{ status: "success", cards }} />,
+    );
+    const rendered = Array.from(
+      container.querySelectorAll("[data-feed-mobile-slot]"),
+    ).map((el) => el.getAttribute("data-feed-mobile-slot"));
+    expect(rendered).toEqual(expected);
+    // the caption aligns to its own media's left edge — M-OFF-R indents
+    // --space-16, everything else --space-4 (the zig-zag mechanism)
+    expect(new Set(expected).size).toBeGreaterThanOrEqual(3);
   });
 
   it("every card is a keyboard-reachable button named for its maker", () => {

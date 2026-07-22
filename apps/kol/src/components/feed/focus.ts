@@ -1,10 +1,13 @@
 /**
  * Focus Film selection model (W3-B1b — discovery-feed AC "Film presence",
- * CPO Ruling 2). ONE shared Film Layer plays on the card nearest viewport
- * centre; up to two composition-order neighbours run disposable ambient
- * loops so the page reads alive (floor: ≥2 cards in motion whenever ≥2 are
- * in view). Pure functions — the debounce and DOM measurement live in
- * FeedMagazine; the selection rules are testable here without a browser.
+ * CPO Ruling 2 + gate-2 ambient ruling). ONE shared Film Layer plays on
+ * the card nearest viewport centre; composition-order neighbours may run
+ * disposable ambient loops so the page reads alive — but the loop COUNT
+ * is a function of how many cards are actually in view. Everything-moving
+ * is the TikTok-Shop register §2.4 bans: with one or two cards on screen
+ * the focus film alone carries the life. Pure functions — the debounce
+ * and DOM measurement live in FeedMagazine; the selection rules are
+ * testable here without a browser.
  */
 
 /** Focus changes at most once per 400ms (AC) — re-targeting on every
@@ -13,6 +16,18 @@ export const FOCUS_DEBOUNCE_MS = 400;
 
 /** Up to two neighbouring cards may play ambient loops (screen-specs §1.3). */
 export const AMBIENT_NEIGHBOUR_MAX = 2;
+
+/**
+ * Ambient loop count as a function of cards in the viewport (gate-2
+ * ruling): 0 ambient at ≤2 in view · 1 at 3 · 2 at ≥4. Attention needs a
+ * ground to be figure against — a two-card viewport with everything
+ * moving reads as a shop window, not a page.
+ */
+export function ambientCountForVisible(visibleCards: number): number {
+  if (visibleCards <= 2) return 0;
+  if (visibleCards === 3) return 1;
+  return AMBIENT_NEIGHBOUR_MAX;
+}
 
 /** Ambient loops replay their first 6 seconds only (≤6s per the AC). */
 export const AMBIENT_LOOP_SECONDS = 6;
@@ -38,9 +53,9 @@ export function pickFocusIndex(distances: readonly number[]): number | null {
 /**
  * The ambient neighbours for a focus card: nearest composition-order
  * indices first (next below, then above — the page should read alive in
- * the direction of travel), widening at the ends so the floor criterion
- * holds wherever focus sits. Never includes the focus card itself; for
- * any count ≥ 2 it returns at least one index.
+ * the direction of travel), widening at the ends so the budget is spent
+ * wherever focus sits. Never includes the focus card itself. `max` comes
+ * from ambientCountForVisible — 0 is a legal budget and yields [].
  */
 export function ambientIndicesFor(
   focusIndex: number,
