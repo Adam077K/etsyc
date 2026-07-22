@@ -234,12 +234,24 @@ describe.skipIf(!hasKeys)("B1a live feed selection boundary (staging DB)", () =>
   });
 
   it("no thankyou (or non-feed-eligible) clip ever appears — structural exclusion", async () => {
+    // Scoped to the SEED worlds: the staging pool is shared and mutable —
+    // parallel live suites (live-eligibility, live-composition) plant
+    // PUBLISHED feed-eligible fixtures and delete them in afterAll, so a
+    // profile lookup racing that delete loses rows and fails the count
+    // below spuriously. The invariant is PER-CARD, so proving it over the
+    // stable seed subset proves the mechanism — and the seeds carry the
+    // full purpose spectrum (every seed store has a thankyou-tagged clip),
+    // so the exclusion stays load-bearing, not trivially true.
     const videoIds = new Set<string>();
     for (let i = 0; i < 3; i += 1) {
       const result = await callFeed({ buyerId: null, sessionId: randomUUID() });
-      for (const card of result.cards) videoIds.add(card.videoId);
+      for (const card of result.cards) {
+        if (seedStoreIds.includes(card.storeId)) videoIds.add(card.videoId);
+      }
     }
-    expect(videoIds.size).toBeGreaterThan(0);
+    // anti-triviality guard: every call carries one card per seed store
+    // (test 1's invariant), so the scope can never filter the set empty
+    expect(videoIds.size).toBeGreaterThanOrEqual(SEED_HANDLES.length);
 
     const { data, error } = await admin
       .from("video_profiles")
@@ -255,22 +267,34 @@ describe.skipIf(!hasKeys)("B1a live feed selection boundary (staging DB)", () =>
   });
 
   it("the SAME sessionId returns the same order; a different sessionId reshuffles", async () => {
+    // Order equality is asserted over the SEED-card subsequence, not the
+    // whole pool: pool MEMBERSHIP is shared mutable state (a parallel
+    // suite inserting/deleting its published fixture between the two calls
+    // changes the full array), while per-card determinism is the actual
+    // invariant — scoring is per-card (rank.ts: seededJitter is keyed
+    // sessionId:videoId, the final sort compares each card's own score),
+    // so the seed subsequence's relative order is invariant to churn
+    // elsewhere in the pool. Same strength, no race.
+    const seedCards = (cards: Awaited<ReturnType<typeof callFeed>>["cards"]) =>
+      cards
+        .filter((card) => seedStoreIds.includes(card.storeId))
+        .map((card) => card.videoId);
     const sessionId = randomUUID();
     const first = await callFeed({ buyerId: null, sessionId });
     const second = await callFeed({ buyerId: null, sessionId });
-    expect(first.cards.length).toBeGreaterThanOrEqual(2);
-    expect(second.cards.map((card) => card.videoId)).toEqual(
-      first.cards.map((card) => card.videoId),
-    );
+    const firstSeeds = seedCards(first.cards);
+    // anti-triviality guard: all four seed worlds are present, so the
+    // compared subsequence is never shorter than the seed pool
+    expect(firstSeeds.length).toBeGreaterThanOrEqual(SEED_HANDLES.length);
+    expect(seedCards(second.cards)).toEqual(firstSeeds);
 
     // Seeded jitter: a new session reorders. With N cards there are N!
     // orders, so allow a few attempts to dodge the coincidence case.
-    const baseline = first.cards.map((card) => card.videoId).join(",");
+    const baseline = firstSeeds.join(",");
     let reshuffled = false;
     for (let i = 0; i < 8 && !reshuffled; i += 1) {
       const other = await callFeed({ buyerId: null, sessionId: randomUUID() });
-      reshuffled =
-        other.cards.map((card) => card.videoId).join(",") !== baseline;
+      reshuffled = seedCards(other.cards).join(",") !== baseline;
     }
     expect(reshuffled).toBe(true);
   });
