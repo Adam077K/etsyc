@@ -5,10 +5,11 @@
  */
 
 /**
- * COOKIE NAMES LIVE IN lib/feed — deliberately not redeclared here.
- * `FEED_SESSION_COOKIE` ("kol_sid", lib/feed/session.ts — minted by the
- * proxy middleware, never by B4) and `FEED_RING_COOKIE` ("kol_ring",
- * lib/feed/select.ts) are the single source of truth: the same session
+ * COOKIE NAMES LIVE IN lib/feed — deliberately not redeclared here, not
+ * even in prose (a stale comment value is the same desync in miniature).
+ * `FEED_SESSION_COOKIE` (lib/feed/session.ts — minted by the proxy
+ * middleware, never by B4) and `FEED_RING_COOKIE` (lib/feed/select.ts)
+ * are the single source of truth: the same session
  * identity scopes the engine's jitter and the same ring carries
  * anti-repetition from FEED into WORLD_BROWSE, so a buyer is never
  * re-shown in a world what the feed just played. The server action imports
