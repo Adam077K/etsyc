@@ -197,13 +197,28 @@ The world **blooms around** a film that never stops. Not a page load with an ani
 
 Film resting position: `hero-video` per the maker's chosen variant (`center-column` default, `full-bleed` for worlds that want the Kotn treatment). It **stays in the rect it grew to** and the world builds around it — it does not move during the unfold. Moving the film *and* building the world in the same 900 ms is two events; keeping the film still makes it one.
 
-### 3.2 The maker's statement
+### 3.2 The maker's statement and the identity line
 
-This is where `hero-video.props.statement` lands (design-direction §8.2 — **required schema addition**). One line, ≤ 48 characters, `--fs-display-hero`, **weight 400–500**, tracking `-0.01em`, `--on-media` over mandatory `--scrim`, `[text-wrap:balance]`.
+*(Amended 2026-07-22 — CPO E5 ruling. The prior text said an absent statement leaves the world with no hero line at all; that contradicted the shipped `hero-video` render and would have judged B3 against a spec the product deliberately contradicts.)*
 
-Per design-direction §2.1: light and large, not heavy and large. It is a guest on the maker's face.
+Two lines, two tiers, and **only one of them is display tier in either case**.
 
-If `statement` is absent, the world simply has no hero line. It does not fall back to a generated one, to the craft line promoted, or to the store name. **A fabricated statement in a maker's voice is a D10 violation** — the maker's words are theirs or they are absent.
+**The statement — display tier, seller-owned voice.** `hero-video.props.statement` (design-direction §8.2). One line, ≤ 48 characters, `--fs-display-hero`, **weight 400–500**, tracking `-0.01em`, `--on-media` over mandatory `--scrim`, `[text-wrap:balance]`. Per design-direction §2.1: light and large, not heavy and large. It is a guest on the maker's face. Maker-authored — AI may suggest it at authoring time with the maker's approval, and may never emit it at render time (D10).
+
+**The identity line — platform-guaranteed.** The maker's name is never absent from the hero frame. It occupies whichever tier the statement leaves free:
+
+| `statement` | Display tier — exactly one line | Caption tier beneath |
+|---|---|---|
+| **present** | the statement — weight 400–500, `-0.01em` | `maker.displayName` **leads the line**, then `· maker.craft · maker.location` when `showCraftLine`. With `showCraftLine: false` the name renders alone. |
+| **absent** | `maker.displayName` — weight 700, `-0.03em` (shipped render, unchanged) | `maker.craft · maker.location` when `showCraftLine` |
+
+The weight and tracking split is the load-bearing part: a name set bold and tight reads as a **nameplate**; a statement set light and open reads as **speech**. They are never mistaken for one another, and the name is never mistaken for words the maker said.
+
+The identity line never truncates or ellipsizes — a person's name wraps to a second caption line before it is cut.
+
+**Still banned, unchanged (D10).** Nothing may be promoted into the display tier *as the maker's words*: not a generated line, not the craft line, not the store name. **A fabricated statement in a maker's voice is a D10 violation** — the maker's words are theirs or they are absent. `maker.displayName` is **stored identity, not attributed speech**; naming the human is the product's promise, not a fabrication of it.
+
+**Why identity never yields to voice.** B3 is deep-linkable. A buyer who lands cold on a world — no feed, no `GROWN` card, no §2.2 name/craft pass — would otherwise read *"Vessels blown in one breath"* and have no way to name the person whose world they are standing in. An unattributed statement is the weaker D10 posture, not the stronger one.
 
 ### 3.3 Unfold choreography (900 ms hard cap, `--ease-cinematic`)
 
