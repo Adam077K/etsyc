@@ -197,6 +197,7 @@
 ## Cross-cutting requirements (every block)
 
 - **4 states are non-negotiable** — a block that renders only `success` is not shippable (design-taste Rule 5).
+- **No alpha on ink tokens.** `text-ink/*`, `text-muted/*`, `text-on-media/*`, `text-on-block-*/*`, `text-accent*/*` are banned — a slash-opacity on an ink composites a color nobody audited (EmptyPrompt's `text-muted/80` over `bg-surface/60` measured 3.63:1, sub-AA in 8 of 10 palette-modes). Secondary hierarchy comes from the **type scale**, not a second alpha. Backdrop alphas (`bg-surface/60` …) are fine. Enforced by `no-ink-alpha.test.ts` (design-system §5).
 - **Empty ≠ blank.** Live worlds omit truly-empty optional blocks; seller-preview shows guiding prompts tied to the interview beat that fills them; required blocks (hero-video) can't reach empty in a published world.
 - **Loading = skeleton matched to real layout** (never a centered spinner); reserve space so nothing shifts when data resolves.
 - **Error = quiet + inline + recoverable**, in the interface's voice, never blocking the rest of the world (frontend-design writing rules).

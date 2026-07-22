@@ -130,13 +130,15 @@ Five pre-approved palettes, recalibrated for the corrected direction: **warm hum
 | ground | `#F6EFE3` | `#191510` |
 | surface | `#FFFBF3` | `#221D16` |
 | ink | `#221C15` | `#F1EADD` |
-| muted | `#6F6153` | `#A79A88` |
+| muted | `#645648` | `#A79A88` |
 | line | `#E7DCC8` | `#332C23` |
 | accent | `#C64A2C` (terracotta) | `#E0714E` |
 | accent-2 | `#3E7E8C` (sky) | `#6FA9B4` |
 | on-media | `#FBF3E8` | `#FBF3E8` |
 
 **Block set:** `--block-a #B8452A` clay · `--block-b #5F6B33` olive · `--block-c #4C93A8` sky — each with `--on-block-* #FBF3E8` warm-cream ink.
+
+> Light `muted` was regraded `#6F6153` → `#645648` (2026-07 AA fix): sunbaked light is KOL's own chrome default, so its secondary ink carries real headroom — 6.19:1 on ground, 6.86:1 on surface — locked at ≥ 5.5:1 in `aa-audit.test.ts`. The other palettes' `muted` values are intentionally untouched (all clear body AA at full opacity; see `docs/06-design/KOL-wave3-aa-fix-muted.md`).
 
 ### 2.2 `market-plum` — brave marketplace color-blocking (Faire)
 *Faire's exact move: warm cream base, but whole sections block into deep plum, mustard, and soft coral. Home goods, food, gifting, multi-category makers. Serif headlines lead.*
@@ -297,6 +299,7 @@ Every world carries **exactly one** memorable cinematic beat (Cuberto's gooey "T
 | Generic typography (Inter everywhere) | AI picks 1 of 4 vetted pairings, all bold display faces; Inter not in the set |
 | Flat sameness across worlds | Palette (5, each with its bound pairing — §3) × motion preset (4) × radius identity (3) × density (2) × which block-grounds a world color-blocks × which blocks in which order = a wide, distinct, bold combination space (pairing tracks palette, not a free cross-product — §3) |
 | Illegible / low-contrast (incl. type-over-film) | Every palette + `--on-media`/`--on-block-*` pre-checked AA **at its honest level** — body 4.5:1 on dark grounds; the two midtone grounds (`sunbaked`/`cuberto-noir` `--block-c`) are large-text-only at 3:1 and restricted to display type (§2); over-media scrim mandatory; caption tracking + measure fixed |
+| Compounded-alpha inks nobody designed (the EmptyPrompt 3.63:1 defect) | **No opacity modifier on any ink token** — `text-ink/*`, `text-muted/*`, `text-on-media/*`, `text-on-block-*/*`, `text-accent*/*` are banned; secondary hierarchy comes from the **type scale** (e.g. `text-caption` vs `text-body`), never a second alpha. Background-token alphas (`bg-surface/60` …) stay — they are measured backdrops. Enforced by `no-ink-alpha.test.ts` |
 | Janky or gratuitous motion | One base curve + one cinematic curve, fixed ramp, hard unfold/cinema budgets, one signature per world, `transform`/`opacity`/`filter` only, reduced-motion honored |
 | The cream+dainty-serif+timid-terracotta cliché | Terracotta only appears as a **bold ground** (Kotn) paired with a heavy grotesque; warm-paper is 1 of 5 moods |
 | Devolving into a transactional product grid | Blocks are film-led and human-first by spec (block catalog); `product-showcase` bans the generic 3-column card row; no urgency/deal chrome exists in the token set |
