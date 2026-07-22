@@ -437,6 +437,13 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
   const releaseSlot = useCallback((slotId: string) => {
     slots.current.delete(slotId);
     if (activeSlotRef.current === slotId) {
+      // symmetric with positionToSlot's supersede: an in-flight FLIP has
+      // nowhere to land once its slot is gone — dispose it now (counter
+      // loop, backstop timer, transition listeners) instead of leaning on
+      // the durationMs+120 backstop, and drop any deferred maintenance
+      flightRef.current?.dispose();
+      flightRef.current = null;
+      maintenanceDirtyRef.current = false;
       // park — hidden, but never unmounted (the frame outlives every screen)
       activeSlotRef.current = null;
       setActiveSlotId(null);
