@@ -3,11 +3,12 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 
 import { AccountBar } from "@/components/auth/AccountBar";
-import { FeedMagazine } from "@/components/feed/FeedMagazine";
 import { SIGN_IN_PATH } from "@/lib/auth/routes";
 import { getFeedSelection } from "@/lib/feed/select";
 import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { createClient } from "@/lib/supabase/server";
+
+import { FeedGrowExperience } from "./FeedGrowExperience";
 
 /**
  * Discovery feed — the PUBLIC front door (W3-B1a, dispatch §7 conflict 2).
@@ -71,7 +72,9 @@ export default async function FeedPage() {
           </Link>
         </div>
       )}
-      <FeedMagazine result={feed} />
+      {/* the feed→grow seam lives in the client composition — a tapped
+          card grows through B2's provider (FeedGrowExperience.tsx) */}
+      <FeedGrowExperience result={feed} />
     </main>
   );
 }
