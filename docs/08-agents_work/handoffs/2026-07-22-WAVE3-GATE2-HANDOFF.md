@@ -93,6 +93,26 @@ The fix produced a band covering ~85% of the hero at 1440px and **the entire fra
 
 This **cannot be resolved while meeting ≥5.5:1 over light footage** — the alpha ≥ 0.953 arithmetic forecloses it. It is not a defect and no lever fixes it. The suggested direction is **world-specific scrim tinting** (a warm-tinted scrim for sunbaked-palette worlds instead of neutral ground-tinted charcoal), which is a design-system palette question for a later cycle. **Re-evaluate the moment real footage lands** — every judgement here is still against synthetic gradient art, which is better evidence than cream but not final evidence.
 
+### 🧩 THE SEAM LEDGER — the wave's defining discovery
+Three seams connect the buyer journey. **All three were specified and none were written.** Every unit was green; the journey did not exist.
+
+| Seam | State | What was actually wrong |
+|---|---|---|
+| **B4 → B5** (StoreWorld) | ✅ wired + pinned | B4 recorded the tapped product as internal state; B5 read a prop nobody passed. Tapping narrated the store-wide fallback |
+| **feed → grow** (B1b → B2) | ✅ wired + pinned | **`GrowProvider` had ZERO production consumers — nothing in the tree mounted it.** B2's whole feature was unreachable. Its contract doc specified the mapping B1b should write; nobody wrote it |
+| **grow → world** | ⏳ in flight | Was a documented no-op — there was no world route until B3 folded in |
+
+**Proven twice, with numbers: per-branch green says nothing about the journey.** Under the feed→grow unwire mutation, B1b's and B2's own suites return **62/62 GREEN**. Under the StoreWorld unwire, B5's five originals stay green. Both suites were structurally blind: B1b pins `onGrow` against a `vi.fn()`; B2 drives `grow()` with a hand-built source. **Neither ever touched the other.**
+
+The generalizable rule: **a unit test that constructs its own counterparty cannot detect that the counterparty was never connected.** Any contract spanning two units needs a test that mounts both.
+
+### ♻️ THE RE-TYPED CONSTANT — eight instances in one wave
+1–4. Four cookie *name* conventions · 5. cookie *attributes* (×4 sites) · 6. `405` for `resolveEdgeMs("ungrow")` · 7. `CHROME_LEAVE_MS` duplicating `--dur-state` · 8. test rigs re-typing `FRAME_MEDIA_SELECTOR` · 9. the `kol_sid` mint's inline attribute copy · 10. **B1b re-typing `"data-feed-card"` instead of importing B2's `FEED_CARD_ATTRIBUTE`**
+
+The last one is the aspect-counter pattern exactly: **B2's parting test plants its own attribute**, so a rename in B1b would silently no-op the parting choreography with every suite green. A self-referential rig cannot observe the thing it claims to test.
+
+**Cookies are now compiler-enforced** — seven declaration sites down to **one** (`firstPartyCookieOptions()` in `lib/feed/session.ts`, middleware-safe, a *function* so `NODE_ENV` can't freeze at import). The `kol_sid` mint had **never had an attribute pin of any kind** — the least-guarded cookie in the system was the one minting buyer identity.
+
 ### 🔍 TWO EVIDENCE DEFECTS THAT INVALIDATE EARLIER REVIEWS
 1. **Capture contamination.** `playwright.config.ts` hardcoded `localhost:3000` with `reuseExistingServer: true`, and this repo runs ~60 worktrees. A worker's first capture run silently screenshotted **another worktree's dev server**. **Any capture-based review predating the `KOL_E2E_PORT` fix should be treated with suspicion.** Mitigating: the critic's Gate-B numbers were independently reconstructed from theme math on the correct build, so those findings were real.
 2. **`/preview` renders no film at all.** The app-root Film Layer holds a **0×0 rect** there, so the hero backdrop is bare `--surface` cream. This is why the statement measured 1.04:1, why "contrast measured against a fiction" recurred all session, and why a design critic could judge a *video-native* surface showing no video. **Fix in flight** — after it lands, re-capture the five heroes on a private port and re-judge the band ruling against a frame that actually contains footage.
