@@ -21,10 +21,25 @@ const STATES: BlockState[] = ["success", "loading", "empty", "error"];
 export default async function PreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ fixture?: string }>;
+  searchParams: Promise<{ fixture?: string; statement?: string }>;
 }) {
-  const { fixture } = await searchParams;
-  const config = fixture === "custom" ? customStore : senaStore;
+  const { fixture, statement } = await searchParams;
+  const authored = fixture === "custom" ? customStore : senaStore;
+  // ?statement=off — the E5 eyes-on toggle: both hero variants (statement
+  // display line + name-led caption vs the name holding the display tier)
+  // must be viewable at world scale under a real theme. Strips the
+  // AUTHORED statement; it never fabricates one (D10).
+  const config =
+    statement === "off"
+      ? {
+          ...authored,
+          blocks: authored.blocks.map((block) =>
+            block.type === "hero-video"
+              ? { ...block, props: { ...block.props, statement: undefined } }
+              : block,
+          ),
+        }
+      : authored;
   const matrixBlocks = matrixBlocksFor(config);
   const matrixData = {
     maker: config.maker,
@@ -44,12 +59,29 @@ export default async function PreviewPage({
             KOL preview · {config.maker.displayName} · theme:{config.theme.kind}
             {config.theme.kind === "curated" ? ` (${config.theme.paletteId})` : " (any-hex)"}
           </p>
-          <nav aria-label="Fixture" className="flex gap-2">
+          <nav aria-label="Fixture" className="flex flex-wrap gap-2">
             <FixtureLink href="/preview" active={fixture !== "custom"}>
               sena · curated
             </FixtureLink>
             <FixtureLink href="/preview?fixture=custom" active={fixture === "custom"}>
               noor · custom
+            </FixtureLink>
+            {/* E5 hero variants — statement present (authored) vs absent */}
+            <FixtureLink
+              href={fixture === "custom" ? "/preview?fixture=custom" : "/preview"}
+              active={statement !== "off"}
+            >
+              statement
+            </FixtureLink>
+            <FixtureLink
+              href={
+                fixture === "custom"
+                  ? "/preview?fixture=custom&statement=off"
+                  : "/preview?statement=off"
+              }
+              active={statement === "off"}
+            >
+              name only
             </FixtureLink>
           </nav>
         </div>

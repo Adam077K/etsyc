@@ -98,12 +98,14 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
           <FilmFrame clip={clip} className="h-full" onError={() => setClipFailed(true)} />
         )}
         {/* the one big line per world — display-hero over film, --on-media ink
-            over the scrim. When the maker authored a statement it takes the
-            hero slot (screen-specs §3.2: weight 400–500, tracking -0.01em —
-            light and large, a guest on the maker's face); absent → NOTHING is
-            promoted into it (D10: never a generated line, the craft line, or
-            the store name AS the maker's words) — the name identity line
-            renders as before. */}
+            over the scrim. Exactly ONE display-tier line in either case (E5
+            ruling, screen-specs §3.2): a maker-authored statement takes the
+            hero slot light and open (weight 400–500, -0.01em — speech, a
+            guest on the maker's face); absent → the maker's NAME holds the
+            tier bold and tight (weight 700, -0.03em — a nameplate, stored
+            identity, not attributed speech). Nothing else is ever promoted
+            into the tier (D10: no generated line, no craft-line promotion,
+            no store name AS the maker's words). */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-[var(--space-4)] md:p-[var(--space-8)]">
           {block.props.statement ? (
             <h1 className="font-display font-medium leading-[0.92] tracking-[-0.01em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),10cqi)]">
@@ -114,7 +116,21 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
               {data.maker.displayName}
             </h1>
           )}
-          {block.props.showCraftLine ? (
+          {/* the identity line — the hero frame is NEVER nameless (E5): B3 is
+              deep-linkable, and a buyer landing cold must be able to name the
+              person whose words they are reading. Statement present → the
+              name DEMOTES to lead this caption line (showCraftLine true or
+              false); absent → the name is already the display line above and
+              the caption stays craft · location. Never truncated — a name
+              wraps before it is cut. */}
+          {block.props.statement ? (
+            <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media">
+              <span>{data.maker.displayName}</span>
+              {block.props.showCraftLine ? (
+                <> · {data.maker.craft} · {data.maker.location}</>
+              ) : null}
+            </p>
+          ) : block.props.showCraftLine ? (
             <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media">
               {data.maker.craft} · {data.maker.location}
             </p>

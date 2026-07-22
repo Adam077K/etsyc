@@ -48,33 +48,57 @@ function markup(config: StoreConfig, state: BlockState = "success"): string {
   );
 }
 
-describe("hero-video statement — the maker's one big line (D10)", () => {
-  it("renders a maker-authored statement as the hero line, replacing the name line", () => {
+describe("hero-video statement + identity line — E5 ruling (D10)", () => {
+  it("statement present → it holds the display tier and the maker's name LEADS the caption line beneath (never absent from the hero frame)", () => {
     const config = cloneSena();
     const { block } = heroSetup(config);
     block.props.statement = "Clay remembers every hand.";
     const html = markup(config);
     expect(html).toContain("Clay remembers every hand.");
-    // the statement takes the single hero slot — the name line yields to it
+    // exactly one display-tier line — the statement
     expect(html.match(/<h1/g)).toHaveLength(1);
-    expect(html).not.toContain("Sena Okonkwo");
+    expect(html).toMatch(/<h1[^>]*>Clay remembers every hand\.<\/h1>/);
+    // E5: identity never yields to voice — the name demotes to caption
+    // lead, it does not disappear (B3 is deep-linkable; a cold arrival
+    // must be able to name the person whose words they are reading)
+    expect(html).toContain("Sena Okonkwo");
+    expect(html).toMatch(/<span>Sena Okonkwo<\/span> · /);
   });
 
-  it("statement absent → NO fallback into the hero slot: the name line renders exactly as before", () => {
-    const html = markup(cloneSena());
-    // pre-amendment render, unchanged: one h1 carrying the maker's NAME
-    // (an identity line, not words attributed to the maker)
+  it("statement present + craft line hidden → the caption line still renders, carrying the name alone", () => {
+    const config = cloneSena();
+    const { block } = heroSetup(config);
+    block.props.statement = "Clay remembers every hand.";
+    block.props.showCraftLine = false;
+    const html = markup(config);
     expect(html.match(/<h1/g)).toHaveLength(1);
-    expect(html).toContain("Sena Okonkwo");
+    // name present with showCraftLine either true or false (binding AC)
+    expect(html).toContain("<span>Sena Okonkwo</span>");
+    // the craft line itself is genuinely off
+    expect(html).not.toContain("hand-thrown stoneware");
+  });
+
+  it("statement absent → the NAME holds the display tier (nameplate: stored identity, not attributed speech)", () => {
+    const config = cloneSena();
+    const { block } = heroSetup(config);
+    delete block.props.statement;
+    const html = markup(config);
+    // exactly one display-tier line and its content is maker.displayName
+    expect(html.match(/<h1/g)).toHaveLength(1);
+    expect(html).toMatch(/<h1[^>]*>Sena Okonkwo<\/h1>/);
+    // nameplate register, never the speech register (weight/tracking split
+    // is the load-bearing part of E5)
+    expect(html).toMatch(/<h1[^>]*font-bold[^>]*tracking-\[-0\.03em\]/);
   });
 
   it("statement absent + craft line hidden → still no promotion of anything into the hero slot", () => {
     const config = cloneSena();
     const { block } = heroSetup(config);
+    delete block.props.statement;
     block.props.showCraftLine = false;
     const html = markup(config);
     expect(html.match(/<h1/g)).toHaveLength(1);
-    expect(html).toContain("Sena Okonkwo");
+    expect(html).toMatch(/<h1[^>]*>Sena Okonkwo<\/h1>/);
     // the craft line is gone entirely — never re-surfaced as a hero line
     expect(html).not.toContain("hand-thrown stoneware");
   });
