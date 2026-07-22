@@ -141,6 +141,56 @@ describe("hero persistence — the P4 invariant, relocated to the Film Layer", (
     expect(container.querySelectorAll("[data-block-crashed]")).toHaveLength(0);
   });
 
+  it("focalPoint reaches the FRONT BUFFER on the production path (FilmLayerProvider mounted)", async () => {
+    // CPO Ruling 3: makers must not be decapitated by the 4:5 crop. Every
+    // world mounts FilmLayerProvider → layer mode — so the crop must land
+    // on the layer's visible A/B buffer; self-mode coverage proves nothing
+    // about this path (gate-1 P1 focalPoint void).
+    const focal = { x: 0.5, y: 0.18 };
+    const focalConfig: StoreConfig = {
+      ...senaStore,
+      media: {
+        ...senaStore.media,
+        clips: senaStore.media.clips.map((clip) => ({ ...clip, focalPoint: focal })),
+      },
+    };
+    const { container } = renderWorld(
+      <StoreWorld config={focalConfig} isPreview initialStage="world-open" />,
+    );
+    const frame = await primeFilm(container);
+    const front = frame.querySelector<HTMLVideoElement>("video.kol-film-front");
+    expect(front?.style.objectPosition).toBe("50% 18%");
+    // the layer's poster underlay agrees with the film on the crop anchor
+    expect(
+      frame.querySelector<HTMLImageElement>("img.kol-film-poster")?.style.objectPosition,
+    ).toBe("50% 18%");
+  });
+
+  it("the claimed hero slot is a transparent window; its poster returns while the film docks away", async () => {
+    const { container, getByRole } = renderWorld(
+      <StoreWorld config={senaStore} isPreview initialStage="world-open" />,
+    );
+    const frame = await primeFilm(container);
+    const slot = container.querySelector<HTMLElement>("[data-film-slot]")!;
+
+    // claimed + undocked: the slot paints NO poster of its own — the film
+    // shows through from the --z-film-bed plane, and the hero chrome that
+    // must read over it (heading/craft/scrim) sits inside the lifted stage
+    expect(slot.querySelector("img")).toBeNull();
+    expect(frame.hasAttribute("data-film-docked")).toBe(false);
+    expect(container.querySelector(".kol-hero-stage .kol-scrim")).not.toBeNull();
+
+    // docked: the layer flips to the film plane; the slot shows its poster
+    goToStage(getByRole, "narrate-shrink");
+    expect(frame.getAttribute("data-film-docked")).toBe("true");
+    expect(slot.getAttribute("data-film-away")).toBe("true");
+    expect(slot.querySelector("img")).not.toBeNull();
+
+    // undock restores the transparent window
+    goToStage(getByRole, "world-browse");
+    expect(slot.querySelector("img")).toBeNull();
+  });
+
   it("self mode (no Film Layer provider): the Wave-0 in-slot video persists and never pauses", () => {
     const playSpy = vi.spyOn(window.HTMLMediaElement.prototype, "play");
     const pauseSpy = vi.spyOn(window.HTMLMediaElement.prototype, "pause");
