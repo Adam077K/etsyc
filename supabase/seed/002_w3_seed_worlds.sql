@@ -102,7 +102,7 @@ where (profiles.role, profiles.display_name, profiles.handle, profiles.avatar_ur
 -- --- 3 · stores (4 published worlds + 1 unpublished probe) -------------------
 
 insert into public.stores (id, owner_id, handle, name, craft, bio, config, published)
-values ('5eed0002-0000-4000-8000-000000000001', '5eed0001-0000-4000-8000-000000000001', 'hollowgrain', 'Hollow & Grain', 'turned wood — storm-felled oak, beech, walnut', 'I turn bowls and vessels from trees that came down in storms along the Kent coast. Nothing is felled for the work; every blank is salvage. The grain decides the shape — I just keep the gouge steady.',
+values ('5eed0002-0000-4000-8000-000000000001', '5eed0001-0000-4000-8000-000000000001', 'hollowgrain', 'Hollow & Grain', 'Woodturner', 'I turn bowls and vessels from trees that came down in storms along the Kent coast. Nothing is felled for the work; every blank is salvage. The grain decides the shape — I just keep the gouge steady.',
 $cfg${
   "schemaVersion": "1.3",
   "storeId": "5eed0002-0000-4000-8000-000000000001",
@@ -110,7 +110,7 @@ $cfg${
     "id": "5eed0001-0000-4000-8000-000000000001",
     "displayName": "Wren Hollis",
     "handle": "hollowgrain",
-    "craft": "turned wood — storm-felled oak, beech, walnut",
+    "craft": "Woodturner",
     "location": "Whitstable, Kent",
     "bio": "I turn bowls and vessels from trees that came down in storms along the Kent coast. Nothing is felled for the work; every blank is salvage. The grain decides the shape — I just keep the gouge steady.",
     "avatarMediaId": "5eed0007-0000-4000-8000-000000000011",
@@ -530,7 +530,7 @@ where (stores.owner_id, stores.handle, stores.name, stores.craft, stores.bio, st
   (excluded.owner_id, excluded.handle, excluded.name, excluded.craft, excluded.bio, excluded.config, excluded.published);
 
 insert into public.stores (id, owner_id, handle, name, craft, bio, config, published)
-values ('5eed0002-0000-4000-8000-000000000002', '5eed0001-0000-4000-8000-000000000002', 'isoldeglass', 'Isolde Glass', 'free-blown glass — sea-fog greys, tide greens', 'Glass moves like water until the second it doesn''t. I blow each vessel in one continuous session at the furnace — no moulds, no second chances. The sea outside the window gets into everything I make.',
+values ('5eed0002-0000-4000-8000-000000000002', '5eed0001-0000-4000-8000-000000000002', 'isoldeglass', 'Isolde Glass', 'Glassblower', 'Glass moves like water until the second it doesn''t. I blow each vessel in one continuous session at the furnace — no moulds, no second chances. The sea outside the window gets into everything I make.',
 $cfg${
   "schemaVersion": "1.3",
   "storeId": "5eed0002-0000-4000-8000-000000000002",
@@ -538,7 +538,7 @@ $cfg${
     "id": "5eed0001-0000-4000-8000-000000000002",
     "displayName": "Isolde Brandt",
     "handle": "isoldeglass",
-    "craft": "free-blown glass — sea-fog greys, tide greens",
+    "craft": "Glassblower",
     "location": "Bristol",
     "bio": "Glass moves like water until the second it doesn't. I blow each vessel in one continuous session at the furnace — no moulds, no second chances. The sea outside the window gets into everything I make.",
     "avatarMediaId": "5eed0007-0000-4000-8000-000000000021",
@@ -993,7 +993,7 @@ where (stores.owner_id, stores.handle, stores.name, stores.craft, stores.bio, st
   (excluded.owner_id, excluded.handle, excluded.name, excluded.craft, excluded.bio, excluded.config, excluded.published);
 
 insert into public.stores (id, owner_id, handle, name, craft, bio, config, published)
-values ('5eed0002-0000-4000-8000-000000000003', '5eed0001-0000-4000-8000-000000000003', 'maraleather', 'Mara Okafor Leather', 'saddle-stitched leather goods — bridle hides, linen thread', 'Nine stitches to the inch, two needles, one thread waxed by hand. I cut every piece from English bridle leather and stitch it the way saddlers have for three hundred years. Slow is the point.',
+values ('5eed0002-0000-4000-8000-000000000003', '5eed0001-0000-4000-8000-000000000003', 'maraleather', 'Mara Okafor Leather', 'Leatherworker', 'Nine stitches to the inch, two needles, one thread waxed by hand. I cut every piece from English bridle leather and stitch it the way saddlers have for three hundred years. Slow is the point.',
 $cfg${
   "schemaVersion": "1.3",
   "storeId": "5eed0002-0000-4000-8000-000000000003",
@@ -1001,7 +1001,7 @@ $cfg${
     "id": "5eed0001-0000-4000-8000-000000000003",
     "displayName": "Mara Okafor",
     "handle": "maraleather",
-    "craft": "saddle-stitched leather goods — bridle hides, linen thread",
+    "craft": "Leatherworker",
     "location": "Walthamstow, London",
     "bio": "Nine stitches to the inch, two needles, one thread waxed by hand. I cut every piece from English bridle leather and stitch it the way saddlers have for three hundred years. Slow is the point.",
     "avatarMediaId": "5eed0007-0000-4000-8000-000000000031",
@@ -1402,7 +1402,7 @@ where (stores.owner_id, stores.handle, stores.name, stores.craft, stores.bio, st
   (excluded.owner_id, excluded.handle, excluded.name, excluded.craft, excluded.bio, excluded.config, excluded.published);
 
 insert into public.stores (id, owner_id, handle, name, craft, bio, config, published)
-values ('5eed0002-0000-4000-8000-000000000004', '5eed0001-0000-4000-8000-000000000004', 'ferreirapress', 'Ferreira Press', 'letterpress prints & hand-bound editions', 'I set type by hand from a hundred-year-old case of Caslon and print on a restored Vandercook. Ink, pressure, paper — nothing else. Each edition is numbered and the type goes back in the case.',
+values ('5eed0002-0000-4000-8000-000000000004', '5eed0001-0000-4000-8000-000000000004', 'ferreirapress', 'Ferreira Press', 'Letterpress printer', 'I set type by hand from a hundred-year-old case of Caslon and print on a restored Vandercook. Ink, pressure, paper — nothing else. Each edition is numbered and the type goes back in the case.',
 $cfg${
   "schemaVersion": "1.3",
   "storeId": "5eed0002-0000-4000-8000-000000000004",
@@ -1410,7 +1410,7 @@ $cfg${
     "id": "5eed0001-0000-4000-8000-000000000004",
     "displayName": "Tomás Ferreira",
     "handle": "ferreirapress",
-    "craft": "letterpress prints & hand-bound editions",
+    "craft": "Letterpress printer",
     "location": "Leeds",
     "bio": "I set type by hand from a hundred-year-old case of Caslon and print on a restored Vandercook. Ink, pressure, paper — nothing else. Each edition is numbered and the type goes back in the case.",
     "avatarMediaId": "5eed0007-0000-4000-8000-000000000041",

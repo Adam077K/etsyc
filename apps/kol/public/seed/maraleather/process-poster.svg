@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 608 760" role="img" aria-label="Mara Okafor Leather — process (placeholder film)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 608 760" role="img" aria-label="Mara Okafor Leather — process film still">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#2a0d18"/>
@@ -8,5 +8,4 @@
   </defs>
   <rect width="608" height="760" fill="url(#g)"/>
   <circle cx="334.40000000000003" cy="228" r="170.24" fill="#8e3a50" opacity="0.55"/>
-  <text x="36.48" y="722" font-family="system-ui, sans-serif" font-size="21" fill="#f2d9df" opacity="0.85">Mara Okafor Leather — process (placeholder film)</text>
 </svg>
