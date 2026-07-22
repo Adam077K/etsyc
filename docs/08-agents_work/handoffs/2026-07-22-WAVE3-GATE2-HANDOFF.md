@@ -4,6 +4,46 @@
 
 ---
 
+## 🛑 SPEND LIMIT AGAIN — EXACT RESUME POINT (2026-07-22 ~18:00)
+
+**All workers died on `You've hit your monthly spend limit`.** Nothing was lost — everything is committed. **Gate 2 is TWO FOLDS AND ONE TEST RUN from a verdict.** QA-Lead has already committed to issuing PASS on four artifacts without re-reading the 143-file base diff.
+
+### Verified state at the moment of death
+| Item | State |
+|---|---|
+| `integ/wave3-dryrun` | **`d8b3941`** — dock branch folded |
+| `feat/b1b-design-r2r3` @ **`fa513f8`** | ⛔ **NOT folded** — the mobile slot-table fix |
+| `test/film-interleave` @ **`7002cae`** | ⛔ **NOT folded** — the film-handoff spec |
+| `feat/b3-world-unfold` @ `9bb9ffd` | folded; the R1 nameplate change **did not land** (wave-close) |
+| Uncommitted work | **none anywhere critical** (1 file on `b5-dock-qa-handle`, already folded byte-identical) |
+
+⚠️ **`feat/b1b-design-r2r3` is LOCAL-ONLY** — no remote copy. It exists solely in `/Users/adamks/VibeCoding/etsyc`. Do not lose that worktree.
+
+### EXACTLY what to do on resume — this is the whole remaining path
+1. **Fold `feat/b1b-design-r2r3` @ `fa513f8`** into `integ/wave3-dryrun` (resolve the ref against the main repo root; it's local-only)
+2. **Fold `test/film-interleave` @ `7002cae`** (the film-handoff spec)
+3. On a **pristine detached worktree at the final tip**, produce QA-Lead's four artifacts:
+   - `git diff be11a12..<final-tip> --stat`
+   - vitest — 0 failed
+   - **full Playwright — ALL tests. No carry-forward** (the mobile fix changes `feed-layout.spec.ts` assertion values). Expect **22/22**, or **23** if film-handoff adds one. **Report the actual total, not the expected one.**
+   - critical-path confirmation, **checked not asserted**: no auth routes, `middleware.ts`, `supabase/migrations/`, billing, webhooks, or `*secret*`/`*token*`/`*key*`
+4. **Flag explicitly** that B1b touches **`globals.css` + `spreads.ts` + `FeedCard.tsx`** — wider than the "`spreads.ts` + tests" QA-Lead expects
+5. Submit to QA-Lead → **PASS** → **then Founder confirmation before `main` moves.** A QA PASS alone is not authority to merge.
+
+### Cleared since the last handoff entry
+- **P1-A cleared** — Playwright 18/18, three independent runs, three environments
+- **P1-B cleared** — font fix verified; `be11a12..07d64e0` confirmed clean by QA-Lead against the diff
+- **P2-A cleared EMPIRICALLY** — the `/feed` → `/w/[handle]` film handoff has now been **observed working for the first time in the project's history**: `frame === the node captured on /feed` (same DOM node across a real `router.push`), `parked === false` (claimed, not merely surviving), 1280×720, mutation-verified. The world re-claimed with **its own** engine-selected clip (`maraleather`), not the feed clip riding along. Until the 0×0 fix this was invisible film handing off to invisible film.
+- **All four mobile constraints now hold**, and **(e) was tightened to its LITERAL form** — structurally guaranteed, not empirical: after any 32-edge card a 128- or 0-edge successor is always legal, so strict no-same-edge cannot deadlock. **No second impossibility surfaced.**
+
+### Wave-close items NOT blocking the merge
+- **R1 uniform nameplate → `display-hero`/600** (ruled, not implemented). Tracking stays `-0.025em`; fallback `display-hero`/700 only if size alone shows stamping
+- **Non-paused assertion** on the film-handoff spec — approved, not written. *The current test proves the frame survives, not that the film keeps playing*, and "the film never stops" is the premise
+- An **uncommitted `film-interleave.spec.ts`** sits in the `e2e-interleave` worktree on no branch — one `git checkout` from gone; it reportedly contains playback-continuity machinery worth adopting rather than rewriting
+- Curated-modulated nameplate render · 6 of 10 palette×mode combos never rendered · `model3d_id` migration (Irreversible) · `--atmosphere-tint-pct` + `blockGround` schema union
+
+---
+
 ## ✅ CURRENT STATE — READ THIS FIRST (supersedes the spend-limit section below)
 
 **The buyer spine is built, connected, and mutation-pinned at every seam.** Gate 2 returned **PASS (Full tier, 0 P0/P1)** on `integ/wave3-dryrun` @ `be11a12` — **but the CEO sent it back**, because that verdict predated two facts: the Playwright e2e suite has *never been executed on the merged tree*, and a live font defect sat inside the tree it passed. A re-verdict is pending on the final tree.
