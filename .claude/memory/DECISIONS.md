@@ -275,3 +275,25 @@ Deploy is staged in apps/kol/DEPLOY.md, gated ONLY on the founder naming call
 documented there: empty launch, gradient film until D12, client-side 404s,
 no order-timeline table, Supabase built-in SMTP.
 **Owner:** session kol-mvp-page-design. **Status:** engineering complete.
+
+## 2026-07-21 — DEPLOYED: kol-heard.vercel.app is LIVE
+
+The MVP is deployed and public. Founder chose the name "KOL Heard" → Vercel
+project `kol-heard` (deliberately NOT "etsyc", per the trademark decision).
+
+- Vercel project `kol-heard`, root `apps/kol`, deploying the fork's `main`
+  (fast-forwarded to c1d4137 so production tracks the migrated code, not the
+  old stub). Env: NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY
+  (public only; service-role key never set). Build green, Production.
+- Live verified: https://kol-heard.vercel.app/ serves the real app reading
+  the live Supabase DB — honest empty feed ("No maker has filmed for KOL
+  yet"), and /login renders the real email/OTP form. Zero fake content.
+- Supabase auth wired for production: Site URL = https://kol-heard.vercel.app;
+  redirect allow-list = localhost + prod + preview-wildcard /auth/callback.
+
+REMAINING (founder-owned, not engineering): "KOL" trademark/domain check
+before promoting the name; D12 footage (films are gradients); OTP email uses
+Supabase built-in SMTP (rate-limited — add custom SMTP before real volume);
+custom domain optional. The seller pipeline's live write-wiring is the next
+build phase.
+**Status:** DEPLOYED & LIVE.
