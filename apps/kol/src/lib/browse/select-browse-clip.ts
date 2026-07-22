@@ -15,9 +15,9 @@ import {
 /**
  * The WORLD_BROWSE server boundary — the browser never touches the engine
  * (its composition root is server-only by design). A server action rather
- * than a route handler because the anti-repetition ring and the session
- * cookie must both be WRITTEN per selection, and actions are the one
- * client-callable surface that may set cookies.
+ * than a route handler because the anti-repetition ring must be WRITTEN
+ * per selection, and actions are the one client-callable surface that may
+ * set cookies (the feed's RSC deliberately cannot — B1a convergence).
  *
  * SWAPS ARE SCORING-DRIVEN, NEVER RANDOM (AC): the clip comes out of
  * `selectVideos`' weighted-sum ranking, and stage 3 (anti-repetition)
@@ -52,15 +52,14 @@ export async function selectBrowseClip(storeId: string): Promise<BrowseClipResul
   try {
     const cookieStore = await cookies();
 
-    // Session identity: first-party, anonymous-safe, generated on first
-    // need. The cookie is client input — anything but a uuid is replaced,
-    // never trusted (it seeds the ranker's jitter).
+    // Session identity: first-party, anonymous-safe, MINTED BY THE PROXY
+    // MIDDLEWARE (updateSession) on every matched request — never here
+    // (two minters = races; B1a convergence, 2026-07-22). The cookie is
+    // client input: anything but a uuid is treated as fresh-anonymous for
+    // THIS request only — never reused raw, never persisted from here.
     const rawSession = cookieStore.get(KOL_SESSION_COOKIE)?.value;
     const parsedSession = SessionIdSchema.safeParse(rawSession);
     const sessionId = parsedSession.success ? parsedSession.data : crypto.randomUUID();
-    if (!parsedSession.success) {
-      cookieStore.set(KOL_SESSION_COOKIE, sessionId, COOKIE_OPTIONS);
-    }
 
     // Anon-safe buyer identity: null = anonymous (Relationship term is 0).
     const supabase = await createClient();
@@ -70,7 +69,11 @@ export async function selectBrowseClip(storeId: string): Promise<BrowseClipResul
 
     // createEngineDeps is the ONLY permitted entry point — it wires the
     // anon client internally so eligibility can never see a signed-in
-    // seller's drafts (§B0 / W2-WIRE).
+    // seller's drafts (§B0 / W2-WIRE). The ring value is engine-owned and
+    // HMAC-signed — passed through opaque; a tampered ring reads as empty.
+    // This write IS the ring's persistence path across states (the ring
+    // written here is the ring the feed reads), and COOKIE_OPTIONS must
+    // stay identical to B1a's or browsers fork the cookie by scope.
     const deps = createEngineDeps({
       read: () => cookieStore.get(ENGINE_RING_COOKIE)?.value,
       write: (value) => cookieStore.set(ENGINE_RING_COOKIE, value, COOKIE_OPTIONS),
