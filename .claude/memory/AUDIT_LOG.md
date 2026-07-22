@@ -31,3 +31,15 @@
 - Rollback: 5 `drop constraint` statements + ledger delete, documented in the migration header.
 - Branch: feat/mig-check (rebased onto post-merge-train main). Session: docs/08-agents_work/sessions/2026-07-21-database-engineer-mig-check.md
 
+## 2026-07-22 — STAGING APPLY — MIG-TS server-enforced timestamps (Irreversible, Founder-signed)
+
+- Applied `20260721000016_server_timestamps.sql` to `olwtcjzmohdhawdzlzqs` — psql/session-pooler, `ON_ERROR_STOP=1`, rc=0 (CREATE FUNCTION / REVOKE / 11× CREATE TRIGGER / COMMIT). Ledger row inserted (16 rows total).
+- `public.enforce_server_timestamps()` (security definer, `search_path=''`, §B0 `auth.role()='service_role'` escape hatch) live as BEFORE INSERT OR UPDATE on all 11 exposed tables: videos, video_profiles, stores, store_versions, products, reviews, media, profiles, carts, commissions, threads. Verified via information_schema.triggers post-apply.
+- Closes the CEO-verified feed-eviction vector: forged `created_at='2099-01-01'` can no longer squat the FEED_CANDIDATE_CAP=300 recency window nor pin rank.ts's ageDays=0 clamp.
+- Acceptance proof (live suite 5/5 green): owner-JWT INSERT with `created_at=2099-01-01` on videos AND video_profiles → stored ≈ now(); owner UPDATE touching created_at → write lands, timestamp unchanged (immutable); service-role INSERT `2020-03-04T05:06:07Z` → preserved exactly; service-role UPDATE moves it at will.
+- SEED-W3 idempotence re-verified post-apply: full re-run = 12× `INSERT 0 0`, per-table md5 checksums identical before/after on all 7 seeded tables.
+- All 5 pre-existing live suites re-run post-apply: 36/36 green. No types regen needed (trigger functions never appear in generated types).
+- updated_at (8 of 11 tables) deliberately left client-writable — no read path keys on it; reasoning in migration header + session file. Follow-up finding: `verifications.created_at` is client-settable via its INSERT policy (outside signed scope).
+- Rollback: 11 `drop trigger` + `drop function` + ledger delete, documented in the migration header.
+- Branch: feat/mig-ts. Session: docs/08-agents_work/sessions/2026-07-22-database-engineer-mig-ts.md
+
