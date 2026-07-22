@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 608 760" role="img" aria-label="Mara Okafor Leather — narration (placeholder film)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a0d18"/>
+      <stop offset="0.55" stop-color="#5c1f31"/>
+      <stop offset="1" stop-color="#2a0d18"/>
+    </linearGradient>
+  </defs>
+  <rect width="608" height="760" fill="url(#g)"/>
+  <rect x="133.76" y="182.4" width="255.35999999999999" height="380" rx="24.32" fill="#8e3a50" opacity="0.5"/>
+  <text x="36.48" y="722" font-family="system-ui, sans-serif" font-size="21" fill="#f2d9df" opacity="0.85">Mara Okafor Leather — narration (placeholder film)</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 608 760" role="img" aria-label="Broadside No. 12, vermilion and black on cream (placeholder product frame)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#efe6d5"/>
+      <stop offset="0.55" stop-color="#d9c9a8"/>
+      <stop offset="1" stop-color="#efe6d5"/>
+    </linearGradient>
+  </defs>
+  <rect width="608" height="760" fill="url(#g)"/>
+  <rect x="133.76" y="182.4" width="255.35999999999999" height="380" rx="24.32" fill="#b5310c" opacity="0.5"/>
+  <text x="36.48" y="722" font-family="system-ui, sans-serif" font-size="21" fill="#1c1917" opacity="0.85">Broadside No. 12, vermilion and black on cream (placeholder product frame)</text>
+</svg>

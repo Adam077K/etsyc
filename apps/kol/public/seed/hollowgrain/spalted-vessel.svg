@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 608 760" role="img" aria-label="Spalted Beech Vessel, ink-line figuring (placeholder product frame)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6b4423"/>
+      <stop offset="0.55" stop-color="#a9743d"/>
+      <stop offset="1" stop-color="#6b4423"/>
+    </linearGradient>
+  </defs>
+  <rect width="608" height="760" fill="url(#g)"/>
+  <rect x="133.76" y="182.4" width="255.35999999999999" height="380" rx="24.32" fill="#d9a05b" opacity="0.5"/>
+  <text x="36.48" y="722" font-family="system-ui, sans-serif" font-size="21" fill="#2b1a0c" opacity="0.85">Spalted Beech Vessel, ink-line figuring (placeholder product frame)</text>
+</svg>

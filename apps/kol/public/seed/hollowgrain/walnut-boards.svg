@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-label="Pair of walnut serving boards (placeholder product frame)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6b4423"/>
+      <stop offset="0.55" stop-color="#a9743d"/>
+      <stop offset="1" stop-color="#6b4423"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="480" fill="url(#g)"/>
+  <g stroke="#d9a05b" stroke-width="8.64" opacity="0.6"><line x1="108" y1="144" x2="612" y2="115.19999999999999"/><line x1="108" y1="216" x2="612" y2="187.20000000000002"/><line x1="108" y1="288" x2="612" y2="259.20000000000005"/><line x1="108" y1="360" x2="612" y2="331.2"/></g>
+  <text x="43.199999999999996" y="456" font-family="system-ui, sans-serif" font-size="25" fill="#2b1a0c" opacity="0.85">Pair of walnut serving boards (placeholder product frame)</text>
+</svg>
