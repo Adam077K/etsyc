@@ -33,6 +33,12 @@
 - Buyer-journey units branch from / rebase onto `feat/b1a-feed-data`, which is already the base for B1b and B4.
 - **RSC cannot write cookies.** The session id is minted by proxy middleware; the ring is read-only during render. That is load-bearing, not a workaround — a ring persisted at render time would break the "same `sessionId` → same order" AC by excluding just-shown clips on reload.
 
+**AMENDMENT (2026-07-22, Gate 2) — the rule must cover ATTRIBUTES, not just names.** Converging the two cookie *names* to one declaration each was necessary and **insufficient**. Gate 2's adversary found B5 writing both cookies **without `secure`** while every other writer set `secure: NODE_ENV === "production"`. Cookie identity is `(name, domain, path)` — **`Secure` is not part of the key** — so that write *replaced* the middleware's cookie and stripped the attribute, putting an HMAC-bearing ring on plaintext `http://` in production. B5 had imported the canonical names; it reimplemented the behaviour. **Matching identifiers, divergent semantics.**
+
+Therefore: **the attribute set is part of the contract and gets the same single-declaration treatment as the names.** Export one `ENGINE_COOKIE_OPTIONS` (httpOnly · sameSite lax · path / · secure in production) from `lib/feed` beside the constants; every writer imports it. Make it a **function**, not a module const, so `NODE_ENV` resolves at write time. Assert it with `toEqual`, never `toMatchObject` — a subset match cannot detect a *missing* attribute, which is exactly how this slipped past a passing suite.
+
+**Generalised rule:** when a value is a cross-unit contract, the whole shape is the contract. Converging the name while leaving the semantics to each caller reproduces the defect with a longer fuse.
+
 **Applies to:** B1a, B1b, B2, B4, B5, B6, B7, B8 and every later engine consumer. **Gate 2 verifies convergence across all branches before merge.**
 
 **Reversibility:** reversible (constants + imports). **Owner:** ceo. **Affects:** every unit that calls `createEngineDeps`.
