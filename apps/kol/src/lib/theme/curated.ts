@@ -8,6 +8,7 @@ import {
   densitySectionGap,
   fontPairings,
   getPaletteTokens,
+  nameplateRegisters,
   palettes,
   radiusIdentities,
 } from "./tokens";
@@ -70,12 +71,24 @@ export function curatedThemeVars(theme: CuratedTheme): ThemeVars {
     "--on-block-c": blocks.onBlockC,
     // over-media scrim (§1.1) — ground-tinted bottom-up gradient
     "--scrim": `linear-gradient(to top, color-mix(in oklab, ${palette.ground} 45%, black) 0%, transparent 55%)`,
+    // solid text-backdrop scrim (gate-2 / invariant I5): the hero chrome band
+    // paints THIS at full opacity under every set line, so over-film text
+    // contrast is contrast(on-media, scrim-strong) — deterministic on any
+    // footage. keep=40% holds ≥9:1 vs on-media on the lightest curated
+    // ground (locked in scrim-strong.test.ts — 2× the AA body floor, real
+    // headroom, not tuned to the 4.5 fiction).
+    "--scrim-strong": `color-mix(in oklab, ${palette.ground} 40%, black)`,
     // pairing (§3)
     "--font-display": pairing.display,
     "--font-text": pairing.text,
     "--font-mono": pairing.mono,
     "--weight-display": String(pairing.displayWeight),
     "--weight-text": String(pairing.textWeight),
+    // nameplate register (§2.1a / R1) — resolved from the pairing's
+    // strokeClass; the renderer reads these three and never a font name
+    "--nameplate-size": nameplateRegisters[pairing.strokeClass].size,
+    "--nameplate-weight": nameplateRegisters[pairing.strokeClass].weight,
+    "--nameplate-tracking": nameplateRegisters[pairing.strokeClass].tracking,
     // radius identity (§1.3)
     "--radius-sm": radius.sm,
     "--radius-md": radius.md,

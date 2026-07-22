@@ -172,6 +172,16 @@ export function getPaletteTokens(id: PaletteId, mode: ThemeMode): PaletteModeTok
 // (Fontshare faces via their hosted CSS; Google faces via next/font/google).
 // ---------------------------------------------------------------------------
 
+/**
+ * Stroke-contrast class of a pairing's display face (design-direction §2.1a,
+ * R1). Optical mass is size × weight × STROKE CONTRAST, not a number: at the
+ * same 700, a modulated serif (Fraunces) reads airy while a uniform-stroke
+ * grotesk reads as a logotype stamped on the maker's face. The nameplate
+ * register resolves from this class — the renderer reads the emitted
+ * --nameplate-* custom properties and NEVER branches on a font name.
+ */
+export type StrokeClass = "modulated" | "uniform";
+
 export interface FontPairing {
   id: FontPairingId;
   /** font-family stacks referencing the loaded @font-face / next-font vars */
@@ -180,7 +190,23 @@ export interface FontPairing {
   mono: string;
   displayWeight: number;
   textWeight: number;
+  /** §2.1a — drives the nameplate register (modulated: Fraunces only). */
+  strokeClass: StrokeClass;
 }
+
+/**
+ * The nameplate register per stroke class (§2.1a / R1). Two axes, not one:
+ * the statement is larger-and-lighter, the nameplate smaller-and-heavier —
+ * a flat 500–600 single-axis correction under-corrects on heavy uniform
+ * faces, which is why `uniform` also steps DOWN a size tier.
+ */
+export const nameplateRegisters: Record<
+  StrokeClass,
+  { size: string; weight: string; tracking: string }
+> = {
+  modulated: { size: "var(--fs-display-hero)", weight: "700", tracking: "-0.03em" },
+  uniform: { size: "var(--fs-display)", weight: "600", tracking: "-0.025em" },
+};
 
 export const fontPairings: Record<FontPairingId, FontPairing> = {
   // §3.1 — Kotn energy. For sunbaked, orchard.
@@ -191,6 +217,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-geist-mono), ui-monospace, monospace",
     displayWeight: 700,
     textWeight: 400,
+    strokeClass: "uniform",
   },
   // §3.2 — Faire warmth, Fraunces set BIG. For market-plum.
   "warm-serif": {
@@ -200,6 +227,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-geist-mono), ui-monospace, monospace",
     displayWeight: 650,
     textWeight: 400,
+    strokeClass: "modulated",
   },
   // §3.3 — Cuberto polish. For cuberto-noir.
   "modern-mono-grotesk": {
@@ -209,6 +237,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-jetbrains-mono), ui-monospace, monospace",
     displayWeight: 800,
     textWeight: 400,
+    strokeClass: "uniform",
   },
   // §3.4 — the maximal pole. For bazaar.
   "character-maximal": {
@@ -218,6 +247,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-space-mono), ui-monospace, monospace",
     displayWeight: 700,
     textWeight: 400,
+    strokeClass: "uniform",
   },
 };
 

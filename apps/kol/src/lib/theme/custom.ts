@@ -17,7 +17,7 @@
 
 import type { CustomTheme } from "@/lib/store-config/types";
 import type { ThemeVars } from "./curated";
-import { densitySectionGap, radiusIdentities } from "./tokens";
+import { densitySectionGap, nameplateRegisters, radiusIdentities } from "./tokens";
 
 /**
  * Hosted-font-catalog family → the stack that actually resolves at runtime.
@@ -74,6 +74,11 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--block-c": roles.accent,
     "--on-block-c": roles.accentInk,
     "--scrim": `linear-gradient(to top, color-mix(in oklab, ${roles.bg} 45%, black) 0%, transparent 55%)`,
+    // solid text-backdrop scrim — same contract as the curated path (the
+    // hero chrome band paints this opaque under set lines; gate-2 / I5).
+    // keep=40% in oklab bounds the result's luminance ≤ ~0.06 for ANY hex
+    // bg, so the custom AA gate on on-media is what carries the guarantee.
+    "--scrim-strong": `color-mix(in oklab, ${roles.bg} 40%, black)`,
     // customPairing — families from the hosted font catalog (pipeline §5.5),
     // mapped through the catalog so next/font faces actually resolve
     "--font-display": resolveFamily(pairing.displayFamily, "system-ui, sans-serif"),
@@ -81,6 +86,12 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--font-mono": "var(--font-geist-mono), ui-monospace, monospace",
     "--weight-display": String(pairing.displayWeight),
     "--weight-text": String(pairing.textWeight),
+    // nameplate register (§2.1a / R1): kind:"custom" can bring ANY face and
+    // declares no strokeClass yet, so it defaults to `uniform` — the
+    // lower-optical-mass fail-safe (the pipeline §5.5 may later classify)
+    "--nameplate-size": nameplateRegisters.uniform.size,
+    "--nameplate-weight": nameplateRegisters.uniform.weight,
+    "--nameplate-tracking": nameplateRegisters.uniform.tracking,
     "--radius-sm": radius.sm,
     "--radius-md": radius.md,
     "--radius-lg": radius.lg,
