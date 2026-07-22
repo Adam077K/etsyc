@@ -1137,23 +1137,22 @@ Tapping an image grows it into a "meet the person" moment. A second tap advances
 transition." A cut, pause, or reload here breaks the felt continuity that makes B3's unfold read as one
 physical motion. The whole product identity rests on it.
 
->>> AMENDMENT A SUPERSEDES THE PARAGRAPH BELOW. The binding AC is now CPO's reframing: "the film frame
->>> never unmounts and never shows a paused or black frame." FEED -> GROWN is a CROSS-TREE handoff (N feed
->>> cards from N stores), which React cannot do by moving a DOM node. FILM-LAYER builds the mechanism; you
->>> publish the feed-card rect and the centre-column rect and call the `grow` edge from the edge table
->>> (design-direction §5.2, `--dur-grow`, `--ease-kol`). DO NOT write a test asserting a single `<video>`
->>> node — A/B buffers use two, and such a test would fail a correct implementation. Tier is now FULL.
+**Binding AC (CPO ruling, supersedes the retired element-identity wording):** *"the film frame never
+unmounts and never shows a paused or black frame."* FEED → GROWN is a **CROSS-TREE** handoff — N feed
+cards from N stores — which React cannot perform by relocating a DOM node. FILM-LAYER builds the
+mechanism; you publish the feed-card rect and the centre-column rect and call the `grow` edge from the
+edge table (design-direction §5.2, `--dur-grow`, `--ease-kol`).
 
-You own an automated test asserting BOTH: the video element IDENTITY persists across FEED -> GROWN
-(same DOM node, not an equivalent one), and `paused` never flips true during the transition.
-`apps/kol/src/lib/renderer/hero-persistence.test.tsx` is the shipped precedent for how to assert this —
-extend that idiom, do not invent a new one.
+**Do NOT write a test asserting a single `<video>` node.** A/B buffers deliberately use two, so such a
+test would fail a *correct* implementation. Assert instead: (i) the Film Layer node identity persists
+across the transition, and (ii) at no sampled frame is the visible video element paused. `grow` is a
+same-source transition, so per CPO's split it requires true element persistence and **cross-fading is
+forbidden** on this edge.
 
 ## What to build
-- The grow transition promoting the tapped card's `hero-video` into the `center-column` variant inside
-  `HeroStage`. PROMOTED, NEVER REMOUNTED. Reuse `HeroStage`'s imperative FLIP pattern (measure first rect,
-  flip the class, measure last, invert, release on `--ease-cinematic`) — it already solves exactly this
-  problem for the narrate-shrink dock.
+- The grow transition promoting the tapped card into the `center-column` variant **via the FILM-LAYER
+  API** — publish the source rect and the destination rect and request the `grow` edge. B2 does not own
+  the film element and must not mount, move, or remount a `<video>`.
 - Extend the stage model in lib/renderer/stages.ts usage — `"grown"` already exists in WORLD_STAGES; wire
   the real feed surface to it. Do NOT redefine WORLD_STAGES.
 - The feed continues scrolling around the centered video.
@@ -1249,14 +1248,18 @@ This is the hardest renderer invariant in the product and P4 already implemented
 `HeroStage` keeps an identical tree position across every stage so React never remounts the `<video>`;
 stages change classes and transforms only, never layout. Your unfold must live INSIDE that guarantee.
 
->>> AMENDMENT A SUPERSEDES THE PARAGRAPH BELOW. Binding AC: "the film frame never unmounts and never shows
->>> a paused or black frame." Assert against the Film Layer, not a `<video>` node. Your unfold choreography
->>> is design-direction §3.3 — a 900 ms HARD CAP on `--ease-cinematic` in three timed bands (0-280 ground
->>> wash + feed fade-out · 140-620 blocks rise in staggered waves, nearest-to-film first, 70 ms ·
->>> 340-900 atmosphere and secondary media). Tier is now FULL, est. 300-420 LOC.
+**Binding AC (CPO ruling):** *"the film frame never unmounts and never shows a paused or black frame."*
+Assert against the **Film Layer**, never against a `<video>` node — A/B buffers use two, so a
+single-node assertion would fail a correct implementation. `unfold` is a same-source transition, so it
+requires true element persistence and **cross-fading is forbidden** on this edge.
 
-You own an automated test asserting element identity persists and playback is continuous across
-GROWN -> WORLD_OPEN. Extend the idiom in apps/kol/src/lib/renderer/hero-persistence.test.tsx.
+Your unfold choreography is design-direction §3.3 — a **900 ms HARD CAP** on `--ease-cinematic` in three
+timed bands: 0–280 ground wash + feed fade-out · 140–620 blocks rise in staggered waves, nearest-to-film
+first, 70 ms · 340–900 atmosphere and secondary media.
+
+You own an automated test asserting Film Layer node identity persists and playback is continuous across
+GROWN → WORLD_OPEN. Extend the idiom in `apps/kol/src/lib/renderer/hero-persistence.test.tsx`, adapting
+its assertions from the `<video>` node to the Film Layer.
 
 ## What to build
 - The unfold: the P4 renderer's ordered `blocks[]` composing around the persistent hero, under the maker's
@@ -1363,12 +1366,12 @@ NEVER commit it, NEVER print it, NEVER echo its contents.
 - **SWAPS ARE SCORING-DRIVEN, NEVER RANDOM** (an AC). The choice comes from the engine's weighted-sum
   scoring; anti-repetition (stage 3) always runs after scoring so nothing loops within the session.
   There must be NO `Math.random` anywhere in your diff. QA-Lead will grep for it.
-- AMENDMENT A CORRECTS THE NEXT LINE. Changing `src` on a live `<video>` runs the media load algorithm:
-  readyState resets, playback stops, poster or black flashes. It is not physically satisfiable. Call
-  FILM-LAYER's `swapClip(src, poster)` instead — it loads the INACTIVE buffer, waits for `canplay`, and
-  cross-fades over `--dur-swap` (120 ms). Your unit gets SIMPLER, not harder; you own no film mechanism.
-- The element persists across swaps: change the `src`, never remount the `<video>`. Any block interaction
-  must NOT pause or unmount the persistent film — assert this in a test.
+- **Never mutate `src` on a live `<video>`.** Doing so runs the media load algorithm: `readyState` resets,
+  playback stops, and a poster or black frame flashes — it is not physically satisfiable. Call FILM-LAYER's
+  `swapClip(src, poster)` instead: it loads the INACTIVE buffer, waits for `canplay`, and cross-fades over
+  `--dur-swap` (120 ms). Your unit gets SIMPLER, not harder — you own no film mechanism.
+- The **film frame** persists across swaps. Any block interaction must NOT pause or unmount the persistent
+  film — assert this against the Film Layer, not against a `<video>` node.
 - No eligible `process`/`atmosphere` clip to swap to -> the player simply keeps the current clip. Graceful,
   never an error.
 - Click a product -> advance toward `NARRATE_SHRINK` (B5). Expose the handoff; B5 owns the shrink.
