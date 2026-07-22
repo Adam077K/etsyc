@@ -4,7 +4,56 @@
 
 ---
 
-## 🛑 SESSION ENDED ON A MONTHLY SPEND LIMIT — READ THIS FIRST
+## ✅ CURRENT STATE — READ THIS FIRST (supersedes the spend-limit section below)
+
+**The buyer spine is built, connected, and mutation-pinned at every seam.** Gate 2 returned **PASS (Full tier, 0 P0/P1)** on `integ/wave3-dryrun` @ `be11a12` — **but the CEO sent it back**, because that verdict predated two facts: the Playwright e2e suite has *never been executed on the merged tree*, and a live font defect sat inside the tree it passed. A re-verdict is pending on the final tree.
+
+### Blocking on the Founder — one action closes four items
+**Re-apply `supabase/seed/002_w3_seed_worlds.sql` to staging** (all upserts; no hand-written mutation needed). A worker's scoped PATCH was **denied by the permission classifier**; it stopped, and the CEO declined to run the same privileged write from a more permissive session — *being able to is not authorization*. That re-seed lands: both font fixes · the 36-file debug-caption strip · the craft-line data-shape fix · and unblocks the ferreirapress eyes-on capture.
+
+Also still outstanding: **real maker footage** (gates 5 acceptance criteria) and the **`store-media` bucket**.
+
+### 🔤 THE SHARPEST DEFECT OF THE WAVE — silent, live, and specified
+`lib/theme/custom.ts:43` fell back to a **quoted passthrough** of any declared font family. `ferreirapress` declared `"Space Grotesk"`/`"Source Serif 4"`; `isoldeglass` declared `"Archivo"`. **None are in the catalog. None are loaded.** Both worlds rendered their type in the system stack — **two of two custom seed worlds** — with every test green.
+
+The second one was found *by the guard written for the first*, on its first run. It was invisible to inspection because isoldeglass's **display** face was fine; only its body text was wrong, so the world looked broadly right.
+
+> **The reason this class produced live wrongness rather than mere coverage gaps: the fallback was specified behaviour. Nothing was broken. The system did exactly what it was told, and what it was told was silent.**
+
+Fixed: both worlds re-faced to catalog faces (ferreirapress → Fraunces/Satoshi, a letterpress printer's display face carrying impression-on-paper character; isoldeglass → General Sans). `font-catalog.test.ts` now parses the seed SQL and fails on any off-catalog family. Whether the runtime should *loudly reject* rather than fall back is an open §5.5 catalog decision.
+
+### 🕳️ FAIL-SAFE BRANCHES THAT WERE NEVER EXERCISED — systematic inventory
+Triggered by finding that **no fixture rendered the modulated nameplate register at all**, making a `DECISIONS.md` merge gate literally unsatisfiable. The class:
+
+> **A fail-safe default that is never exercised looks identical to a working feature.** Coverage won't flag it (the fallback line *is* covered). Tests won't flag it (the fallback *is* correct). It surfaces only when someone asks: *has anything ever taken the other branch?*
+
+| # | Finding | State |
+|---|---|---|
+| 1 | font passthrough (above) | **live defect ×2** — fixed |
+| 2 | `custom.ts:54` light-mode `--on-media` — ran live on ferreirapress, asserted nowhere | pinned |
+| 3 | `curated.ts:60` `accent3 ?? accent` — dead both ways, zero consumers | removed |
+| 4 | `accentCtaPair` generic-dark branch — fires for no existing world | emission-pinned only |
+| 5 | **6 of 10 palette × mode combos have never been rendered** (sunbaked-D, orchard-D, market-plum-L, cuberto-noir L+D, bazaar L+D) | **open gap** |
+| 6 | **curated-MODULATED nameplate has never painted** — all seeds author statements, so the absent-statement path never runs on the curated path; covered only via custom/noor | **open — may gate B3 merge** |
+| 7 | `reviews` layout variants, `atmosphere block-ground` silent fall-through, `dimensional` motion preset | reported |
+
+**#5 matters beyond itself:** Design-Lead's shadow-blend and badge-opacity findings *cannot be measured*, because no dark world is rendered anywhere to measure them on. **The evidence base itself has a hole.**
+
+### 📏 THE MOBILE CONSTRAINTS WERE PROVABLY UNSATISFIABLE — and got fixed at the root
+An engineer **derived** (not guessed) that **(d)-hard, (e)-literal, the bleed cadence, and anti-periodicity cannot all four hold** under §1.6: `M-OFF-L`/`M-OFF-R` were accidental **215px bilateral mirrors**, so (d) deleted their adjacency edge, leaving one edge-breaker and forcing a ping-pong that anti-periodicity then rejected. Any three could hold.
+
+Design-Lead chose **Path A — fix the slot table**, not "pick three and record it": *"choosing three is honest but permanently leaves a spec that asserts something it cannot satisfy."* `M-OFF-L` right inset 128px → **112px** (231px vs 215px, 16px apart). Widen left rather than narrow right because `M-OFF-L` is 1:1 (231×231 reads as an editorial plate) while narrowing 3:2 `M-OFF-R` yields a thumbnail.
+
+### 📐 CONSTANTS REGISTER — approved, `KOL-design-system.md` §6
+Four instances this wave of **one constant calibrated in isolation, wrong at the other end of an unnamed axis**: nameplate weight (typeface stroke contrast) · caption margin (descender depth) · atmosphere tint (ground luminance) · and the constraint-set version above. Design-Lead caught the first itself, then repeated the mistake twice — **evidence the insight does not survive as an insight.**
+
+Every appearance-governing constant gets a row: value · **calibrated-against** · **blind-to** · far-end check (**measured / reasoned / derived** — explicit, never uniform confidence) · status (`OK` / `KNOWN-GAP` / `NEEDS-CHECK` / **`NEEDS-RENDER`** for "measurement context does not exist"). Pre-merge gate; auto-flag any `color-mix(in oklab, token N%, …)` on a wide-luminance token (*"the reviewer does not need to understand oklab — the pattern match is sufficient"*); re-grep `Blind-to: ground luminance` whenever a palette world is added.
+
+**Constraint-set companion:** when adding a constraint on a layout variable, verify against every other constraint on that variable that a simultaneously-satisfying assignment exists.
+
+---
+
+## 🛑 (HISTORICAL) SESSION INTERRUPTED BY A MONTHLY SPEND LIMIT
 
 Five workers were killed mid-flight by `You've hit your monthly spend limit`. **Raise the limit before continuing — nothing below can proceed without workers.** Four of the five committed before dying. Salvage:
 
