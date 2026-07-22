@@ -573,7 +573,7 @@ $cfg${
     },
     "customPairing": {
       "displayFamily": "Clash Display",
-      "textFamily": "Archivo",
+      "textFamily": "General Sans",
       "scaleRatio": 1.25,
       "displayWeight": 600,
       "textWeight": 400
@@ -1444,11 +1444,12 @@ $cfg${
       }
     },
     "customPairing": {
-      "displayFamily": "Space Grotesk",
-      "textFamily": "Source Serif 4",
+      "displayFamily": "Fraunces",
+      "textFamily": "Satoshi",
       "scaleRatio": 1.2,
       "displayWeight": 700,
-      "textWeight": 400
+      "textWeight": 400,
+      "strokeClass": "modulated"
     },
     "motionPreset": "fluid",
     "radiusIdentity": "round",

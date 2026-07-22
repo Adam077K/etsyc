@@ -79,6 +79,37 @@ describe("--scrim-strong: deterministic over-film text backdrop (gate-2 / I5)", 
     expect(ratio).toBeGreaterThanOrEqual(OVER_FILM_BODY_FLOOR);
   });
 
+  it("custom LIGHT mode (ferreirapress seed roles) — the onMedia=surface branch, live on a seed world but previously never contrast-verified", () => {
+    // fail-safe-hunt finding: customThemeVars picks on-media per mode
+    // (dark→ink, light→surface). Every fixture is dark-mode custom, so the
+    // LIGHT branch shipped exercised only by the ferreirapress seed world —
+    // rendered live, asserted nowhere. Pinned here with that seed's exact
+    // roles so the branch has an output-level test, not just line coverage.
+    const theme = customStore.theme;
+    if (theme.kind !== "custom") throw new Error("noor fixture must be custom-themed");
+    const light = {
+      ...theme,
+      customPalette: {
+        mode: "light" as const,
+        roles: {
+          bg: "#f7f2e9",
+          surface: "#fffdf7",
+          ink: "#1c1917",
+          inkMuted: "#57514a",
+          accent: "#b5310c",
+          accentInk: "#fff7ef",
+          border: "#d8cfc0",
+        },
+      },
+    };
+    const vars = customThemeVars(light) as Record<string, string>;
+    // light mode must select the light-reading role (surface), not ink
+    expect(vars["--on-media"]).toBe("#fffdf7");
+    const ratio = measured(vars);
+    expect(ratio).toBeGreaterThanOrEqual(SCRIM_STRONG_TARGET);
+    expect(ratio).toBeGreaterThanOrEqual(OVER_FILM_BODY_FLOOR);
+  });
+
   it("sena fixture (the capture that failed at 3.78:1) — curated path emits the pair", () => {
     const theme = senaStore.theme;
     if (theme.kind !== "curated") throw new Error("sena fixture must be curated-themed");

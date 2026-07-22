@@ -41,7 +41,6 @@ export interface PaletteModeTokens {
   accent: string;
   accent2: string;
   /** Optional third accent — only palettes with three-way play (bazaar). */
-  accent3?: string;
   onMedia: string;
 }
 
@@ -146,12 +145,12 @@ export const palettes: Record<PaletteId, Palette> = {
     id: "bazaar",
     light: {
       ground: "#F7ECE0", surface: "#FDF6EC", ink: "#2A1220", muted: "#7A5A54",
-      line: "#E7D3C0", accent: "#C2452D", accent2: "#1F6F6B", accent3: "#D8A24A",
+      line: "#E7D3C0", accent: "#C2452D", accent2: "#1F6F6B",
       onMedia: "#FBEFE0",
     },
     dark: {
       ground: "#241028", surface: "#31183A", ink: "#F6E9D8", muted: "#C7A6B8",
-      line: "#43254D", accent: "#E0623F", accent2: "#2E9A93", accent3: "#E7B45C",
+      line: "#43254D", accent: "#E0623F", accent2: "#2E9A93",
       onMedia: "#FBEFE0",
     },
     blocks: {

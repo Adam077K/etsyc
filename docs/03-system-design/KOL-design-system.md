@@ -118,7 +118,7 @@ See §4 for the full language. The atomic tokens (v2 — cinematic + physical):
 
 Five pre-approved palettes, recalibrated for the corrected direction: **warm human temperature, but brave enough to color-block whole sections.** Each ships light + dark and — new in v2 — a **block-ground set** (`--block-a/-b/-c` with matching `--on-block-*` ink) so a world can render full-bleed vivid sections (the Faire move) without authoring raw hex. For **curated worlds** (KOL's own UI + direction-less shops) the AI picks one whole palette per world and never mixes across palettes; **seller shops bring their own brand** (D15 — the scope note up top), and these five are their optional presets, not a cap. AA on block-grounds is honest and per-combo (see the AA-levels note below the token contract) — re-verified in the QA gate, not assumed.
 
-**Token contract per palette:** `--ground` (page), `--surface` (raised/card), `--ink` (primary text), `--muted` (secondary), `--line` (hairline), `--accent` (interactive accent), `--accent-2` (secondary), `--accent-3` (**optional** — a third interactive accent; declared only by palettes with three-way accent play, e.g. `bazaar`; two-accent palettes leave it unset), `--on-media` (type set over film), plus the **block set** `--block-a/-b/-c` + `--on-block-a/-b/-c`.
+**Token contract per palette:** `--ground` (page), `--surface` (raised/card), `--ink` (primary text), `--muted` (secondary), `--line` (hairline), `--accent` (interactive accent), `--accent-2` (secondary), `--on-media` (type set over film), plus the **block set** `--block-a/-b/-c` + `--on-block-a/-b/-c`.
 
 **AA levels on block-grounds (honest, per-combo — re-verified in the QA gate, not assumed).** Paired text on the **dark block-grounds** clears WCAG AA body (4.5:1). Two **midtone grounds are large-text-only** — cream/paper ink on them lands between 3:1 and 4.5:1, passing AA **large text (≥24px, or ≥18.66px bold → 3:1) but failing body**: `sunbaked --block-c` (sky `#4C93A8` + cream ≈ 3.1:1) and `cuberto-noir --block-c` (electric `#3D6CE0` + paper ≈ 4.4:1). **Restrict those two grounds to display/large statement type** — which is exactly what color-block sections carry (the `display-hero`/`display` line washes over the ground, §1.2/§4.2). For body copy on a colored section, use a **dark** ground (`--block-a`) or the standard `--ground`/`--surface`. The guarantee is therefore *body 4.5:1 on dark grounds, large-text 3:1 on the two midtone grounds* — not a blanket body-level claim.
 
@@ -200,7 +200,6 @@ Five pre-approved palettes, recalibrated for the corrected direction: **warm hum
 | line | `#E7D3C0` | `#43254D` |
 | accent | `#C2452D` (vermilion) | `#E0623F` |
 | accent-2 | `#1F6F6B` (teal) | `#2E9A93` |
-| accent-3 | `#D8A24A` (gold) | `#E7B45C` |
 | on-media | `#FBEFE0` | `#FBEFE0` |
 
 **Block set:** `--block-a #7A1E3C` jewel-magenta (`--on-block-a #F9DCE6`) · `--block-b #1F6F6B` teal (`--on-block-b #EAF7F5`) · `--block-c #D8A24A` gold (`--on-block-c #2A1004`).

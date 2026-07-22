@@ -10,7 +10,7 @@
    motion tokens. PER-WORLD (set by apply-theme.ts at the world
    root, curated + custom converge on identical names): --ground,
    --surface, --ink, --muted, --line, --accent, --accent-2,
-   --accent-3, --accent-ink, --on-media, --block-a/-b/-c,
+   --accent-ink, --on-media, --block-a/-b/-c,
    --on-block-a/-b/-c, --font-display/-text/-mono,
    --radius-sm/-md/-lg, --space-section.
    ============================================================ */
@@ -125,7 +125,6 @@
   --line: #e7dcc8;
   --accent: #c64a2c;
   --accent-2: #3e7e8c;
-  --accent-3: var(--accent);
   /* AA-measured CTA pair (sunbaked light: cream on 5%-darkened accent, 4.72:1) */
   --accent-cta: color-mix(in srgb, var(--accent) 95%, black);
   --accent-ink: #fbf3e8;

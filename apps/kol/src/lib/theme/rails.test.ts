@@ -46,7 +46,6 @@ const REQUIRED_WORLD_VARS = [
   "--line",
   "--accent",
   "--accent-2",
-  "--accent-3",
   "--accent-cta",
   "--accent-ink",
   "--on-media",
@@ -222,17 +221,6 @@ describe("curated resolution — every combination yields a complete token set",
     for (const preset of MOTION_PRESETS) {
       expect(motionSpec(preset).reveals).toBe(true);
       expect(motionSpec(preset).cinematicUnfold).toBe(preset !== "hushed");
-    }
-  });
-
-  it("only bazaar declares a third accent; others fall back to --accent", () => {
-    for (const paletteId of PALETTE_IDS) {
-      const vars = curatedThemeVars({ ...baseCurated, paletteId });
-      if (paletteId === "bazaar") {
-        expect(vars["--accent-3"]).not.toBe(vars["--accent"]);
-      } else {
-        expect(vars["--accent-3"]).toBe(vars["--accent"]);
-      }
     }
   });
 });

@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 // Ink tokens (design-system §2 token contract). `accent[a-z0-9-]*` also
-// catches accent-2/accent-3/accent-cta/accent-ink. Alpha is a bare number
+// catches accent-2/accent-cta/accent-ink. Alpha is a bare number
 // (text-muted/80) or an arbitrary value (text-muted/[0.8]). Non-global
 // source; call sites build their own instance so lastIndex never leaks.
 const INK_ALPHA_SRC =
