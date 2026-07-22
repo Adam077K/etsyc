@@ -14,7 +14,7 @@ import {
   type ProductField,
   type ProductFormState,
 } from "@/lib/products/actions";
-import { SPEC_FIELDS, type SpecField } from "@/lib/products/schemas";
+import { CURRENCY_CODES, SPEC_FIELDS, type SpecField } from "@/lib/products/schemas";
 import { Constants } from "@/lib/supabase/database.types";
 import { PRODUCT_BADGES } from "@/lib/store-config/schema";
 import { cn } from "@/lib/utils";
@@ -270,20 +270,26 @@ export function ProductForm({
               <label htmlFor="product-currency" className={labelClass}>
                 Currency
               </label>
-              <input
+              {/* a SELECT over the supported set (F4): the stored integer's
+                  meaning depends on the currency's minor-unit exponent, so
+                  free-typed codes we have no exponent for can't be offered.
+                  The schema still gates forged payloads to the same set. */}
+              <select
                 id="product-currency"
                 name="currency"
-                type="text"
-                maxLength={3}
                 defaultValue={product?.currency ?? "GBP"}
-                autoCapitalize="characters"
-                spellCheck={false}
                 aria-invalid={currencyError ? true : undefined}
                 aria-describedby={
                   currencyError ? "product-currency-error" : "product-price-help"
                 }
                 className={cn(inputClass, "font-mono uppercase tabular-nums")}
-              />
+              >
+                {CURRENCY_CODES.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-1 flex-col gap-2">
               <label htmlFor="product-price" className={labelClass}>
@@ -307,9 +313,10 @@ export function ProductForm({
             </div>
           </div>
           <p id="product-price-help" className="text-caption text-muted">
-            Stored exactly as entered — whole units and up to two decimal
-            places (48 or 48.50). Checkout reads this price from your catalog;
-            it can never be set anywhere else.
+            Stored exactly as entered, in the currency&rsquo;s own precision —
+            48.50 (GBP), 4800 (JPY, whole amounts), 12.345 (KWD). Checkout
+            reads this price from your catalog; it can never be set anywhere
+            else.
           </p>
           {currencyError ? (
             <div id="product-currency-error">

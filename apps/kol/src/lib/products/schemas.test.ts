@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { formatPrice as formatPriceIntl } from "@/lib/utils";
 import {
   badgesSchema,
+  CURRENCIES,
+  CURRENCY_CODES,
+  currencyExponent,
   currencySchema,
   formatPrice,
   inventoryQtySchema,
@@ -10,9 +14,9 @@ import {
   minorToMajor,
   narrationClipIdsSchema,
   optionalUuidSchema,
-  priceMajorSchema,
   PRICE_MAX_MINOR,
   productSpecsSchema,
+  productWriteFieldsSchema,
   productWriteSchema,
   SPEC_FIELDS,
   titleSchema,
@@ -123,20 +127,92 @@ describe("formatPrice", () => {
   });
 });
 
-describe("priceMajorSchema", () => {
-  it("parses a valid amount to integer minor units", () => {
-    const parsed = priceMajorSchema.safeParse("48.50");
-    expect(parsed.success).toBe(true);
-    if (parsed.success) expect(parsed.data).toBe(4850);
+describe("money — per-currency exponent (adversary F4)", () => {
+  it("JPY: a seller typing 4800 stores 4800 — NOT 480000 (the mis-store F4 exists to prevent)", () => {
+    expect(majorToMinor("4800", 0)).toBe(4800);
   });
 
-  it.each(["12.345", "-1", "", "free", "£5"])("rejects %j", (input) => {
-    expect(priceMajorSchema.safeParse(input).success).toBe(false);
+  it("JPY: decimal input is a hard reject, never a rounding", () => {
+    expect(majorToMinor("48.5", 0)).toBeNull();
+    expect(majorToMinor("48.00", 0)).toBeNull();
+    expect(majorToMinor("48.", 0)).toBeNull();
   });
 
-  it("rejects a missing price with a humane message", () => {
-    const parsed = priceMajorSchema.safeParse(null);
-    expect(parsed.success).toBe(false);
+  it("KWD: three decimal places convert exactly (12.345 → 12345)", () => {
+    expect(majorToMinor("12.345", 3)).toBe(12345);
+    expect(majorToMinor("12.3", 3)).toBe(12300);
+    expect(majorToMinor("12.3456", 3)).toBeNull();
+  });
+
+  it("three-decimal inputs respect the int4 cap — 7-digit units would overflow without it", () => {
+    // 9,999,999.999 KWD = 9,999,999,999 minor units > int4 — must reject
+    expect(majorToMinor("9999999.999", 3)).toBeNull();
+    // the largest representable three-decimal price is exactly the cap
+    expect(majorToMinor("999999.999", 3)).toBe(PRICE_MAX_MINOR);
+  });
+
+  it("minorToMajor honours the exponent (4800@0 → \"4800\", 12345@3 → \"12.345\", 5@3 → \"0.005\")", () => {
+    expect(minorToMajor(4800, 0)).toBe("4800");
+    expect(minorToMajor(12345, 3)).toBe("12.345");
+    expect(minorToMajor(5, 3)).toBe("0.005");
+  });
+
+  it("currencyExponent: supported codes get their ISO exponent; unknown legacy codes fall back to 2", () => {
+    expect(currencyExponent("JPY")).toBe(0);
+    expect(currencyExponent("KWD")).toBe(3);
+    expect(currencyExponent("GBP")).toBe(2);
+    expect(currencyExponent("SEK")).toBe(2);
+  });
+});
+
+describe("money — the full boundary round-trip, every supported currency", () => {
+  /** Seller-typed inputs per exponent class — what the buyer must see back. */
+  const TYPED: Record<0 | 2 | 3, string[]> = {
+    0: ["4800", "1", "9999999"],
+    2: ["48.50", "0.29", "19.99", "48"],
+    3: ["12.345", "0.005", "999999.999"],
+  };
+
+  it.each(CURRENCY_CODES)("%s: typed → stored integer → displayed, exactly", (code) => {
+    const exponent = CURRENCIES[code].exponent;
+    for (const typed of TYPED[exponent]) {
+      const stored = majorToMinor(typed, exponent);
+      expect(stored, `${code} ${typed} must store`).not.toBeNull();
+      // storage is an integer, and the seller's exact amount comes back
+      expect(Number.isSafeInteger(stored)).toBe(true);
+      const canonical =
+        exponent === 0 || typed.includes(".") ? typed : `${typed}.${"0".repeat(exponent)}`;
+      expect(minorToMajor(stored!, exponent)).toBe(canonical);
+      // seller-side display carries the exact canonical amount
+      expect(formatPrice(stored!, code)).toContain(canonical);
+    }
+  });
+
+  it("pins each declared exponent to Intl/CLDR — the table cannot drift from what the buyer path renders", () => {
+    for (const code of CURRENCY_CODES) {
+      const digits = new Intl.NumberFormat("en-GB", {
+        style: "currency",
+        currency: code,
+      }).resolvedOptions().maximumFractionDigits;
+      expect(digits, `${code} exponent drift`).toBe(CURRENCIES[code].exponent);
+    }
+  });
+
+  it("buyer display (lib/utils, Intl path): ¥4800 renders as 4,800 — never 48.00", () => {
+    const jpy = formatPriceIntl(4800, "JPY");
+    expect(jpy).toContain("4,800");
+    expect(jpy).not.toContain("48.00");
+    expect(jpy).not.toContain(".");
+  });
+
+  it("buyer display: 12.345 KWD renders three decimals — never 123.45", () => {
+    const kwd = formatPriceIntl(12345, "KWD");
+    expect(kwd).toContain("12.345");
+    expect(kwd).not.toContain("123.45");
+  });
+
+  it("buyer display: 2dp currencies are unchanged (£48.50)", () => {
+    expect(formatPriceIntl(4850, "GBP")).toBe("£48.50");
   });
 });
 
@@ -146,11 +222,27 @@ describe("currencySchema", () => {
   });
 
   it("normalises lowercase input", () => {
-    expect(currencySchema.parse("eur")).toBe("EUR");
+    expect(currencySchema.parse("jpy")).toBe("JPY");
   });
 
-  it.each(["GB", "GBPX", "12A", "£££"])("rejects %j", (input) => {
+  it("accepts every supported code", () => {
+    for (const code of CURRENCY_CODES) {
+      expect(currencySchema.parse(code)).toBe(code);
+    }
+  });
+
+  it.each(["GB", "GBPX", "12A", "£££"])("rejects malformed %j", (input) => {
     expect(currencySchema.safeParse(input).success).toBe(false);
+  });
+
+  it("rejects a well-formed but UNSUPPORTED code loudly — better than silently mis-storing its integer (F4)", () => {
+    for (const code of ["SEK", "TRY", "XXX"]) {
+      const parsed = currencySchema.safeParse(code);
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues[0]?.message).toContain("supported");
+      }
+    }
   });
 });
 
@@ -267,8 +359,37 @@ describe("productWriteSchema — whole-object boundary", () => {
     ).toBe(false);
   });
 
+  it("cross-field (F4): the price's accepted precision follows the CURRENCY", () => {
+    // JPY — whole amounts store verbatim…
+    const jpy = productWriteSchema.safeParse({ ...valid, currency: "JPY", price: "4800" });
+    expect(jpy.success).toBe(true);
+    if (jpy.success) {
+      expect(jpy.data.price).toBe(4800);
+      expect(jpy.data.currency).toBe("JPY");
+    }
+    // …and 2dp input is a field error on price, naming the rule
+    const jpyDecimal = productWriteSchema.safeParse({ ...valid, currency: "JPY", price: "48.50" });
+    expect(jpyDecimal.success).toBe(false);
+    if (!jpyDecimal.success) {
+      const issue = jpyDecimal.error.issues.find((i) => i.path[0] === "price");
+      expect(issue?.message).toContain("whole amounts");
+    }
+    // KWD — three decimals store exactly
+    const kwd = productWriteSchema.safeParse({ ...valid, currency: "KWD", price: "12.345" });
+    expect(kwd.success).toBe(true);
+    if (kwd.success) expect(kwd.data.price).toBe(12345);
+  });
+
+  it("an unsupported currency is a currency-field error — the price is never converted on a guessed exponent", () => {
+    const parsed = productWriteSchema.safeParse({ ...valid, currency: "TRY" });
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues.some((i) => i.path[0] === "currency")).toBe(true);
+    }
+  });
+
   it("has no client-set store_id, status, or created_at anywhere in its shape", () => {
-    const keys = Object.keys(productWriteSchema.shape);
+    const keys = Object.keys(productWriteFieldsSchema.shape);
     expect(keys).not.toContain("storeId");
     expect(keys).not.toContain("store_id");
     expect(keys).not.toContain("createdAt");
