@@ -1,15 +1,14 @@
+import type { FeedCardFocalPoint } from "@/lib/feed/select";
 import type { GrownSelection } from "@/lib/grow/types";
 
 /**
  * B2 seam types — what a feed card hands the grow machinery on tap, and
  * what the grow surface hands B3 on the second tap.
  *
- * `GrowSource` is structurally satisfiable from B1a's `FeedCard` view
- * model ({ videoId, storeId, makerName, src, poster, captionsSrc, … }) —
- * B1b maps a tapped card into this at the tap site. `craftLine` and
- * `focalPoint` are optional because the FeedCard contract does not carry
- * them yet (flagged in decisions_made); everything renders correctly
- * without them.
+ * `GrowSource` consumes B1a's shipped `FeedCard` view model field-for-
+ * field ({ videoId, storeId, makerName, craft, place, src, poster,
+ * captionsSrc, focalPoint, … }) — B1b maps a tapped card into this at the
+ * tap site with no renames.
  */
 export interface GrowSource {
   /** Video cards run the film path; image cards run "meet the person". */
@@ -18,15 +17,18 @@ export interface GrowSource {
   videoId: string | null;
   storeId: string;
   makerName: string;
-  /** "CERAMICIST · LISBON" — rendered when present (screen-specs §2.2). */
-  craftLine?: string | null;
+  /** FeedCard.craft — composed with `place` into "CERAMICIST · LISBON" (§2.2). */
+  craft: string | null;
+  /** FeedCard.place (config.maker.location). */
+  place: string | null;
   /** Clip src (kind "video"); unused for image cards. */
   src: string;
   /** Clip poster (video) or the portrait image itself (image). */
   poster: string;
   captionsSrc?: string | null;
-  /** clips[].focalPoint (v1.3, CPO Ruling 3) — rides into the Film Layer. */
-  focalPoint?: { x: number; y: number };
+  /** FeedCard.focalPoint (v1.3, CPO Ruling 3) — rides into the Film Layer;
+      null → the renderer's 0.5/0.5 default applies. */
+  focalPoint: FeedCardFocalPoint | null;
   /** Real alt text — required in spirit for the image path. */
   alt?: string;
 }

@@ -241,6 +241,8 @@ export function GrownColumn({
   }, [source.kind, selection, onRetrySelection]);
 
   const firstName = source.makerName.split(/\s+/)[0] ?? source.makerName;
+  // "CERAMICIST · LISBON" (§2.2) — composed from FeedCard.craft + .place
+  const craftLine = [source.craft, source.place].filter(Boolean).join(" · ");
   const mediaActive = activeClip !== null;
   const chromeIn = entered && !leaving;
   const selectionFailed = source.kind === "image" && selection?.status === "error" && !watching;
@@ -274,7 +276,7 @@ export function GrownColumn({
               data-grow-portrait=""
               src={source.poster}
               alt={source.alt ?? `${source.makerName} — portrait`}
-              style={{ objectPosition: clipObjectPosition(source) }}
+              style={{ objectPosition: clipObjectPosition({ focalPoint: source.focalPoint ?? undefined }) }}
               aria-hidden={watching && playback === "playing" ? true : undefined}
               className={cn(
                 "absolute inset-0 h-full w-full object-cover transition-opacity duration-[var(--dur-swap)]",
@@ -306,9 +308,9 @@ export function GrownColumn({
               <h2 className="font-display font-medium leading-[0.95] tracking-[-0.02em] text-on-media [text-wrap:balance] text-[min(var(--fs-display),9cqi)]">
                 {source.makerName}
               </h2>
-              {source.craftLine ? (
+              {craftLine !== "" ? (
                 <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media">
-                  {source.craftLine}
+                  {craftLine}
                 </p>
               ) : null}
               {ctaReady ? (

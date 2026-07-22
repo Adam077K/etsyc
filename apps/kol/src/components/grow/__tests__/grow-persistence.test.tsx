@@ -51,8 +51,10 @@ const VIDEO_SOURCE: GrowSource = {
   videoId: "v1",
   storeId: "s1",
   makerName: "Sena Okafor",
-  craftLine: "CERAMICIST · LISBON",
+  craft: "Ceramicist",
+  place: "Lisbon",
   src: clip.src,
+  focalPoint: null,
   poster: clip.poster,
   captionsSrc: null,
 };
@@ -220,7 +222,7 @@ describe("B2 grow — film-frame persistence across FEED → GROWN", () => {
 
     // chrome comes from store metadata — it never waits on the video
     expect(container.textContent).toContain("Sena Okafor");
-    expect(container.textContent).toContain("CERAMICIST · LISBON");
+    expect(container.textContent).toContain("Ceramicist · Lisbon"); // uppercased by CSS
     // loading: a progress edge over the poster, never a spinner
     expect(container.querySelector("[data-grow-window] .kol-skeleton")).not.toBeNull();
 
@@ -360,8 +362,10 @@ describe("B2 grow — film-frame persistence across FEED → GROWN", () => {
       videoId: null,
       storeId: "s1",
       makerName: "Sena Okafor",
-      craftLine: "CERAMICIST · LISBON",
+      craft: "Ceramicist",
+      place: "Lisbon",
       src: "",
+      focalPoint: null,
       poster: "/stills/sena-portrait.jpg",
       alt: "Sena Okafor at the wheel in her Lisbon studio",
     };
