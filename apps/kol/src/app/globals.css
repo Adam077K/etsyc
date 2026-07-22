@@ -189,25 +189,24 @@
     pointer-events: none;
   }
 
-  /* ---- P4 world-stage choreography — the film always wins.
-          Transform/opacity only; the hero <video> itself is never
-          touched (HeroStage keeps its DOM identity). The global
-          reduced-motion block below collapses every transition
-          here to instant — the hero still persists. ---- */
+  /* ---- P4 world-stage choreography — the film always wins. The film
+          ELEMENT lives in the app-root Film Layer (Amendment A): the layer
+          FLIPs between the rects HeroStage publishes per stage (the old
+          0.55/0.82 scales and the .kol-hero-docked corner geometry moved
+          there), and the rules here only fold the world + the hero slot's
+          chrome. Opacity only. The global reduced-motion block below
+          collapses these; the layer snaps its rect and keeps playing. ---- */
   .kol-hero-stage {
     view-transition-name: hero-video;
   }
   .kol-hero-stage-inner {
-    transform-origin: 50% 0;
-    transition: transform var(--dur-cinema) var(--ease-cinematic);
-    will-change: transform;
+    transition: opacity var(--dur-state) var(--ease-kol);
   }
-  /* feed/grown: the film at card scale, the world folded away around it */
-  [data-world-stage="feed"] .kol-hero-stage-inner {
-    transform: scale(0.55);
-  }
+  /* feed/grown: the world (and the hero slot's headline chrome) is folded
+     away — the Film Layer at card/centre scale IS the surface */
+  [data-world-stage="feed"] .kol-hero-stage-inner,
   [data-world-stage="grown"] .kol-hero-stage-inner {
-    transform: scale(0.82);
+    opacity: 0;
   }
   .kol-world-body {
     transition: opacity var(--dur-unfold) var(--ease-kol);
@@ -216,28 +215,6 @@
   [data-world-stage="grown"] .kol-world-body {
     opacity: 0;
     pointer-events: none;
-  }
-  /* narrate-shrink: the film docks to a corner (FLIP transform in
-     HeroStage); the docked frame fills its box edge-to-edge, overriding
-     the hero block's in-flow page gutters without the block knowing */
-  .kol-hero-docked {
-    position: fixed;
-    right: var(--space-2);
-    bottom: var(--space-2);
-    z-index: 40;
-    width: clamp(240px, 32vw, 320px);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-raised);
-  }
-  .kol-hero-docked section {
-    padding: 0;
-  }
-  .kol-hero-docked section > div {
-    margin: 0;
-    width: 100%;
-    max-width: none;
-    border-radius: 0;
   }
 
   /* ---- the Film Layer (design-direction §6.2, Amendment A) — ONE film,

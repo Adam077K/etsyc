@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useHeroPersistence } from "@/lib/renderer/hero-persistence";
 import type { Clip } from "@/lib/store-config/types";
 import { cn } from "@/lib/utils";
@@ -14,9 +14,12 @@ import { PosterStill } from "./PosterStill";
  * captions toggle, quiet fallback to the poster frame on decode/404 failure
  * so the world stays usable around the still. Autoplay is scroll-gated
  * (catalog §6): plays on scroll-into-view, pauses on scroll-out — EXCEPT
- * inside the renderer's persistent hero slot (HeroPersistenceContext),
- * where the film plays on mount and is never paused by this component
- * (spec P4: the hero never pauses across world-stage transitions).
+ * inside the renderer's hero slot (HeroPersistenceContext), where the film
+ * never pauses (spec P4). Post-Amendment-A the hero slot has two shapes:
+ * in "layer" mode the app-root Film Layer owns the video and this frame is
+ * only the SLOT — a poster underlay registering its rect + clip; in "self"
+ * mode (no FilmLayerProvider above — bare renderer mounts, unit rigs) this
+ * frame owns its video and plays persistently, exactly as Wave 0 did.
  */
 export function FilmFrame({
   clip,
@@ -31,7 +34,8 @@ export function FilmFrame({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const persistent = useHeroPersistence();
+  const heroSlot = useHeroPersistence();
+  const persistent = heroSlot?.mode === "self";
   const [failed, setFailed] = useState(false);
   const [muted, setMuted] = useState(true);
   const [captionsOn, setCaptionsOn] = useState(false);
@@ -76,6 +80,18 @@ export function FilmFrame({
     const track = video.textTracks[0];
     if (track) track.mode = captionsOn ? "showing" : "hidden";
   }, [captionsOn, failed]);
+
+  // "layer" mode: the Film Layer owns the film element — this frame is the
+  // slot registrar and the poster-first paint beneath it.
+  if (heroSlot?.mode === "layer") {
+    return (
+      <FilmSlotFrame
+        clip={clip}
+        className={className}
+        register={heroSlot.registerFilm}
+      />
+    );
+  }
 
   if (failed) {
     return (
@@ -132,6 +148,38 @@ export function FilmFrame({
         onCaptionsToggle={() => setCaptionsOn((c) => !c)}
         showCaptionsToggle={clip.captionsSrc !== null}
       />
+    </div>
+  );
+}
+
+/**
+ * The hero slot under a Film Layer: renders the poster underlay only (the
+ * layer's player is the film) and registers its frame + clip with
+ * HeroStage, which publishes rects and claims the film per stage.
+ */
+function FilmSlotFrame({
+  clip,
+  className,
+  register,
+}: {
+  clip: Clip;
+  className?: string;
+  register: (element: HTMLElement, clip: Clip) => () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    return register(element, clip);
+  }, [register, clip]);
+  return (
+    <div
+      ref={ref}
+      data-film-slot=""
+      className={cn("relative w-full overflow-hidden bg-surface", className)}
+    >
+      {/* poster-first paint before the layer claims and the clip resolves */}
+      <PosterStill src={clip.poster} className="absolute inset-0 h-full w-full object-cover" />
     </div>
   );
 }
