@@ -314,24 +314,43 @@ function StageRail({
   stage: WorldStage;
   onStage: (stage: WorldStage) => void;
 }) {
+  // Gate finding P3-A: the rail is LEFT-aligned from md so it can never meet
+  // the bottom-RIGHT dock band (right-aligning would guarantee the collision
+  // it fixes); below md it stays centered (the mobile centered-vs-centered
+  // dock overlap at 375 is a separate case — flagged, not fixed here).
   return (
     <nav
       aria-label="Simulate buyer journey stage"
-      className="fixed bottom-[var(--space-2)] left-1/2 z-50 -translate-x-1/2"
+      className="fixed bottom-[var(--space-2)] left-1/2 z-50 -translate-x-1/2 md:left-[var(--space-2)] md:translate-x-0"
     >
-      <div className="flex gap-1 rounded-pill border border-line bg-surface/90 p-1 shadow-raised backdrop-blur">
+      <div className="flex gap-0.5 rounded-pill border border-line bg-surface/90 p-1 shadow-raised backdrop-blur sm:gap-1">
         {WORLD_STAGES.map((s) => (
           <button
             key={s}
             type="button"
             aria-pressed={s === stage}
+            // accessible name stays the canonical label at every viewport —
+            // the sub-sm "Open" swap below is visual-only
+            aria-label={STAGE_LABELS[s]}
             onClick={() => onStage(s)}
             className={cn(
-              "min-h-11 rounded-pill px-3 font-mono text-caption uppercase tracking-[0.04em] transition-colors duration-state ease-kol",
+              // gate finding P1-A: this rail is the instrument mobile reviews
+              // are conducted with — at 375 the full-label pill overflowed and
+              // clipped ("FEED" read "EED"). Tighter padding + the short
+              // world-open label below sm keep all five stages visible at
+              // once; a scrollable rail would hide instrument state instead.
+              "min-h-11 rounded-pill px-1.5 font-mono text-caption uppercase tracking-[0.04em] transition-colors duration-state ease-kol sm:px-3",
               s === stage ? "bg-ink text-ground" : "text-muted hover:text-ink",
             )}
           >
-            {STAGE_LABELS[s]}
+            {s === "world-open" ? (
+              <>
+                <span className="sm:hidden">Open</span>
+                <span className="hidden sm:inline">{STAGE_LABELS[s]}</span>
+              </>
+            ) : (
+              STAGE_LABELS[s]
+            )}
           </button>
         ))}
       </div>
