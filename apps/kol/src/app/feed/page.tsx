@@ -3,12 +3,11 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 
 import { AccountBar } from "@/components/auth/AccountBar";
+import { FeedMagazine } from "@/components/feed/FeedMagazine";
 import { SIGN_IN_PATH } from "@/lib/auth/routes";
 import { getFeedSelection } from "@/lib/feed/select";
 import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { createClient } from "@/lib/supabase/server";
-
-import { FeedCards } from "./FeedCards";
 
 /**
  * Discovery feed — the PUBLIC front door (W3-B1a, dispatch §7 conflict 2).
@@ -67,7 +66,7 @@ export default async function FeedPage() {
           </Link>
         </div>
       )}
-      <FeedCards result={feed} />
+      <FeedMagazine result={feed} />
     </main>
   );
 }
