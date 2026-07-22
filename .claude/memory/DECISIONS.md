@@ -4,6 +4,25 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-22 — Wave-3 Gate 1: two Irreversible migrations, and the "RLS gates rows, not values" class
+
+**Context:** Wave-3 T0a (W2-WIRE, FILM-LAYER, P3-EXT, SEED-W3) went through a 5-reviewer Full-tier panel. Three BLOCKed, six P1s. Two of the P1s were the same root cause the project has now hit twice.
+
+**The class, stated once so it stops recurring:** **RLS gates *which rows* a principal may write; it says nothing about *what values* go in them.** MIG-CHECK closed this for tag columns (Wave 2). Gate 1 found it open on timestamps: `created_at` was client-settable on 11 tables. W2-WIRE's F3 fix then weaponised it — bounding the feed to `FEED_CANDIDATE_CAP=300` most-recently-tagged clips turned `created_at` from a ranking *bias* into a membership *gate*, so a seller inserting 300 rows dated `2099-01-01` **permanently evicts every other maker from discovery** (a future date never rotates out; `rank.ts` then clamps it to `ageDays=0` = permanent max freshness). Confirmed live by the CEO before acceptance. **Any new column that a read path orders, ranks, or gates on must be server-enforced at the DB, not validated in the app.**
+
+**Decisions:**
+1. **MIG-TS applied** (Irreversible, Founder-signed) — `enforce_server_timestamps()` BEFORE INSERT OR UPDATE on 11 tables (`videos, video_profiles, stores, store_versions, products, reviews, media, profiles, carts, commissions, threads`). INSERT forces `now()`; UPDATE preserves `OLD.created_at`; `auth.role()='service_role'` bypasses (§B0 escape hatch — SEED idempotence depends on it). Proven live: forged 2099 INSERT → `now()`; forged UPDATE → unchanged; service-role explicit timestamps preserved; SEED-W3 re-run `12× INSERT 0 0` with identical per-table md5.
+2. **Mechanism is a trigger, NOT a column-grant revoke** (QA-Lead ruling) — column-list grants silently break every future `ADD COLUMN` and reject benign echo-back upserts.
+3. **`updated_at` deliberately excluded** — no read path consumes it, forcing it is a write-semantics change deserving its own sign-off, and 3 of 11 tables lack the column. Revisit the moment a read path keys on it.
+4. **Gate-1 partial merge authorized** — P3-EXT + SEED-W3 merged; FILM-LAYER + W2-WIRE held for fix cycle 1 of 2.
+5. **Migrations gate the *read side*, not the merge** (MIG-CHECK precedent, reaffirmed): the vector exists on staging independent of what is on `main`, so holding certified branches buys nothing. MIG-TS is a **T1 entry gate**.
+
+**Process finding worth keeping:** three of the six P1s were guards that existed with *nothing pinning them* — a zero-delta FLIP whose `data-film-edge` telemetry claimed success, `focalPoint` tested only in a mode production never runs, and an anon-client boundary provable only on keyed machines. **Mutation verification is now the standard for any fix to a load-bearing guard**: break it, watch the test go red, restore, report it. Two units did exactly that this gate.
+
+**Open follow-ups (do not drop):** `verifications.created_at` is client-settable on INSERT — the CEO's exclusion scope was one-sided (checked UPDATE policies only); outside MIG-TS's signed scope, needs a decision. F12 module-scope `createClient` still defeats `describe.skipIf` in 5 live suites on `main`. G1-F2 cross-aspect FLIP smear rides now but becomes P1 at Gate 2 if unaddressed (it sits on B2's flagship grow edge). Maker-name-vs-`statement` hero line needs a CPO + Design-Lead written ruling before B3 dispatches.
+
+**Reversibility:** hard (triggers applied to live staging; rollback in the migration header). **Owner:** ceo (`ceo-1-1784669503`). **Affects:** every Wave-3+ builder, and any future migration touching a ranked column.
+
 ## 2026-07-21 — Wave-3 AC rulings: film-frame continuity, Focus Film, two additive schema fields
 
 **Context:** Design-Lead's Wave-3 direction (code-read, not eyes-on — no `/preview` in its worktree) surfaced that two binding ACs in shipped specs were unsatisfiable or wrong, plus two store-config gaps. AC ownership is CPO's; CEO routed rather than deciding.
