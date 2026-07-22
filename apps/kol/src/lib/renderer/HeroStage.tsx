@@ -9,7 +9,11 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { useFilmLayer } from "@/components/film/FilmLayer";
+import {
+  useFilmLayer,
+  type FilmRect,
+  type FilmSlotOptions,
+} from "@/components/film/FilmLayer";
 import type { Clip } from "@/lib/store-config/types";
 import { HeroPersistenceContext, type HeroFilmSlot } from "./hero-persistence";
 import { heroEdgeFor } from "./stage-edges";
@@ -59,11 +63,16 @@ export function HeroStage({ stage, children }: { stage: WorldStage; children: Re
   const filmElRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef(stage);
 
-  /** Publish the film rect for a stage; narrate-shrink publishes the corner. */
-  const publishStageRect = useCallback(
-    (s: WorldStage) => {
+  /**
+   * Slot spec (id, rect, options) for a stage; narrate-shrink specs the
+   * corner. ONE source of truth for both rect maintenance (publish) and
+   * claims — the claim path hands the rect to setActiveSlot so the record
+   * update happens INSIDE the FLIP (atomic; see FilmClaimOptions).
+   */
+  const stageSlotSpec = useCallback(
+    (s: WorldStage): { slotId: string; rect: FilmRect; options: FilmSlotOptions } | null => {
       const element = filmElRef.current;
-      if (!element || !layer) return;
+      if (!element) return null;
       const base = element.getBoundingClientRect();
       if (s === "narrate-shrink") {
         // the old .kol-hero-docked geometry, now computed: clamp(240px,
@@ -75,30 +84,38 @@ export function HeroStage({ stage, children }: { stage: WorldStage; children: Re
         const width = Math.min(320, Math.max(240, vw * 0.32));
         const aspect = base.width > 0 ? base.height / base.width : 9 / 16;
         const height = width * aspect;
-        layer.publishRect(
-          dockSlotId,
-          { left: vw - width - margin, top: vh - height - margin, width, height },
-          { fixed: true, radius: "var(--radius-md)" },
-        );
-        return;
+        return {
+          slotId: dockSlotId,
+          rect: { left: vw - width - margin, top: vh - height - margin, width, height },
+          options: { fixed: true, radius: "var(--radius-md)" },
+        };
       }
       const scale = STAGE_FILM_SCALE[s];
-      layer.publishRect(
+      return {
         slotId,
-        {
+        rect: {
           // anchored top-center, like Wave 0's transform-origin: 50% 0
           left: base.left + (base.width * (1 - scale)) / 2,
           top: base.top,
           width: base.width * scale,
           height: base.height * scale,
         },
-        {
+        options: {
           radius:
             typeof getComputedStyle === "function" ? getComputedStyle(element).borderRadius : "",
         },
-      );
+      };
     },
-    [layer, slotId, dockSlotId],
+    [slotId, dockSlotId],
+  );
+
+  /** Rect maintenance (viewport resize) — claims carry their rect instead. */
+  const publishStageRect = useCallback(
+    (s: WorldStage) => {
+      const spec = stageSlotSpec(s);
+      if (spec && layer) layer.publishRect(spec.slotId, spec.rect, spec.options);
+    },
+    [layer, stageSlotSpec],
   );
 
   /** FilmFrame ("layer" mode) hands us its frame element + clip. */
@@ -106,10 +123,14 @@ export function HeroStage({ stage, children }: { stage: WorldStage; children: Re
     (element: HTMLElement, clip: Clip) => {
       filmElRef.current = element;
       if (layer) {
-        publishStageRect(stageRef.current);
-        const target = stageRef.current === "narrate-shrink" ? dockSlotId : slotId;
-        layer.setActiveSlot(target, null); // first claim snaps — no edge
-        layer.swapClip(clip.src, clip.poster, clip.captionsSrc);
+        const spec = stageSlotSpec(stageRef.current);
+        if (spec) {
+          // first claim snaps — no edge
+          layer.setActiveSlot(spec.slotId, null, { rect: spec.rect, slotOptions: spec.options });
+        }
+        // the clip rides whole: focalPoint crops BOTH layer buffers
+        // (CPO Ruling 3 — the layer IS the production path)
+        layer.swapClip(clip);
       }
       return () => {
         filmElRef.current = null;
@@ -117,11 +138,13 @@ export function HeroStage({ stage, children }: { stage: WorldStage; children: Re
         layer?.releaseSlot(dockSlotId);
       };
     },
-    [layer, publishStageRect, slotId, dockSlotId],
+    [layer, stageSlotSpec, slotId, dockSlotId],
   );
 
-  // Stage transitions: pin the flow height, publish the new rect, claim on
-  // the §5.2 edge. Same source throughout — the layer moves by FLIP
+  // Stage transitions: pin the flow height, claim on the §5.2 edge with
+  // the freshly specced rect riding the claim (atomic — publish-then-claim
+  // snapped the live slot first and every same-slot edge animated a zero
+  // delta, gate-1 P1). Same source throughout — the layer moves by FLIP
   // transform only and never touches the video buffers.
   useLayoutEffect(() => {
     const previous = stageRef.current;
@@ -138,10 +161,15 @@ export function HeroStage({ stage, children }: { stage: WorldStage; children: Re
     }
 
     if (!layer || !filmElRef.current) return;
-    publishStageRect(stage);
+    const spec = stageSlotSpec(stage);
+    if (!spec) return;
     const { edge, reverse } = heroEdgeFor(previous, stage);
-    layer.setActiveSlot(docking ? dockSlotId : slotId, edge, reverse ? { reverse } : undefined);
-  }, [stage, layer, publishStageRect, slotId, dockSlotId]);
+    layer.setActiveSlot(spec.slotId, edge, {
+      ...(reverse ? { reverse } : {}),
+      rect: spec.rect,
+      slotOptions: spec.options,
+    });
+  }, [stage, layer, stageSlotSpec]);
 
   // Viewport changes move both the in-flow box and the corner rect.
   useEffect(() => {
@@ -152,8 +180,11 @@ export function HeroStage({ stage, children }: { stage: WorldStage; children: Re
   }, [layer, publishStageRect]);
 
   const value = useMemo<HeroFilmSlot>(
-    () => (layer ? { mode: "layer", registerFilm } : { mode: "self" }),
-    [layer, registerFilm],
+    () =>
+      layer
+        ? { mode: "layer", registerFilm, filmAway: stage === "narrate-shrink" }
+        : { mode: "self" },
+    [layer, registerFilm, stage],
   );
 
   return (

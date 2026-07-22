@@ -78,8 +78,13 @@ export const EDGE_TABLE: Record<FilmEdge, EdgeSpec> = {
 export const SWAP_FALLBACK_MS = 120;
 export const RETURN_RATIO_FALLBACK = 0.78;
 
-/** Parse a CSS <time> ("520ms" / "0.52s") to ms; null when unparseable. */
-function parseCssTime(raw: string): number | null {
+/**
+ * Parse a CSS <time> ("520ms" / "0.52s") to ms; null when unparseable.
+ * Exported for the layer's computed-duration reads (buffer fade under
+ * reduced motion runs at --dur-state, not --dur-swap — the pause delay
+ * must derive from the element, not the token).
+ */
+export function parseCssTime(raw: string): number | null {
   const value = raw.trim();
   if (value.endsWith("ms")) {
     const ms = Number.parseFloat(value);

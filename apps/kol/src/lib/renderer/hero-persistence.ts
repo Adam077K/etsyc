@@ -24,7 +24,19 @@ import type { Clip } from "@/lib/store-config/types";
  */
 export type HeroFilmSlot =
   | { mode: "self" }
-  | { mode: "layer"; registerFilm: (element: HTMLElement, clip: Clip) => () => void };
+  | {
+      mode: "layer";
+      registerFilm: (element: HTMLElement, clip: Clip) => () => void;
+      /**
+       * True while the film is claimed AWAY from the hero slot (docked at
+       * the corner) — the slot shows its own poster again. While the film
+       * IS here, the slot is a transparent window beneath the layer's
+       * --z-film-bed plane, and the slot's chrome (heading, craft line,
+       * scrim) reads over the film per the stacking contract in
+       * globals.css.
+       */
+      filmAway: boolean;
+    };
 
 export const HeroPersistenceContext = createContext<HeroFilmSlot | null>(null);
 

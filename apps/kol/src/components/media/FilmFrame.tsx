@@ -89,6 +89,7 @@ export function FilmFrame({
         clip={clip}
         className={className}
         register={heroSlot.registerFilm}
+        filmAway={heroSlot.filmAway}
       />
     );
   }
@@ -153,33 +154,59 @@ export function FilmFrame({
 }
 
 /**
- * The hero slot under a Film Layer: renders the poster underlay only (the
- * layer's player is the film) and registers its frame + clip with
- * HeroStage, which publishes rects and claims the film per stage.
+ * The hero slot under a Film Layer: registers its frame + clip with
+ * HeroStage, which claims the film per stage. Once claimed, the slot is a
+ * TRANSPARENT WINDOW — its poster and surface hide, and the film paints
+ * through from the --z-film-bed plane BELOW the slot's chrome (stacking
+ * contract, globals.css), so the maker's headline, craft line and
+ * .kol-scrim read over the film exactly as Wave 0 shipped. The poster is
+ * the SSR/pre-claim paint (never a posterless hero before hydration) and
+ * returns whenever the film is away at the docked corner.
  */
 function FilmSlotFrame({
   clip,
   className,
   register,
+  filmAway,
 }: {
   clip: Clip;
   className?: string;
   register: (element: HTMLElement, clip: Clip) => () => void;
+  filmAway: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [claimed, setClaimed] = useState(false);
   useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
-    return register(element, clip);
+    const release = register(element, clip);
+    // the claim lands synchronously inside register — hide the poster in
+    // the same pre-paint flush (the layer's own underlay takes over)
+    setClaimed(true);
+    return () => {
+      setClaimed(false);
+      release();
+    };
   }, [register, clip]);
+  const showPoster = !claimed || filmAway;
   return (
     <div
       ref={ref}
       data-film-slot=""
-      className={cn("relative w-full overflow-hidden bg-surface", className)}
+      data-film-away={filmAway ? "true" : undefined}
+      className={cn(
+        "relative w-full overflow-hidden",
+        showPoster && "bg-surface",
+        className,
+      )}
     >
-      {/* poster-first paint before the layer claims and the clip resolves */}
-      <PosterStill src={clip.poster} className="absolute inset-0 h-full w-full object-cover" />
+      {showPoster ? (
+        <PosterStill
+          src={clip.poster}
+          className="absolute inset-0 h-full w-full object-cover"
+          objectPosition={clipObjectPosition(clip)}
+        />
+      ) : null}
     </div>
   );
 }

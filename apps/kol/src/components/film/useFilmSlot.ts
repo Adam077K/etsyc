@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef } from "react";
 import type { FilmEdge } from "./edge-table";
-import { useFilmLayer, type FilmRect } from "./FilmLayer";
+import { useFilmLayer, type FilmRect, type FilmSlotOptions } from "./FilmLayer";
 
 /**
  * useFilmSlot — the hook a screen calls to register a Film Layer slot:
@@ -21,18 +21,23 @@ export function useFilmSlot(options?: { fixed?: boolean }) {
   const fixed = options?.fixed === true;
   const elementRef = useRef<HTMLElement | null>(null);
 
-  const publish = useCallback(() => {
+  const measure = useCallback((): { rect: FilmRect; options: FilmSlotOptions } | null => {
     const element = elementRef.current;
-    if (!element || !layer) return;
+    if (!element) return null;
     const rect = element.getBoundingClientRect();
     const radius =
       typeof getComputedStyle === "function" ? getComputedStyle(element).borderRadius : "";
-    layer.publishRect(
-      slotId,
-      { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
-      { fixed, radius },
-    );
-  }, [layer, slotId, fixed]);
+    return {
+      rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+      options: { fixed, radius },
+    };
+  }, [fixed]);
+
+  const publish = useCallback(() => {
+    if (!layer) return;
+    const measured = measure();
+    if (measured) layer.publishRect(slotId, measured.rect, measured.options);
+  }, [layer, measure, slotId]);
 
   const ref = useCallback(
     (element: HTMLElement | null) => {
@@ -64,14 +69,25 @@ export function useFilmSlot(options?: { fixed?: boolean }) {
     };
   }, [layer, publish, slotId]);
 
-  /** Claim the film for this slot — fresh rect first, then the edge FLIP. */
+  /**
+   * Claim the film for this slot. The fresh rect rides WITH the claim
+   * (measure `first` → update rect → FLIP, atomically inside the layer) —
+   * publishing ahead would snap the live frame onto the new rect and a
+   * SAME-slot edge would animate a zero delta (gate-1 P1).
+   */
   const claim = useCallback(
     (edge?: FilmEdge | null, claimOptions?: { reverse?: boolean }) => {
       if (!layer) return;
-      publish();
-      layer.setActiveSlot(slotId, edge ?? null, claimOptions);
+      const measured = measure();
+      layer.setActiveSlot(
+        slotId,
+        edge ?? null,
+        measured
+          ? { ...claimOptions, rect: measured.rect, slotOptions: measured.options }
+          : claimOptions,
+      );
     },
-    [layer, publish, slotId],
+    [layer, measure, slotId],
   );
 
   /** Publish a computed rect (element-less slots — e.g. a corner rect). */

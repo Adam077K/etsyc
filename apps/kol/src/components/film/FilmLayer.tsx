@@ -11,9 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import { FilmControls } from "@/components/media/FilmControls";
+import { clipObjectPosition } from "@/components/media/focal-point";
 import { PosterStill } from "@/components/media/PosterStill";
 import { cn } from "@/lib/utils";
-import { EDGE_TABLE, resolveEdgeMs, resolveSwapMs, type FilmEdge } from "./edge-table";
+import { EDGE_TABLE, parseCssTime, resolveEdgeMs, resolveSwapMs, type FilmEdge } from "./edge-table";
 import { readSpringVideoParams, springLinearEasing } from "./spring-easing";
 
 /**
@@ -42,6 +43,11 @@ import { readSpringVideoParams, springLinearEasing } from "./spring-easing";
  * Inherits FilmFrame's behaviour: poster-first, muted until opt-in (the
  * hard tone line), captions toggle, quiet fallback to the poster on
  * decode/404. Controls are the shared FilmControls — not a fork.
+ *
+ * Paint order against page content follows the film stacking contract in
+ * globals.css (--z-film-bed / --z-film-chrome / --z-film): undocked, the
+ * layer rides BELOW slot chrome so the maker's headline, craft line and
+ * scrim read over the film; docked, it floats above as the corner card.
  */
 
 export interface FilmRect {
@@ -58,20 +64,47 @@ export interface FilmSlotOptions {
   radius?: string;
 }
 
+export interface FilmClaimOptions {
+  /** §5.1 return-ratio rule for a forward edge walked backwards in preview. */
+  reverse?: boolean;
+  /**
+   * Fresh rect (+ slot options) measured by the claimer, recorded as part
+   * of the claim itself: measure `first` → update rect → FLIP, atomically.
+   * Publishing ahead of the claim would snap the live frame onto the new
+   * rect first and every SAME-slot edge would animate a zero delta
+   * (gate-1 P1) — so claimers pass the rect here instead.
+   */
+  rect?: FilmRect;
+  slotOptions?: FilmSlotOptions;
+}
+
+/**
+ * What a swap needs from a clip — the v1.3 `Clip` is structurally
+ * assignable, so callers pass the clip object whole and `focalPoint`
+ * (CPO Ruling 3) rides into BOTH buffers and the poster underlay.
+ */
+export interface FilmClipSource {
+  src: string;
+  poster: string;
+  captionsSrc?: string | null;
+  /** clips[].focalPoint (v1.3) — optional, centre-defaulted at the buffer. */
+  focalPoint?: { x: number; y: number };
+}
+
 export interface FilmLayerApi {
   /** A screen tells the layer where the film should sit for a slot. */
   publishRect(slotId: string, rect: FilmRect, options?: FilmSlotOptions): void;
   /**
    * A screen claims the film; the layer FLIPs to that slot's rect on the
    * given §5.2 edge (null = snap — first claim, or a non-event like
-   * WORLD_OPEN ↔ WORLD_BROWSE). `reverse` applies the §5.1 return-ratio
-   * rule when a forward edge is walked backwards in preview.
+   * WORLD_OPEN ↔ WORLD_BROWSE). Pass the freshly measured rect in
+   * `options.rect` so the record update happens INSIDE the FLIP.
    */
-  setActiveSlot(slotId: string, edge?: FilmEdge | null, options?: { reverse?: boolean }): void;
+  setActiveSlot(slotId: string, edge?: FilmEdge | null, options?: FilmClaimOptions): void;
   /** Unregister a slot; if it held the film, the layer parks (stays mounted). */
   releaseSlot(slotId: string): void;
   /** Load a clip into the inactive buffer and cross-fade once it plays. */
-  swapClip(src: string, poster: string, captionsSrc?: string | null): void;
+  swapClip(clip: FilmClipSource): void;
 }
 
 interface SlotRecord {
@@ -87,6 +120,7 @@ interface FilmClip {
   src: string;
   poster: string;
   captionsSrc: string | null;
+  focalPoint?: { x: number; y: number };
 }
 
 type BufferKey = "a" | "b";
@@ -104,6 +138,34 @@ function prefersReducedMotion(): boolean {
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
+}
+
+/**
+ * The buffer cross-fade's REAL duration, computed off the element: under
+ * reduced motion globals.css stretches the fade to --dur-state, so a
+ * token-only --dur-swap read would under-wait and pause the rear buffer
+ * with ~0 margin (gate-1 4b). Falls back to the token where computed CSS
+ * is unavailable (jsdom/SSR).
+ */
+export function bufferFadeMs(video: HTMLVideoElement): number {
+  if (typeof getComputedStyle !== "function") return resolveSwapMs();
+  const raw = getComputedStyle(video).transitionDuration ?? "";
+  const parsed = raw
+    .split(",")
+    .map((part) => parseCssTime(part))
+    .filter((ms): ms is number => ms !== null);
+  return parsed.length > 0 ? Math.max(...parsed) : resolveSwapMs();
+}
+
+/** One layout write: the frame adopts a slot record's box (no motion here). */
+function applySlotLayout(frame: HTMLElement, record: SlotRecord) {
+  frame.style.position = record.fixed ? "fixed" : "absolute";
+  frame.style.left = `${record.fixed ? record.rect.left : record.docLeft}px`;
+  frame.style.top = `${record.fixed ? record.rect.top : record.docTop}px`;
+  frame.style.width = `${record.rect.width}px`;
+  frame.style.height = `${record.rect.height}px`;
+  if (record.radius) frame.style.borderRadius = record.radius;
+  else frame.style.removeProperty("border-radius");
 }
 
 export function FilmLayerProvider({ children }: { children: ReactNode }) {
@@ -128,6 +190,18 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
   const swapGenRef = useRef(0);
   const currentSrcRef = useRef<string | null>(null);
 
+  // FLIP release in flight: rect maintenance defers while set (a mid-grow
+  // ResizeObserver publish must not teleport the film) and lands on
+  // transitionend. Token guards against a superseding claim.
+  const flightRef = useRef<{ token: number; dispose: () => void } | null>(null);
+  const flightTokenRef = useRef(0);
+  const maintenanceDirtyRef = useRef(false);
+  // Buffer cross-fade in flight: swaps arriving now target the still-
+  // VISIBLE fading-out buffer, so they defer (latest wins) until fade end.
+  const fadeRef = useRef<{ token: number; dispose: () => void } | null>(null);
+  const fadeTokenRef = useRef(0);
+  const deferredSwapRef = useRef<FilmClipSource | null>(null);
+
   // ref mirrors for DOM-event readers (buffer onError, autoplay-veto
   // recovery) — updated post-commit, which is when those events can fire
   useEffect(() => {
@@ -137,7 +211,10 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
     pendingRef.current = pendingSwap;
   }, [pendingSwap]);
 
-  const [posterSrc, setPosterSrc] = useState<string | null>(null);
+  const [poster, setPoster] = useState<{
+    src: string;
+    focalPoint?: { x: number; y: number };
+  } | null>(null);
   const [failed, setFailed] = useState(false);
   const [muted, setMuted] = useState(true);
   const [captionsOn, setCaptionsOn] = useState(false);
@@ -149,9 +226,13 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
 
   /**
    * Move the frame to a slot's rect. Layout position (position/left/top/
-   * width/height) snaps in one write; motion is FLIP — invert to where the
-   * frame just was, flush, release on the edge's transition. Same-source,
-   * transform-only: the buffers are never touched here.
+   * width/height) snaps in one write; motion is FLIP — measure `first`
+   * where the frame visually is, write the new layout, invert, flush,
+   * release on the edge's transition. Same-source, transform-only: the
+   * buffers are never touched here. While the release is in flight, rect-
+   * maintenance publishes defer (flightRef) and land on transitionend.
+   * `data-film-edge` is written ONLY beside a non-identity transform — the
+   * observable record never claims motion that didn't happen (gate-1 P1).
    */
   const positionToSlot = useCallback(
     (
@@ -163,21 +244,25 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       const record = slots.current.get(slotId);
       if (!frame || !record) return;
 
+      // a new positioning supersedes any in-flight FLIP; deferred rect
+      // maintenance is subsumed — the layout below uses the latest record
+      flightRef.current?.dispose();
+      flightRef.current = null;
+      maintenanceDirtyRef.current = false;
+
       const first = frame.getBoundingClientRect();
 
-      frame.style.position = record.fixed ? "fixed" : "absolute";
-      frame.style.left = `${record.fixed ? record.rect.left : record.docLeft}px`;
-      frame.style.top = `${record.fixed ? record.rect.top : record.docTop}px`;
-      frame.style.width = `${record.rect.width}px`;
-      frame.style.height = `${record.rect.height}px`;
-      if (record.radius) frame.style.borderRadius = record.radius;
-      else frame.style.removeProperty("border-radius");
+      // neutralise any live transform BEFORE the layout writes so `last`
+      // (and a snap landing) measures the un-transformed box
+      frame.style.transition = "none";
+      frame.style.transform = "";
 
-      const snap = () => {
-        // Reduced motion / first claim / rect tracking: the FLIP SKIPS its
-        // invert step entirely (§5.3) — running it at 0.01ms would jump.
-        frame.style.transition = "none";
-        frame.style.transform = "";
+      applySlotLayout(frame, record);
+
+      const settle = () => {
+        // Reduced motion / first claim / rect tracking / identity delta:
+        // the FLIP SKIPS its invert step entirely (§5.3) — no transform,
+        // no false data-film-edge record.
         void frame.getBoundingClientRect();
         frame.style.transition = "";
         delete frame.dataset.filmEdge;
@@ -191,13 +276,13 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
         first.width <= 0 ||
         first.height <= 0
       ) {
-        snap();
+        settle();
         return;
       }
 
       const last = frame.getBoundingClientRect();
       if (last.width <= 0 || last.height <= 0) {
-        snap();
+        settle();
         return;
       }
 
@@ -206,9 +291,20 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       const sx = first.width / last.width;
       const sy = first.height / last.height;
 
+      // identity gate: a same-rect claim is a non-event, not an edge —
+      // sub-pixel jitter must not fake choreography either
+      if (
+        Math.abs(dx) < 0.5 &&
+        Math.abs(dy) < 0.5 &&
+        Math.abs(sx - 1) < 0.005 &&
+        Math.abs(sy - 1) < 0.005
+      ) {
+        settle();
+        return;
+      }
+
       const spec = EDGE_TABLE[edge];
       const durationMs = resolveEdgeMs(edge, options);
-      frame.style.transition = "none";
       frame.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
       void frame.getBoundingClientRect();
       frame.style.transitionProperty = "transform";
@@ -224,16 +320,56 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
           springLinearEasing(readSpringVideoParams(), durationMs),
         );
       }
-      // observable edge record — QA and e2e assert choreography off these
+      // observable edge record — QA and e2e assert choreography off these;
+      // only ever written beside the non-identity transform above
       frame.dataset.filmEdge = edge;
       frame.dataset.filmEdgeMs = String(durationMs);
       frame.style.transform = "";
+
+      // track the release so mid-flight rect maintenance defers and then
+      // lands as a snap when the transform transition ends
+      const token = ++flightTokenRef.current;
+      const finish = () => {
+        const flight = flightRef.current;
+        if (!flight || flight.token !== token) return;
+        flightRef.current = null;
+        flight.dispose();
+        if (maintenanceDirtyRef.current) {
+          maintenanceDirtyRef.current = false;
+          const activeId = activeSlotRef.current;
+          const latest = activeId ? slots.current.get(activeId) : undefined;
+          if (latest) {
+            frame.style.transition = "none";
+            frame.style.transform = "";
+            applySlotLayout(frame, latest);
+            void frame.getBoundingClientRect();
+            frame.style.transition = "";
+            delete frame.dataset.filmEdge;
+            delete frame.dataset.filmEdgeMs;
+          }
+        }
+      };
+      const onTransitionEnd = (event: Event) => {
+        if (event.target !== frame) return; // buffer opacity fades bubble up
+        finish();
+      };
+      const timer = window.setTimeout(finish, durationMs + 120);
+      frame.addEventListener("transitionend", onTransitionEnd);
+      frame.addEventListener("transitioncancel", onTransitionEnd);
+      flightRef.current = {
+        token,
+        dispose: () => {
+          window.clearTimeout(timer);
+          frame.removeEventListener("transitionend", onTransitionEnd);
+          frame.removeEventListener("transitioncancel", onTransitionEnd);
+        },
+      };
     },
     [],
   );
 
-  const publishRect = useCallback(
-    (slotId: string, rect: FilmRect, options?: FilmSlotOptions) => {
+  const writeSlotRecord = useCallback(
+    (slotId: string, rect: FilmRect, options?: FilmSlotOptions): boolean => {
       const fixed = options?.fixed === true;
       const scrollX = typeof window === "undefined" ? 0 : window.scrollX;
       const scrollY = typeof window === "undefined" ? 0 : window.scrollY;
@@ -244,25 +380,48 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
         fixed,
         radius: options?.radius ?? "",
       });
+      return fixed;
+    },
+    [],
+  );
+
+  const publishRect = useCallback(
+    (slotId: string, rect: FilmRect, options?: FilmSlotOptions) => {
+      const fixed = writeSlotRecord(slotId, rect, options);
       // re-publish of the live slot (resize, layout shift) tracks by SNAP —
-      // rect maintenance is not an edge
+      // rect maintenance is not an edge. While an edge FLIP is in flight
+      // the snap DEFERS (the useFilmSlot body-ResizeObserver fires on any
+      // document-height change, e.g. world content mounting mid-grow, and
+      // must not teleport the film); it lands on the flight's transitionend.
       if (activeSlotRef.current === slotId) {
-        positionToSlot(slotId, null);
+        if (flightRef.current) {
+          maintenanceDirtyRef.current = true;
+        } else {
+          positionToSlot(slotId, null);
+        }
         setDocked(fixed);
       }
     },
-    [positionToSlot],
+    [positionToSlot, writeSlotRecord],
   );
 
   const setActiveSlot = useCallback(
-    (slotId: string, edge: FilmEdge | null = null, options?: { reverse?: boolean }) => {
+    (slotId: string, edge: FilmEdge | null = null, options?: FilmClaimOptions) => {
+      // atomic claim: the fresh rect is recorded HERE — after the caller
+      // measured it but before the FLIP reads `first` off the live frame —
+      // never published ahead as a snap (gate-1 P1: publish-then-claim made
+      // every same-slot edge animate a zero delta)
+      if (options?.rect) writeSlotRecord(slotId, options.rect, options.slotOptions);
       const wasParked = activeSlotRef.current === null;
       activeSlotRef.current = slotId;
       setActiveSlotId(slotId);
       setDocked(slots.current.get(slotId)?.fixed === true);
-      positionToSlot(slotId, wasParked ? null : edge, { ...options, wasParked });
+      positionToSlot(slotId, wasParked ? null : edge, {
+        reverse: options?.reverse,
+        wasParked,
+      });
     },
-    [positionToSlot],
+    [positionToSlot, writeSlotRecord],
   );
 
   const releaseSlot = useCallback((slotId: string) => {
@@ -275,16 +434,94 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const swapClip = useCallback((src: string, poster: string, captionsSrc: string | null = null) => {
-    if (currentSrcRef.current === src) return;
-    currentSrcRef.current = src;
+  /** The actual buffer load — callers go through swapClip's fade gate. */
+  const runSwap = useCallback((clip: FilmClipSource) => {
+    // Same-source: claims never touch the buffers (the binding AC's first
+    // half) — a re-request of the playing clip is a no-op, not a reload.
+    if (currentSrcRef.current === clip.src) return;
+    currentSrcRef.current = clip.src;
     const gen = ++swapGenRef.current;
     const incoming: BufferKey = frontRef.current === "a" ? "b" : "a";
     setFailed(false);
-    setPosterSrc(poster);
-    setBuffers((prev) => ({ ...prev, [incoming]: { src, poster, captionsSrc } }));
+    setPoster({ src: clip.poster, focalPoint: clip.focalPoint });
+    setBuffers((prev) => ({
+      ...prev,
+      [incoming]: {
+        src: clip.src,
+        poster: clip.poster,
+        captionsSrc: clip.captionsSrc ?? null,
+        focalPoint: clip.focalPoint,
+      },
+    }));
     setPendingSwap({ buffer: incoming, gen });
   }, []);
+
+  const swapClip = useCallback(
+    (clip: FilmClipSource) => {
+      if (fadeRef.current) {
+        // A cross-fade is running: the only free buffer is the one still
+        // VISIBLY fading out — mutating its src mid-fade runs the media
+        // load algorithm on a visible frame (gate-1 4a). Defer until fade
+        // end, latest intent wins — a re-request of the current clip
+        // cancels whatever was queued.
+        deferredSwapRef.current = currentSrcRef.current === clip.src ? null : clip;
+        return;
+      }
+      runSwap(clip);
+    },
+    [runSwap],
+  );
+
+  /**
+   * A promotion starts the CSS cross-fade — track it so (i) swaps arriving
+   * mid-fade defer (4a), (ii) the rear decoder releases only after the
+   * COMPUTED fade duration — reduced motion stretches --dur-swap to
+   * --dur-state, so the delay derives from the element, not the token (4b)
+   * — and (iii) the pause re-checks state when it actually fires: never
+   * the front, never a buffer a pending swap is about to play.
+   */
+  const beginBufferFade = useCallback(
+    (outgoingKey: BufferKey) => {
+      const outgoing = bufferEl(outgoingKey);
+      // cold start: nothing visible is fading — no gate, no pause needed
+      if (!outgoing || buffersRef.current[outgoingKey] === null) return;
+      fadeRef.current?.dispose();
+      const token = ++fadeTokenRef.current;
+      const settle = () => {
+        const fade = fadeRef.current;
+        if (!fade || fade.token !== token) return;
+        fadeRef.current = null;
+        fade.dispose();
+        // release the rear decoder — with a fire-time re-check: NEVER
+        // pause the front, never a buffer a pending swap will play (the
+        // 4a stale-timer race fired pause() mid-play())
+        if (outgoingKey !== frontRef.current && pendingRef.current?.buffer !== outgoingKey) {
+          outgoing.pause();
+        }
+        const deferred = deferredSwapRef.current;
+        if (deferred) {
+          deferredSwapRef.current = null;
+          runSwap(deferred);
+        }
+      };
+      const onTransitionEnd = (event: Event) => {
+        if (event.target !== outgoing) return;
+        settle();
+      };
+      const timer = window.setTimeout(settle, bufferFadeMs(outgoing) + 80);
+      outgoing.addEventListener("transitionend", onTransitionEnd);
+      outgoing.addEventListener("transitioncancel", onTransitionEnd);
+      fadeRef.current = {
+        token,
+        dispose: () => {
+          window.clearTimeout(timer);
+          outgoing.removeEventListener("transitionend", onTransitionEnd);
+          outgoing.removeEventListener("transitioncancel", onTransitionEnd);
+        },
+      };
+    },
+    [bufferEl, runSwap],
+  );
 
   // Promote a pending buffer: wait for canplay (readyState >= 3), START
   // PLAYBACK, and only then flip the front — the cross-fade begins with the
@@ -300,9 +537,13 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       void Promise.resolve(video.play())
         .then(() => {
           if (cancelled || swapGenRef.current !== pendingSwap.gen) return;
+          const outgoingKey = frontRef.current;
           frontRef.current = pendingSwap.buffer;
           setFront(pendingSwap.buffer);
           setPendingSwap(null);
+          // the front flip starts the cross-fade — gate swaps + schedule
+          // the rear release off the fade itself
+          beginBufferFade(outgoingKey);
         })
         .catch(() => {
           if (cancelled || swapGenRef.current !== pendingSwap.gen) return;
@@ -310,17 +551,19 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
           // never trade a playing frame for a paused one. On a cold start
           // promote anyway: the incoming poster shows (poster-first, no
           // error chrome — FilmFrame parity).
-          const outgoing = bufferEl(frontRef.current);
+          const outgoingKey = frontRef.current;
+          const outgoing = bufferEl(outgoingKey);
           const outgoingLive =
-            outgoing !== null && buffersRef.current[frontRef.current] !== null && !outgoing.paused;
+            outgoing !== null && buffersRef.current[outgoingKey] !== null && !outgoing.paused;
           if (outgoingLive) {
-            currentSrcRef.current = buffersRef.current[frontRef.current]?.src ?? null;
+            currentSrcRef.current = buffersRef.current[outgoingKey]?.src ?? null;
             setPendingSwap(null);
             return;
           }
           frontRef.current = pendingSwap.buffer;
           setFront(pendingSwap.buffer);
           setPendingSwap(null);
+          beginBufferFade(outgoingKey);
         });
     };
 
@@ -335,18 +578,43 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       video.removeEventListener("canplay", promote);
     };
-  }, [pendingSwap, bufferEl]);
+  }, [pendingSwap, bufferEl, beginBufferFade]);
 
-  // After the cross-fade the hidden rear buffer releases its decoder. The
-  // pause is unobservable — opacity 0 behind an opaque, already-playing
-  // front — so the "never shows a paused frame" AC holds.
+  // The rear buffer's decoder release lives in beginBufferFade: it waits
+  // for the fade's OWN transitionend (computed duration + margin as the
+  // fallback), and re-checks front/pending at fire time — the pause is
+  // unobservable, opacity 0 behind an opaque, already-playing front.
+
+  // Tab-hide pauses media in mobile browsers, and nothing else would
+  // resume the film until the next claim or swap — a returning buyer saw
+  // a genuinely paused frame indefinitely (gate-1 4c). Resume the front on
+  // return, veto-safely. Parked frames stay parked.
   useEffect(() => {
-    const rearKey: BufferKey = front === "a" ? "b" : "a";
-    const rear = bufferEl(rearKey);
-    if (!rear || buffersRef.current[rearKey] === null) return;
-    const timer = window.setTimeout(() => rear.pause(), resolveSwapMs() + 80);
-    return () => window.clearTimeout(timer);
-  }, [front, bufferEl]);
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      if (activeSlotRef.current === null) return;
+      const video = bufferEl(frontRef.current);
+      if (video && buffersRef.current[frontRef.current] !== null && video.paused) {
+        void video.play().catch(() => {
+          /* autoplay veto — poster remains, no error chrome */
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [bufferEl]);
+
+  // the provider outlives every screen, but tests (and future multi-root
+  // mounts) unmount it — release flight/fade timers and listeners
+  useEffect(
+    () => () => {
+      flightRef.current?.dispose();
+      flightRef.current = null;
+      fadeRef.current?.dispose();
+      fadeRef.current = null;
+    },
+    [],
+  );
 
   // A claim keeps the film playing — play resumes if the frame was parked.
   useEffect(() => {
@@ -405,8 +673,19 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
         className="kol-film-layer group"
       >
         {/* poster underlay — poster-first paint while a clip loads, and the
-            quiet decode/404 fallback; bg-surface beneath means never black */}
-        {posterSrc !== null ? <PosterStill src={posterSrc} className="kol-film-poster" /> : null}
+            quiet decode/404 fallback; bg-surface beneath means never black.
+            Carries the incoming clip's focal crop so the poster and the
+            film agree on where the maker's face is. */}
+        {poster !== null ? (
+          <PosterStill
+            src={poster.src}
+            className="kol-film-poster"
+            objectPosition={clipObjectPosition(poster)}
+          />
+        ) : null}
+        {/* focal-point crop (v1.3 clips[].focalPoint, CPO Ruling 3) applies
+            on BOTH buffers — the layer IS the production path; FilmFrame's
+            self-mode crop only covers provider-less mounts */}
         <video
           ref={videoARef}
           data-film-buffer="a"
@@ -417,6 +696,7 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
           playsInline
           crossOrigin="anonymous"
           onError={() => handleBufferError("a")}
+          style={buffers.a ? { objectPosition: clipObjectPosition(buffers.a) } : undefined}
           className={cn(
             "kol-film-buffer",
             front === "a" && buffers.a !== null && !failed && "kol-film-front",
@@ -436,6 +716,7 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
           playsInline
           crossOrigin="anonymous"
           onError={() => handleBufferError("b")}
+          style={buffers.b ? { objectPosition: clipObjectPosition(buffers.b) } : undefined}
           className={cn(
             "kol-film-buffer",
             front === "b" && buffers.b !== null && !failed && "kol-film-front",
