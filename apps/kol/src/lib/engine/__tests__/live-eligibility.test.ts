@@ -1,7 +1,10 @@
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -11,7 +14,8 @@ import type { BuyerState, Candidate, EngineContext } from "../types";
 
 /**
  * LIVE 8-state eligibility verification for P6a against the applied staging
- * DB. Auto-skips when apps/kol/.env.local is absent (CI has no keys).
+ * DB. Auto-skips when apps/kol/.env.local is absent (CI has no keys);
+ * clients are built in beforeAll — skipped suites run no hooks.
  * Mirrors the Wave-1 live-suite rig (live-account-boundary.test.ts):
  * service-role is used ONLY as test fixture (seed/inspect/cleanup); the
  * engine itself is exercised through the ANON key — the exact trust level
@@ -46,15 +50,17 @@ const productId = randomUUID();
 describe.skipIf(!hasKeys)("P6a live 8-state eligibility (staging DB)", () => {
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 60_000 });
 
-  const admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  // vitest executes this describe BODY at collection even under skipIf(true)
+  // — only hooks and tests are skipped. Constructing the clients here throws
+  // `supabaseUrl is required` on a keyless checkout, turning the documented
+  // auto-skip into a hard FAIL. beforeAll never runs for a skipped suite, so
+  // the clients are built there and nothing at describe scope may touch the
+  // network or env.
+  let admin: SupabaseClient<Database>;
   // Bare anon client — the feed engine's trust level for eligibility.
-  const asAnon = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  let asAnon: SupabaseClient<Database>;
 
-  const eligible = createEligible(asAnon);
+  let eligible: ReturnType<typeof createEligible>;
 
   let ownerId = "";
   let storeId = "";
@@ -79,6 +85,14 @@ describe.skipIf(!hasKeys)("P6a live 8-state eligibility (staging DB)", () => {
     candidates.filter((c) => c.ownerId === ownerId);
 
   beforeAll(async () => {
+    admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    asAnon = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    eligible = createEligible(asAnon);
+
     const seller = await admin.auth.admin.createUser({
       email: sellerEmail,
       email_confirm: true,

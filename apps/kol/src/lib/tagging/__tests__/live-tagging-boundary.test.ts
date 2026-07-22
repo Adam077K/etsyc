@@ -1,6 +1,9 @@
 import { fileURLToPath } from "node:url";
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -9,8 +12,9 @@ import type { Database } from "@/lib/supabase/database.types";
  * LIVE trust-boundary verification for P7 (video-profile tagging) against
  * the applied staging DB. Auto-skips when apps/kol/.env.local is absent (CI
  * has no keys). Mirrors the P2 live suite's rig: service-role is used ONLY
- * as test fixture (create/inspect/cleanup); clients are built directly
- * because server.ts/admin.ts are `server-only` modules.
+ * as test fixture (create/inspect/cleanup); clients are built directly (in
+ * beforeAll — skipped suites run no hooks) because server.ts/admin.ts are
+ * `server-only` modules.
  *
  * Verifies the DB-enforced boundary the tagging lib builds on (B0) — the
  * tag COLUMNS have no CHECK constraint (Zod is that boundary, unit-tested
@@ -50,20 +54,18 @@ const OWNER_TAGS = {
 describe.skipIf(!hasKeys)("P7 live tagging boundary (staging DB)", () => {
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 60_000 });
 
-  const admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  // vitest executes this describe BODY at collection even under skipIf(true)
+  // — only hooks and tests are skipped. Constructing the clients here throws
+  // `supabaseUrl is required` on a keyless checkout, turning the documented
+  // auto-skip into a hard FAIL. beforeAll never runs for a skipped suite, so
+  // the clients are built there and nothing at describe scope may touch the
+  // network or env.
+  let admin: SupabaseClient<Database>;
   // Seller A (the owner) and buyer B each hold a session for the RLS checks.
-  const asUserA = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const asUserB = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  let asUserA: SupabaseClient<Database>;
+  let asUserB: SupabaseClient<Database>;
   // Bare anon client — NO session.
-  const asAnon = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  let asAnon: SupabaseClient<Database>;
 
   let userAId = "";
   let userBId = "";
@@ -91,6 +93,19 @@ describe.skipIf(!hasKeys)("P7 live tagging boundary (staging DB)", () => {
   }
 
   beforeAll(async () => {
+    admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    asUserA = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    asUserB = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    asAnon = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
     const a = await admin.auth.admin.createUser({
       email: emailA,
       email_confirm: true,
