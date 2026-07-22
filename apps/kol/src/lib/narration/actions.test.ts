@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ENGINE_RING_COOKIE, ENGINE_SESSION_COOKIE } from "./cookies";
+import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_SESSION_COOKIE } from "@/lib/feed/session";
 
 /**
  * The NARRATE_SHRINK server boundary: one engine read, zero throw paths.
@@ -91,7 +92,7 @@ describe("selectNarration — the one engine read", () => {
     expect(ctx).toEqual({
       state: "NARRATE_SHRINK",
       buyerId: null,
-      sessionId: mocks.jarStore.get(ENGINE_SESSION_COOKIE),
+      sessionId: mocks.jarStore.get(FEED_SESSION_COOKIE),
       storeScope: STORE_ID,
       productId: PRODUCT_ID,
       moodHint: null,
@@ -100,7 +101,7 @@ describe("selectNarration — the one engine read", () => {
     expect(deps).toEqual({ deps: "stub" });
 
     // the session cookie was minted HttpOnly on first read
-    const minted = mocks.setCalls.find((call) => call.name === ENGINE_SESSION_COOKIE);
+    const minted = mocks.setCalls.find((call) => call.name === FEED_SESSION_COOKIE);
     expect(minted?.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });
 
     // the clip crosses the boundary as the serializable 4-field slice only
@@ -115,7 +116,7 @@ describe("selectNarration — the one engine read", () => {
   });
 
   it("reuses an existing session cookie and passes the signed-in buyer", async () => {
-    mocks.jarStore.set(ENGINE_SESSION_COOKIE, "session-existing");
+    mocks.jarStore.set(FEED_SESSION_COOKIE, "session-existing");
     mocks.getUser.mockResolvedValue({ data: { user: { id: "buyer-7" } } });
 
     await selectNarration({ storeId: STORE_ID, productId: null });
@@ -126,11 +127,11 @@ describe("selectNarration — the one engine read", () => {
       buyerId: "buyer-7",
       productId: null,
     });
-    expect(mocks.setCalls.find((call) => call.name === ENGINE_SESSION_COOKIE)).toBeUndefined();
+    expect(mocks.setCalls.find((call) => call.name === FEED_SESSION_COOKIE)).toBeUndefined();
   });
 
   it("wires the ring cookie by its canonical name, read AND write", async () => {
-    mocks.jarStore.set(ENGINE_RING_COOKIE, "signed-ring-value");
+    mocks.jarStore.set(FEED_RING_COOKIE, "signed-ring-value");
 
     await selectNarration({ storeId: STORE_ID, productId: PRODUCT_ID });
 
@@ -139,7 +140,7 @@ describe("selectNarration — the one engine read", () => {
     ];
     expect(cookieOpts.read()).toBe("signed-ring-value");
     cookieOpts.write("next-ring");
-    const written = mocks.setCalls.find((call) => call.name === ENGINE_RING_COOKIE);
+    const written = mocks.setCalls.find((call) => call.name === FEED_RING_COOKIE);
     expect(written?.value).toBe("next-ring");
     expect(written?.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });
   });

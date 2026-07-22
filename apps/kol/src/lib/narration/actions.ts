@@ -8,7 +8,8 @@ import { z } from "zod";
 import { createEngineDeps, selectVideos } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
 
-import { ENGINE_RING_COOKIE, ENGINE_SESSION_COOKIE } from "./cookies";
+import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_SESSION_COOKIE } from "@/lib/feed/session";
 
 /**
  * NARRATE_SHRINK selection boundary (B5, contextual-narration-shrink spec).
@@ -60,10 +61,10 @@ export async function selectNarration(input: {
     const jar = await cookies();
 
     // Session scope for jitter + the ring — minted on first engine read.
-    let sessionId = jar.get(ENGINE_SESSION_COOKIE)?.value;
+    let sessionId = jar.get(FEED_SESSION_COOKIE)?.value;
     if (!sessionId) {
       sessionId = randomUUID();
-      jar.set(ENGINE_SESSION_COOKIE, sessionId, {
+      jar.set(FEED_SESSION_COOKIE, sessionId, {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
@@ -78,9 +79,9 @@ export async function selectNarration(input: {
     } = await supabase.auth.getUser();
 
     const deps = createEngineDeps({
-      read: () => jar.get(ENGINE_RING_COOKIE)?.value,
+      read: () => jar.get(FEED_RING_COOKIE)?.value,
       write: (value) =>
-        jar.set(ENGINE_RING_COOKIE, value, {
+        jar.set(FEED_RING_COOKIE, value, {
           httpOnly: true,
           sameSite: "lax",
           path: "/",
