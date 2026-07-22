@@ -702,6 +702,7 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       <div
         ref={frameRef}
         data-film-layer=""
+        data-film-frame=""
         data-film-parked={parked ? "true" : undefined}
         data-film-docked={docked ? "true" : undefined}
         inert={parked ? true : undefined}
