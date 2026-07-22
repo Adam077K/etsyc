@@ -79,6 +79,17 @@
   --spring-video: 210 26 1;
   --spring-liquid: 140 18 1.2;
 
+  /* --- Wave-3 buyer-state transition grammar (design-direction §5.1).
+         OWNED BY FILM-LAYER — B2–B5 consume these and never add here
+         (four parallel branches editing this block is a guaranteed
+         conflict; Amendment A). --- */
+  --dur-grow: var(--dur-reveal); /* 520ms — FEED → GROWN */
+  --dur-ungrow: 405ms; /* 0.78 × grow — GROWN → FEED */
+  --dur-dock: 440ms; /* WORLD_BROWSE ↔ NARRATE_SHRINK spring settle */
+  --dur-swap: 120ms; /* in-frame clip cross-fade — never a black frame */
+  --return-ratio: 0.78; /* every reverse edge runs at 0.78 × its forward edge */
+  --z-film: 40; /* the Film Layer plane (§6.2 — the old .kol-hero-docked z) */
+
   /* --- app-chrome fallback palette (KOL's own UI = sunbaked light,
          design-system §2.1) so pages outside a world root are never
          unstyled. Worlds override every one of these at their root. --- */
