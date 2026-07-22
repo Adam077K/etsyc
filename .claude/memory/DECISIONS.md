@@ -17,6 +17,12 @@
 4. **Gate-1 partial merge authorized** — P3-EXT + SEED-W3 merged; FILM-LAYER + W2-WIRE held for fix cycle 1 of 2.
 5. **Migrations gate the *read side*, not the merge** (MIG-CHECK precedent, reaffirmed): the vector exists on staging independent of what is on `main`, so holding certified branches buys nothing. MIG-TS is a **T1 entry gate**.
 
+**Z-order stacking contract (binding on every Wave-3+ buyer surface).** The Film Layer is one `position:fixed` player at app root, so page-level chrome no longer wins by default — a rewrite silently painted the film over the hero `h1`, craft line and `.kol-scrim`, losing a Wave-0 visual guarantee that jsdom cannot see. Resolved with three root-level bands, written into `globals.css`:
+
+`--z-film-bed: 30` (undocked film, above world flow) < `--z-film-chrome: 35` (`.kol-hero-stage` lifts heading/craft/scrim over the film; the claimed slot becomes a transparent window) < `--z-film: 40` (docked corner card; `data-film-docked` flips planes **at claim time** so the whole dock flight rides the top plane). App chrome stays >= 50.
+
+**Mechanism is lift-chrome, NOT portal-into-layer** — portalling would rip the `h1` out of the world's heading/accessibility order and drag chrome into the docked corner. **B1b, B3, B4 and B5 lift their chrome the same way and must keep the ancestor chain free of intervening stacking contexts.**
+
 **Process finding worth keeping:** three of the six P1s were guards that existed with *nothing pinning them* — a zero-delta FLIP whose `data-film-edge` telemetry claimed success, `focalPoint` tested only in a mode production never runs, and an anon-client boundary provable only on keyed machines. **Mutation verification is now the standard for any fix to a load-bearing guard**: break it, watch the test go red, restore, report it. Two units did exactly that this gate.
 
 **Open follow-ups (do not drop):** `verifications.created_at` is client-settable on INSERT — the CEO's exclusion scope was one-sided (checked UPDATE policies only); outside MIG-TS's signed scope, needs a decision. F12 module-scope `createClient` still defeats `describe.skipIf` in 5 live suites on `main`. G1-F2 cross-aspect FLIP smear rides now but becomes P1 at Gate 2 if unaddressed (it sits on B2's flagship grow edge). Maker-name-vs-`statement` hero line needs a CPO + Design-Lead written ruling before B3 dispatches.
