@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useFilmLayer } from "@/components/film/FilmLayer";
 import { useFilmSlot } from "@/components/film/useFilmSlot";
+import { FEED_CARD_ATTRIBUTE } from "@/components/grow/part-feed";
 import { clipObjectPosition } from "@/components/media/focal-point";
 import { PosterStill } from "@/components/media/PosterStill";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
@@ -201,7 +202,10 @@ export function FeedCardView({
   return (
     <article
       ref={setArticleRef}
-      data-feed-card=""
+      // B2's parting contract: the grow column parts [data-feed-card]
+      // elements — derived from the SOURCE constant so a rename is a
+      // compile error, never a silently no-opped choreography
+      {...{ [FEED_CARD_ATTRIBUTE]: "" }}
       data-feed-slot={slot.name}
       data-feed-mobile-slot={mobileSlot.name}
       data-feed-focus={isFocus ? "" : undefined}

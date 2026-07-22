@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { FeedMagazine } from "@/components/feed/FeedMagazine";
+import { FEED_CARD_ATTRIBUTE } from "@/components/grow/part-feed";
 import { clipObjectPosition } from "@/components/media/focal-point";
 import { PosterStill } from "@/components/media/PosterStill";
 import type { FeedCard } from "@/lib/feed/select";
@@ -65,7 +66,13 @@ function UniformGridControl({ cards }: { cards: FeedCard[] }) {
       className="grid grid-cols-3 gap-4"
     >
       {cards.map((card) => (
-        <article key={card.videoId} data-feed-card="" data-feed-slot="GRID" className="min-w-0">
+        <article
+          key={card.videoId}
+          // derived from B2's source constant — never re-typed (parting contract)
+          {...{ [FEED_CARD_ATTRIBUTE]: "" }}
+          data-feed-slot="GRID"
+          className="min-w-0"
+        >
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-ground">
             {card.poster !== null ? (
               <PosterStill

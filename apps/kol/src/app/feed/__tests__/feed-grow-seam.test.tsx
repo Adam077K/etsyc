@@ -89,11 +89,31 @@ describe("feed → grow seam — the tapped card reaches B2's machinery", () => 
     expect(column?.getAttribute("aria-label")).toBe("Marta Ferreira — grown");
 
     // the parting contract: B2 parts `[data-feed-card]` elements
-    // (FEED_CARD_ATTRIBUTE, part-feed.ts) and B1b's card RE-TYPES that
-    // literal at its render site — this join is what a rename silently
-    // severs (the parting no-ops; B2's own suite plants its own attribute
-    // and stays green). Assert the REAL cards carry B2's selector.
+    // (FEED_CARD_ATTRIBUTE, part-feed.ts). Behavioural layer of the join:
+    // the REAL rendered cards carry B2's selector (B2's own suite plants
+    // its own attribute, so only this composition can see a severed join).
     expect(container.querySelectorAll(`[${FEED_CARD_ATTRIBUTE}]`)).toHaveLength(4);
+  });
+
+  it("card render sites DERIVE the parting attribute from B2's constant — never re-type it", async () => {
+    // instance #8's source fix: a re-typed "data-feed-card" agrees today
+    // and drifts on rename; deriving from FEED_CARD_ATTRIBUTE makes a
+    // rename move both sides together. This pin catches the literal
+    // creeping back (which would keep every behavioural test green).
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    for (const file of [
+      "src/components/feed/FeedCard.tsx",
+      "src/app/preview/feed/page.tsx",
+    ]) {
+      const source = readFileSync(join(process.cwd(), file), "utf8");
+      expect(source, `${file} derives from FEED_CARD_ATTRIBUTE`).toMatch(
+        /\{\.\.\.\{ \[FEED_CARD_ATTRIBUTE\]: "" \}\}/,
+      );
+      expect(source, `${file} must not re-type the literal`).not.toMatch(
+        /data-feed-card=/,
+      );
+    }
   });
 
   it("growSourceFromCard maps field-for-field per B2's seam contract — no renames, focalPoint rides", () => {
