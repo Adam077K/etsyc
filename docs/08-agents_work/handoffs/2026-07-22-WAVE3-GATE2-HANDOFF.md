@@ -19,6 +19,23 @@ Five workers were killed mid-flight by `You've hit your monthly spend limit`. **
 
 **The critical loss is B3.** The invisible-statement P1 (maker's first line at 1.04:1) is entirely unfixed. Re-dispatch it first; the brief is in "THE BLOCKING FINDINGS" plus the source mechanism below.
 
+### ✅ RECOVERY AFTER THE LIMIT LIFTED — work re-dispatched and landing
+
+The spend limit lifted and workers spawn again. Completed since:
+
+| Branch | Head | Base | What landed |
+|---|---|---|---|
+| `test/b2-filmlayer-wiring` | `b0c9c98` | `ae303c7` | **The fake test is dead.** A real FilmLayer-level test renders `FilmLayerProvider` and queries actual DOM (`[data-film-layer]`, `video` tags) instead of the classnames the counter selects on. `FRAME_MEDIA_SELECTOR` is now exported and the rig derives from it. **All 3 mutations verified red** — including the buffer-only classname rename, the variant nothing caught before. Film suites 24 → 25. *CEO-verified independently.* |
+| `test/b4-world-interaction` | `13b4a26` | `2ef539e` | **B4's last coverage hole closed. 5 surviving mutants killed.** Browse suites 17 → 21. *CEO-verified independently.* |
+
+**Path correction, recorded so it isn't repeated:** the coverage audit's UNFINISHED item named `lib/browse/world-interaction.ts`. **That file does not exist.** `lib/renderer/world-interaction.ts` is a 28-line context contract carrying none of the four behaviours — all four live in **`lib/browse/BrowseSwapController.tsx`** (190 lines). Audit that.
+
+B4 audit result: midline-crossing-consumed and floor-applies-on-attempts were **already genuinely pinned** (proved by red mutation, no padding added). Three things were NOT: the floor running from **mount** (every existing test advanced the clock past the floor first), **all three legs of the fallback chain** (test 1's mock returned src/poster identical to the config clip, so preference was indistinguishable), and **late-response discard after a stage change**.
+
+**B2's work now spans two branches** — `test/b2-gate2-coverage` @ `ae303c7` (3 items) and `test/b2-filmlayer-wiring` @ `b0c9c98` (fast-forwards cleanly onto it). Integration needs both. Same for B4: `test/b4-browse-boundary` @ `2ef539e` then `test/b4-world-interaction` @ `13b4a26`.
+
+**Independent confirmation of the CI defect:** a worker in a fresh worktree hit *"7 `live-*` suites fail at collection — supabaseUrl is required"* without knowing it was a known issue. That is exactly what CI does today.
+
 ### Source mechanism for B3's P1 — derived by code review, use it
 `components/blocks/hero-video/index.tsx:109-112`. The chrome block is `absolute inset-x-0 bottom-0` with **no height budget**, and the h1 sizes off container *width* only (`min(var(--fs-display-hero), 10cqi)`). So wrapped lines grow **upward**. The frame is `overflow-hidden` at `:85` — meaning what the first line escapes is **the scrim's finite bottom gradient band, not the frame box**. It lands on un-scrimmed film. That is exactly the measured 1.04:1.
 
