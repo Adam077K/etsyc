@@ -204,6 +204,12 @@ export const PAGE_ELIGIBILITIES = [
 
 export const CLIP_MOODS = ["calm", "warm", "energetic", "intimate"] as const;
 
+/** 0–1 art-direction anchor (the maker's FACE) for cross-aspect crops. */
+const focalPointSchema = z.strictObject({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+});
+
 /**
  * Config-side mirror for authoring/reference only — canonical source of truth
  * is the `video_profiles` table (ADR-0001 OQ-2); the video engine ignores
@@ -224,6 +230,17 @@ export const ClipSchema = z.strictObject({
   poster: assetUrl,
   durationMs: z.number().int().nonnegative(),
   captionsSrc: assetUrl.nullable(),
+  /**
+   * v1.3 Wave-3 amendment (CPO Ruling 3): one clip is composed at four
+   * aspect ratios across the journey (4:5 feed card · 16:9 centre column ·
+   * full-bleed world hero · 320 px dock) — without a focal point a centre
+   * crop decapitates the maker in the 4:5 card. OPTIONAL with a 0.5/0.5
+   * RENDERER default — deliberately unlike the REQUIRED images[].focalPoint:
+   * optional is what keeps every already-validated config valid. Do not
+   * "fix" it to required, and do not inject the default at parse time
+   * (stored configs round-trip unchanged).
+   */
+  focalPoint: focalPointSchema.optional(),
   videoProfile: VideoProfileSchema,
 });
 
@@ -234,10 +251,8 @@ export const StoreImageSchema = z.strictObject({
   src: assetUrl,
   alt: z.string().min(1, { error: "images[].alt is required and never empty (a11y)" }),
   aspect: z.enum(IMAGE_ASPECTS),
-  focalPoint: z.strictObject({
-    x: z.number().min(0).max(1),
-    y: z.number().min(0).max(1),
-  }),
+  // REQUIRED here (unlike the optional clips[].focalPoint — see ClipSchema).
+  focalPoint: focalPointSchema,
 });
 
 export const MediaSchema = z.strictObject({
@@ -325,7 +340,27 @@ export const HeroVideoBlockSchema = z.strictObject({
   ...blockBase,
   type: z.literal("hero-video"),
   variant: z.enum(["full-bleed", "center-column", "corner-shrunk"]),
-  props: z.strictObject({ showCraftLine: z.boolean() }),
+  props: z.strictObject({
+    showCraftLine: z.boolean(),
+    /**
+     * v1.3 Wave-3 amendment (CPO Ruling 3): the maker's one big line over
+     * her film — --fs-display-hero over the mandatory --scrim. At most one
+     * per world (structural: exactly one hero-video). MAKER-AUTHORED (D10):
+     * if absent the world has NO hero line — the renderer never generates
+     * one, promotes the craft line, or substitutes the store name. AI
+     * suggestion at AUTHORING time with explicit maker approval is permitted
+     * (recorded in maker.trust.aiTransparency.aiAssistedFields); a
+     * render-time fallback is banned.
+     */
+    statement: z
+      .string()
+      .min(1, { error: 'hero-video statement must not be empty — omit the field rather than ""' })
+      .max(48, {
+        error:
+          "hero-video statement must be ≤ 48 chars — one line that survives display-hero scale without widowing",
+      })
+      .optional(),
+  }),
 });
 
 export const CraftStoryBlockSchema = z.strictObject({

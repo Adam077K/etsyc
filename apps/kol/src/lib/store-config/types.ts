@@ -9,6 +9,12 @@
  *
  * v1.2 → v1.3: `thank-you` props gain an OPTIONAL maker-authored `message`
  * (D10 honesty — never AI-generated; omitted → neutral platform fallback).
+ *
+ * v1.3 Wave-3 amendment (CPO Ruling 3, 2026-07-21 — additive, NO version
+ * bump): `media.clips[].focalPoint {x,y}` OPTIONAL with a 0.5/0.5 renderer
+ * default (deliberately unlike the required `images[].focalPoint`), and
+ * `hero-video` props gain an OPTIONAL maker-authored `statement` (≤ 48
+ * chars; D10 — no render-time fallback, ever).
  */
 
 // ---------------------------------------------------------------------------
@@ -147,6 +153,12 @@ export interface Clip {
   durationMs: number;
   /** WebVTT — accessibility. */
   captionsSrc: string | null;
+  /**
+   * 0–1, the maker's FACE — anchor for cross-aspect crops (4:5 feed card ·
+   * 16:9 centre column · full-bleed hero · dock). OPTIONAL with a 0.5/0.5
+   * renderer default, deliberately unlike the required images[].focalPoint.
+   */
+  focalPoint?: { x: number; y: number };
   videoProfile: VideoProfile;
 }
 
@@ -251,7 +263,15 @@ interface BlockBase {
 export interface HeroVideoBlock extends BlockBase {
   type: "hero-video";
   variant: "full-bleed" | "center-column" | "corner-shrunk";
-  props: { showCraftLine: boolean };
+  props: {
+    showCraftLine: boolean;
+    /**
+     * The maker's one big line over her film, ≤ 48 chars. MAKER-AUTHORED
+     * (D10): absent → the world has NO hero line; the renderer never
+     * generates one, promotes the craft line, or substitutes the store name.
+     */
+    statement?: string;
+  };
 }
 
 export interface CraftStoryBlock extends BlockBase {

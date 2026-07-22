@@ -130,6 +130,98 @@ describe("v1.3 shape — strict keys + schemaVersion", () => {
   });
 });
 
+describe("v1.3 Wave-3 additive amendment — clips[].focalPoint + hero-video statement (P3-EXT)", () => {
+  function heroBlock(config: StoreConfig) {
+    const hero = config.blocks.find((b) => b.type === "hero-video");
+    if (!hero || hero.type !== "hero-video") throw new Error("fixture must contain a hero");
+    return hero;
+  }
+
+  // NON-BREAKING PROOF: both canonical stored-config fixtures predate the
+  // amendment (no clips[].focalPoint, no statement anywhere) and must parse
+  // GREEN *unchanged* — and round-trip identically: the parser must not
+  // inject defaults into stored configs (the 0.5/0.5 default is the
+  // RENDERER's, schema doc §2.3).
+  it("parses both pre-amendment fixtures unchanged and round-trips them identically", () => {
+    for (const fixture of [senaStore, customStore]) {
+      const result = validateStoreConfig(structuredClone(fixture));
+      if (!result.ok) {
+        throw new Error(
+          `expected GREEN, got:\n${result.errors.map((e) => `${e.path}: ${e.message}`).join("\n")}`,
+        );
+      }
+      expect(result.config).toEqual(fixture);
+      expect(fixture.media.clips.some((clip) => "focalPoint" in clip)).toBe(false);
+    }
+  });
+
+  it("accepts clips[].focalPoint {x,y} in 0–1 range (green)", () => {
+    const config = cloneSena();
+    const clip = config.media.clips[0];
+    if (!clip) throw new Error("fixture needs a clip");
+    clip.focalPoint = { x: 0.5, y: 0.32 };
+    expectGreen(config);
+  });
+
+  it("rejects an out-of-range focalPoint, naming the exact axis", () => {
+    const config = cloneSena();
+    const clip = config.media.clips[0];
+    if (!clip) throw new Error("fixture needs a clip");
+    clip.focalPoint = { x: 1.5, y: 0.5 };
+    expectReject(config, /media\.clips\.0\.focalPoint\.x/);
+
+    const config2 = cloneSena();
+    const clip2 = config2.media.clips[0];
+    if (!clip2) throw new Error("fixture needs a clip");
+    clip2.focalPoint = { x: 0.5, y: -0.1 };
+    expectReject(config2, /media\.clips\.0\.focalPoint\.y/);
+  });
+
+  it("rejects unknown keys inside focalPoint (strict object)", () => {
+    const config = cloneSena();
+    const clip = config.media.clips[0];
+    if (!clip) throw new Error("fixture needs a clip");
+    clip.focalPoint = { x: 0.5, y: 0.5, z: 0.5 } as never;
+    expectReject(config, /media\.clips\.0\.focalPoint/);
+  });
+
+  it("images[].focalPoint stays REQUIRED — the asymmetry is deliberate, not harmonised", () => {
+    const config = cloneSena();
+    const image = config.media.images[0];
+    if (!image) throw new Error("fixture needs an image");
+    delete (image as { focalPoint?: unknown }).focalPoint;
+    expectReject(config, /media\.images\.0\.focalPoint/);
+  });
+
+  it("accepts a maker-authored hero statement at exactly the 48-char cap (green)", () => {
+    const config = cloneSena();
+    heroBlock(config).props.statement = "a".repeat(48);
+    expectGreen(config);
+
+    const config2 = cloneSena();
+    heroBlock(config2).props.statement = "Every glaze starts as swept ash.";
+    expectGreen(config2);
+  });
+
+  it("rejects a 49-char statement, naming the cap", () => {
+    const config = cloneSena();
+    heroBlock(config).props.statement = "a".repeat(49);
+    expectReject(config, /statement must be ≤ 48 chars/);
+  });
+
+  it('rejects an empty statement — omit the field rather than ""', () => {
+    const config = cloneSena();
+    heroBlock(config).props.statement = "";
+    expectReject(config, /omit the field rather than ""/);
+  });
+
+  it("keeps hero-video props strict — an unknown key beside statement is still rejected", () => {
+    const config = cloneSena();
+    (heroBlock(config).props as Record<string, unknown>).aiStatement = "fabricated";
+    expectReject(config, /aiStatement/);
+  });
+});
+
 describe("theme — curated enum rails apply ONLY to kind:curated (D9/D15)", () => {
   it("rejects a non-enum curated paletteId, naming the key", () => {
     const config = cloneSena();
