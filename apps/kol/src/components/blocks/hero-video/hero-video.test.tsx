@@ -172,9 +172,9 @@ describe("gate-2 P1 — the chrome band is clipped to the film rect and paints i
     expect(nameplate).toContain("kol-hero-chrome");
   });
 
-  it("caption clears the display descender: mt-10 desktop / mt-4 mobile (band ruling — ~60px descender→cap at desktop, ≥40px target)", () => {
+  it("caption clears the display descender INK-TO-INK: mt-12 desktop / mt-4 mobile (band re-ruling — mt-10 left Fraunces ~2px under the ≥40px bound)", () => {
     const html = markup(cloneSena());
-    expect(html).toContain("mt-4 md:mt-10");
+    expect(html).toContain("mt-4 md:mt-12");
     // the old 8px gap (25–29px optical, descenders touching the caption) is gone
     expect(html).not.toMatch(/<p[^>]*class="mt-2 /);
   });
