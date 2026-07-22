@@ -30,11 +30,11 @@ import { createClient } from "@/lib/supabase/server";
 const getWorld = cache(
   async (
     handle: string,
-  ): Promise<{ storeId: string; name: string; craft: string | null; config: StoreConfig } | null> => {
+  ): Promise<{ storeId: string; name: string; config: StoreConfig } | null> => {
     const supabase = await createClient();
     const { data: store } = await supabase
       .from("stores")
-      .select("id, name, craft, config")
+      .select("id, name, config")
       .eq("handle", handle)
       .eq("published", true)
       .maybeSingle();
@@ -48,7 +48,7 @@ const getWorld = cache(
       console.warn(`[w/${handle}] stored config failed validation — serving 404`, parsed.errors);
       return null;
     }
-    return { storeId: store.id, name: store.name, craft: store.craft, config: parsed.config };
+    return { storeId: store.id, name: store.name, config: parsed.config };
   },
 );
 
