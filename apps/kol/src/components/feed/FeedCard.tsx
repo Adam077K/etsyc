@@ -106,7 +106,9 @@ export const DESKTOP_ASPECT_CLASS: Record<SlotAspect, string> = {
 export const MOBILE_MEDIA_CLASS: Record<MobileSlotName, string> = {
   "M-BLEED": "rounded-none md:rounded-md",
   "M-FULL": "ml-[var(--space-4)] mr-[var(--space-4)] md:ml-0 md:mr-0",
-  "M-OFF-L": "ml-[var(--space-4)] mr-[var(--space-16)] md:ml-0 md:mr-0",
+  // M-OFF-L's right inset is --space-14, not --space-16 — the slot-table
+  // fix that keeps the two offset slots 16px apart in width (spreads.ts)
+  "M-OFF-L": "ml-[var(--space-4)] mr-[var(--space-14)] md:ml-0 md:mr-0",
   "M-OFF-R": "ml-[var(--space-16)] mr-[var(--space-4)] md:ml-0 md:mr-0",
 };
 

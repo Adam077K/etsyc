@@ -426,11 +426,22 @@ describe("slot table matches screen-specs §1.1 exactly", () => {
 });
 
 describe("mobile composition (§1.6) — the left edge is the identity", () => {
-  it("slot table matches the spec: asymmetric insets, one bleed", () => {
+  it("slot table matches the spec: asymmetric insets, one bleed, no width mirrors", () => {
     expect(MOBILE_SLOTS["M-BLEED"]).toMatchObject({ leftInsetPx: 0, rightInsetPx: 0, aspect: "16:9" });
     expect(MOBILE_SLOTS["M-FULL"]).toMatchObject({ leftInsetPx: 32, rightInsetPx: 32, aspect: "4:5" });
-    expect(MOBILE_SLOTS["M-OFF-L"]).toMatchObject({ leftInsetPx: 32, rightInsetPx: 128, aspect: "1:1" });
+    // right inset --space-14 (112), not --space-16: the slot-table fix
+    // that broke the accidental 215px bilateral symmetry so (d), (e),
+    // the bleed cadence and anti-periodicity can all hold at once
+    expect(MOBILE_SLOTS["M-OFF-L"]).toMatchObject({ leftInsetPx: 32, rightInsetPx: 112, aspect: "1:1" });
     expect(MOBILE_SLOTS["M-OFF-R"]).toMatchObject({ leftInsetPx: 128, rightInsetPx: 32, aspect: "3:2" });
+    // every pair of rendered widths clears (d)'s 8px guard at 375
+    const widths = Object.values(MOBILE_SLOTS).map(mobileSlotRefWidthPx);
+    expect(widths.sort((a, b) => b - a)).toEqual([375, 311, 231, 215]);
+    for (let i = 0; i < widths.length; i += 1) {
+      for (let j = i + 1; j < widths.length; j += 1) {
+        expect(Math.abs((widths[i] ?? 0) - (widths[j] ?? 0))).toBeGreaterThan(8);
+      }
+    }
   });
 
   it("assigns every card once, in order, for every N and profile", () => {
@@ -444,7 +455,7 @@ describe("mobile composition (§1.6) — the left edge is the identity", () => {
     }
   });
 
-  it("hard constraints: no consecutive slot, bleed gap ≥5, edge run ≤2, adjacent widths differ >8px", () => {
+  it("hard constraints: no consecutive slot, bleed gap ≥5, (e)-LITERAL edges, adjacent widths differ >8px", () => {
     for (const profile of PROFILES) {
       for (const n of [8, 18, 24]) {
         const slots = composeMobileFeed(profile.cards(n)).map(({ slot }) => slot);
@@ -460,17 +471,14 @@ describe("mobile composition (§1.6) — the left edge is the identity", () => {
                 Math.abs(mobileSlotRefWidthPx(slot) - mobileSlotRefWidthPx(prev)),
                 `${profile.name} N=${n}: cards ${i - 1},${i} share a width`,
               ).toBeGreaterThan(8);
+              // §1.7(e) in its LITERAL form — achievable since the
+              // slot-table fix reopened the M-OFF-L↔M-OFF-R edge: the
+              // leading edge never repeats even once consecutively
+              expect(
+                slot.leftInsetPx,
+                `${profile.name} N=${n}: cards ${i - 1},${i} share a left edge`,
+              ).not.toBe(prev.leftInsetPx);
             }
-          }
-          if (
-            i >= 2 &&
-            slots[i - 1] !== undefined &&
-            slots[i - 2] !== undefined
-          ) {
-            const run =
-              slot.leftInsetPx === slots[i - 1]?.leftInsetPx &&
-              slot.leftInsetPx === slots[i - 2]?.leftInsetPx;
-            expect(run, `${profile.name} N=${n}: left edge repeats 3× at ${i}`).toBe(false);
           }
           if (slot.name === "M-BLEED") {
             expect(i - lastBleed).toBeGreaterThanOrEqual(5);

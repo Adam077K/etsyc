@@ -2,7 +2,13 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { buildFixtureCards } from "../src/app/preview/feed/fixtures";
 import { ambientCountForVisible } from "../src/components/feed/focus";
-import { composeFeed, composeMobileFeed } from "../src/components/feed/spreads";
+import {
+  composeFeed,
+  composeMobileFeed,
+  MOBILE_SLOTS,
+  mobileSlotRefWidthPx,
+  type MobileSlotName,
+} from "../src/components/feed/spreads";
 
 /**
  * B1's HARD GATE (discovery-feed AC "Layout identity", gate-2 rulings) on
@@ -21,12 +27,14 @@ import { composeFeed, composeMobileFeed } from "../src/components/feed/spreads";
  *
  * Mobile at 375 (screen-specs §1.6/§1.7):
  *   (d) no two adjacent cards share a rendered media width within 8px;
- *   (e) the dominant left edge breaks within every 3 consecutive cards.
- *       (The literal every-viewport form of (e) is unsatisfiable under
- *       the binding §1.6 slot table: (d) forbids M-OFF-L↔M-OFF-R
- *       adjacency and the bleed is gap-limited, so an occasional
- *       same-edge PAIR is forced; runs of 3+ never are. The composer
- *       prices pairs high, so they stay rare.)
+ *   (e) LITERAL — no two adjacent cards share a left edge at all. This
+ *       was unsatisfiable under the original §1.6 table (the 215px
+ *       M-OFF-L/M-OFF-R width mirrors let (d)'s guard delete their
+ *       adjacency edge, degenerating the graph); the slot-table fix
+ *       (M-OFF-L right inset --space-14 → 231px wide) reopened that
+ *       edge, and every 32-edge card now has a 128- or 0-edge successor
+ *       available, so the literal rule holds structurally — no
+ *       relax-ladder escape exists or is needed.
  *
  * The detector is PROVEN against a negative control (?grid=1 renders the
  * same cards as a uniform 3-col grid), and the period gate is mutation-
@@ -265,21 +273,30 @@ test.describe("mobile at 375 — the left edge is the identity (§1.6)", () => {
     // The critic cannot resolve an 8px width delta from a static capture,
     // so this constraint is provable ONLY here: real rendered boxes at
     // 375, every one of the N−1 adjacent pairs checked, N=18 AND N=8 —
-    // never a sampled pair. Mutation-verified: forcing the composer into
-    // a fixed 4-cycle (which puts equal-width M-OFF-L/M-OFF-R side by
-    // side) turns this red.
+    // never a sampled pair. Mutation-verified: restoring the 215px
+    // mirror table (--space-16 inset in BOTH spreads.ts and FeedCard's
+    // class) and forcing mirror adjacency turns this red with
+    // "cards 1/2: 215px vs 215px" on measured boxes.
     for (const n of [8, 18]) {
       await page.goto(`/preview/feed?n=${n}`);
       await expect(page.locator("[data-feed-card]")).toHaveCount(n);
-      const media = await measureMedia(page);
-      expect(media).toHaveLength(n);
-      const widths = media.map((m) => m.width);
+      const cards = await page.$$eval("[data-feed-card]", (elements) =>
+        elements.map((element) => {
+          const media = element.querySelector("[data-feed-media]");
+          return {
+            slot: element.getAttribute("data-feed-mobile-slot"),
+            width: media ? Math.round(media.getBoundingClientRect().width) : null,
+          };
+        }),
+      );
+      expect(cards).toHaveLength(n);
+      const widths = cards.map((card) => card.width);
       const offences: string[] = [];
       let pairsChecked = 0;
       for (let i = 0; i + 1 < widths.length; i += 1) {
         const a = widths[i];
         const b = widths[i + 1];
-        if (a === undefined || b === undefined) continue;
+        if (a == null || b == null) continue;
         pairsChecked += 1;
         if (Math.abs(a - b) <= 8) {
           offences.push(`cards ${i}/${i + 1}: ${a}px vs ${b}px`);
@@ -290,10 +307,27 @@ test.describe("mobile at 375 — the left edge is the identity (§1.6)", () => {
         offences,
         `N=${n} rendered widths [${widths.join(", ")}] — adjacent pairs within 8px: ${offences.join("; ")}`,
       ).toEqual([]);
+
+      // Model↔pixels parity: the rendered width must equal the slot
+      // table's width. The insets live twice — MOBILE_SLOTS (which the
+      // composer's guard reasons about) and FeedCard's Tailwind classes
+      // (which the browser renders) — and nothing else ties them
+      // together, so a drift between them would silently split the
+      // guard's world from the buyer's. This is the tripwire.
+      for (const card of cards) {
+        expect(card.slot).not.toBeNull();
+        expect(card.width).not.toBeNull();
+        if (card.slot === null || card.width === null) continue;
+        const spec = MOBILE_SLOTS[card.slot as MobileSlotName];
+        expect(
+          Math.abs(card.width - mobileSlotRefWidthPx(spec)),
+          `${card.slot}: rendered ${card.width}px vs model ${mobileSlotRefWidthPx(spec)}px — the slot table and the CSS classes have drifted apart`,
+        ).toBeLessThanOrEqual(1);
+      }
     }
   });
 
-  test("(e) the dominant edge breaks within any 3 cards; edge and width carry the variety", async ({ page }) => {
+  test("(e) LITERAL — no two adjacent cards share a left edge; edge and width carry the variety", async ({ page }) => {
     await page.goto("/preview/feed?n=18");
     await expect(page.locator("[data-feed-card]")).toHaveCount(18);
     const media = await measureMedia(page);
@@ -304,13 +338,18 @@ test.describe("mobile at 375 — the left edge is the identity (§1.6)", () => {
     expect(new Set(media.map((m) => m.left)).size).toBeGreaterThanOrEqual(3);
     expect(new Set(media.map((m) => m.width)).size).toBeGreaterThanOrEqual(3);
 
-    // (e) — the dominant edge (--space-4 = 32) never survives 3 cards
-    for (let i = 0; i + 2 < media.length; i += 1) {
-      const window3 = media.slice(i, i + 3);
+    // (e) in its literal form, achievable since the slot-table fix: the
+    // left edge changes on EVERY card, so every screenful shows a broken
+    // rule — the text column zig-zags without pause
+    const edges = media.map((m) => m.left);
+    for (let i = 0; i + 1 < edges.length; i += 1) {
+      const a = edges[i];
+      const b = edges[i + 1];
+      if (a === undefined || b === undefined) continue;
       expect(
-        window3.some((m) => Math.abs(m.left - 32) > 1),
-        `cards ${i}–${i + 2} all sit on the dominant left edge`,
-      ).toBe(true);
+        Math.abs(a - b),
+        `cards ${i},${i + 1} share the left edge (${a}px) — edge sequence [${edges.join(", ")}]`,
+      ).toBeGreaterThan(1);
     }
 
     // one slot bleeds past both margins

@@ -37,6 +37,7 @@
   --space-8: 64px;
   --space-10: 80px;
   --space-12: 96px;
+  --space-14: 112px; /* §1.6 M-OFF-L right inset (gate-2 slot-table fix) */
   --space-16: 128px;
   --space-20: 160px;
 
