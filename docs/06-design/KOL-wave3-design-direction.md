@@ -72,10 +72,46 @@ That distinction matters more for KOL than for Kotn, because our image is always
 
 | Context | Size | Weight | Tracking | Treatment |
 |---|---|---|---|---|
-| `display-hero` **over film** (I1 slot) | `--fs-display-hero` | **400–500** | `-0.01em` (relaxed from `-0.03em`) | `--scrim` mandatory; `--on-media` ink |
+| `display-hero` **over film**, carrying *speech* (I1 slot, the statement) | `--fs-display-hero` | **400–500** | `-0.01em` (relaxed from `-0.03em`) | `--scrim` mandatory; `--on-media` ink |
 | `display-hero` / `display` **on a ground** (block-ground or `--ground`) | `--fs-display-hero` / `--fs-display` | **700–800** | `-0.03em` / `-0.02em` | as design-system §1.1 |
+| **A name over film** (the nameplate) | see §2.1a | see §2.1a | see §2.1a | `--scrim` mandatory |
 
-Same tier, two registers. Heavy when it has a ground to stand on; light when it is a guest on someone's face.
+Same tier, three registers. Heavy when it has a ground to stand on; light when it is a guest on someone's face; and a name over film is neither — it is a nameplate, governed by §2.1a.
+
+### 2.1a Correction A′ — the nameplate register is stroke-contrast-aware, not a number
+
+*(Added 2026-07-22, gate-2 critic ruling. The prior text stated the light-over-film rule as an absolute weight and then let screen-specs §3.2 carve out `weight 700` for the absent-`statement` case, over exactly the face §2.1 exists to protect. The two contradicted each other and §3.2 won by fiat. **The critic is right and I was wrong** — not about the nameplate-vs-speech distinction, which the captures confirm reads, but about expressing it as a number. Optical mass is size × weight × **stroke contrast**. Noor Haddad at Fraunces 700 stays airy because the face's thins do the airing; Sena Okonkwo at a geometric 700, same tier, reads as a logotype stamped onto the image. Same number, opposite outcome — so the number was never the rule.)*
+
+Every pairing declares one property, `strokeClass`, and the nameplate register is read off it. The renderer never branches on a font name.
+
+| `strokeClass` | Meaning | Nameplate size | Weight | Tracking |
+|---|---|---|---|---|
+| `modulated` | High stroke contrast — optical serifs, faces with real thick/thin variation | `--fs-display-hero` | **700** | `-0.03em` |
+| `uniform` | Low stroke contrast — geometric, neo-grotesque, near-equal stem widths | `--fs-display` | **600** | `-0.025em` |
+
+**Assignment, binding across all five pairings:**
+
+| Pairing | Display face | `strokeClass` |
+|---|---|---|
+| `statement-grotesk` | Clash Display | `uniform` |
+| `warm-serif` | Fraunces | `modulated` |
+| `modern-mono-grotesk` | Cabinet Grotesk | `uniform` |
+| `character-maximal` | Bricolage Grotesque | `uniform` |
+| `kind:"custom"` (seller-derived) | any | **declared at authoring time; defaults to `uniform`** |
+
+`uniform` is the fail-safe default because it is the lower-mass treatment — an unbounded seller face that turns out to be modulated renders slightly quieter than it could, which is a miss we can live with. The reverse miss is Sena.
+
+**Exposed to the renderer as three custom properties**, set once per world from the pairing, never hard-coded in a screen:
+
+```css
+--nameplate-size:     var(--fs-display);   /* or --fs-display-hero when modulated */
+--nameplate-weight:   600;                 /* or 700 when modulated */
+--nameplate-tracking: -0.025em;            /* or -0.03em when modulated */
+```
+
+**Why two levers and not just weight.** Weight alone leaves the same failure at a lower amplitude on the heaviest uniform faces. Dropping the uniform nameplate one size role as well is what produces the register the distinction actually depends on: **the statement is larger and lighter; the nameplate is smaller and heavier.** They move in opposite directions on both axes, so they are unmistakable for one another — which is exactly what screen-specs §3.2 was reaching for and could not reach with one number. Both remain display tier; the tier budget of one display line per world is unchanged.
+
+**Design-system follow-up (not editable from this doc):** `KOL-design-system.md` §3 must carry the `strokeClass` line on each of the four pairings, and the `kind:"custom"` derivation must emit it. Until it does, the values in the assignment table above are the source of truth.
 
 ### 2.2 Correction B — brave colour and composed type, not both at once
 
@@ -117,7 +153,13 @@ The design-system §1.1 scale is unchanged. What Wave 3 adds is **role assignmen
 
 Global scale unchanged (design-system §1.2). Two Wave-3 additions:
 
-**4.1 The feed's rhythm is a 12-column asymmetric stagger, not a grid.** Columns are a measuring device, not a cell structure. Cards span 4, 5, 6, or 7 columns and are vertically offset from their neighbour so **no two cards share a top edge**. The offset is the anti-grid mechanism and it is testable: the B1 layout test should assert both (a) rendered cards do not all share identical dimensions, and (b) **no two adjacent cards share a `getBoundingClientRect().top` within 24 px.** The second assertion is the one that actually catches a grid; the first can be passed by a grid with two cell sizes.
+**4.1 The feed's rhythm is a 12-column asymmetric stagger, not a grid.** Columns are a measuring device, not a cell structure. Cards span 4, 5, 6, 7, or 8 columns and are vertically offset from their neighbour so **no two cards share a top edge**. The offset is the anti-grid mechanism and it is testable: the B1 layout test should assert both (a) rendered cards do not all share identical dimensions, and (b) **no two adjacent cards share a `getBoundingClientRect().top` within 24 px.** The second assertion is the one that actually catches a grid; the first can be passed by a grid with two cell sizes.
+
+**Both assertions are necessary and neither is sufficient** *(added 2026-07-22, gate-2 critic ruling — the critic is right; this is the second thing I got wrong)*. A deterministic three-pattern cycle passes (a) and (b) at every card and still reads as a grid with a longer period: at N=18 the built feed ran S1→S2→S3 **3.6 times**, big-left/small-right → centred wide → small-left/big-right, four times over. No magazine runs the same spread template twice consecutively, let alone four times. The mechanism that fixes it is **content-aware slot assignment** (screen-specs §1.1), and it carries its own assertion — **(c) across N ≥ 12, no ordered three-card slot sequence occurs more than twice, and at least four distinct row patterns appear.** (c) is the one that catches a period.
+
+**4.1b Contrast over film carries headroom, or it is not a pass.** Every contrast number in this wave was measured against a smooth synthetic gradient — zero variance. hollowgrain's caption measured 4.89:1, which is 0.39 of headroom over a surface no real footage produces; a face lit from the left takes it under AA in the frame it moves. **Binding: type over film must measure ≥ 5.5:1 body / ≥ 4.0:1 large against its rendered backdrop**, i.e. a full point of margin over the I5 floor. The scrim ramps until that holds, capped at `0.8`; a clip that still cannot reach it is not eligible for the hero slot. I5 itself is unchanged — this is a stricter measurement condition on media surfaces, not a new invariant, and it is implementable today with no new infrastructure.
+
+*Recommended for Wave 4/5, not binding now:* replace the fixed `--scrim` token with a function of **backdrop variance** — sample mean luminance and σ under the text box once at clip ingest, store per clip, and require contrast against `mean + 1.5σ` (the bright tail) rather than the mean. That is the correct model. The 1.0-point margin above is its cheap standing approximation.
 
 **4.2 Feed vertical rhythm is `--space-10` between cards within a spread and `--space-16` between spreads.** A "spread" is the repeating unit of the composition (§ screen spec B1). Two rhythms, not one, is what makes a page read as composed rather than tiled.
 
@@ -209,7 +251,11 @@ Desktop-first (D1). Each breakpoint is a **different composition**, not a reflow
 | **≥ 1440** (design target) | 12-col asymmetric stagger, spans 4/5/6/7, two cards visible in the opening viewport — the magazine opening spread | Centre column 720 px | 320×180, bottom-right, `--space-3` inset |
 | **1024–1439** | Same composition, spans compress to 5/6/7 | Centre column 640 px | 280×158 |
 | **768–1023** (tablet) | Two-track editorial stack: large / small alternating, still vertically offset | 92 vw, top-anchored | 240×135 |
-| **< 768** (mobile) | **Single column — variety comes from card *height*, not width.** Aspect ratios cycle 4:5 · 16:9 · 1:1 · 3:2. This is what preserves the anti-grid identity when width is fixed. | Full-bleed, top-pinned | 200×112, **bottom-centre**, and see below |
+| **< 768** (mobile) | **Single column, four mobile slots — variety comes from *edge* and *height*, not width.** See screen-specs §1.6. Aspect alone is not enough and the prior text was wrong to imply it was. | Full-bleed, top-pinned | 200×112, **bottom-centre**, and see below |
+
+**The mobile ruling** *(added 2026-07-22, gate-2 critic ruling — the critic is right; the spec was simply silent below the breakpoint and mobile is the majority of real traffic for a Gen-Z buyer product)*. At 375 px the built feed rendered eight cards at identical widths with uniform gaps: the equal-cell layout §2.4 bans, one column wide. Aspect alternation was the only variety and it is not enough, because **width equality is what the eye reads as a grid, and at one column every card was the same width.** Two columns is the wrong fix for media-first cards — it shrinks the face, which is the one thing that must not shrink.
+
+The mechanism is **the left edge**. Mobile cards vary their inset asymmetrically, some bleed past both margins, and each caption aligns to its own media's left edge — so the text column zig-zags down the page and the reader never sees a repeating rule. Slots, constraints, and rhythm: screen-specs §1.6.
 
 **The mobile dock ruling (closes B5 OQ #1 and B5 risk "dock covers the CTA"):** on `< 768`, when a primary CTA (`add-to-cart`) enters the viewport, the dock **collapses to the audio-only pill** already specified in design-system §4.4 — the maker keeps narrating, the CTA is never occluded, and nothing errors. On `≥ 768` the dock sits bottom-right and the product layout reserves a `340 px × 200 px` exclusion zone in that corner; the CTA never enters it.
 

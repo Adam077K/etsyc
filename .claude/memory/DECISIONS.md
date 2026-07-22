@@ -4,6 +4,23 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-22 — Gate-2 design rulings: optical properties are not numbers, and an anti-grid rule is not an anti-cycle rule
+
+**Context:** The first design-critic pass measured the built product at pixel level across ten captures. It confirmed the hardest Wave-3 call (light display weight over film) and found three places the direction itself — authored without ever running `/preview` — was wrong.
+
+**R1 — the nameplate register is stroke-contrast-aware (replaces the flat `weight 700`).** Same weight, same tier, opposite outcomes: Fraunces reads airy, a geometric sans reads as a logotype stamped on the face. Optical mass is size × weight × **stroke contrast**, so the spec now declares `strokeClass` per pairing and the renderer reads `--nameplate-size/-weight/-tracking`, never a font name (`kind:"custom"` defaults to `uniform`, the lower-mass fail-safe). `modulated` → `display-hero`/700/`-0.03em`; `uniform` → `display`/600/`-0.025em`. Two axes, not one: **statement larger-and-lighter, nameplate smaller-and-heavier**, so nameplate-vs-speech survives any face. Dissolves the standing §2.1 ↔ §3.2 contradiction.
+
+**R2 — the feed gets a mobile identity, carried by the left edge.** The spec was silent below 768 px and mobile rendered eight identical-width cards with uniform gaps: the equal-cell layout §2.4 bans, one column wide. Width equality is what reads as a grid; aspect alternation cannot fix it. Two columns rejected — it shrinks the maker's face. Four mobile slots vary inset asymmetrically, one bleeds both margins, and **each caption aligns to its own media's left edge** so the text column zig-zags.
+
+**R3 — slot assignment is content-aware, not cyclic.** S1→S2→S3 repeated 3.6× at N=18 while passing both anti-grid assertions — a deterministic cycle is a grid with a longer period. Cards now choose slots by aspect fit + repeat/edge penalties under four hard constraints, deterministic, degrading to centre focal point if the `focalPoint` schema add has not landed. Added a 6th slot (`COLUMN`) and a 3rd assertion: **no ordered 3-card slot sequence more than twice, ≥ 4 distinct row patterns.** The anti-grid AC was necessary and insufficient.
+
+**Also bound — contrast carries headroom.** Every number this wave was measured on a zero-variance synthetic gradient; hollowgrain's caption at 4.89:1 has 0.39 of margin and a lit face takes it under. Type over film must now measure **≥ 5.5:1 body / ≥ 4.0:1 large** — a full point over the I5 floor. I5 unchanged; this is a stricter measurement condition on media surfaces. Variance-aware scrim (contrast against `mean + 1.5σ`, sampled at ingest) recommended for Wave 4/5.
+
+**Reversibility:** reversible (spec text; no data or schema change)
+**Owner:** design-lead
+**Affects:** B1b (feed layout — R2, R3), B3 (hero nameplate — R1), QA-Lead (three new ACs), KOL-design-system §3 (must mirror `strokeClass`)
+**Status:** Binding. B1b and B3 fix briefs carry it.
+
 ## 2026-07-22 — E5 hero-line ruling: a maker's NAME is identity, not her words (unblocks B3)
 
 **Context:** Gate 1 filed E5 — screen-specs §3.2 and world-unfold's binding AC both said an absent `statement` leaves the world with **no hero line at all**, while the shipped `hero-video` render (pre-dating Wave 3) puts `maker.displayName` in that slot at `--fs-display-hero`. Two independent reviewers had already cleared the code as in-scope and non-D10. So this was never a defect — it was a product decision nobody had made, and B3's completion bar cited the text that contradicts what ships.
@@ -20,6 +37,28 @@
 
 **Files changed:** `docs/06-design/KOL-wave3-screen-specs.md` §3.2 (rewritten), `docs/04-features/specs/world-unfold.md` (AC block + changelog), `docs/04-features/KOL-block-catalog.md` (hero-video props + Success state), `docs/06-design/KOL-wave3-design-direction.md` §display-budget table row.
 **Reversibility:** reversible (spec text + one caption-line render). **Owner:** cpo (`cpo-e5-heroline`). **Affects:** B3 (dispatch-blocking), B2 §2.2 (same two-tier read), B5 dock chrome, `hero-video.test.tsx` (one new assertion, one amended), QA-Lead's B3 completion bar.
+
+## 2026-07-22 — Engine cookie names are a single source of truth (buyer-journey seam)
+
+**Context:** Three T1 units independently invented cookie names for the same two values — B1a `kol_sid`/`kol_ring`, B4 `kol_session`/`kol_ring`, B5 `kol_sid`/`kol_film_ring`. Each was green in isolation. Together they fragment buyer identity across the journey.
+
+**Why it matters (silent, not cosmetic):** a buyer scrolls the feed under one session id, taps into a world, and a different cookie is read. The seeded jitter changes AND the anti-repetition ring does not carry — so the buyer is shown clips they just watched, on the one surface whose whole promise is that it remembers them. Same class as the Gate-1 defect where FILM-LAYER silently voided P3-EXT's `focalPoint`: two correct units that break on contact.
+
+**Decision — canonical, binding on every buyer-journey unit:**
+- **Session cookie: `kol_sid`** · **Ring cookie: `kol_ring`** (B1a's values; B1a owns session identity per packet §7).
+- **Declared in exactly one place each** — `lib/feed/session.ts` (`FEED_SESSION_COOKIE`) and `lib/feed/select.ts` (`FEED_RING_COOKIE`). **Every other consumer imports; nobody re-declares.** Two independently-declared constants that agree today drift the moment one is renamed.
+- Buyer-journey units branch from / rebase onto `feat/b1a-feed-data`, which is already the base for B1b and B4.
+- **RSC cannot write cookies.** The session id is minted by proxy middleware; the ring is read-only during render. That is load-bearing, not a workaround — a ring persisted at render time would break the "same `sessionId` → same order" AC by excluding just-shown clips on reload.
+
+**AMENDMENT (2026-07-22, Gate 2) — the rule must cover ATTRIBUTES, not just names.** Converging the two cookie *names* to one declaration each was necessary and **insufficient**. Gate 2's adversary found B5 writing both cookies **without `secure`** while every other writer set `secure: NODE_ENV === "production"`. Cookie identity is `(name, domain, path)` — **`Secure` is not part of the key** — so that write *replaced* the middleware's cookie and stripped the attribute, putting an HMAC-bearing ring on plaintext `http://` in production. B5 had imported the canonical names; it reimplemented the behaviour. **Matching identifiers, divergent semantics.**
+
+Therefore: **the attribute set is part of the contract and gets the same single-declaration treatment as the names.** Export one `ENGINE_COOKIE_OPTIONS` (httpOnly · sameSite lax · path / · secure in production) from `lib/feed` beside the constants; every writer imports it. Make it a **function**, not a module const, so `NODE_ENV` resolves at write time. Assert it with `toEqual`, never `toMatchObject` — a subset match cannot detect a *missing* attribute, which is exactly how this slipped past a passing suite.
+
+**Generalised rule:** when a value is a cross-unit contract, the whole shape is the contract. Converging the name while leaving the semantics to each caller reproduces the defect with a longer fuse.
+
+**Applies to:** B1a, B1b, B2, B4, B5, B6, B7, B8 and every later engine consumer. **Gate 2 verifies convergence across all branches before merge.**
+
+**Reversibility:** reversible (constants + imports). **Owner:** ceo. **Affects:** every unit that calls `createEngineDeps`.
 
 ## 2026-07-22 — Wave-3 Gate 1: two Irreversible migrations, and the "RLS gates rows, not values" class
 
