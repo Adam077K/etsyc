@@ -21,3 +21,13 @@
 - Suite: 212/212 green, tsc+lint clean.
 - Session: docs/08-agents_work/sessions/2026-07-21-qa-lead-kol-p5-final.md
 
+## 2026-07-22 — STAGING APPLY — MIG-CHECK video_profiles CHECK constraints (Irreversible, Founder-signed)
+
+- Applied `20260721000015_video_profiles_check_constraints.sql` to `olwtcjzmohdhawdzlzqs` — psql/session-pooler, `ON_ERROR_STOP=1`, rc=0 (BEGIN/ALTER TABLE/COMMIT). Ledger row inserted (15 rows total).
+- 5 CHECKs live, spec-verbatim names: purpose_enum, page_enum, mood_enum, thankyou_exclusive, antirep_key_format. Verified via pg_constraint post-apply.
+- Pre-flight re-run immediately before apply: 0 rows, 0 nonconforming on all 5 predicates. No seller data touched.
+- Acceptance proof (owner JWT via PostgREST, not app/Zod): INSERT `purpose=['thankyou'], page_eligibility=['feed']` → **SQLSTATE 23514** `video_profiles_thankyou_exclusive`; PATCH variant → same 23514; all-empty-array row inserts OK (untagged stays valid + invisible). Live suite 7/7 green.
+- CHECKs bind the service role too (verified in suite) — the §B0 "app-side only" gap is closed; Zod and DB guards now parallel.
+- Rollback: 5 `drop constraint` statements + ledger delete, documented in the migration header.
+- Branch: feat/mig-check (rebased onto post-merge-train main). Session: docs/08-agents_work/sessions/2026-07-21-database-engineer-mig-check.md
+
