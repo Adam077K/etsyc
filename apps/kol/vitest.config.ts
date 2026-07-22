@@ -19,9 +19,12 @@ export default defineConfig({
   test: {
     // e2e/ is Playwright's — vitest owns unit tests under src/ only.
     // Component tests opt into jsdom per-file via `@vitest-environment`.
-    // *.eval.ts are the LLM evals (agents/evals/) — they auto-skip without
-    // the relevant API key, so a keyless CI run stays green and honest.
-    include: ["src/**/*.test.{ts,tsx}", "src/**/*.eval.ts"],
+    // *.eval.ts (the LLM evals under agents/evals/) are deliberately NOT in
+    // the default include: once ANTHROPIC_API_KEY exists in .env.local they
+    // make live LLM calls, and `pnpm test` must stay fast, free, and
+    // deterministic. Run evals explicitly via `pnpm eval`
+    // (vitest.eval.config.ts).
+    include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
   },
 });
