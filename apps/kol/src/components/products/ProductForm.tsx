@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
+import { ImageUploader, ModelUploader } from "@/components/products/MediaUploader";
 import { ErrorInline } from "@/components/states/ErrorInline";
 import { Button } from "@/components/ui/button";
 import {
@@ -114,19 +115,19 @@ export function ProductForm({
   product,
   specs,
   clips,
-  storeId: _storeId,
+  storeId,
 }: {
   mode: "create" | "edit";
   product: ProductFormData | null;
   specs: Record<SpecField, string>;
   clips: ClipOption[];
-  /** Reserved for the media upload path (STEP 3). */
   storeId: string;
 }) {
   const [state, action, pending] = useActionState(
     mode === "create" ? createProduct : updateProduct,
     IDLE,
   );
+  const [model3dId, setModel3dId] = useState(product?.model3dId ?? "");
 
   const titleError = fieldError(state, "title");
   const descriptionError = fieldError(state, "description");
@@ -237,6 +238,26 @@ export function ProductForm({
               </div>
             ) : null}
           </div>
+        </section>
+
+        {/* ── Imagery ───────────────────────────────────────────── */}
+        <section className="flex flex-col gap-5" aria-labelledby="section-imagery">
+          <h2 id="section-imagery" className={legendClass}>
+            Imagery
+          </h2>
+          <ImageUploader storeId={storeId} />
+        </section>
+
+        {/* ── In the round ──────────────────────────────────────── */}
+        <section className="flex flex-col gap-5" aria-labelledby="section-model">
+          <h2 id="section-model" className={legendClass}>
+            In the round
+          </h2>
+          <ModelUploader
+            storeId={storeId}
+            value={model3dId}
+            onChange={setModel3dId}
+          />
         </section>
 
         {/* ── Price ─────────────────────────────────────────────── */}
@@ -445,12 +466,8 @@ export function ProductForm({
           </div>
         </section>
 
-        {/* Hidden model3d binding — populated by the 3D upload path. */}
-        <input
-          type="hidden"
-          name="model3dId"
-          defaultValue={product?.model3dId ?? ""}
-        />
+        {/* model3d binding — populated by the "In the round" upload path. */}
+        <input type="hidden" name="model3dId" value={model3dId} />
         {model3dError ? <ErrorInline message={model3dError} /> : null}
 
         {state.status === "error" ? (

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { SIGN_IN_PATH } from "@/lib/auth/routes";
 import { createClient } from "@/lib/supabase/server";
 
+import { mediaRecordSchema, STORE_MEDIA_BUCKET } from "./media";
 import {
   productIdSchema,
   productWriteSchema,
@@ -23,7 +24,8 @@ import {
  * the schema — no float ever reaches Supabase.
  */
 
-export const PRODUCTS_PATH = "/seller/products";
+// Not exported: "use server" modules may only export async functions.
+const PRODUCTS_PATH = "/seller/products";
 
 export type ProductField =
   | "title"
@@ -358,4 +360,73 @@ export async function deleteProduct(
 
   revalidatePath(PRODUCTS_PATH);
   redirect(`${PRODUCTS_PATH}?deleted=1`);
+}
+
+export type MediaRecordResult =
+  | { status: "ok"; mediaId: string; src: string }
+  | { status: "error"; message: string };
+
+/**
+ * Registers an uploaded storage object as a `media` row (spec S8, STEP 3).
+ * The file itself goes browser → `store-media` bucket on the anon-key
+ * client; this action only writes the row — owner-scoped by RLS
+ * (`media_owner_all` + the P1-5 cross-store WITH CHECK), with the storage
+ * path verified to sit under the caller's OWN store prefix so a forged path
+ * can't claim another store's folder.
+ */
+export async function createMediaRecord(
+  input: unknown,
+): Promise<MediaRecordResult> {
+  const supabase = await createClient();
+  const { user, store } = await ownStore(supabase);
+  if (!store) {
+    return { status: "error", message: "Your store isn't set up yet." };
+  }
+
+  const parsed = mediaRecordSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? "That upload can't be saved.",
+    };
+  }
+
+  if (!parsed.data.path.startsWith(`${store.id}/`)) {
+    return {
+      status: "error",
+      message: "That upload isn't in your store's space.",
+    };
+  }
+
+  const { data: publicUrl } = supabase.storage
+    .from(STORE_MEDIA_BUCKET)
+    .getPublicUrl(parsed.data.path);
+
+  const { data: created, error } = await supabase
+    .from("media")
+    .insert({
+      owner_id: user.id,
+      store_id: store.id,
+      kind: parsed.data.kind,
+      src: publicUrl.publicUrl,
+      alt: parsed.data.kind === "image" ? parsed.data.alt : null,
+      aspect: parsed.data.kind === "image" ? parsed.data.aspect : null,
+      focal_point: parsed.data.kind === "image" ? parsed.data.focalPoint : null,
+      mime: parsed.data.mime,
+    })
+    .select("id, src")
+    .single();
+
+  if (error || !created) {
+    console.error("[products] media_record_failed", {
+      code: error?.code,
+      message: error?.message,
+    });
+    return {
+      status: "error",
+      message: "The upload finished but couldn't be saved — try again.",
+    };
+  }
+
+  return { status: "ok", mediaId: created.id, src: created.src };
 }
