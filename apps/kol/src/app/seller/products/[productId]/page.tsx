@@ -9,6 +9,7 @@ import {
 } from "@/components/products/ProductForm";
 import { BUYER_LANDING, SIGN_IN_PATH } from "@/lib/auth/routes";
 import {
+  currencyExponent,
   minorToMajor,
   productIdSchema,
   SPEC_FIELDS,
@@ -82,7 +83,9 @@ export default async function ProductFormPage({
       title: row.title,
       description: row.description ?? "",
       materials: row.materials ?? "",
-      priceMajor: minorToMajor(row.price_amount),
+      // the stored integer's meaning depends on the currency's exponent
+      // (F4) — ¥4800 is 4800 minor units, not 480000
+      priceMajor: minorToMajor(row.price_amount, currencyExponent(row.currency)),
       currency: row.currency,
       inventoryStatus: row.inventory_status,
       inventoryQty: row.inventory_qty === null ? "" : String(row.inventory_qty),

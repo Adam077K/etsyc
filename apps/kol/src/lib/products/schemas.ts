@@ -23,68 +23,112 @@ import { PRODUCT_BADGES } from "@/lib/store-config/schema";
  */
 
 // ---------------------------------------------------------------------------
-// Money — integer minor units, exact string math
+// Money — integer minor units, exact string math, per-currency exponent
 // ---------------------------------------------------------------------------
 
-/** £9,999,999.99 — comfortably inside int4; matches the 7-digit input cap. */
+/**
+ * The supported currency set, each with its ISO-4217 minor-unit exponent
+ * (adversary F4). The stored integer's MEANING depends on the exponent: a
+ * seller typing ¥4800 must store 4800, not 480000 — get this wrong and the
+ * stored number silently disagrees with both the seller and the buyer.
+ * Restricting to a curated table means an unsupported currency fails loudly
+ * at authoring instead of mis-storing; adding support = adding a row here
+ * (the round-trip suite iterates this table, so a new row is auto-covered,
+ * and a drift test pins each exponent against Intl/CLDR).
+ *
+ * Membership: GBP/EUR/USD were already in use; NGN and JOD are the fixture
+ * makers' home currencies (Lagos; Amman); CAD/AUD/CHF/AED are common maker
+ * markets; JPY/KRW and JOD/KWD/BHD/OMR bring the zero- and three-decimal
+ * classes in as classes, not one-off patches.
+ */
+export const CURRENCIES = {
+  GBP: { exponent: 2, symbol: "£" },
+  EUR: { exponent: 2, symbol: "€" },
+  USD: { exponent: 2, symbol: "$" },
+  CAD: { exponent: 2 },
+  AUD: { exponent: 2 },
+  CHF: { exponent: 2 },
+  NGN: { exponent: 2, symbol: "₦" },
+  AED: { exponent: 2 },
+  JPY: { exponent: 0, symbol: "¥" },
+  KRW: { exponent: 0, symbol: "₩" },
+  JOD: { exponent: 3 },
+  KWD: { exponent: 3 },
+  BHD: { exponent: 3 },
+  OMR: { exponent: 3 },
+} as const satisfies Record<string, { exponent: 0 | 2 | 3; symbol?: string }>;
+
+export type CurrencyCode = keyof typeof CURRENCIES;
+export type CurrencyExponent = (typeof CURRENCIES)[CurrencyCode]["exponent"];
+
+export const CURRENCY_CODES = Object.keys(CURRENCIES) as CurrencyCode[];
+
+/**
+ * Exponent for a stored currency code. Unknown codes (legacy rows written
+ * before the F4 restriction — none observed in practice) fall back to 2,
+ * which is what the display path always assumed for them.
+ */
+export function currencyExponent(currency: string): CurrencyExponent {
+  return (CURRENCIES as Record<string, { exponent: CurrencyExponent }>)[currency]?.exponent ?? 2;
+}
+
+/** 999,999,999 minor units — comfortably inside int4 for EVERY exponent. */
 export const PRICE_MAX_MINOR = 999_999_999;
 
 /**
- * Major-unit input → integer minor units. Accepts "48", "48.5", "48.50";
- * rejects signs, grouping, exponents, >2 decimal places, and anything
- * non-numeric. Never parses the input as a float — units and pence are
- * extracted as separate integers.
+ * Major-unit input → integer minor units at the currency's exponent.
+ * Exponent 2: "48", "48.5", "48.50"; exponent 0: whole amounts only
+ * ("4800" — a decimal point is a hard reject, never a rounding);
+ * exponent 3: up to "12.345". Rejects signs, grouping, exponent notation,
+ * excess decimal places, and anything over PRICE_MAX_MINOR (the int4
+ * guard — a 7-digit three-decimal amount would overflow int4 without it).
+ * Never parses the input as a float — units and fraction are extracted as
+ * separate integers.
  */
-export function majorToMinor(input: string): number | null {
-  const match = /^(\d{1,7})(?:\.(\d{1,2}))?$/.exec(input.trim());
+export function majorToMinor(input: string, exponent: CurrencyExponent = 2): number | null {
+  const pattern =
+    exponent === 0 ? /^(\d{1,7})$/ : new RegExp(`^(\\d{1,7})(?:\\.(\\d{1,${exponent}}))?$`);
+  const match = pattern.exec(input.trim());
   if (!match) return null;
   const units = Number(match[1]);
-  const pence = Number((match[2] ?? "").padEnd(2, "0"));
-  return units * 100 + pence;
+  const fraction = Number((match[2] ?? "").padEnd(exponent, "0") || "0");
+  const minor = units * 10 ** exponent + fraction;
+  return minor > PRICE_MAX_MINOR ? null : minor;
 }
 
-/** Integer minor units → canonical 2-decimal major string ("1234" → "12.34"). */
-export function minorToMajor(minor: number): string {
+/**
+ * Integer minor units → canonical major string at the currency's exponent
+ * (1234 → "12.34" at 2; 4800 → "4800" at 0; 12345 → "12.345" at 3).
+ */
+export function minorToMajor(minor: number, exponent: CurrencyExponent = 2): string {
   if (!Number.isSafeInteger(minor) || minor < 0) {
     throw new RangeError(`minorToMajor expects a non-negative integer, got ${minor}`);
   }
-  const units = Math.trunc(minor / 100);
-  const pence = minor % 100;
-  return `${units}.${String(pence).padStart(2, "0")}`;
+  if (exponent === 0) return String(minor);
+  const scale = 10 ** exponent;
+  const units = Math.trunc(minor / scale);
+  const fraction = minor % scale;
+  return `${units}.${String(fraction).padStart(exponent, "0")}`;
 }
-
-const CURRENCY_SYMBOLS: Record<string, string> = {
-  GBP: "£",
-  EUR: "€",
-  USD: "$",
-};
 
 /**
  * Display formatting for a stored price — pure string concatenation over
- * minorToMajor, so no float ever enters the render path. Unknown currencies
- * fall back to "12.34 SEK" rather than guessing a symbol.
+ * the exponent-aware minorToMajor, so no float ever enters the render path.
+ * Unknown currencies fall back to "12.34 SEK" (exponent 2, explicit code)
+ * rather than guessing a symbol.
  */
 export function formatPrice(minor: number, currency: string): string {
-  const major = minorToMajor(minor);
-  const symbol = CURRENCY_SYMBOLS[currency];
+  const major = minorToMajor(minor, currencyExponent(currency));
+  const symbol = (CURRENCIES as Record<string, { symbol?: string }>)[currency]?.symbol;
   return symbol ? `${symbol}${major}` : `${major} ${currency}`;
 }
 
-export const priceMajorSchema = z
-  .string({ error: "Add a price." })
-  .transform((v, ctx) => {
-    const minor = majorToMinor(v);
-    if (minor === null) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Price looks off — use a plain amount like 48 or 48.50.",
-      });
-      return z.NEVER;
-    }
-    return minor;
-  });
-
-/** char(3), default GBP. Lowercase input is normalised, never rejected. */
+/**
+ * char(3), default GBP; lowercase is normalised, never rejected. Membership
+ * is the F4 rule: only currencies whose exponent this module knows may be
+ * stored — an unsupported code is a loud authoring-time rejection, never a
+ * silently mis-stored integer.
+ */
 export const currencySchema = z
   .string()
   .trim()
@@ -93,7 +137,24 @@ export const currencySchema = z
     z.string().regex(/^[A-Z]{3}$/, {
       error: "Currency is a 3-letter ISO code (GBP, EUR, USD…).",
     }),
+  )
+  .pipe(
+    z.custom<CurrencyCode>((v) => typeof v === "string" && v in CURRENCIES, {
+      error: `We can't take payments in that currency yet — supported: ${Object.keys(CURRENCIES).join(", ")}.`,
+    }),
   );
+
+/** The exponent-aware "price looks off" copy, per currency class. */
+function priceFormatMessage(currency: CurrencyCode): string {
+  const exponent = CURRENCIES[currency].exponent;
+  if (exponent === 0) {
+    return `Price looks off — ${currency} takes whole amounts only, like 4800.`;
+  }
+  if (exponent === 3) {
+    return "Price looks off — use a plain amount with up to three decimal places, like 12.345.";
+  }
+  return "Price looks off — use a plain amount like 48 or 48.50.";
+}
 
 // ---------------------------------------------------------------------------
 // Catalog fields
@@ -207,17 +268,33 @@ export const productSpecsSchema = z.object(
 // The write contract
 // ---------------------------------------------------------------------------
 
-export const productWriteSchema = z.object({
+/**
+ * The field shapes, price still a raw string: how many decimal places a
+ * price may carry depends on the CURRENCY (F4), so major→minor conversion
+ * is cross-field and happens in the object-level transform below — after
+ * both fields parsed, still inside this module (the single conversion
+ * point). Exported so shape-level tests can introspect the key set.
+ */
+export const productWriteFieldsSchema = z.object({
   title: titleSchema,
   description: descriptionSchema,
   materials: materialsSchema,
-  price: priceMajorSchema,
+  price: z.string({ error: "Add a price." }),
   currency: currencySchema,
   inventoryStatus: inventoryStatusSchema,
   inventoryQty: inventoryQtySchema,
   badges: badgesSchema,
   model3dId: optionalUuidSchema,
   specs: productSpecsSchema,
+});
+
+export const productWriteSchema = productWriteFieldsSchema.transform((data, ctx) => {
+  const minor = majorToMinor(data.price, CURRENCIES[data.currency].exponent);
+  if (minor === null) {
+    ctx.addIssue({ code: "custom", path: ["price"], message: priceFormatMessage(data.currency) });
+    return z.NEVER;
+  }
+  return { ...data, price: minor };
 });
 
 export type ProductWriteInput = z.infer<typeof productWriteSchema>;
