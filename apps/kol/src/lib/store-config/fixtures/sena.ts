@@ -169,7 +169,10 @@ export const senaStore: StoreConfig = {
       type: "hero-video",
       variant: "center-column",
       order: 0,
-      props: { showCraftLine: true },
+      // statement is fixture-AUTHORED (like all four seed worlds) so /preview
+      // shows the statement-present hero by default; ?statement=off exercises
+      // the absent path (E5 eyes-on gate). 44 chars — under the 48 cap.
+      props: { showCraftLine: true, statement: "Every glaze began as ash on a workshop floor" },
       bindings: { clipTags: ["clip_intro"], imageIds: [], productIds: [], voiceoverIds: [] },
     },
     {

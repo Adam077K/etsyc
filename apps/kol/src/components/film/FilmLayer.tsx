@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -14,6 +15,7 @@ import { FilmControls } from "@/components/media/FilmControls";
 import { clipObjectPosition } from "@/components/media/focal-point";
 import { PosterStill } from "@/components/media/PosterStill";
 import { cn } from "@/lib/utils";
+import { startAspectCounter, ASPECT_EPSILON } from "./aspect-counter";
 import { EDGE_TABLE, parseCssTime, resolveEdgeMs, resolveSwapMs, type FilmEdge } from "./edge-table";
 import { readSpringVideoParams, springLinearEasing } from "./spring-easing";
 
@@ -326,6 +328,14 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       frame.dataset.filmEdgeMs = String(durationMs);
       frame.style.transform = "";
 
+      // G1-F2: a non-uniform FLIP (grow — 4:5 card → 16:9 column) would
+      // stretch the cover-fit media with the frame for the whole edge.
+      // Counter-scale the buffers + poster per sampled frame so only the
+      // FRAME changes aspect, never the film. Uniform-scale edges skip it
+      // (identity inverse); the flight's dispose is the single stop path.
+      const stopAspectCounter =
+        Math.abs(sx / sy - 1) >= ASPECT_EPSILON ? startAspectCounter(frame) : null;
+
       // track the release so mid-flight rect maintenance defers and then
       // lands as a snap when the transform transition ends
       const token = ++flightTokenRef.current;
@@ -359,6 +369,7 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       flightRef.current = {
         token,
         dispose: () => {
+          stopAspectCounter?.();
           window.clearTimeout(timer);
           frame.removeEventListener("transitionend", onTransitionEnd);
           frame.removeEventListener("transitioncancel", onTransitionEnd);
@@ -424,9 +435,34 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
     [positionToSlot, writeSlotRecord],
   );
 
+  // First-claim landing (gate-2: the 0x0 layer). The frame <div> is a LATER
+  // sibling of {children}, and React runs the layout phase in tree order —
+  // so a claim arriving during the very commit that mounts this provider
+  // (FilmSlotFrame's mount layout effect → registerFilm → setActiveSlot)
+  // finds frameRef still null: positionToSlot returned without writing any
+  // geometry and the layer sat at its CSS default (position:fixed, 0-size,
+  // origin) — an INVISIBLE film. Every cold world-open mount hit this;
+  // every /preview hero review happened over bare --surface because of it.
+  // Land the active slot as a snap the moment the frame exists: never
+  // mid-flight, and only if the frame has never been positioned (every
+  // applySlotLayout writes an inline width, so "" means never).
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || activeSlotId === null || flightRef.current) return;
+    if (frame.style.width !== "") return;
+    positionToSlot(activeSlotId, null);
+  }, [activeSlotId, positionToSlot]);
+
   const releaseSlot = useCallback((slotId: string) => {
     slots.current.delete(slotId);
     if (activeSlotRef.current === slotId) {
+      // symmetric with positionToSlot's supersede: an in-flight FLIP has
+      // nowhere to land once its slot is gone — dispose it now (counter
+      // loop, backstop timer, transition listeners) instead of leaning on
+      // the durationMs+120 backstop, and drop any deferred maintenance
+      flightRef.current?.dispose();
+      flightRef.current = null;
+      maintenanceDirtyRef.current = false;
       // park — hidden, but never unmounted (the frame outlives every screen)
       activeSlotRef.current = null;
       setActiveSlotId(null);
@@ -666,6 +702,7 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       <div
         ref={frameRef}
         data-film-layer=""
+        data-film-frame=""
         data-film-parked={parked ? "true" : undefined}
         data-film-docked={docked ? "true" : undefined}
         inert={parked ? true : undefined}

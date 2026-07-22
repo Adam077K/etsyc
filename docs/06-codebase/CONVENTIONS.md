@@ -267,6 +267,20 @@ return NextResponse.json(
 
 _[Add any project-specific error handling patterns here.]_
 
+## Worktree hygiene
+
+- **`.env.local` does not follow worktrees.** It is gitignored, so every fresh
+  `git worktree add` produces a tree whose dev server crashes on
+  `NEXT_PUBLIC_SUPABASE_URL`. Copy it in before running anything:
+  `cp <main-repo>/apps/kol/.env.local <worktree>/apps/kol/.env.local`.
+  This has now bitten two reviewers mid-gate (design-critic twice) — do it as
+  part of worktree creation, not after the first crash.
+- **e2e against the right tree:** `KOL_E2E_PORT=<fresh port> pnpm test:e2e` —
+  with `reuseExistingServer`, a stale server on :3000 from another worktree
+  silently gets tested instead of yours (this also happened mid-gate).
+  Next 16 refuses a second dev server per directory; if one is already
+  running for your worktree, point `KOL_E2E_PORT` at ITS port instead.
+
 ---
 
-_Last updated: — | Updated by: —_
+_Last updated: 2026-07-23 | Updated by: frontend-engineer (b3 gate-2)_

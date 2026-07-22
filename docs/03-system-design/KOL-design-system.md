@@ -118,7 +118,7 @@ See §4 for the full language. The atomic tokens (v2 — cinematic + physical):
 
 Five pre-approved palettes, recalibrated for the corrected direction: **warm human temperature, but brave enough to color-block whole sections.** Each ships light + dark and — new in v2 — a **block-ground set** (`--block-a/-b/-c` with matching `--on-block-*` ink) so a world can render full-bleed vivid sections (the Faire move) without authoring raw hex. For **curated worlds** (KOL's own UI + direction-less shops) the AI picks one whole palette per world and never mixes across palettes; **seller shops bring their own brand** (D15 — the scope note up top), and these five are their optional presets, not a cap. AA on block-grounds is honest and per-combo (see the AA-levels note below the token contract) — re-verified in the QA gate, not assumed.
 
-**Token contract per palette:** `--ground` (page), `--surface` (raised/card), `--ink` (primary text), `--muted` (secondary), `--line` (hairline), `--accent` (interactive accent), `--accent-2` (secondary), `--accent-3` (**optional** — a third interactive accent; declared only by palettes with three-way accent play, e.g. `bazaar`; two-accent palettes leave it unset), `--on-media` (type set over film), plus the **block set** `--block-a/-b/-c` + `--on-block-a/-b/-c`.
+**Token contract per palette:** `--ground` (page), `--surface` (raised/card), `--ink` (primary text), `--muted` (secondary), `--line` (hairline), `--accent` (interactive accent), `--accent-2` (secondary), `--on-media` (type set over film), plus the **block set** `--block-a/-b/-c` + `--on-block-a/-b/-c`.
 
 **AA levels on block-grounds (honest, per-combo — re-verified in the QA gate, not assumed).** Paired text on the **dark block-grounds** clears WCAG AA body (4.5:1). Two **midtone grounds are large-text-only** — cream/paper ink on them lands between 3:1 and 4.5:1, passing AA **large text (≥24px, or ≥18.66px bold → 3:1) but failing body**: `sunbaked --block-c` (sky `#4C93A8` + cream ≈ 3.1:1) and `cuberto-noir --block-c` (electric `#3D6CE0` + paper ≈ 4.4:1). **Restrict those two grounds to display/large statement type** — which is exactly what color-block sections carry (the `display-hero`/`display` line washes over the ground, §1.2/§4.2). For body copy on a colored section, use a **dark** ground (`--block-a`) or the standard `--ground`/`--surface`. The guarantee is therefore *body 4.5:1 on dark grounds, large-text 3:1 on the two midtone grounds* — not a blanket body-level claim.
 
@@ -200,7 +200,6 @@ Five pre-approved palettes, recalibrated for the corrected direction: **warm hum
 | line | `#E7D3C0` | `#43254D` |
 | accent | `#C2452D` (vermilion) | `#E0623F` |
 | accent-2 | `#1F6F6B` (teal) | `#2E9A93` |
-| accent-3 | `#D8A24A` (gold) | `#E7B45C` |
 | on-media | `#FBEFE0` | `#FBEFE0` |
 
 **Block set:** `--block-a #7A1E3C` jewel-magenta (`--on-block-a #F9DCE6`) · `--block-b #1F6F6B` teal (`--on-block-b #EAF7F5`) · `--block-c #D8A24A` gold (`--on-block-c #2A1004`).
@@ -215,29 +214,35 @@ Each pairing is display + text + mono. **No Inter.** Displays are now **bold gro
 
 > **Pairing ↔ palette is bound, not a free cross-product.** Each pairing declares the palette(s) it serves (the `For …` line under each set): `statement-grotesk` → `sunbaked` + `orchard`, `warm-serif` → `market-plum`, `modern-mono-grotesk` → `cuberto-noir`, `character-maximal` → `bazaar`. A curated world takes its palette's bound pairing — it is not a free 5×4 palette×pairing matrix. Variety across curated worlds therefore comes from **palette (5) × motion preset (4) × radius identity (3) × density (2) × which block-grounds it color-blocks × which blocks in which order** — a wide, bold space — *not* from mixing an arbitrary pairing onto an arbitrary palette (that would risk incoherence, the opposite of the rails' purpose). §5 states the claim at this honest scope. (Seller `kind:"custom"` shops are unaffected — they derive their own pairing per D15.)
 
+> **Every pairing declares a `strokeClass`** (design-direction §2.1a, gate-2 ruling): `modulated` for faces with real thick/thin stroke variation (optical serifs), `uniform` for geometric / neo-grotesque faces with near-equal stems. The **nameplate register** — how a maker's NAME holds the display tier when no statement is authored — is read off this property via the emitted `--nameplate-size/-weight/-tracking` vars, never off a font family name and never as a bare numeric weight in a screen: `modulated` → `--fs-display-hero` / 700 / `-0.03em`; `uniform` → `--fs-display` / 600 / `-0.025em`. Optical mass is a property of stroke contrast: Fraunces at 700/display-hero stays airy because its thins do the airing; a geometric sans at the same numbers reads as a logotype stamped onto the maker's face. `kind:"custom"` pairings may declare `strokeClass` at authoring time (store-config `customPairing.strokeClass`, optional); undeclared defaults to `uniform` — the lower-mass fail-safe.
+
 ### 3.1 `statement-grotesk`
 *Kotn energy — big, bold, confident sans statements over human film. For `sunbaked`, `orchard`.*
 - **Display:** `Clash Display` (Fontshare — bold, characterful grotesque; heavy weights carry `display-hero`; alt: PP Neue Machina)
 - **Text:** `General Sans` (Fontshare — clean, warm-neutral body; alt: Söhne)
 - **Mono:** `Geist Mono` (prices, data, meta)
+- **Stroke class:** `uniform` (geometric grotesque — nameplate at `--fs-display` / 600 / `-0.025em`)
 
 ### 3.2 `warm-serif`
 *Faire warmth — heavy optical serif used **big** for marketplace headlines over color-blocks. For `market-plum`.*
 - **Display:** `Fraunces` (variable optical serif — set at high opsz + 600–700 weight for Faire-scale statements, not the timid small serif of v1; alt: GT Sectra)
 - **Text:** `Satoshi` (Fontshare)
 - **Mono:** `Geist Mono`
+- **Stroke class:** `modulated` (high stroke contrast — nameplate at `--fs-display-hero` / 700 / `-0.03em`; the only modulated pairing)
 
 ### 3.3 `modern-mono-grotesk`
 *Cuberto polish — crisp, tight, modern; pairs with dark↔light and 3D objects. For `cuberto-noir`.*
 - **Display:** `Cabinet Grotesk` (Fontshare — tight bold; alt: PP Neue Montreal / Neue Haas Grotesk)
 - **Text:** `Satoshi` (Fontshare)
 - **Mono:** `JetBrains Mono`
+- **Stroke class:** `uniform` (near-equal stems — nameplate at `--fs-display` / 600 / `-0.025em`)
 
 ### 3.4 `character-maximal`
 *Loud, distinctive faces for the maximal pole. For `bazaar`.*
 - **Display:** `Bricolage Grotesque` (Google — quirky, characterful, heavy; alt: Ogg / Cabinet Grotesk Bold)
 - **Text:** `Satoshi`
 - **Mono:** `Space Mono` (intentional quirk)
+- **Stroke class:** `uniform` (grotesque despite the quirk — nameplate at `--fs-display` / 600 / `-0.025em`)
 
 **Typographic craft (from `ui-typography`), enforced everywhere:** curly quotes `“ ”`, en dashes for ranges, em dashes for breaks; tabular/mono figures for all prices and data; no widows on `display-hero`/display/H1; hanging punctuation on pull-quotes where the pairing supports it. Display faces now carry **the one or two big statements per world** (the hero line, a section opener) — bold and large — while everything else stays in the text face. Big ≠ everywhere: restraint is in *how many* display moments, not in their *size*.
 

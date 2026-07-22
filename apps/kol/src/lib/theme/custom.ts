@@ -8,7 +8,7 @@
  * Vars the 7-role palette doesn't carry are DERIVED deterministically here
  * (documented fallbacks — the AI pipeline §5.4 may later emit richer sets,
  * and the AA gate, not this file, is the accessibility guarantee for custom):
- *   --accent-2/-3   → accent (single-accent brand until the pipeline derives more)
+ *   --accent-2      → accent (single-accent brand until the pipeline derives more)
  *   --on-media      → the palette's lightest text role (over a dark scrim)
  *   --block-a       → accent ground with accentInk type
  *   --block-b       → inverted band (ink ground, bg type)
@@ -17,7 +17,7 @@
 
 import type { CustomTheme } from "@/lib/store-config/types";
 import type { ThemeVars } from "./curated";
-import { densitySectionGap, radiusIdentities } from "./tokens";
+import { densitySectionGap, nameplateRegisters, radiusIdentities } from "./tokens";
 
 /**
  * Hosted-font-catalog family → the stack that actually resolves at runtime.
@@ -27,7 +27,7 @@ import { densitySectionGap, radiusIdentities } from "./tokens";
  * names and pass through quoted. Unknown families (catalog grows with the
  * pipeline §5.5) pass through quoted too — worst case is the system stack.
  */
-const fontCatalog: Record<string, string> = {
+export const fontCatalog: Record<string, string> = {
   Fraunces: "var(--font-fraunces)",
   "Bricolage Grotesque": "var(--font-bricolage)",
   "Geist Mono": "var(--font-geist-mono)",
@@ -39,7 +39,7 @@ const fontCatalog: Record<string, string> = {
   "Cabinet Grotesk": '"Cabinet Grotesk"',
 };
 
-function resolveFamily(family: string, fallback: string): string {
+export function resolveFamily(family: string, fallback: string): string {
   const resolved = fontCatalog[family] ?? `"${family}"`;
   return `${resolved}, ${fallback}`;
 }
@@ -61,7 +61,6 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--line": roles.border,
     "--accent": roles.accent,
     "--accent-2": roles.accent,
-    "--accent-3": roles.accent,
     // accent/accentInk is a pipeline-derived pair — the deterministic WCAG-AA
     // gate (schema §2.2) guarantees it, so the CTA uses it untouched
     "--accent-cta": roles.accent,
@@ -74,6 +73,11 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--block-c": roles.accent,
     "--on-block-c": roles.accentInk,
     "--scrim": `linear-gradient(to top, color-mix(in oklab, ${roles.bg} 45%, black) 0%, transparent 55%)`,
+    // solid text-backdrop scrim — same contract as the curated path (the
+    // hero chrome band paints this opaque under set lines; gate-2 / I5).
+    // keep=40% in oklab bounds the result's luminance ≤ ~0.06 for ANY hex
+    // bg, so the custom AA gate on on-media is what carries the guarantee.
+    "--scrim-strong": `color-mix(in oklab, ${roles.bg} 40%, black)`,
     // customPairing — families from the hosted font catalog (pipeline §5.5),
     // mapped through the catalog so next/font faces actually resolve
     "--font-display": resolveFamily(pairing.displayFamily, "system-ui, sans-serif"),
@@ -81,6 +85,15 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--font-mono": "var(--font-geist-mono), ui-monospace, monospace",
     "--weight-display": String(pairing.displayWeight),
     "--weight-text": String(pairing.textWeight),
+    // nameplate register (§2.1a): custom pairings MAY declare strokeClass
+    // at authoring time (v1.3 additive-optional field); absent takes the
+    // `uniform` fail-safe — the LOWER-mass treatment (an undeclared seller
+    // face that turns out modulated renders slightly quieter than it could;
+    // the reverse miss is the logotype-stamp failure §2.1a exists to
+    // prevent). Never a renderer branch on a font name.
+    "--nameplate-size": nameplateRegisters[pairing.strokeClass ?? "uniform"].size,
+    "--nameplate-weight": nameplateRegisters[pairing.strokeClass ?? "uniform"].weight,
+    "--nameplate-tracking": nameplateRegisters[pairing.strokeClass ?? "uniform"].tracking,
     "--radius-sm": radius.sm,
     "--radius-md": radius.md,
     "--radius-lg": radius.lg,

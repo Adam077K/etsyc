@@ -41,6 +41,14 @@ export type ThemeMode = "light" | "dark";
 export type RadiusIdentity = "sharp" | "soft" | "round";
 export type Density = "airy" | "standard";
 
+/**
+ * Design-direction §2.1a — the display face's stroke contrast, which the
+ * nameplate register is read off (never a font family name, never a bare
+ * numeric weight). Curated pairings declare it in the token registry;
+ * custom pairings may declare it here and default to `uniform`.
+ */
+export type StrokeClass = "modulated" | "uniform";
+
 export interface CuratedTheme {
   kind: "curated";
   paletteId: PaletteId;
@@ -75,6 +83,8 @@ export interface CustomTheme {
     scaleRatio: number;
     displayWeight: number;
     textWeight: number;
+    /** §2.1a nameplate register — optional; absent = `uniform` fail-safe. */
+    strokeClass?: StrokeClass;
   };
   motionPreset: MotionPreset;
   radiusIdentity: RadiusIdentity;

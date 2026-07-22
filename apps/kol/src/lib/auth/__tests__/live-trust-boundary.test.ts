@@ -1,6 +1,9 @@
 import { fileURLToPath } from "node:url";
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -20,7 +23,8 @@ import type { Database } from "@/lib/supabase/database.types";
  * Service-role is used ONLY as test rig (create/inspect/cleanup) via a
  * test-local client — the app runtime has no admin-client consumer. Clients
  * are built directly (not from @/lib/supabase/*) because server.ts/admin.ts
- * are `server-only` modules that cannot load under vitest.
+ * are `server-only` modules that cannot load under vitest — and in
+ * beforeAll, because skipped suites run no hooks.
  */
 
 try {
@@ -43,18 +47,27 @@ const emailB = `kol-p1-live-${runStamp}-b@example.com`;
 describe.skipIf(!hasKeys)("P1 live trust boundary (staging DB)", () => {
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 60_000 });
 
-  const admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  // vitest executes this describe BODY at collection even under skipIf(true)
+  // — only hooks and tests are skipped. Constructing the clients here throws
+  // `supabaseUrl is required` on a keyless checkout, turning the documented
+  // auto-skip into a hard FAIL. beforeAll never runs for a skipped suite, so
+  // the clients are built there and nothing at describe scope may touch the
+  // network or env.
+  let admin: SupabaseClient<Database>;
   // Anon client that will hold user A's session for the RLS/guard checks.
-  const asUserA = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  let asUserA: SupabaseClient<Database>;
 
   let userAId = "";
   let userBId = "";
 
   beforeAll(async () => {
+    admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    asUserA = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
     // Signup attempting the forbidden client-set role/handle via metadata.
     const a = await admin.auth.admin.createUser({
       email: emailA,

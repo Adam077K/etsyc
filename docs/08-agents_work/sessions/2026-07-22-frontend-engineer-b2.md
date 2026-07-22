@@ -1,0 +1,9 @@
+---
+role: frontend-engineer · task: b2-grow (Wave 3 T1, retiered Full — Amendment A) · date: 2026-07-22 · tier: full
+branch: feat/b2-grow · status: COMPLETE (awaiting QA-Lead gate 2)
+---
+B2 grow interaction via the Film Layer API: GrowProvider/GrownColumn publish card + centre-column rects and claim the §5.2 `grow` edge (520ms `--ease-kol`) — same-source, true element persistence, cross-fade forbidden and asserted so. Ungrow (Escape): chrome leaves at `--dur-state`, film FLIPs back 405ms, focus restored. Feed parting: `[data-feed-card]` Y-translate only, 70ms stagger outward. Image path per §2.3: portrait doorway, one `--accent-cta` pill hands the slot to the layer.
+G1-F2 FIXED in `components/film/aspect-counter.ts` + ~12-line FilmLayer wiring: per-frame sampled counter-transform keeps visible media scale uniform at max(sx,sy) (cover semantics, focal-aligned) — additive, identity on same-aspect edges; deliberate, argued exception to the "don't touch FilmLayer internals" rule since the FLIP site is the only place the standard fix can live.
+Engine: `lib/grow/` GROWN server action via `createEngineDeps` only; buyer/session identity server-side; errors return status, never throw. States: loading poster+shimmer edge, quiet inline retry (cache-buster defeats same-source no-op), success; empty N/A by construction.
+Seams (post-rebase onto B1a): canonical cookie identity adopted — `resolveFeedSessionId`/`FEED_SESSION_COOKIE` (`kol_sid`, proxy-minted only) + `FEED_RING_COOKIE` (`kol_ring`, action persists per B1a's own note), zero cookie constants declared in lib/grow; GrowSource consumes FeedCard `craft`/`place`/`focalPoint` field-for-field; B1b wires `useGrow().grow(source, cardEl)` + `data-feed-card`; parent unmounts provider only after B3 claims the film.
+Gates (post-rebase): typecheck 0 · lint clean · full suite green (+19 B2 tests in 2 suites, incl. the load-bearing persistence suite).

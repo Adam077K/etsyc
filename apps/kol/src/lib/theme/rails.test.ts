@@ -21,6 +21,7 @@ import {
   MOTION_PRESETS,
   PALETTE_IDS,
   RADIUS_IDENTITIES,
+  STROKE_CLASSES,
   THEME_MODES,
 } from "@/lib/store-config/schema";
 import type { CuratedTheme, CustomTheme } from "@/lib/store-config/types";
@@ -31,6 +32,7 @@ import {
   densitySectionGap,
   fontPairings,
   motionPresets,
+  nameplateRegisters,
   palettes,
   radiusIdentities,
 } from "./tokens";
@@ -44,7 +46,6 @@ const REQUIRED_WORLD_VARS = [
   "--line",
   "--accent",
   "--accent-2",
-  "--accent-3",
   "--accent-cta",
   "--accent-ink",
   "--on-media",
@@ -60,6 +61,9 @@ const REQUIRED_WORLD_VARS = [
   "--font-mono",
   "--weight-display",
   "--weight-text",
+  "--nameplate-size",
+  "--nameplate-weight",
+  "--nameplate-tracking",
   "--radius-sm",
   "--radius-md",
   "--radius-lg",
@@ -135,6 +139,52 @@ describe("enum lock — registries ≡ store-config v1.3 tuples (no drift)", () 
       expect(FONT_PAIRING_IDS).toContain(palette.boundPairing);
     }
   });
+
+  it("§2.1a strokeClass assignment is binding: warm-serif alone is modulated; the emitted nameplate register follows it", () => {
+    for (const pairing of Object.values(fontPairings)) {
+      expect(pairing.strokeClass).toBe(pairing.id === "warm-serif" ? "modulated" : "uniform");
+      const vars = curatedThemeVars({ ...baseCurated, fontPairingId: pairing.id });
+      if (pairing.strokeClass === "modulated") {
+        expect(vars["--nameplate-size"]).toBe("var(--fs-display-hero)");
+        expect(vars["--nameplate-weight"]).toBe("700");
+        expect(vars["--nameplate-tracking"]).toBe("-0.03em");
+      } else {
+        expect(vars["--nameplate-size"]).toBe("var(--fs-display)");
+        expect(vars["--nameplate-weight"]).toBe("600");
+        expect(vars["--nameplate-tracking"]).toBe("-0.025em");
+      }
+    }
+    // undeclared custom pairing → the uniform fail-safe (the lower-mass
+    // treatment; the reverse miss is the logotype stamp)
+    const custom = customThemeVars(offRailCustom);
+    expect(custom["--nameplate-size"]).toBe("var(--fs-display)");
+    expect(custom["--nameplate-weight"]).toBe("600");
+    expect(custom["--nameplate-tracking"]).toBe("-0.025em");
+  });
+
+  it("nameplate register table keys equal STROKE_CLASSES (no drift)", () => {
+    expect(Object.keys(nameplateRegisters).sort()).toEqual([...STROKE_CLASSES].sort());
+  });
+
+  it("a custom pairing MAY declare strokeClass — declared modulated emits the modulated register; junk is rejected", () => {
+    const declared: CustomTheme = {
+      ...offRailCustom,
+      customPairing: { ...offRailCustom.customPairing, strokeClass: "modulated" },
+    };
+    // schema: optional, additive — declared value validates, junk does not
+    expect(CustomThemeSchema.safeParse(declared).success).toBe(true);
+    expect(
+      CustomThemeSchema.safeParse({
+        ...offRailCustom,
+        customPairing: { ...offRailCustom.customPairing, strokeClass: "heavy" },
+      }).success,
+    ).toBe(false);
+    // derivation: the declaration lands on the emitted vars
+    const vars = customThemeVars(declared);
+    expect(vars["--nameplate-size"]).toBe("var(--fs-display-hero)");
+    expect(vars["--nameplate-weight"]).toBe("700");
+    expect(vars["--nameplate-tracking"]).toBe("-0.03em");
+  });
 });
 
 describe("curated resolution — every combination yields a complete token set", () => {
@@ -171,17 +221,6 @@ describe("curated resolution — every combination yields a complete token set",
     for (const preset of MOTION_PRESETS) {
       expect(motionSpec(preset).reveals).toBe(true);
       expect(motionSpec(preset).cinematicUnfold).toBe(preset !== "hushed");
-    }
-  });
-
-  it("only bazaar declares a third accent; others fall back to --accent", () => {
-    for (const paletteId of PALETTE_IDS) {
-      const vars = curatedThemeVars({ ...baseCurated, paletteId });
-      if (paletteId === "bazaar") {
-        expect(vars["--accent-3"]).not.toBe(vars["--accent"]);
-      } else {
-        expect(vars["--accent-3"]).toBe(vars["--accent"]);
-      }
     }
   });
 });

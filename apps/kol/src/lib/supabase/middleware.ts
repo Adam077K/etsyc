@@ -7,6 +7,11 @@ import {
   classifyRoute,
   landingPathFor,
 } from "@/lib/auth/routes";
+import {
+  FEED_SESSION_COOKIE,
+  firstPartyCookieOptions,
+  isFeedSessionId,
+} from "@/lib/feed/session";
 
 import type { Database } from "./database.types";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
@@ -19,6 +24,9 @@ import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
  *   - protected routes (buyer/seller/account) without a session → /sign-in?next=…
  *   - /sign-in with a session → role-correct landing (buyer→feed, seller→dashboard)
  *   - seller routes as a non-seller → buyer landing (no cross-role leak)
+ *   - /feed is PUBLIC since W3-B1a: an anonymous request passes through with
+ *     200 (no redirect) while the getUser() call below still runs, so the
+ *     auth-cookie refresh path is preserved for signed-in visitors.
  *
  * Routing is UX; RLS remains the only trust boundary (B0). The role is read
  * from the RLS-scoped profiles row — never from forgeable JWT user_metadata.
@@ -54,6 +62,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Feed session identity (W3-B1a): Server Components cannot set cookies,
+  // so the proxy mints the first-party feed-session cookie — on first visit
+  // or when the incoming value is not a UUID (external input, never trusted
+  // unparsed). Browser-session lifetime by design: a new browser session
+  // reshuffles the feed; within a session the order is stable
+  // (discovery-feed AC). Set AFTER getUser (whose cookie sync may replace
+  // supabaseResponse); redirectTo() below copies it onto redirects.
+  if (!isFeedSessionId(request.cookies.get(FEED_SESSION_COOKIE)?.value)) {
+    supabaseResponse.cookies.set(
+      FEED_SESSION_COOKIE,
+      crypto.randomUUID(),
+      // the canonical attribute set — imported, never re-typed (DECISIONS)
+      firstPartyCookieOptions(),
+    );
+  }
+
   // Any redirect must carry the refreshed auth cookies, or the new token is
   // dropped and the user bounces through a refresh loop.
   const redirectTo = (pathname: string, next?: string) => {
@@ -71,6 +95,9 @@ export async function updateSession(request: NextRequest) {
   const route = classifyRoute(request.nextUrl.pathname);
 
   if (!user) {
+    // "buyer" currently has no member routes (W3-B1a made /feed public);
+    // the branch stays so a future buyer-only route is protected the moment
+    // classifyRoute claims it. /account and /seller remain gated.
     if (route === "buyer" || route === "seller" || route === "account") {
       return redirectTo(SIGN_IN_PATH, request.nextUrl.pathname);
     }
