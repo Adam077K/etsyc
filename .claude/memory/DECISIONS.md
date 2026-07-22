@@ -4,6 +4,23 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-22 — Gate-2 design rulings: optical properties are not numbers, and an anti-grid rule is not an anti-cycle rule
+
+**Context:** The first design-critic pass measured the built product at pixel level across ten captures. It confirmed the hardest Wave-3 call (light display weight over film) and found three places the direction itself — authored without ever running `/preview` — was wrong.
+
+**R1 — the nameplate register is stroke-contrast-aware (replaces the flat `weight 700`).** Same weight, same tier, opposite outcomes: Fraunces reads airy, a geometric sans reads as a logotype stamped on the face. Optical mass is size × weight × **stroke contrast**, so the spec now declares `strokeClass` per pairing and the renderer reads `--nameplate-size/-weight/-tracking`, never a font name (`kind:"custom"` defaults to `uniform`, the lower-mass fail-safe). `modulated` → `display-hero`/700/`-0.03em`; `uniform` → `display`/600/`-0.025em`. Two axes, not one: **statement larger-and-lighter, nameplate smaller-and-heavier**, so nameplate-vs-speech survives any face. Dissolves the standing §2.1 ↔ §3.2 contradiction.
+
+**R2 — the feed gets a mobile identity, carried by the left edge.** The spec was silent below 768 px and mobile rendered eight identical-width cards with uniform gaps: the equal-cell layout §2.4 bans, one column wide. Width equality is what reads as a grid; aspect alternation cannot fix it. Two columns rejected — it shrinks the maker's face. Four mobile slots vary inset asymmetrically, one bleeds both margins, and **each caption aligns to its own media's left edge** so the text column zig-zags.
+
+**R3 — slot assignment is content-aware, not cyclic.** S1→S2→S3 repeated 3.6× at N=18 while passing both anti-grid assertions — a deterministic cycle is a grid with a longer period. Cards now choose slots by aspect fit + repeat/edge penalties under four hard constraints, deterministic, degrading to centre focal point if the `focalPoint` schema add has not landed. Added a 6th slot (`COLUMN`) and a 3rd assertion: **no ordered 3-card slot sequence more than twice, ≥ 4 distinct row patterns.** The anti-grid AC was necessary and insufficient.
+
+**Also bound — contrast carries headroom.** Every number this wave was measured on a zero-variance synthetic gradient; hollowgrain's caption at 4.89:1 has 0.39 of margin and a lit face takes it under. Type over film must now measure **≥ 5.5:1 body / ≥ 4.0:1 large** — a full point over the I5 floor. I5 unchanged; this is a stricter measurement condition on media surfaces. Variance-aware scrim (contrast against `mean + 1.5σ`, sampled at ingest) recommended for Wave 4/5.
+
+**Reversibility:** reversible (spec text; no data or schema change)
+**Owner:** design-lead
+**Affects:** B1b (feed layout — R2, R3), B3 (hero nameplate — R1), QA-Lead (three new ACs), KOL-design-system §3 (must mirror `strokeClass`)
+**Status:** Binding. B1b and B3 fix briefs carry it.
+
 ## 2026-07-22 — E5 hero-line ruling: a maker's NAME is identity, not her words (unblocks B3)
 
 **Context:** Gate 1 filed E5 — screen-specs §3.2 and world-unfold's binding AC both said an absent `statement` leaves the world with **no hero line at all**, while the shipped `hero-video` render (pre-dating Wave 3) puts `maker.displayName` in that slot at `--fs-display-hero`. Two independent reviewers had already cleared the code as in-scope and non-D10. So this was never a defect — it was a product decision nobody had made, and B3's completion bar cited the text that contradicts what ships.

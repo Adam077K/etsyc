@@ -52,28 +52,64 @@ A magazine index of people, not a catalogue of things. The reader should feel th
 | `WIDE` | 8 | 3 | 16:9 | 0 |
 | `INSET` | 5 | 1 | 3:2 | `--space-8` (64 px) |
 | `TALL` | 5 | 8 | 4:5 | 0 |
+| `COLUMN` | 4 | 5 | 3:4 | `--space-6` (48 px) |
 
-**Spreads** are the repeating unit. Three patterns cycle:
+`COLUMN` is new (2026-07-22). A narrow centred portrait plate with four columns of open ground on each side — the magazine move the first slot table had no vocabulary for, and the cheapest widening of the permutation space below.
 
-- **S1 (opening):** `LEAD` + `SIDE`
-- **S2 (breath):** `WIDE` alone
-- **S3:** `INSET` + `TALL`
+**Rows** are the composition unit. Any set of slots whose columns do not overlap is a legal row. With six slots that is five row patterns, not three:
 
-Rhythm: `--space-10` between cards *within* a spread, `--space-16` *between* spreads. Two rhythms, not one — that is what makes it read composed rather than tiled.
+| Row | Slots | Reads as |
+|---|---|---|
+| `R-LEAD` | `LEAD` (1–7) + `SIDE` (9–12) | big-left / small-right |
+| `R-INSET` | `INSET` (1–5) + `TALL` (8–12) | small-left / big-right |
+| `R-CROSS` | `INSET` (1–5) + `SIDE` (9–12) | two smalls, wide ground between |
+| `R-WIDE` | `WIDE` (3–10) alone | the breath |
+| `R-PLATE` | `COLUMN` (5–8) alone | the centred plate |
+
+Rhythm: `--space-10` between cards *within* a row, `--space-16` *between* rows. Two rhythms, not one — that is what makes it read composed rather than tiled.
+
+**Slot assignment is content-aware, not cyclic** *(2026-07-22, gate-2 critic ruling — replaces the fixed S1→S2→S3 cycle, which at N=18 repeated 3.6 times and read as exactly that)*. Cards are placed by an art-director rule, not a rotation: **the clip picks the slot it belongs in, and the composition refuses to repeat itself.**
+
+For each card in engine order:
+
+```
+eligible = slots whose crop keeps the clip's focalPoint at least 12% inside
+           every crop edge, and whose columns fit the open space in the
+           current row (else open a new row)
+
+cost(slot) = |ln(clipAspect / slotAspect)|          // aspect fit — dominant term
+           + 0.50 · repeatPenalty(slot, last 2 placements)
+           + 0.35 · edgePenalty(slot.colStart, last 2 col-starts)
+
+place at argmin(cost); ties break to the least-used slot so far
+```
+
+**Hard constraints (not scored — a placement violating one is illegal):**
+
+1. No slot repeats within 2 placements.
+2. No row pattern repeats **consecutively**.
+3. A row's spans never overlap; a card that cannot fit the remaining columns opens a new row.
+4. Never end on an orphan half-row — promote the trailing card to `WIDE` (unchanged).
+
+**Deterministic, no randomness.** Same input order → same composition. This keeps the layout test stable and keeps parity with the engine's own anti-repetition posture.
+
+**Degradation when `focalPoint` is absent** (design-direction §8.1 is a schema add that may not have landed in the data yet): treat the focal point as centre `(0.5, 0.5)` and **skip constraint-check 1 of eligibility only** — the focal-safety filter. Aspect fit, repeat penalty, edge penalty, and all four hard constraints still run. **The mechanism ships with or without the schema add**; focalPoint improves the crops, it does not gate the composition.
+
+**Small N is unchanged in intent but expressed through the same rule.** At N = 1 the single card takes `WIDE` at col-start 3. At N = 2–4 the assignment runs normally; hard constraint 4 handles termination. The old N table is retained below as the expected output, and is what the test asserts.
 
 **Termination at small N (closes design-direction OQ-4 — during the seed period the feed returns 4 cards, not 18, because of `distinct on (store_id)`):**
 
 | N | Composition | Why |
 |---|---|---|
 | 1 | `WIDE` at col-start 3 | An editorial single, not a lonely card |
-| 2 | S1 | One complete spread |
-| 3 | S1 + S2 | A complete opening, then a breath |
-| 4 | S1 + S3 | Two complete spreads — avoids ending on a lone `WIDE`, which reads as truncation |
-| ≥ 5 | S1 → S2 → S3 cycling | If the final spread would be an orphan half of S1 or S3, **promote it to `WIDE`** |
+| 2 | `R-LEAD` | One complete row |
+| 3 | `R-LEAD` + `R-WIDE` | A complete opening, then a breath |
+| 4 | `R-LEAD` + `R-INSET` | Two complete rows — avoids ending on a lone `WIDE`, which reads as truncation |
+| ≥ 5 | content-aware assignment above | Hard constraint 4 handles the tail: an orphan trailing card is **promoted to `WIDE`** |
 
-**Never end on an orphan half-spread.** This rule is the difference between "the feed is short" and "the feed is broken."
+**Never end on an orphan half-row.** This rule is the difference between "the feed is short" and "the feed is broken."
 
-Engine request limit: **18**. Rationale: 12 reads thin for a publication; 24 thins the anti-repetition pool across few stores. 18 = six three-slot spreads.
+Engine request limit: **18**. Rationale: 12 reads thin for a publication; 24 thins the anti-repetition pool across few stores. 18 gives the assignment rule enough cards for four distinct row patterns to appear without any repeating consecutively.
 
 ### 1.2 The card
 
@@ -119,14 +155,39 @@ The count is live and honest. At N=4 it reads "Four people who make things." A f
 | **Error** | Serve the last cached selection (session storage). Above the masthead, one `ErrorInline`: *"Showing you the last set — we couldn't reach the new one."* + retry. If there is no cache, fall through to Empty's layout with error copy: *"We're having trouble reaching the makers. Try again in a moment."* + retry. Never blank. |
 | **Success** | Live composition; focus film playing; tapping a card runs `grow` → B2. |
 
-### 1.6 Responsive
+### 1.6 Responsive — and the mobile composition (`< 768`)
 
-Per design-direction §7. At `< 768` the feed is single-column and **variety comes from card height, not width** — aspects cycle 4:5 · 16:9 · 1:1 · 3:2. This is what keeps the anti-grid identity alive when width is fixed, and it is the case the layout test must also cover.
+Per design-direction §7 for `≥ 768`.
+
+**At `< 768` the feed is single-column and its identity is carried by the left edge.** The prior spec said variety comes from card height and cycled four aspects; the built result at 375 px was eight cards of identical width with uniform gaps — the equal-cell layout design-direction §2.4 bans, one column wide. Aspect alternation is real but it is not enough, because **width equality is what reads as a grid.** Two columns is the wrong fix: it shrinks the maker's face, the one thing that must not shrink.
+
+**Four mobile slots.** Widths are asymmetric, insets differ left and right, and one slot bleeds past both margins. The page margin is `--space-4` (32 px).
+
+| Slot | Left inset | Right inset | Aspect | Caption |
+|---|---|---|---|---|
+| `M-BLEED` | 0 | 0 | 16:9 | indented `--space-4` from the viewport left edge |
+| `M-FULL` | `--space-4` | `--space-4` | 4:5 | flush with media left edge |
+| `M-OFF-L` | `--space-4` | `--space-16` (128 px) | 1:1 | flush with media left edge |
+| `M-OFF-R` | `--space-16` | `--space-4` | 3:2 | flush with media left edge |
+
+**The caption always aligns to its own media's left edge.** That is the load-bearing detail: the text column zig-zags down the page in step with the media, so the reader never sees a repeating rule. A caption set to a fixed page margin would undo the whole mechanism.
+
+**Assignment uses the same content-aware rule as §1.1**, over this slot table instead of the desktop one — same cost function, same tie-break, same focalPoint degradation. One mechanism, two slot tables.
+
+**Hard constraints:**
+
+1. No slot repeats consecutively.
+2. `M-BLEED` appears at most once per four cards and never twice within five.
+3. The leading edge (`--space-4` vs `--space-16` vs `0`) never repeats more than twice consecutively.
+
+**Rhythm:** `--space-8` after an inset card, `--space-12` after `M-BLEED` — a bleed card needs more air on the other side of it than an inset one does.
 
 ### 1.7 Acceptance beyond the CPO spec
 
-- Layout test asserts (a) rendered cards do not all share identical dimensions **and** (b) **no two adjacent cards share `getBoundingClientRect().top` within 24 px.** (b) is the assertion that actually catches a grid; (a) is passable by a two-cell-size grid.
-- Composition renders correctly and intentionally at N = 1, 2, 3, 4.
+- Desktop layout test asserts (a) rendered cards do not all share identical dimensions, **and** (b) **no two adjacent cards share `getBoundingClientRect().top` within 24 px**, **and** (c) **across N ≥ 12, no ordered three-card slot sequence occurs more than twice and at least four distinct row patterns appear.** (b) catches a grid; (c) catches a *cycle*, which passes (a) and (b) at every card. All three are necessary; none alone is sufficient.
+- Mobile layout test at 375 px asserts (d) **no two adjacent cards share a rendered width within 8 px**, and (e) **at least one card per viewport-height breaks the dominant left edge.**
+- Composition renders correctly and intentionally at N = 1, 2, 3, 4, on both slot tables.
+- Type over film measures **≥ 5.5:1 body / ≥ 4.0:1 large** against its rendered backdrop (design-direction §4.1b — a full point of headroom over the I5 floor, because every number in this wave was measured on a zero-variance synthetic gradient).
 - Zero elements matching the banned-chrome list (countdown, discount, sold-count, star cluster).
 
 ### 1.8 Data note for the implementer
@@ -201,6 +262,8 @@ Film resting position: `hero-video` per the maker's chosen variant (`center-colu
 
 *(Amended 2026-07-22 — CPO E5 ruling. The prior text said an absent statement leaves the world with no hero line at all; that contradicted the shipped `hero-video` render and would have judged B3 against a spec the product deliberately contradicts.)*
 
+*(Re-amended 2026-07-22 — gate-2 critic ruling. The E5 text set the absent-`statement` nameplate at a flat `weight 700` at `display-hero`. That was measured wrong: Noor Haddad in Fraunces reads as an airy nameplate at those exact values, and Sena Okonkwo in a geometric sans at the same values reads as a logotype stamped onto her own face. **Optical mass is a property of stroke contrast, not of a number** — the number was never the rule. The nameplate register now comes from design-direction §2.1a, which also dissolves this section's standing contradiction with §2.1.)*
+
 Two lines, two tiers, and **only one of them is display tier in either case**.
 
 **The statement — display tier, seller-owned voice.** `hero-video.props.statement` (design-direction §8.2). One line, ≤ 48 characters, `--fs-display-hero`, **weight 400–500**, tracking `-0.01em`, `--on-media` over mandatory `--scrim`, `[text-wrap:balance]`. Per design-direction §2.1: light and large, not heavy and large. It is a guest on the maker's face. Maker-authored — AI may suggest it at authoring time with the maker's approval, and may never emit it at render time (D10).
@@ -209,10 +272,19 @@ Two lines, two tiers, and **only one of them is display tier in either case**.
 
 | `statement` | Display tier — exactly one line | Caption tier beneath |
 |---|---|---|
-| **present** | the statement — weight 400–500, `-0.01em` | `maker.displayName` **leads the line**, then `· maker.craft · maker.location` when `showCraftLine`. With `showCraftLine: false` the name renders alone. |
-| **absent** | `maker.displayName` — weight 700, `-0.03em` (shipped render, unchanged) | `maker.craft · maker.location` when `showCraftLine` |
+| **present** | the statement — `--fs-display-hero`, weight 400–500, `-0.01em` | `maker.displayName` **leads the line**, then `· maker.craft · maker.location` when `showCraftLine`. With `showCraftLine: false` the name renders alone. |
+| **absent** | `maker.displayName` in the **nameplate register** — `var(--nameplate-size)` / `var(--nameplate-weight)` / `var(--nameplate-tracking)`, resolved from the pairing's `strokeClass` per design-direction §2.1a | `maker.craft · maker.location` when `showCraftLine` |
 
-The weight and tracking split is the load-bearing part: a name set bold and tight reads as a **nameplate**; a statement set light and open reads as **speech**. They are never mistaken for one another, and the name is never mistaken for words the maker said.
+**The nameplate register, restated here because it is the part that gets mis-built:**
+
+| `strokeClass` | Pairings | Size | Weight | Tracking |
+|---|---|---|---|---|
+| `modulated` | `warm-serif` (Fraunces) | `--fs-display-hero` | 700 | `-0.03em` |
+| `uniform` | `statement-grotesk`, `modern-mono-grotesk`, `character-maximal`, and `kind:"custom"` unless it declares otherwise | `--fs-display` | 600 | `-0.025em` |
+
+The renderer reads the three custom properties. **It never branches on a font family name** — that would not survive the first `kind:"custom"` world, which can bring any face.
+
+The register split is the load-bearing part, and it now moves on two axes at once: **the statement is larger and lighter; the nameplate is smaller and heavier.** A name set tight and dense reads as a **nameplate**; a line set open and light reads as **speech**. Because they diverge on both size and weight rather than weight alone, they are unmistakable for one another on a modulated serif and on a geometric sans equally — which is what the single-number version could not do. Both remain display tier; the one-display-line budget is unchanged.
 
 The identity line never truncates or ellipsizes — a person's name wraps to a second caption line before it is cut.
 
