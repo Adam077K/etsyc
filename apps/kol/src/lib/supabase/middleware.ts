@@ -7,6 +7,7 @@ import {
   classifyRoute,
   landingPathFor,
 } from "@/lib/auth/routes";
+import { FEED_SESSION_COOKIE, isFeedSessionId } from "@/lib/feed/session";
 
 import type { Database } from "./database.types";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
@@ -56,6 +57,22 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Feed session identity (W3-B1a): Server Components cannot set cookies,
+  // so the proxy mints the first-party feed-session cookie — on first visit
+  // or when the incoming value is not a UUID (external input, never trusted
+  // unparsed). Browser-session lifetime by design: a new browser session
+  // reshuffles the feed; within a session the order is stable
+  // (discovery-feed AC). Set AFTER getUser (whose cookie sync may replace
+  // supabaseResponse); redirectTo() below copies it onto redirects.
+  if (!isFeedSessionId(request.cookies.get(FEED_SESSION_COOKIE)?.value)) {
+    supabaseResponse.cookies.set(FEED_SESSION_COOKIE, crypto.randomUUID(), {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
+  }
 
   // Any redirect must carry the refreshed auth cookies, or the new token is
   // dropped and the user bounces through a refresh loop.
