@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { createEngineDeps, selectVideos } from "@/lib/engine";
+import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { renderStore } from "@/lib/renderer/render-store";
 import { validateStoreConfig } from "@/lib/store-config/schema";
 import type { StoreConfig } from "@/lib/store-config/types";
@@ -24,10 +26,6 @@ import { createClient } from "@/lib/supabase/server";
  * media.clips[].id ≡ videos.id. The engine never reads blocks or
  * stores.config; the renderer never reads the canonical video tables.
  */
-
-/** Ring cookie name — B1's feed must reuse this so the anti-repetition
- *  session is ONE session across surfaces. */
-const ENGINE_RING_COOKIE = "kol_engine_ring";
 
 const getWorld = cache(
   async (
@@ -79,21 +77,23 @@ export async function generateMetadata({
 async function selectSignatureClipId(storeId: string): Promise<string | undefined> {
   try {
     const cookieStore = await cookies();
+    // ONE ring cookie across every buyer surface (B1a canonical name,
+    // DECISIONS.md) — feed history counts against this selection and vice
+    // versa. Best-effort write: Server Components cannot persist cookies
+    // (same posture as lib/supabase/server.ts / getFeedSelection); the
+    // intended ring WRITER is B4's server action, not this read.
     const deps = createEngineDeps({
-      read: () => cookieStore.get(ENGINE_RING_COOKIE)?.value,
+      read: () => cookieStore.get(FEED_RING_COOKIE)?.value,
       write: (value: string) => {
         try {
-          cookieStore.set(ENGINE_RING_COOKIE, value, {
+          cookieStore.set(FEED_RING_COOKIE, value, {
             httpOnly: true,
             sameSite: "lax",
             secure: process.env.NODE_ENV === "production",
             path: "/",
           });
         } catch {
-          // Server Components cannot persist cookies (same posture as
-          // lib/supabase/server.ts). The ring still READS here, so feed
-          // history reaches this selection; persistence of THIS read's
-          // ring happens on surfaces served by route handlers/actions.
+          // read-only cookie store during RSC render — deliberate, not a gap
         }
       },
     });
@@ -106,10 +106,11 @@ async function selectSignatureClipId(storeId: string): Promise<string | undefine
       {
         state: "WORLD_OPEN",
         buyerId: user?.id ?? null,
-        // No app-level session id exists yet (B1 owns establishing one);
-        // per-request scope only affects the ranker's seeded jitter on a
-        // limit-1 store-scoped read. Swap to the session id when B1 lands.
-        sessionId: crypto.randomUUID(),
+        // The proxy middleware is the SOLE minter of kol_sid;
+        // resolveFeedSessionId only validates (fresh anonymous id for this
+        // request when absent/tampered — the proxy re-mints on response).
+        // Stable session ⇒ stable seeded jitter across reloads.
+        sessionId: resolveFeedSessionId(cookieStore.get(FEED_SESSION_COOKIE)?.value),
         storeScope: storeId,
         productId: null,
         moodHint: null,
