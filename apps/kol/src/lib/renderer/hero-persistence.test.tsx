@@ -191,6 +191,128 @@ describe("hero persistence — the P4 invariant, relocated to the Film Layer", (
     expect(slot.querySelector("img")).toBeNull();
   });
 
+  it("B3 unfold — GROWN → WORLD_OPEN is a SAME-SOURCE transition: Film Layer node identity persists, the visible element is never swapped or paused", async () => {
+    const pauseSpy = vi.spyOn(window.HTMLMediaElement.prototype, "pause");
+    const { container, getByRole } = renderWorld(
+      <StoreWorld config={senaStore} isPreview initialStage="grown" />,
+    );
+    const frame = await primeFilm(container);
+    const film = frame.querySelector("video.kol-film-front");
+    expect(film).not.toBeNull();
+
+    goToStage(getByRole, "world-open");
+
+    // the SAME Film Layer node — never remounted, never detached
+    expect(container.querySelector("[data-film-layer]")).toBe(frame);
+    expect(frame.isConnected).toBe(true);
+    // cross-fading is FORBIDDEN on this edge (CPO Ruling 1): the visible
+    // element is the SAME video — the A/B buffers were never touched, so
+    // no sampled frame can show a paused or black incoming buffer
+    expect(frame.querySelector("video.kol-film-front")).toBe(film);
+    expect(frame.querySelectorAll("video.kol-film-front")).toHaveLength(1);
+    // playback continuity: no transition ever calls pause (jsdom cannot
+    // sample frames — the pause spy + untouched front buffer are the
+    // testable projection of "never a paused or black frame")
+    expect(pauseSpy).not.toHaveBeenCalled();
+  });
+
+  it("B3 unfold — §3.3 choreography structure: items rise nearest-to-film first in BOTH directions, atmosphere in band 3, all inside the 900ms cap", () => {
+    // give the world a block ABOVE the film so both directions exist
+    const reordered: StoreConfig = {
+      ...senaStore,
+      blocks: senaStore.blocks.map((block) =>
+        block.id === "b_story" ? { ...block, order: -1 } : block,
+      ),
+    };
+    const { container } = renderWorld(
+      <StoreWorld config={reordered} isPreview initialStage="grown" />,
+    );
+
+    const items = Array.from(container.querySelectorAll<HTMLElement>(".kol-unfold-item"));
+    // every non-hero block is choreographed; the hero is NOT an item (the
+    // film is the fixed point the world assembles around)
+    expect(items).toHaveLength(senaStore.blocks.length - 1);
+    expect(container.querySelector(".kol-hero-stage .kol-unfold-item")).toBeNull();
+
+    const delayOf = (el: HTMLElement) =>
+      Number.parseInt(el.style.getPropertyValue("--unfold-delay"), 10);
+    const riseOf = (el: HTMLElement) =>
+      Number.parseFloat(el.style.getPropertyValue("--unfold-rise"));
+
+    // both direction-1 neighbours open the wave at 140ms (band 2 start)
+    const above = items.filter((el) => el.dataset.unfoldDistance === "1");
+    expect(above.length).toBeGreaterThanOrEqual(2); // one each side of the film
+    for (const el of above) expect(delayOf(el)).toBe(140);
+
+    // stagger is monotone outward and every item settles by t=900
+    for (const el of items) {
+      const distance = Number(el.dataset.unfoldDistance);
+      expect(delayOf(el)).toBeGreaterThanOrEqual(140);
+      expect(delayOf(el) + Number.parseInt(el.style.getPropertyValue("--unfold-dur"), 10))
+        .toBeLessThanOrEqual(900);
+      if (distance > 1) {
+        const nearer = items.find((c) => Number(c.dataset.unfoldDistance) === distance - 1);
+        if (nearer) expect(delayOf(el)).toBeGreaterThanOrEqual(delayOf(nearer));
+      }
+    }
+
+    // atmosphere resolves in band 3 (≥340ms) as a breath: rise 0 — it is
+    // the only block type with a zero rise, so the filter identifies it
+    const atmoItems = items.filter((el) => riseOf(el) === 0);
+    expect(atmoItems).toHaveLength(1); // sena carries exactly one atmosphere band
+    for (const el of atmoItems) {
+      expect(delayOf(el)).toBeGreaterThanOrEqual(340);
+    }
+
+    // parallax depth: a deeper block rises further than a nearer one
+    const d1 = items.find((el) => el.dataset.unfoldDistance === "1")!;
+    const deepest = items.reduce((a, b) =>
+      Number(a.dataset.unfoldDistance) >= Number(b.dataset.unfoldDistance) ? a : b,
+    );
+    expect(riseOf(deepest)).toBeGreaterThan(riseOf(d1));
+  });
+
+  it("B3 pin — the engine's WORLD_OPEN pick reaches the persistent slot via videos.id, and an unbound pick is ignored", async () => {
+    // hero bound to two clips; the engine picked the SECOND — the pin must
+    // put it in the slot without touching the seller's other blocks
+    const twoClipHero: StoreConfig = {
+      ...senaStore,
+      blocks: senaStore.blocks.map((block) =>
+        block.type === "hero-video"
+          ? { ...block, bindings: { ...block.bindings, clipTags: ["clip_intro", "clip_wheel"] } }
+          : block,
+      ),
+    };
+    const { container } = renderWorld(
+      <StoreWorld
+        config={twoClipHero}
+        isPreview
+        initialStage="world-open"
+        pinnedClipId="clip_wheel"
+      />,
+    );
+    const frame = await primeFilm(container);
+    expect(
+      frame.querySelector<HTMLVideoElement>("video.kol-film-front")?.src,
+    ).toContain("/media/ashwork/wheel.mp4");
+
+    cleanup();
+
+    // a pick OUTSIDE the seller's bindings never overrides their authoring
+    const { container: unpinned } = renderWorld(
+      <StoreWorld
+        config={senaStore}
+        isPreview
+        initialStage="world-open"
+        pinnedClipId="clip_wheel"
+      />,
+    );
+    const frame2 = await primeFilm(unpinned);
+    expect(
+      frame2.querySelector<HTMLVideoElement>("video.kol-film-front")?.src,
+    ).toContain("/media/ashwork/intro.mp4");
+  });
+
   it("self mode (no Film Layer provider): the Wave-0 in-slot video persists and never pauses", () => {
     const playSpy = vi.spyOn(window.HTMLMediaElement.prototype, "play");
     const pauseSpy = vi.spyOn(window.HTMLMediaElement.prototype, "pause");
