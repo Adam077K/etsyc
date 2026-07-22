@@ -43,3 +43,13 @@
 - Rollback: 11 `drop trigger` + `drop function` + ledger delete, documented in the migration header.
 - Branch: feat/mig-ts. Session: docs/08-agents_work/sessions/2026-07-22-database-engineer-mig-ts.md
 
+
+## 2026-07-22 — QA GATE — Gate 1 re-review PASS (fix cycle 1): FILM-LAYER + W2-WIRE certified, Gate 1 CLEARED
+
+- QA-Lead re-review of new diffs only: feat/film-layer @ b0dd1ed (fix 70d6623, tests 81aa9ab), feat/w2-wire-engine @ 9356a4f (0406910, eec2e3d, 4d333bf). Both PASS; PASS pinned to these SHAs.
+- Independently re-run by QA-Lead: film-layer 615/615, w2-wire 588/588 (live vs staging), tsc 0 + eslint clean on both, merge-tree vs main fa3942b: 0 conflicts both branches.
+- All four FILM-LAYER P1s closed in code, not tested-around: atomic claim on every path (incl. element-less dock slot + deferred rect maintenance), three-band stacking contract (bed 30 < chrome 35 < film 40) with C-suite DECISIONS breadcrumb, focalPoint on both buffers + posters via swapClip(clip), fade-gated swaps with fire-time pause re-check + computed-duration release + veto-safe visibility resume. G1-F4 closed.
+- W2-WIRE: F12 keyless-fail fixed by construction (beforeAll), keyless wiring guard catches the full-crossover mutant via path assertions, server-only + 32-byte secret floor + .env.example landed; composition.test.ts zero-mock pledge intact.
+- MIG-TS verified merged/applied/proven on main (E4 satisfied). Ruling: verifications.created_at INSERT gap = follow-up G1-F12 (no read side today), NOT a T1 blocker; needs its own Founder-signed micro-migration before the verification-resolution flow.
+- Merge order: w2-wire → film-layer → full suite on main after each. T1: E1/E2/E3/E4 satisfied; E5 (maker-name ruling) still holds B3 only. G1-F2 untouched — becomes P1 at Gate 2 if B2 ships without it.
+- Session: docs/08-agents_work/sessions/2026-07-22-qa-lead-gate1-recheck.md
