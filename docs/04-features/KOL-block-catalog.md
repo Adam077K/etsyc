@@ -21,14 +21,16 @@
 
 **Props / bindings.** `props: { showCraftLine: bool, statement?: string }` · `bindings.clipTags` (hint set; the video engine P6 owns final selection by `videoProfile`). Controls minimal: mute toggle + captions only; **sound off until opt-in** (the hard tone line — no autoplay audio).
 
-`statement` (added 2026-07-21, store-config v1.3 amendment) is the maker's one big line over her film — `--fs-display-hero`, weight 400–500, `--scrim` mandatory, `--on-media` ink, ≤ 48 chars, at most one per world. `showCraftLine` is a different tier: it renders `maker.craft` at **caption** size, and the two may co-exist. **`statement` is maker-authored and has no render-time fallback** — absent means the world has no hero line, never a generated one, never the craft line promoted, never the store name (D10).
+`statement` (added 2026-07-21, store-config v1.3 amendment) is the maker's one big line over her film — `--fs-display-hero`, weight 400–500, `--scrim` mandatory, `--on-media` ink, ≤ 48 chars, at most one per world. `showCraftLine` is a different tier: it renders `maker.craft` at **caption** size, and the two may co-exist.
+
+**`statement` is maker-authored and has no render-time fallback (D10)** — nothing is ever promoted into the display tier *as the maker's words*: no generated line, no promoted craft line, no store name. But the hero frame is never nameless (amended 2026-07-22, CPO E5 ruling): `maker.displayName` is stored identity, not attributed speech, and it simply changes tier. **Statement present** → statement holds display tier; the name leads the caption line beneath it (with `· craft · location` when `showCraftLine`, alone when not). **Statement absent** → the name holds display tier at weight 700 / `-0.03em`, the shipped render. Bold-and-tight reads as a nameplate; light-and-open reads as speech — that split is what keeps the name from ever being read as words the maker said.
 
 | State | Design behavior |
 |-------|-----------------|
 | Empty | Maker hasn't uploaded film → poster still with a muted "Add your first clip" prompt (seller preview only; a live world can't reach this — publish requires ≥1 clip). |
 | Loading | Poster frame shown immediately; subtle skeleton shimmer over a spinner-free progress edge; audio never loads until played. |
 | Error | Clip 404/decode fail → fallback to `poster`, a quiet inline "Couldn't load this clip" + retry; the world stays usable around the still. |
-| Success | Video plays muted, controls fade after 2s idle, captions available; craft-line (`maker.craft`) sets in caption type if `showCraftLine`; `statement`, when present, sets at display-hero over `--scrim`. |
+| Success | Video plays muted, controls fade after 2s idle, captions available; `statement`, when present, sets at display-hero over `--scrim` and `maker.displayName` leads the caption line beneath it; when absent, `maker.displayName` sets at display-hero. Craft-line (`maker.craft`) sets in caption type if `showCraftLine`. |
 
 ---
 
