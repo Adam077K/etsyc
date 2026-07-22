@@ -1,3 +1,9 @@
+// SERVER-ONLY MODULE — eligibility must query at the PUBLIC trust level via
+// the server-side anon client. Without this guard a "use client" module could
+// import createEligible and wire it to the browser session client, reproducing
+// the unpublished-clip defect client-side (drafts satisfy owner RLS).
+import "server-only";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";

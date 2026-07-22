@@ -63,6 +63,30 @@ export class EngineSecretMissingError extends Error {
 }
 
 /**
+ * ENGINE_COOKIE_SECRET floor — what the missing-secret error message already
+ * instructs (`openssl rand -base64 48`). Below 32 bytes the HMAC key is weak
+ * enough that the signed ring cookie degrades toward client-controlled input.
+ */
+const MIN_SECRET_BYTES = 32;
+
+/**
+ * Thrown by createEngineDeps when ENGINE_COOKIE_SECRET is present but shorter
+ * than MIN_SECRET_BYTES. A 1-character secret must not pass the guard that
+ * exists to keep the ring cookie unforgeable.
+ */
+export class EngineSecretTooShortError extends Error {
+  constructor(byteLength: number) {
+    super(
+      `[engine] ENGINE_COOKIE_SECRET is ${byteLength} bytes — at least ` +
+        `${MIN_SECRET_BYTES} random bytes are required ` +
+        "(`openssl rand -base64 48`). A short secret makes the signed " +
+        "anti-repetition ring cookie forgeable client input.",
+    );
+    this.name = "EngineSecretTooShortError";
+  }
+}
+
+/**
  * Compose the three engine stages from explicit dependencies.
  *
  * LOCKED SIGNATURE (QA-Lead condition, dispatch packet §5): this is the
@@ -114,6 +138,11 @@ export function createEngineDeps(cookies: {
   const secret = process.env.ENGINE_COOKIE_SECRET;
   if (secret === undefined || secret.length === 0) {
     throw new EngineSecretMissingError();
+  }
+  // Byte length, not UTF-16 code units — the floor is an entropy budget.
+  const secretBytes = new TextEncoder().encode(secret).byteLength;
+  if (secretBytes < MIN_SECRET_BYTES) {
+    throw new EngineSecretTooShortError(secretBytes);
   }
   return createDefaultDeps({
     db: createAnonClient(),

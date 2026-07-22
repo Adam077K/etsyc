@@ -5,6 +5,7 @@ import type { Database } from "@/lib/supabase/database.types";
 
 import {
   EngineSecretMissingError,
+  EngineSecretTooShortError,
   createDefaultDeps,
   createEngineDeps,
   selectVideos,
@@ -260,7 +261,8 @@ function feedWorld(): FakeProfileRow[] {
 
 // --- rig ------------------------------------------------------------------------
 
-const TEST_SECRET = "w2-wire-composition-test-secret";
+// ≥32 bytes — createEngineDeps enforces the entropy floor at the entry point.
+const TEST_SECRET = "w2-wire-composition-test-secret-32-bytes-min";
 
 function memoryCookieJar(initial?: string) {
   const jar = {
@@ -406,6 +408,16 @@ describe("createEngineDeps — the only entry point app code may call", () => {
   it("treats an empty ENGINE_COOKIE_SECRET as missing", () => {
     vi.stubEnv("ENGINE_COOKIE_SECRET", "");
     expect(() => createEngineDeps(memoryCookieJar())).toThrow(EngineSecretMissingError);
+  });
+
+  it("rejects a secret shorter than 32 bytes — the floor its own error message instructs", () => {
+    // A 1-character secret previously passed both guards; the ring cookie's
+    // HMAC key must carry a real entropy budget, not merely be non-empty.
+    vi.stubEnv("ENGINE_COOKIE_SECRET", "x");
+    expect(() => createEngineDeps(memoryCookieJar())).toThrow(EngineSecretTooShortError);
+
+    vi.stubEnv("ENGINE_COOKIE_SECRET", "a".repeat(31));
+    expect(() => createEngineDeps(memoryCookieJar())).toThrow(EngineSecretTooShortError);
   });
 
   it("constructs the full dependency set internally once the secret is present", () => {
