@@ -10,8 +10,38 @@
 --           this table is platform reference data only.
 --
 -- Access:   SERVICE-ROLE ONLY. `blocks` is public-read with NO client write
---           policy (see 20260721000005_blocks_voiceovers.sql). Apply via
---           scripts/seed-blocks.sh — never with a client/anon key.
+--           policy (see 20260721000005_blocks_voiceovers.sql). Never apply
+--           with a client/anon key.
+--
+-- How to apply — MANUAL RUNBOOK (operator-run; deliberately NO repo script):
+--   Security review removed scripts/seed-blocks.sh: it ran this file through
+--   the Management API /database/query endpoint, which executes as the
+--   `postgres` superuser under an org-wide personal access token — far beyond
+--   the project-scoped service-role write this seed was authorized for.
+--   Committed automation must be least-privilege; see
+--   .claude/memory/DECISIONS.md (2026-07-21) for the standing policy.
+--
+--   Apply by hand with psql using the project-scoped connection string
+--   (Dashboard → Project Settings → Database). As of 2026-07-21 neither psql
+--   nor the Supabase CLI is installed on the dev machine — install one first
+--   (e.g. `brew install libpq` for psql).
+--
+--     psql -h <project-db-host> -p 5432 -d postgres -U postgres -W \
+--          -f supabase/seed/001_blocks_catalog.sql
+--
+--   Secret handling (non-negotiable):
+--     * NEVER pass the password/token in argv — argv is world-readable via
+--       `ps -ef`. Use -W to be prompted, or ~/.pgpass (chmod 600).
+--     * NEVER `set -a; source .env.local` — that exports every secret (incl.
+--       the service-role key and DB password) into all child-process
+--       environments. Read single non-secret vars explicitly if needed.
+--   If using the Supabase CLI instead: authenticate with `supabase login`
+--   (interactive prompt — never `--token <value>` in argv), then
+--   `supabase link --project-ref <ref>`, and run this file via psql as above.
+--
+--   Verify after apply (expect total_rows=31, distinct_types=11):
+--     select count(*) as total_rows, count(distinct type) as distinct_types
+--       from public.blocks;
 --
 -- Idempotent: YES. Upsert on the `unique (type, variant)` constraint; running
 --           this file twice leaves the table content identical.

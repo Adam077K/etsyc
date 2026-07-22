@@ -4,6 +4,15 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-21 — Management-API SQL under an org-wide PAT is FORBIDDEN in committed automation (SEED must-fix)
+
+**Context:** Security review BLOCKED the SEED branch over `scripts/seed-blocks.sh` (seed SQL itself certified clean). The script applied the seed via the Management API `/database/query` endpoint — executes as `postgres` superuser, authenticated by an **org-wide PAT** (create/delete projects, rotate every key) — where the brief authorized only a project-scoped service-role write. That is a standing arbitrary-SQL capability in the repo: reviewers treat `.sql` seeds as inert, so a later seed edit would run as superuser under normal review. It also passed the PAT in curl `argv` (world-readable via `ps -ef`) and `set -a; source`d `.env.local`, exporting the service-role key and DB password into every child process.
+**Decision:** Management-API `/database/query` as `postgres` under an org-wide PAT is **FORBIDDEN in committed automation.** Repo scripts use least privilege — project-scoped service-role, or `psql` with a scoped connection string. Secrets never in `argv`, never `set -a` exported. Break-glass is a documented manual runbook only, at Irreversible floor with Founder sign-off. Script deleted; the sanctioned apply path is now the manual runbook in the header of `supabase/seed/001_blocks_catalog.sql`.
+**Known gap:** neither `psql` nor the Supabase CLI is installed on the dev machine — that absence drove the original Management-API escalation, and the next engineer will hit the same wall. Install `psql` (`brew install libpq`) before the next manual apply.
+**Reversibility:** reversible (policy), but re-introducing such a script is Irreversible-floor + Founder sign-off by this ruling.
+**Owner:** devops-engineer (QA-Lead ruling, SEED branch)
+**Affects:** all workers writing repo automation that touches the DB — database-engineer, devops-engineer, backend-engineer; QA/security reviewers (review floor for any DB-executing script)
+
 ## 2026-07-21 — Wave 1 backend live: 31-table schema applied + P1 auth merged
 
 **Context:** First DB wave of the KOL MVP. Founder provided Supabase keys for the KOL staging project (ref `olwtcjzmohdhawdzlzqs`); no Docker on host + Free-plan 2-active-project cap meant no disposable throwaway, so validated+applied directly on the empty staging project with Founder sign-off.
