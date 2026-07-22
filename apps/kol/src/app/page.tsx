@@ -253,13 +253,20 @@ export default function DiscoverPage() {
       : [];
 
   const isEmpty = state.status === "ready" && tiles.length === 0;
+  // Honest count: how many distinct makers are actually on film right now.
+  const makerCount =
+    state.status === "ready" ? new Set(items.map((it) => it.makerSlug)).size : 0;
 
   return (
     <>
       {/* ============ editorial opener: a face, not a filter bar ============ */}
       <header className="mx-auto w-full max-w-page px-6 pb-10 pt-12">
         <Reveal>
-          <p className="text-caption uppercase text-muted">Today on KOL · 41 makers filming</p>
+          <p className="text-caption uppercase text-muted">
+            {tiles.length > 0
+              ? `Today on KOL · ${makerCount} ${makerCount === 1 ? "maker" : "makers"} on film`
+              : "Today on KOL"}
+          </p>
         </Reveal>
         <Reveal delayMs={STAGGER_MS}>
           <h1 className="mt-2 max-w-measure font-display text-display [text-wrap:balance]">
