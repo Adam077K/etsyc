@@ -295,3 +295,42 @@ anyone ever sending a legal letter.
 **Owner:** ceo
 **Affects:** all — domain, product name, outreach sending domain, survey branding, API application
 **Status:** Recommendation. Awaiting Adam's sign-off.
+
+---
+
+## 2026-07-22 — A convention recorded in prose is not a convention; declare shared contracts once, in code
+
+**Context:** Wave-3 T1. Five units independently invented five cookie conventions. I recorded the
+canonical names in DECISIONS.md, verified every unit imported them, and considered it closed. B5 then
+imported the canonical *names* while reimplementing the *behaviour* — dropping `secure` off an HMAC
+cookie. I amended the convention to say attributes are part of the contract, recorded that too, and
+again moved on.
+
+An integration dry run later found the amendment had not held: **ring-cookie write attributes were
+still declared four independent times** (`feed/select.ts:263`, `grow/actions.ts:56`,
+`browse/select-browse-clip.ts:34`, `narration/actions.ts:48`). Attribute-identical by luck, not by
+construction. Worse, browse's module-level const froze `NODE_ENV` at import — precisely the bug
+narration's own fix comment forbids. Diverging attributes make browsers fork the cookie by scope,
+silently splitting buyer identity.
+
+**Decision:** A cross-unit contract is only enforced when a single declaration is *imported* and the
+compiler fails on divergence. Writing the rule in DECISIONS.md, and verifying compliance by review,
+does not survive the next unit. Shared attribute sets ship as an exported **function** (not a const —
+consts freeze environment reads at import) with a test asserting every call site via `toEqual`.
+`toMatchObject` is banned for this class: a partial matcher is how the stripped `secure` passed review.
+
+**Rationale:** This is instance six or seven of the same failure in one wave (also: `405` hard-coded
+for `resolveEdgeMs("ungrow")`, `CHROME_LEAVE_MS` duplicating `--dur-state`, test rigs re-typing
+`FRAME_MEDIA_SELECTOR`). The pattern is unmistakable: **every constant that two units must agree on
+will diverge unless the second unit physically cannot re-declare it.** Detection by review scales
+with reviewer diligence; detection by compiler does not need to.
+
+The correction to my own practice: when a gate finding is a *pattern* rather than a one-off, the fix
+is not a rule — it is removing the ability to break it, plus a sweep of the existing instances. Note
+`live-composition.test.ts` had the collection fix months earlier tagged `F12 (QA-Lead gate-1 must-fix
+5)`; it was fixed in one file and never swept, so six siblings shipped broken. Same lesson.
+
+**Reversibility:** reversible
+**Owner:** ceo
+**Affects:** cto, all workers — cookie writes, design tokens, shared selectors, any cross-unit constant
+**Status:** Adopted. Structural fix in flight on `integ/wave3-dryrun`.

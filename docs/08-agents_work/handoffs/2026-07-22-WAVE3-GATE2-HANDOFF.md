@@ -41,6 +41,23 @@ B4 audit result: midline-crossing-consumed and floor-applies-on-attempts were **
 
 **Independent confirmation of the CI defect:** a worker in a fresh worktree hit *"7 `live-*` suites fail at collection — supabaseUrl is required"* without knowing it was a known issue. That is exactly what CI does today.
 
+### 🟢 INTEGRATION DRY RUN — `integ/wave3-dryrun` @ `7058a0a` (off `main` @ `578a7ce`)
+The merged tree now exists. **11 branch tips merged, keyless full run: 48 files (39 passed / 9 skipped) · 803 tests — 743 passed, 60 skipped, 0 failed.** typecheck and lint clean. B1b and B3 deliberately excluded (both being rewritten).
+
+**Conflict map:** merges 1–5 and 7 are **CLEAN** (the test chains merge cleanly because each contains its parent). Only `feat/b5-narration-shrink` conflicts, in 3 files:
+- `.claude/memory/DECISIONS.md` — mechanical, take HEAD
+- `docs/06-design/KOL-wave3-screen-specs.md` — mechanical, take HEAD
+- **`lib/renderer/StoreWorld.tsx` — the real one.** B4 brings `WorldInteractionContext` + `selectedProductId` + `data-selected-product`; B5 brings `useProductNarration` + `narrationProductId`. Resolution is a union **plus the seam wiring**. ⚠️ **B3 will conflict here again — whoever resolves it must preserve the wiring line.**
+
+**The seam is now wired and pinned.** Resolution: `productId: narrationProductId ?? selectedProductId` — B4's recorded click drives narration, an explicit prop overrides it (B6's product-page case). The proof it matters: under an unwire mutation the new test goes red while **B5's five original tests stay green** — the existing suite was structurally blind to this seam, which is exactly why both units were green while NARRATE_SHRINK narrated the store-wide fallback.
+
+**Clean-merge-but-broken-on-contact findings:**
+1. **FIXED** — `live-feed.test.ts` (B1a) and `live-products-boundary.test.ts` (S8) were **born broken**: their branches forked *before* `test/live-suite-collection-fix`, so git merged everything cleanly and the merged tree then failed 2 files at collection keyless. Repaired in `924f16a`.
+2. **FIXED (in flight)** — ring-cookie **write attributes** were declared **four independent times**, and browse's module-level const froze `NODE_ENV` at import — the exact bug narration's F2 fix forbids. See the DECISIONS entry: *a convention recorded in prose is not a convention.*
+3. **VERIFIED CLEAN** — cookie *names* (2 declarations, all else imports); no cross-branch DOM/state collisions (`HeroStage`, dock rect, `data-*` attrs each have one writer; the three `swapClip` writers are stage-disjoint with guards pinned on both sides); no dangling imports from the B1b/B3 exclusion.
+
+**Known unknown:** S8's live suite repair was not executed live (heavy fixtures — 3 users, storage, orders). It is the identical mechanical pattern proven on 8 other suites, but it is unproven.
+
 ### Source mechanism for B3's P1 — derived by code review, use it
 `components/blocks/hero-video/index.tsx:109-112`. The chrome block is `absolute inset-x-0 bottom-0` with **no height budget**, and the h1 sizes off container *width* only (`min(var(--fs-display-hero), 10cqi)`). So wrapped lines grow **upward**. The frame is `overflow-hidden` at `:85` — meaning what the first line escapes is **the scrim's finite bottom gradient band, not the frame box**. It lands on un-scrimmed film. That is exactly the measured 1.04:1.
 
