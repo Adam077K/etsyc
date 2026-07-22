@@ -13,6 +13,52 @@
 
 Also still outstanding: **real maker footage** (gates 5 acceptance criteria) and the **`store-media` bucket**.
 
+### 🚦 GATE 2 STATUS — BLOCK live, resting on one unlanded fix
+
+**`qa_verdict: BLOCK`** (Full tier) on `integ/wave3-dryrun`. QA-Lead issued PASS, then **reversed its own verdict** when the CEO supplied two facts it hadn't had. Both are now resolved:
+
+| | Status |
+|---|---|
+| **P1-A** — Playwright never run on the merged tree | ✅ **CLEARED.** 18/18, and now **three independent executions in three environments on three ports** (QA-Lead @ `be11a12`, a cohabited run, and a pristine detached worktree). Includes every rendered-output gate: the (d) full-set proof, the period gate **with its `?grid=1` negative control actually rejecting a uniform grid**, parity, zig-zag/rhythm, Focus Film wiring, both world captures |
+| **P1-B** — live font defect in the tree | ✅ **FIXED**, awaiting fold to the final tip |
+
+**Also closed by execution, not inference:** all **nine** live suites ran with keys — 58 files, 935 tests, 0 failed. **S8's known-unknown is resolved** (it was the last carry-forward from the collection-fix work). Keyless and keyed both green; typecheck 0 on a pristine tip.
+
+**Re-verification scope, ruled by QA-Lead:** its PASS carries forward for everything already reviewed, given (a) Playwright on the final tip, (b) the font-catalog test green, (c) `git diff be11a12..<tip> --stat`, plus a **checked** confirmation the new commits avoid auth routes, `middleware.ts`, `supabase/migrations/`, and `*secret*`/`*token*`/`*key*`. The CEO proactively told QA-Lead its narrow "vitest-alone" shortcut **did not apply**, because the fold is three branches and touches `FilmLayer.tsx` (certified) and the e2e specs themselves.
+
+**Still to land before the final tip exists:** B1b's slot-table fix (`M-OFF-L` → 231px) and the `data-film-frame` / StageRail dock work.
+
+### 🧪 NARRATE_SHRINK — CPO ruling: film-only. The dock is NOT a dead end; B6 is simply absent
+A design gate on WORLD_BROWSE/NARRATE_SHRINK (**the first ever on either surface**) returned WORLD_BROWSE **PASS** and NARRATE_SHRINK **conditional**, with: *"if a buyer taps a product and nothing changes except the film miniaturizes, the interaction is a dead end."*
+
+**CPO ruled (a) film-only**, quoting §5.1: *"The dock carries no type at all except captions… A dock with a caption bar is a video player; a dock without one is the maker, still there."* The exclusion zone exists **purely to protect B6's CTA** — *"a layout contract on B6, not a runtime collision check. Reserve the space; do not detect and dodge."*
+
+The dead end is real today and is **B6's absence, not a B5 defect**. Four new B6 ACs recorded: product surface renders around the dock · layout reserves the §5.3 zone (340×200 ≥1024, 260×155 at 768–1023) with an invariant test · CTA carries `data-primary-cta` · mobile audio-pill collapse when the CTA enters view. **Do not ask design-critic to sign off the compound experience until B6 lands** — route it to a post-B6 QA-Lead gate.
+
+### 🧭 THE NAMEPLATE AXIS — why a single constant kept failing (wave-close)
+Both registers now **PASS** on rendering. But the critic found they sit further apart than intended: *"Modulated Fraunces asserts; uniform Clash announces."* Both names are ~11 characters, so **size is the whole explanation** (79.2px floats in a ~515px band; 112px fills it).
+
+**Weight cannot fix it:** *"On Fraunces, weight interacts with existing stroke contrast — the name asserts because the thin strokes stay thin. On Clash there is no internal contrast; weight means ink density and nothing else. At 700 it tips to stamp; at 600 it doesn't tip but also doesn't claim. **There is no stable number between them.**"* Returning to 700 would re-create the exact defect R1 was written to fix.
+
+**Proposed (wave-close, not blocking):** raise the uniform nameplate to `display-hero` at the **same 600 weight** — stamping is a weight phenomenon, not a size one. Then both registers sit at display-hero, differentiated by weight *and stroke contrast* rather than size. **Tracking deliberately held back**: looser tracking moves toward logo-spacing convention (CHLOÉ, JACQUEMUS, TOTEME) — *"a different kind of stamp: not weight-stamp but spacing-stamp."* Test one axis at a time.
+
+> **The root cause of all four instances, and the most useful sentence of the wave:**
+> *"The constraint was specified in terms of the measurement, not the phenomenon. The weight constant doesn't measure 'identity authority' — it measures ink density. Those are correlated on some faces and uncorrelated on others."*
+
+Hence a proposed **`Proxy-for`** field in the Constants Register beside `Calibrated-against` and `Blind-to`: constants standing in for perceptual targets must say what phenomenon they proxy, so the failure mode is predictable when the face, ground, or content changes.
+
+### ⚠️ THE EVIDENCE-QUALITY LESSON, INCLUDING ONE THE CEO CAUSED
+Roughly as much of this wave went into **fixing the evidence** as into fixing the code, and every evidence defect turned out to be upstream of findings we'd been treating as unrelated:
+- contrast measured against **bare cream** because a 0×0 rect meant no film ever rendered
+- captures silently taken from **another worktree's dev server** on a shared port
+- a composition gate judged against **8 recycled images** presented as 18
+- a nameplate gate that **no fixture could satisfy**
+- **and finally: the gate verification itself ran in a worktree shared by two sessions**, against HEAD plus uncommitted tracked-file edits — because the CEO dispatched a worker to edit the integration worktree directly. Fixed by committing that work to a branch and re-running on a **pristine detached worktree**.
+
+> The engineer's framing is the one to keep: **"I judge the numbers representative — but that is assessment, not isolation."**
+
+**Standing rules earned:** every capture on a private `KOL_E2E_PORT`, never 3000 (~60 worktrees here) · verification runs on pristine detached worktrees at a pinned SHA · never dispatch a worker to edit a worktree another session is verifying in.
+
 ### 🔤 THE SHARPEST DEFECT OF THE WAVE — silent, live, and specified
 `lib/theme/custom.ts:43` fell back to a **quoted passthrough** of any declared font family. `ferreirapress` declared `"Space Grotesk"`/`"Source Serif 4"`; `isoldeglass` declared `"Archivo"`. **None are in the catalog. None are loaded.** Both worlds rendered their type in the system stack — **two of two custom seed worlds** — with every test green.
 
