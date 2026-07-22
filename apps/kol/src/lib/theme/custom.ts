@@ -8,7 +8,7 @@
  * Vars the 7-role palette doesn't carry are DERIVED deterministically here
  * (documented fallbacks — the AI pipeline §5.4 may later emit richer sets,
  * and the AA gate, not this file, is the accessibility guarantee for custom):
- *   --accent-2/-3   → accent (single-accent brand until the pipeline derives more)
+ *   --accent-2      → accent (single-accent brand until the pipeline derives more)
  *   --on-media      → the palette's lightest text role (over a dark scrim)
  *   --block-a       → accent ground with accentInk type
  *   --block-b       → inverted band (ink ground, bg type)
@@ -27,7 +27,7 @@ import { densitySectionGap, nameplateRegisters, radiusIdentities } from "./token
  * names and pass through quoted. Unknown families (catalog grows with the
  * pipeline §5.5) pass through quoted too — worst case is the system stack.
  */
-const fontCatalog: Record<string, string> = {
+export const fontCatalog: Record<string, string> = {
   Fraunces: "var(--font-fraunces)",
   "Bricolage Grotesque": "var(--font-bricolage)",
   "Geist Mono": "var(--font-geist-mono)",
@@ -39,7 +39,7 @@ const fontCatalog: Record<string, string> = {
   "Cabinet Grotesk": '"Cabinet Grotesk"',
 };
 
-function resolveFamily(family: string, fallback: string): string {
+export function resolveFamily(family: string, fallback: string): string {
   const resolved = fontCatalog[family] ?? `"${family}"`;
   return `${resolved}, ${fallback}`;
 }
@@ -61,7 +61,6 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--line": roles.border,
     "--accent": roles.accent,
     "--accent-2": roles.accent,
-    "--accent-3": roles.accent,
     // accent/accentInk is a pipeline-derived pair — the deterministic WCAG-AA
     // gate (schema §2.2) guarantees it, so the CTA uses it untouched
     "--accent-cta": roles.accent,

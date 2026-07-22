@@ -55,9 +55,6 @@ export function curatedThemeVars(theme: CuratedTheme): ThemeVars {
     "--line": palette.line,
     "--accent": palette.accent,
     "--accent-2": palette.accent2,
-    // two-accent palettes leave --accent-3 unset in the doc; falling back to
-    // --accent keeps any accent-3 utility harmless instead of transparent.
-    "--accent-3": palette.accent3 ?? palette.accent,
     // the high-emphasis CTA pair (AA-measured, see accentCtaPair)
     "--accent-cta": cta.bg,
     "--accent-ink": cta.ink,
