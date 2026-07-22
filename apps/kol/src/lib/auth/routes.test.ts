@@ -32,6 +32,28 @@ describe("classifyRoute", () => {
     expect(classifyRoute("/sellers-market")).toBe("public");
     expect(classifyRoute("/accounting")).toBe("public");
   });
+
+  // W1-FF fix 4 — classification is case-insensitive: the middleware gate
+  // must class odd-cased paths correctly instead of falling through to
+  // "public" (previously mitigated only by the page re-check + RLS).
+  it.each([
+    ["/Sign-In", "auth-entry"],
+    ["/SIGN-IN/anything", "auth-entry"],
+    ["/Feed", "buyer"],
+    ["/FEED/Saved", "buyer"],
+    ["/Seller", "seller"],
+    ["/SELLER/Orders", "seller"],
+    ["/Account", "account"],
+    ["/ACCOUNT/Settings", "account"],
+  ] as const)("%s → %s (case-insensitive)", (path, expected) => {
+    expect(classifyRoute(path)).toBe(expected);
+  });
+
+  it("keeps mixed-case look-alikes public", () => {
+    expect(classifyRoute("/FeedBack")).toBe("public");
+    expect(classifyRoute("/Accounting")).toBe("public");
+    expect(classifyRoute("/Sellers-Market")).toBe("public");
+  });
 });
 
 describe("landingPathFor", () => {
@@ -115,5 +137,20 @@ describe("safeNextPath (open-redirect guard, parse-based)", () => {
 
   it("drops over-long paths (3000 chars)", () => {
     expect(safeNextPath(`/${"a".repeat(3000)}`)).toBeNull();
+  });
+
+  // W1-FF fix 3 — explicit next-param length bound (additive: tighter than
+  // the old 2048 parse cap; rejected values fall back to the role landing).
+  it("accepts a path at the 512-char bound and drops one char over", () => {
+    expect(safeNextPath(`/${"a".repeat(511)}`)).toBe(`/${"a".repeat(511)}`);
+    expect(safeNextPath(`/${"a".repeat(512)}`)).toBeNull();
+  });
+
+  it("bounds the NORMALIZED output too — encoding can lengthen the input", () => {
+    // Short unicode paths stay fine (the rejection below is length-driven,
+    // not charset-driven)…
+    expect(safeNextPath("/é")).toBe("/%C3%A9");
+    // …but 201 raw chars percent-encode to 1201 — over the bound, dropped.
+    expect(safeNextPath(`/${"é".repeat(200)}`)).toBeNull();
   });
 });

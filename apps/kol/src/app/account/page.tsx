@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ProfileForm } from "@/components/account/ProfileForm";
+import { ProfileLoadError } from "@/components/account/ProfileLoadError";
 import { AccountBar } from "@/components/auth/AccountBar";
 import { ACCOUNT_PATH, SIGN_IN_PATH } from "@/lib/auth/routes";
 import { createClient } from "@/lib/supabase/server";
@@ -36,6 +37,24 @@ export default async function AccountPage() {
       code: error.code,
       message: error.message,
     });
+    // Read failed ≠ new profile (W1-FF fix 1). Falling through here would
+    // render the form pre-filled with blanks, and one submit would overwrite
+    // a real stored profile with empty values. Render the recoverable error
+    // state instead — no editable form, no AccountBar built on data we don't
+    // have (a defaulted role would flash the wrong identity).
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-page flex-col gap-[var(--space-4)] px-[var(--space-2)] py-[var(--space-6)] md:px-[var(--space-6)]">
+        <p className="font-text text-caption uppercase tracking-[0.08em] text-muted">
+          KOL · your account
+        </p>
+        <h1 className="max-w-[16ch] font-display text-display [text-wrap:balance]">
+          Your profile
+        </h1>
+        <div className="max-w-prose">
+          <ProfileLoadError />
+        </div>
+      </main>
+    );
   }
 
   return (

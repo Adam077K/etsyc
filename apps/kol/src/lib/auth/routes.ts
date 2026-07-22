@@ -31,12 +31,18 @@ function inPrefix(pathname: string, prefix: string): boolean {
  * route can never accidentally require auth.
  */
 export function classifyRoute(pathname: string): RouteClass {
-  if (inPrefix(pathname, SIGN_IN_PATH)) return "auth-entry";
-  if (inPrefix(pathname, SELLER_LANDING)) return "seller";
-  if (inPrefix(pathname, BUYER_LANDING)) return "buyer";
+  // Case-insensitive (W1-FF fix 4): /Account must class as account, /SELLER
+  // as seller. Lowercasing the INPUT only ever widens the protected classes
+  // — an odd Unicode lowercasing fails closed (an extra auth gate on a
+  // public path), it can never reclassify a canonical protected path as
+  // public, so no new bypass is possible.
+  const path = pathname.toLowerCase();
+  if (inPrefix(path, SIGN_IN_PATH)) return "auth-entry";
+  if (inPrefix(path, SELLER_LANDING)) return "seller";
+  if (inPrefix(path, BUYER_LANDING)) return "buyer";
   // Profile/settings (spec P2): requires a session but is role-neutral —
   // buyers AND sellers both own a profiles row.
-  if (inPrefix(pathname, ACCOUNT_PATH)) return "account";
+  if (inPrefix(path, ACCOUNT_PATH)) return "account";
   return "public";
 }
 

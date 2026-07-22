@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { SignInForm } from "@/components/auth/SignInForm";
-import { safeNextPath } from "@/lib/auth/routes";
+import { SIGN_IN_PATH, safeNextPath } from "@/lib/auth/routes";
 
 /**
  * Logged-out entry (spec P1 empty state — curated chrome, KOL's own UI).
@@ -25,6 +26,12 @@ export default async function SignInPage({
   const next =
     safeNextPath(typeof params.next === "string" ? params.next : null) ??
     undefined;
+  // A rejected ?next= must not linger in the address bar for the whole OTP
+  // flow (W1-FF fix 6): strip it server-side before anything renders — the
+  // only ?next= that survives in the URL is one that will be honored.
+  if (next === undefined && params.next !== undefined) {
+    redirect(SIGN_IN_PATH);
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-page flex-col justify-center px-[var(--space-2)] md:px-[var(--space-6)]">

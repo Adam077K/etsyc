@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { BUYER_LANDING, landingPathFor, safeNextPath } from "./routes";
+import { SIGN_IN_PATH, landingPathFor, safeNextPath } from "./routes";
 import { requestOtpSchema, verifyOtpSchema } from "./schemas";
 
 /**
@@ -131,6 +131,11 @@ export async function verifyOtp(
       code: profileError.code,
       message: profileError.message,
     });
+    // W1-FF fix 6: never guess "buyer" off a FAILED read — a seller would
+    // land on (and see) the buyer feed. Bounce through auth-entry instead:
+    // the middleware re-reads the role at its own choke point and issues
+    // the role-correct landing server-side, so no wrong surface renders.
+    redirect(safeNextPath(next) ?? SIGN_IN_PATH);
   }
 
   redirect(safeNextPath(next) ?? landingPathFor(profile?.role ?? "buyer"));

@@ -35,7 +35,6 @@ export const bioSchema = z
 export const avatarUrlSchema = z
   .string()
   .trim()
-  .max(2048, { error: "That avatar URL is too long." })
   .transform((v, ctx) => {
     if (v === "") return null;
     let url: URL;
@@ -49,7 +48,15 @@ export const avatarUrlSchema = z
       ctx.addIssue({ code: "custom", message: "Avatar URLs must be https." });
       return z.NEVER;
     }
-    return url.toString();
+    // Length-check the NORMALIZED form (W1-FF fix 2): parsing can lengthen
+    // the string (percent-encoding, punycode), so the 2048 bound must apply
+    // to what is actually persisted, not the pre-parse input.
+    const normalized = url.toString();
+    if (normalized.length > 2048) {
+      ctx.addIssue({ code: "custom", message: "That avatar URL is too long." });
+      return z.NEVER;
+    }
+    return normalized;
   });
 
 export const updateProfileSchema = z.object({
