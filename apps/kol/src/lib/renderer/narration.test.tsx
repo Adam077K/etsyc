@@ -185,4 +185,43 @@ describe("NARRATE_SHRINK — the fallback chain in the dock", () => {
       productId: null,
     });
   });
+
+  it("B4 → B5 seam: tapping a product narrates THAT product — the click state feeds the hook", async () => {
+    // The integration defect this pins: B4 recorded the tapped product as
+    // internal state + data-selected-product; B5's hook read only the
+    // narrationProductId PROP, which nothing on the in-world journey
+    // passes. Both units were green in isolation (every test in this file
+    // feeds the prop; B4's suite mocks the browse action, not narration)
+    // while NARRATE_SHRINK silently narrated the store-wide fallback
+    // instead of the product the buyer tapped. This test walks the REAL
+    // path — no prop, a genuine product click — and fails if the hook and
+    // the interaction state ever come unwired again.
+    selectNarration.mockResolvedValue({ clip: NARRATION_CLIP });
+    const utils = render(
+      <FilmLayerProvider>
+        <StoreWorld config={senaStore} initialStage="world-browse" />
+      </FilmLayerProvider>,
+    );
+    const frame = frameOf(utils.container);
+    reportCanPlay(frame);
+    await waitFor(() => expect(frontVideo(frame)).not.toBeNull());
+
+    // the buyer taps a product IN the world — B4's doorway toward B5
+    fireEvent.click(utils.getByRole("button", { name: /Ridge Tumbler/i }));
+
+    // B4's half of the handoff: stage + the recorded product
+    const root = utils.container.querySelector("[data-world-stage]")!;
+    expect(root.getAttribute("data-world-stage")).toBe("narrate-shrink");
+    expect(root.getAttribute("data-selected-product")).toBe("p_ridge_tumbler");
+
+    // B5's half: the engine is asked for THE TAPPED PRODUCT, never the
+    // store-wide null rung
+    await waitFor(() => {
+      expect(selectNarration).toHaveBeenCalledWith({
+        storeId: senaStore.storeId,
+        productId: "p_ridge_tumbler",
+      });
+    });
+    await waitFor(() => expect(narrationStatus(utils.container)).toBe("narrating"));
+  });
 });
