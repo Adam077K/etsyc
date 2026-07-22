@@ -347,3 +347,20 @@ accommodate a known wart as a suspect, not as neutral.
 **Status:** Adopted and implemented on `integ/wave3-dryrun` (`ringCookieOptions()` exported once, four
 writers import, three mutations verified red). Seventh instance — the `kol_sid` mint in
 `lib/supabase/middleware.ts` — sanctioned for the same treatment via `lib/feed/session.ts`.
+
+---
+
+## 2026-07-22 — Commit before you mutate; and a fix that widens a range re-opens bounds the old code was accidentally immune to
+
+**Context:** Mutation verification became the standard this wave — break the guard, watch the test go red, restore, report. It was used ~15 times and caught real defects every time (a fake test certifying a broken gate, five surviving mutants in one controller, an unwired seam that left 62 tests green). Two operational lessons came out of running it that often.
+
+**1. Mutate only committed code.** An engineer reverted a mutation with `git checkout <file>` while feature work in the same file was still uncommitted — and lost the feature work with the mutation. It failed loudly at test collection and was re-done, but silence was equally possible. **Commit the work first, then mutate, then `git checkout` freely.** The technique's whole value is that the revert is trivial; that only holds if the revert can't take anything else with it.
+
+**2. A correctness fix that widens an input range re-opens bounds the old code was accidentally immune to.** Fixing per-product currency to carry ISO-4217 exponents added three-decimal currencies — and a 7-digit three-decimal amount (9,999,999.999 KWD = 9,999,999,999 minor units) overflows `int4`. That hole did not exist before **only** because every price was hardwired to two decimal places. The old constraint was load-bearing without anyone declaring it.
+
+**Decision:** When a change widens a domain (more currencies, more locales, more content lengths, more viewports), explicitly re-derive the bounds that the narrower domain was silently satisfying. Ask what the old restriction was accidentally protecting. Related: when deleting a now-unsafe helper, **delete it rather than deprecate it** — the currency fix removed the 2dp-only `priceMajorSchema` export outright, on the reasoning that leaving it importable invites exactly the misuse being fixed. A deprecated export is a re-declared constant with a comment on it.
+
+**Reversibility:** reversible
+**Owner:** ceo
+**Affects:** all workers — mutation testing procedure; any change that widens an input domain
+**Status:** Adopted.
