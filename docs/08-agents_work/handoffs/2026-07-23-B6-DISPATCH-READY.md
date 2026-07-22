@@ -47,8 +47,8 @@
 ## AFTER B6
 **B7a Stripe server + webhook — IRREVERSIBLE**: Full pipeline + 2-of-3 multi-judge + **Founder sign-off**. TEST MODE only; an `sk_live_` prefix must hard-fail at startup. Then B7b checkout surface, B8 thank-you (maker-authored, never AI-fabricated), Gate 3, then **Wave 4 seller pipeline → MVP functionally complete.**
 
-## WAVE-CLOSE CONDITIONS (T1 is merged but not "COMPLETE")
-1. Re-run `film-handoff.spec.ts` against post-merge `main`. **Related and unwritten:** it asserts the frame *survives* navigation but **not that the film keeps playing** — approved for strengthening. *"The film never stops"* is the premise; a test proving the element survived hasn't tested the claim.
+## WAVE-CLOSE CONDITIONS (T1 is merged; one of two now closed)
+1. ✅ **CLOSED — `film-handoff.spec.ts` re-run against post-merge `main` @ `93faeb4`: 1 passed (20.6s)**, private port, CEO-executed. The `/feed` → `/w/[handle]` transition is confirmed working on the merged tree. **Related and unwritten:** it asserts the frame *survives* navigation but **not that the film keeps playing** — approved for strengthening. *"The film never stops"* is the premise; a test proving the element survived hasn't tested the claim.
 2. **The curated modulated absent-statement nameplate has never been viewed at world scale.** Needs a `/preview` fixture with the statement off on hollowgrain or sena.
 
 ## FOUNDER ITEMS — none of these can be worked around
