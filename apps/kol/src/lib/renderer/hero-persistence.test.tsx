@@ -56,6 +56,31 @@ async function primeFilm(container: HTMLElement): Promise<HTMLElement> {
 }
 
 describe("hero persistence — the P4 invariant, relocated to the Film Layer", () => {
+  it("cold mount lands the layer ON the slot's rect — the mount-commit claim races the frame ref and must still position (gate-2 0x0 layer)", () => {
+    // The provider's frame <div> is a later sibling of {children}, so the
+    // slot's mount layout effect claims BEFORE the frame ref attaches. The
+    // un-landed claim left the layer at its 0-size CSS default: an
+    // invisible film on every cold world-open — /preview hero reviews were
+    // conducted over bare --surface because of this. The provider must
+    // land the active slot in the same pre-paint flush.
+    const rect = {
+      left: 213, top: 69, width: 852, height: 479,
+      right: 1065, bottom: 548, x: 213, y: 69,
+      toJSON: () => ({}),
+    } as DOMRect;
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue(rect);
+    const { container } = renderWorld(
+      <StoreWorld config={senaStore} isPreview initialStage="world-open" />,
+    );
+    const frame = container.querySelector<HTMLElement>("[data-film-layer]")!;
+    // in-flow slot: document coords, real size — not fixed/0x0/origin
+    expect(frame.style.position).toBe("absolute");
+    expect(frame.style.left).toBe("213px");
+    expect(frame.style.top).toBe("69px");
+    expect(frame.style.width).toBe("852px");
+    expect(frame.style.height).toBe("479px");
+  });
+
   it("keeps ONE film frame mounted and playing across FEED→GROWN→WORLD_OPEN→WORLD_BROWSE→NARRATE_SHRINK", async () => {
     const playSpy = vi.spyOn(window.HTMLMediaElement.prototype, "play");
     const pauseSpy = vi.spyOn(window.HTMLMediaElement.prototype, "pause");

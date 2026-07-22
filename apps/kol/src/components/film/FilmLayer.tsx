@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -423,6 +424,24 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
     },
     [positionToSlot, writeSlotRecord],
   );
+
+  // First-claim landing (gate-2: the 0x0 layer). The frame <div> is a LATER
+  // sibling of {children}, and React runs the layout phase in tree order —
+  // so a claim arriving during the very commit that mounts this provider
+  // (FilmSlotFrame's mount layout effect → registerFilm → setActiveSlot)
+  // finds frameRef still null: positionToSlot returned without writing any
+  // geometry and the layer sat at its CSS default (position:fixed, 0-size,
+  // origin) — an INVISIBLE film. Every cold world-open mount hit this;
+  // every /preview hero review happened over bare --surface because of it.
+  // Land the active slot as a snap the moment the frame exists: never
+  // mid-flight, and only if the frame has never been positioned (every
+  // applySlotLayout writes an inline width, so "" means never).
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || activeSlotId === null || flightRef.current) return;
+    if (frame.style.width !== "") return;
+    positionToSlot(activeSlotId, null);
+  }, [activeSlotId, positionToSlot]);
 
   const releaseSlot = useCallback((slotId: string) => {
     slots.current.delete(slotId);
