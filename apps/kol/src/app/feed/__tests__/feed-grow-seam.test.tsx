@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilmLayerProvider } from "@/components/film/FilmLayer";
+import { FEED_CARD_ATTRIBUTE } from "@/components/grow/part-feed";
 import type { FeedCard, FeedResult } from "@/lib/feed/select";
 
 import { FeedGrowExperience, growSourceFromCard } from "../FeedGrowExperience";
@@ -86,6 +87,13 @@ describe("feed → grow seam — the tapped card reaches B2's machinery", () => 
     const column = container.querySelector("[data-grow-column]");
     expect(column).not.toBeNull();
     expect(column?.getAttribute("aria-label")).toBe("Marta Ferreira — grown");
+
+    // the parting contract: B2 parts `[data-feed-card]` elements
+    // (FEED_CARD_ATTRIBUTE, part-feed.ts) and B1b's card RE-TYPES that
+    // literal at its render site — this join is what a rename silently
+    // severs (the parting no-ops; B2's own suite plants its own attribute
+    // and stays green). Assert the REAL cards carry B2's selector.
+    expect(container.querySelectorAll(`[${FEED_CARD_ATTRIBUTE}]`)).toHaveLength(4);
   });
 
   it("growSourceFromCard maps field-for-field per B2's seam contract — no renames, focalPoint rides", () => {
