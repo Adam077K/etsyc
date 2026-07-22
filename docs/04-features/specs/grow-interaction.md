@@ -80,8 +80,15 @@ On tap, the tapped feed clip becomes the center-column `hero-video` (`center-col
 - Given the tapped clip is grown, when the buyer scrolls, then the surrounding feed continues to scroll around the centered, still-playing video.
 - Given the grown state, when the engine resolves the `GROWN` preset, then it returns the grown clip (usually the same feed `intro` clip promoted) plus the tapped store's peers (`page_eligibility @> {grown}` ∧ `purpose && {intro, craft-story}`, store scope = tapped clip's `store_id`).
 
-**Shared-element continuity (load-bearing)**
-- Given a feed clip is playing, when it transitions to `GROWN`, then the `hero-video` element MUST NOT pause, unmount, or reload — playback is continuous across the transition (shared-element continuity; cite P4 `layoutId="hero-video"` persistence — the same invariant carried into B3). An automated test MUST assert the video element identity persists and `paused` never flips true across the transition.
+**Film-frame continuity (load-bearing — amended 2026-07-21, CPO Ruling 1)**
+
+The promise this protects is that **the maker's face never cuts away**. It is stated in terms of the *film frame*, not a single DOM node, because the spec independently requires clip swaps (B4 scoring swaps, B5 narration) and a single `<video>` cannot change `src` without pausing. The frame is the shared element; inside it, one or two video buffers may take turns.
+
+- **Same-source transitions — true element persistence.** Given a clip is playing, when a transition occurs that does NOT change the clip source (`grow`, `ungrow`, `unfold`, `dock`, `undock`), then the SAME video element carries playback across it — it MUST NOT unmount, pause, re-source, or re-buffer. An automated test MUST assert element identity persists and `paused` never flips true across each of these transitions. **A cross-fade is not permitted here** — these transitions move the film, they do not change it.
+- **Source-changing swaps — in-frame cross-fade.** Given an event that DOES change the clip source, when the swap runs, then it is an in-frame cross-fade at `--dur-swap` between two stacked video elements inside a Film Layer whose container node identity persists for the session. The incoming element MUST have reached `readyState >= 3` (`HAVE_FUTURE_DATA`) **and already be playing** before the cross-fade begins. At no sampled frame during or after the swap is the visible video element paused, and at no sampled frame is the frame blank or black.
+- **Frame identity across the journey.** Given any path from `FEED` through `NARRATE_SHRINK`, when transitions and swaps occur, then the Film Layer container node identity persists unbroken (same node reference at journey entry and exit) and moving footage of the maker is continuously visible — no cut to background, no empty frame, no spinner in the frame.
+
+*Implementation note (not binding): the approved mechanism is two stacked `<video>` elements (A/B) inside one persistent Film Layer, per `KOL-wave3-design-direction.md` §6.2. `--dur-swap: 120 ms` is provisional — it must be reviewed eyes-on against a real clip pair before B4 merges (see Open Question 2).*
 
 **Image path**
 - Given a feed image card, when the buyer taps it, then it grows into a "meet the person" view (not a video-narration state).
@@ -225,6 +232,7 @@ Risk tier: **Lite** (frontend transition + one engine read; no API/DB/auth write
 | # | Question | Owner | Due |
 |---|---|---|---|
 | 1 | Confirm the exact "meet the person" image-grow treatment with Design-Lead (distinct from video grow). | CPO + Design-Lead | pre-build |
+| 2 | `--dur-swap: 120 ms` is provisional. The cross-fade must be reviewed eyes-on on a real clip pair (frame-by-frame capture) before B4 merges — a swap that reads as a cut fails the promise even with the AC green. | Design-Lead + QA-Lead | before B4 merge |
 
 ---
 
@@ -233,7 +241,8 @@ Risk tier: **Lite** (frontend transition + one engine read; no API/DB/auth write
 | Date | Change | Author |
 |---|---|---|
 | 2026-07-20 | Initial draft | CPO (Phase-5 spec worker) |
+| 2026-07-21 | **AC amended (Ruling 1).** "Shared-element continuity" replaced by "Film-frame continuity" — the old AC (`paused` never flips true on a single `<video>`) was unsatisfiable alongside the spec's own clip-swap requirements. Split into same-source transitions (true element persistence, cross-fade forbidden) and source-changing swaps (in-frame cross-fade, incoming buffer playing before the fade). Added OQ-2 on `--dur-swap` eyes-on verification. | CPO |
 
 ---
 
-_Last updated: 2026-07-20 | Updated by: CPO (Phase-5 spec worker W2)_
+_Last updated: 2026-07-21 | Updated by: CPO (Wave-3 AC rulings)_

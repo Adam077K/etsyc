@@ -10,21 +10,25 @@
 ---
 
 ## 1 · `hero-video`
-**Purpose.** The persistent maker film the whole world unfolds around and returns to. Exactly one per world. It is the shared element (`layoutId="hero-video"`) that survives every state transition — it never unmounts, never pauses on transition.
+**Purpose.** The persistent maker film the whole world unfolds around and returns to. Exactly one per world. It is the **shared film frame** that survives every state transition.
+
+*Amended 2026-07-21 (CPO Ruling 1).* The shared element is the **frame**, not necessarily one `<video>` node. Across transitions that do not change the clip (`grow`/`ungrow`/`unfold`/`dock`/`undock`) the same video element carries playback and must never unmount, pause, re-source, or cross-fade. Where the clip source genuinely changes (B4 scoring swaps, B5 narration), the change is an in-frame cross-fade at `--dur-swap` between two stacked buffers inside a Film Layer whose container node persists for the session — the incoming buffer already playing before the fade starts. The full contract lives in [`specs/grow-interaction.md`](./specs/grow-interaction.md) "Film-frame continuity".
 
 **Variants** (the same block, different `pageEligibility` state — the renderer picks by buyer state, the maker picks the resting one):
 - `full-bleed` — edge-to-edge, `--radius 0`, feed/grown drama.
 - `center-column` — framed center with world margins breathing around it (default resting).
 - `corner-shrunk` — docked `320×180`, `--radius-md`, `--shadow-raised` (the `NARRATE_SHRINK` dock).
 
-**Props / bindings.** `props: { showCraftLine: bool }` · `bindings.clipTags` (hint set; the video engine P6 owns final selection by `videoProfile`). Controls minimal: mute toggle + captions only; **sound off until opt-in** (the hard tone line — no autoplay audio).
+**Props / bindings.** `props: { showCraftLine: bool, statement?: string }` · `bindings.clipTags` (hint set; the video engine P6 owns final selection by `videoProfile`). Controls minimal: mute toggle + captions only; **sound off until opt-in** (the hard tone line — no autoplay audio).
+
+`statement` (added 2026-07-21, store-config v1.3 amendment) is the maker's one big line over her film — `--fs-display-hero`, weight 400–500, `--scrim` mandatory, `--on-media` ink, ≤ 48 chars, at most one per world. `showCraftLine` is a different tier: it renders `maker.craft` at **caption** size, and the two may co-exist. **`statement` is maker-authored and has no render-time fallback** — absent means the world has no hero line, never a generated one, never the craft line promoted, never the store name (D10).
 
 | State | Design behavior |
 |-------|-----------------|
 | Empty | Maker hasn't uploaded film → poster still with a muted "Add your first clip" prompt (seller preview only; a live world can't reach this — publish requires ≥1 clip). |
 | Loading | Poster frame shown immediately; subtle skeleton shimmer over a spinner-free progress edge; audio never loads until played. |
 | Error | Clip 404/decode fail → fallback to `poster`, a quiet inline "Couldn't load this clip" + retry; the world stays usable around the still. |
-| Success | Video plays muted, controls fade after 2s idle, captions available; craft-line (`maker.craft`) sets in caption type if `showCraftLine`. |
+| Success | Video plays muted, controls fade after 2s idle, captions available; craft-line (`maker.craft`) sets in caption type if `showCraftLine`; `statement`, when present, sets at display-hero over `--scrim`. |
 
 ---
 
@@ -204,7 +208,7 @@
 - **The film always wins.** No block's chrome, motion, or color may pull focus from the maker's video.
 - **Block-grounds are the brave-color move (P2-a).** Four blocks expose an optional `blockGround: "a" | "b" | "c"` prop that renders the section full-bleed in a palette's `--block-{a|b|c}` ground with `--on-block-*` ink (design-system §2): `voice-quote` + `atmosphere` (`block-ground` variant) accept **all three** grounds (display/large type or no type); `craft-story` + `contact-cta` carry body/UI copy so they accept **only dark grounds that clear AA body 4.5:1** — the two midtone grounds (`sunbaked`/`cuberto-noir` `--block-c`) are display-only and rejected there. Grounds wash in first on reveal (§4.2), `--space-12`→`--space-16` padding (§1.2). This is how the renderer builds the Faire "section-on-a-color-block" identity from config alone.
 
-*P3-c — impact-stat primitive (optional, deferred):* a small maker-authored stat pair (e.g. "12 years · one wheel", set in mono/tabular figures per design-system §3) could live as a `craft-story` sub-slot or a future dedicated primitive; not one of the 11 in v1, noted here so P4 doesn't reinvent it ad hoc.
+*P3-c — impact-stat primitive (optional, deferred):* a small maker-authored stat pair (e.g. "12 years · one wheel", set in mono/tabular figures per design-system §3) could live as a `craft-story` sub-slot or a future dedicated primitive; not one of the 11 in v1, noted here so P4 doesn't reinvent it ad hoc. **CPO position 2026-07-21:** agreed — Wave 6, as a `craft-story` sub-slot, **not** a twelfth block. The catalog stays at 11. Every block added is a block the AI drafter must learn to compose and the critic must learn to judge; a stat pair is a slot, not a structure. It must remain maker-*declared* (D16-2) — the platform never computes or infers a stat on a maker's behalf.
 
 ---
 

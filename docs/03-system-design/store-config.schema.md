@@ -5,7 +5,7 @@
 >
 > **Validation.** Zod schema on every read/write (P3). Stored as `stores.config jsonb` in Supabase. Store versions snapshot the whole object (`store_versions`), carrying `criticScore` (P9) and per-section approval status (P10).
 >
-> **Changelog.** `v1.3` — added an **optional** `message?: string` to the `thank-you` block's `props` (§2.6): the maker's own written thank-you words, shown in the `text+media` / no-clip variant. Closes a D10 honesty gap the scaffold QA caught — without this field the block had to fabricate a maker quote; per D10 (voice = the maker's own words) the message is maker-authored only, never AI-generated, and omitted → neutral platform fallback (no fabricated quote). `v1.2` — reconciled the `kind:"curated"` enums to design-system **v2** (the founder-confirmed authoritative direction): `paletteId` → `sunbaked | market-plum | cuberto-noir | orchard | bazaar` (was the rejected v1 `atelier-chalk | studio-paper | nocturne | …`); `fontPairingId` → `statement-grotesk | warm-serif | modern-mono-grotesk | character-maximal` (was `editorial-warm | gallery-grotesque | …`); `motionPreset` → `hushed | fluid | liquid | dimensional` (4-value, was the 3-value `still | calm | lively`; adds the `liquid`/`dimensional` cinematic-signature presets required by design-system §4.5); §3 worked example re-themed to valid v2 ids. `v1.1` — `theme` becomes a discriminated union on `kind` (`curated | custom`) for D15 seller-shop brand freedom; the curated-enum invariant scopes to `kind:"curated"` only, with the WCAG-AA gate + auto-critic as the guarantee for `kind:"custom"`; §2.3 `videoProfile` source-of-truth note (ADR-0001 OQ-2). `v1.0` — initial Phase 3 contract.
+> **Changelog.** `v1.3 — amendment 2026-07-21 (CPO Ruling 3, Wave 3)`: two **additive optional** fields. (a) `media.clips[].focalPoint {x,y}` (§2.3) — the maker's face, for cross-aspect cropping; optional with a 0.5/0.5 renderer default, deliberately unlike the required `images[].focalPoint`. (b) `hero-video.props.statement?: string` (§2.6, ≤ 48 chars) — the maker's one display-scale line over her film; maker-authored, **no render-time fallback** (D10). **`schemaVersion` stays `"1.3"` — no bump.** It is a `z.literal("1.3")` in the validator, so bumping it would invalidate every stored config; two optional fields do not warrant a migration. Both are non-breaking: every already-validated config omits them and remains valid under the amended schema. `v1.3` — added an **optional** `message?: string` to the `thank-you` block's `props` (§2.6): the maker's own written thank-you words, shown in the `text+media` / no-clip variant. Closes a D10 honesty gap the scaffold QA caught — without this field the block had to fabricate a maker quote; per D10 (voice = the maker's own words) the message is maker-authored only, never AI-generated, and omitted → neutral platform fallback (no fabricated quote). `v1.2` — reconciled the `kind:"curated"` enums to design-system **v2** (the founder-confirmed authoritative direction): `paletteId` → `sunbaked | market-plum | cuberto-noir | orchard | bazaar` (was the rejected v1 `atelier-chalk | studio-paper | nocturne | …`); `fontPairingId` → `statement-grotesk | warm-serif | modern-mono-grotesk | character-maximal` (was `editorial-warm | gallery-grotesque | …`); `motionPreset` → `hushed | fluid | liquid | dimensional` (4-value, was the 3-value `still | calm | lively`; adds the `liquid`/`dimensional` cinematic-signature presets required by design-system §4.5); §3 worked example re-themed to valid v2 ids. `v1.1` — `theme` becomes a discriminated union on `kind` (`curated | custom`) for D15 seller-shop brand freedom; the curated-enum invariant scopes to `kind:"curated"` only, with the WCAG-AA gate + auto-critic as the guarantee for `kind:"custom"`; §2.3 `videoProfile` source-of-truth note (ADR-0001 OQ-2). `v1.0` — initial Phase 3 contract.
 
 ---
 
@@ -111,6 +111,14 @@ The renderer (P4) reads either shape: `curated` → look up tokens by id (existi
     "poster":    "url",              // still frame (feed + loading states)
     "durationMs": 0,
     "captionsSrc": "url|null",       // WebVTT — accessibility
+    "focalPoint": { "x": 0.5, "y": 0.5 },  // OPTIONAL, 0–1, default centre. The maker's FACE.
+                                     // The same clip is composed at four aspect ratios across the
+                                     // journey (4:5 feed card · 16:9 centre column · full-bleed world
+                                     // hero · 320 px dock). Without it a centre crop decapitates the
+                                     // maker in the 4:5 card. NOTE the deliberate asymmetry with
+                                     // images[].focalPoint, which is REQUIRED: clips[].focalPoint is
+                                     // optional so that every already-validated v1.3 config stays
+                                     // valid. Do not "fix" it to required.
     "videoProfile": {                // ← the ONLY thing the video engine (P6) selects on
       "purpose":        ["intro" | "craft-story" | "process" | "product-narration" | "thankyou" | "atmosphere"],
       "pageEligibility":["feed" | "grown" | "world" | "product" | "checkout" | "thankyou"],
@@ -180,6 +188,23 @@ Independent of `products[].description` and of clip narration — the three voic
 `props` shape is defined per block type in the block catalog; the Zod schema is a discriminated union on `type`. `bindings` are validated for referential integrity at write time.
 
 **Typed props called out at the contract level** (the catalog holds the full per-type shape; these are pinned here because validation / honesty rules depend on them):
+```jsonc
+// type:"hero-video" props
+"props": {
+  "showCraftLine": true,             // renders maker.craft at CAPTION size
+  "statement": "string | undefined"  // OPTIONAL — the maker's one big line over her film, set at
+                                     // --fs-display-hero (weight 400–500, --scrim mandatory,
+                                     // --on-media ink). Max 48 chars; min 1 (omit rather than "").
+                                     // At most one per world. MAKER-AUTHORED. If absent, the world
+                                     // has NO hero line — the renderer must NOT generate one, promote
+                                     // the craft line, or substitute the store name. A fabricated
+                                     // statement in the maker's voice is a D10 violation.
+                                     // At AUTHORING time, AI suggestion with explicit maker approval
+                                     // is permitted (D10 "store text — AI-assist OK") and must be
+                                     // recorded in maker.trust.aiTransparency.aiAssistedFields.
+                                     // At RENDER time there is no fallback, ever.
+}
+```
 ```jsonc
 // type:"thank-you" props
 "props": {

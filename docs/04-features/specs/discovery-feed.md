@@ -76,11 +76,23 @@ A magazine feed composed of `hero-video` cards (feed variant), sized and arrange
 ## Acceptance Criteria
 
 **Happy Path**
-- Given published stores with `feed`-eligible clips, when the buyer opens the feed, then the video engine `FEED` preset returns a cross-maker set (`page_eligibility @> {feed}` ∧ `purpose && {intro, craft-story, atmosphere}`, `distinct on (store_id)` newest, limit 12–24) and the feed renders one `hero-video` (feed / `full-bleed` variant) card per store.
+- Given published stores with `feed`-eligible clips, when the buyer opens the feed, then the video engine `FEED` preset returns a cross-maker set (`page_eligibility @> {feed}` ∧ `purpose && {intro, craft-story, atmosphere}`, `distinct on (store_id)` newest, **limit 18** — confirmed with Design-Lead 2026-07-21, closing OQ-2: 12 reads thin for a publication, 24 thins the anti-repetition pool across few stores; 18 = six three-slot spreads) and the feed renders one `hero-video` (feed / `full-bleed` variant) card per store.
 - Given a returning buyer, when they refresh or start a new session, then the feed reshuffles via the engine's seeded jitter (`hash(sessionId, video_id)`, no `Math.random`) — same order within a session, new order on a new session.
 
-**Layout identity (hard gate — forbids a uniform grid)**
-- Given the feed renders, when cards lay out, then the layout MUST be a mixed-size magazine composition (asymmetric, varied card sizes, media-forward) and MUST NOT be a uniform equal-cell product grid. An automated layout test MUST assert that rendered feed cards do not all share identical dimensions / a single repeating cell size (the anti-flattening invariant, NARRATIVE).
+**Layout identity (hard gate — forbids a uniform grid; strengthened 2026-07-21, CPO Ruling 2)**
+- Given the feed renders, when cards lay out, then the layout MUST be a mixed-size magazine composition (asymmetric, varied card sizes, media-forward) and MUST NOT be a uniform equal-cell product grid. An automated layout test MUST assert **both**: (a) rendered feed cards do not all share identical dimensions / a single repeating cell size, **and** (b) **no two vertically adjacent cards share a `getBoundingClientRect().top` within 24 px**. (b) is the assertion that actually catches a grid — (a) is passable by a grid with two cell sizes.
+- Given the feed renders at `< 768`, when it is single-column, then card **aspect ratios vary** (the anti-grid identity is carried by height, not width) and assertion (a) still holds.
+- **The anti-grid guarantee is carried by composition alone.** Video in cells does not satisfy it — TikTok Shop's row of five autoplaying clips is still unmistakably a grid. No implementation may cite "the cards have film in them" as a defence of an equal-cell layout.
+
+**Film presence — the Focus Film model (amended 2026-07-21, CPO Ruling 2)**
+
+The prior AC read "muted autoplaying film … renders across mixed-size cards" (plural), implying N simultaneous films. That is replaced. One shared Film Layer is what makes the film survive `FEED → GROWN` at all, and 18 concurrent decodes is the largest single threat to the 60 fps budget B1/B3/B4 all carry. What the buyer must feel is that **the feed is alive with people**, not that every tile is playing.
+
+- Given the feed renders with eligible clips, when it is interactive, then the card nearest viewport centre is the **focus card** and the shared Film Layer positions over its rect and plays its clip with real human footage, muted.
+- Given ≥ 2 cards intersect the viewport and their stores have eligible clips, when the feed is at rest at any scroll position, then **at least 2 cards are showing moving footage** — the focus card plus at least one neighbouring ambient loop (≤ 6 s, ≤ 480p, muted, no audio track, disposable elements — never the shared Film Layer). At N=1, or where neighbours have no eligible clip, this criterion is exempt. *A feed of one moving card among seventeen dead stills is a photo catalogue, which is the failure this criterion exists to prevent.*
+- Given non-focus, non-ambient cards, when they render, then they show the clip's **poster still** cropped to the slot aspect using `media.clips[].focalPoint` — never a product photograph in place of the maker's film.
+- Given the buyer scrolls, when the focus card changes, then the Film Layer FLIPs to the new rect with an in-frame cross-fade per the film-frame continuity contract, and **focus changes at most once per 400 ms** (debounced). A film that re-targets on every scroll tick is nausea, not life.
+- Given the buyer taps a **non-focus** card, when the tap is handled, then the card is first promoted to focus (Film Layer FLIPs to it, ≤ 200 ms) and `grow` runs immediately after, reading to the buyer as one continuous motion.
 
 **Structural exclusion (load-bearing test)**
 - Given a store with both a `feed` clip and a `thankyou` clip, when the `FEED` selection runs for any buyer or seed, then the feed contains the `feed` clip and NEVER the `thankyou` (or `checkout`) clip. This is structural: `FEED` is a positive `page_eligibility @> {feed}` predicate and a `thankyou` clip is tagged `['thankyou']` only, so no code path can add it. A structural test asserting this MUST exist (video-engine-spec §2.1).
@@ -96,7 +108,10 @@ A magazine feed composed of `hero-video` cards (feed variant), sized and arrange
 - Given the feed request fails, when the engine or network errors, then the last cached feed is served with a quiet inline retry; the feed is never left blank.
 
 **Success**
-- Given clips resolve, when the feed is interactive, then muted autoplaying film with real human faces renders across mixed-size cards; tapping a video card transitions to `GROWN` (B2).
+- Given clips resolve, when the feed is interactive, then the composition renders as a mixed-size magazine spread of real makers, the focus card plays muted film with a real human face, neighbouring cards read alive per the Focus Film criteria, and tapping any card transitions to `GROWN` (B2).
+
+**Small-N composition (closes design-direction OQ-4)**
+- Given the seed period returns N = 1, 2, 3, or 4 cards (`distinct on (store_id)`), when the feed renders, then the composition terminates on a complete spread and **never on an orphan half-spread** (N=1 → a single `WIDE`; N=2 → S1; N=3 → S1+S2; N=4 → S1+S3; ≥5 → S1→S2→S3 cycling, promoting a would-be orphan to `WIDE`). A test MUST cover N = 1–4. The masthead count is live and honest — at N=4 it reads "Four people who make things"; a fabricated count is a trust failure in a product whose premise is honesty.
 
 ---
 
@@ -233,7 +248,8 @@ Risk tier: **Full** (reads `buyer_signals` behind the RLS trust boundary via the
 | # | Question | Owner | Due |
 |---|---|---|---|
 | 1 | Scoring weights (feed `w_relation` vs `w_freshness`) are launch defaults, TBD post-launch on real data (OQ-V3). | ai-engineer | post-launch |
-| 2 | Confirm the exact 12–24 feed limit and per-viewport card count with Design-Lead. | CPO + Design-Lead | pre-build |
+| 2 | ~~Confirm the exact 12–24 feed limit and per-viewport card count with Design-Lead.~~ **CLOSED 2026-07-21 — limit 18**, composition per `KOL-wave3-screen-specs.md` §1.1. | CPO + Design-Lead | done |
+| 3 | The Focus Film model is approved on reasoning, not on eyes-on evidence (Design-Lead could not run `/preview`). Before B1 merges, a design-critic pass MUST confirm the feed reads **alive with people** rather than as a photo catalogue at N=4 and N=18. If it does not, the ambient-loop count is the dial to turn — not the Focus Film model. | Design-Lead + QA-Lead | before B1 merge |
 
 ---
 
@@ -242,7 +258,8 @@ Risk tier: **Full** (reads `buyer_signals` behind the RLS trust boundary via the
 | Date | Change | Author |
 |---|---|---|
 | 2026-07-20 | Initial draft | CPO (Phase-5 spec worker) |
+| 2026-07-21 | **AC amended (Ruling 2).** "Muted autoplaying film … across mixed-size cards" replaced by the Focus Film model (one shared Film Layer + ≥1 ambient neighbour + focalPoint-cropped poster stills). Layout-identity gate strengthened with the adjacent-`top` assertion and an explicit "video does not rescue a grid" clause. Small-N composition AC added (closes design-direction OQ-4). Engine limit fixed at 18 (closes OQ-2). New OQ-3: eyes-on design-critic confirmation before B1 merge. | CPO |
 
 ---
 
-_Last updated: 2026-07-20 | Updated by: CPO (Phase-5 spec worker W2)_
+_Last updated: 2026-07-21 | Updated by: CPO (Wave-3 AC rulings)_

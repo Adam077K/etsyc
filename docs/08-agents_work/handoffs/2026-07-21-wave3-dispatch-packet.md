@@ -4,7 +4,8 @@ date: 2026-07-21
 author: CTO (session `cto-wave3-packet`)
 status: READY TO DISPATCH — GATED ON WAVE-2 MERGE
 baseline: main @ 641ca6e (Waves 0 + 1 merged). Wave 2 is CODE-CERTIFIED but UNMERGED.
-units: 13 (W2-WIRE, SEED-W3, B1a, B1b, B2, B3, B4, B5, S8, B6, B7a, B7b, B8)
+units: 15 (FILM-LAYER, P3-EXT, W2-WIRE, SEED-W3, B1a, B1b, B2, B3, B4, B5, S8, B6, B7a, B7b, B8)
+amended: 2026-07-22 — AMENDMENT A (Film Layer) + AMENDMENT B (Design-Lead delivery). Read those FIRST.
 new_migrations_required: 0
 ---
 
@@ -12,6 +13,138 @@ new_migrations_required: 0
 
 Paste-ready worker briefs for the KOL MVP Wave 3 — the wave where the buyer product goes live.
 The CTO does not spawn workers and writes no source code; this packet is the entire engineering deliverable.
+
+---
+
+## AMENDMENT A — the Film Layer. **CTO ruling, 2026-07-22. Supersedes §2E and retiers B2/B3.**
+
+Design-Lead is correct and my original §2E was wrong. I ruled against the shipped code, not the docs.
+
+**What I got wrong.** §2E cited `HeroStage.tsx`'s doc comment — *"ready for the cross-route shared-element
+morph when the feed (B1) arrives"* — as evidence the machinery was ready. It is a forward-looking author's
+note, not a shipped capability, and I quoted it as if it were the latter.
+
+**The evidence, on the code:**
+
+1. `HeroStage` is rendered **inside** `StoreWorld`, which is scoped to exactly one `config`
+   (`data-store={config.storeId}`). It is a child of a single store's tree.
+2. Its persistence guarantee comes from `StoreWorld` holding an identical tree position while only
+   `data-world-stage` flips and CSS fades `.kol-world-body`. `stages.ts` says so in its own comment:
+   *"FEED/GROWN belong to the feed surface (B1) in the full app; the renderer carries them so the unfold
+   can be simulated and transition-tested end-to-end before the feed exists."* Wave 0 simulates feed and
+   grown **inside one world**, and labelled it as simulation.
+3. `hero-persistence.test.tsx` proves persistence only within a single mounted `<StoreWorld config={senaStore}>`.
+   Every assertion is a `container.querySelector` inside one store's tree. It never tests two stores. It cannot.
+4. The real FEED is cross-maker — `eligible.ts` runs `newestPerStore(pool)` with no `storeScope`, so the feed
+   is N sibling cards from N stores. Tapping card #7 must turn card #7's `<video>` into store #7's world hero.
+   Different component trees. **React cannot relocate a host node across parents without unmounting it.**
+   No primitive does this, and `layoutId` in framer-motion does not either — it cross-fades two nodes and
+   animates the rect, which fails the invariant rather than satisfying it.
+5. `view-transition-name` on `.kol-hero-stage` does not rescue this. The View Transitions API morphs
+   **snapshots**: it captures old and new as images. A `<video>` under a view transition shows a static
+   captured frame for the duration of the morph — which is precisely the frozen frame the invariant exists
+   to forbid.
+6. Design-Lead's second claim is also correct. `FilmFrame` renders `<video src={clip.src}>`. Changing `src`
+   on a live `<video>` runs the media load algorithm: `readyState` resets, playback stops, poster or black
+   flashes. **B4's original instruction in this packet — "change the `src`, never remount the `<video>`" —
+   is not physically satisfiable.** A/B stacked buffers cross-fading over `--dur-swap` is the correct
+   mechanism.
+
+**The ruling.** The Film Layer is real, it is required, and it is the largest piece of Wave-3 frontend work.
+It becomes **unit FILM-LAYER**, tier **Full**, group **T0a**, brief at the end of this packet. It gates
+B1b, B2, B3, B4, B5.
+
+**Retiering:**
+
+| Unit | Was | Now | Why |
+|---|---|---|---|
+| **FILM-LAYER** | — | **Full** (new) | rewrites a QA-passed P4 invariant; est. 400–600 LOC; load-bearing for the whole buyer journey |
+| **B2** grow | Lite, 180–260 | **Full**, 220–320 | owns the cross-tree FEED→GROWN edge — the one that broke the original architecture |
+| **B3** unfold | Lite, 200–280 | **Full**, 300–420 | Design-Lead §3.3 is a 900 ms three-band choreography, materially larger than my estimate |
+| **B4** browse | Lite, 180–260 | **Lite** (unchanged) | gets *simpler* — the clip swap becomes a FILM-LAYER API call instead of an impossible src mutation |
+| **B5** dock | Lite, 150–220 | **Lite** (unchanged) | gets *simpler* — the dock FLIP moves into FILM-LAYER; B5 publishes a rect and owns the exclusion zone + fallback chain |
+| **B1b** feed | Full | **Full** (unchanged) | under Focus Film only the focused card is a film; the rest are posters, which removes the N-concurrent-video problem |
+
+**The AC wording changes with it.** CPO's reframing — *"the film frame never unmounts and never shows a
+paused or black frame"* — is correct and stricter than the old phrasing in the right way: the old
+"the `<video>` element never unmounts" technically permitted a black flash on src change. **Retire the
+element-identity wording from B2 and B3.** A worker left with it will write a test asserting a single
+`<video>` node, which A/B buffers deliberately violate — the test would fail the correct implementation.
+
+**§2E is superseded** on the claim that B2–B5 "extend this machinery." They extend the **Film Layer**, which
+FILM-LAYER builds. Everything §2E says about **not adding framer-motion still stands** — the mechanism is
+still an imperative FLIP plus CSS, and an animation library would not have solved the cross-tree problem
+anyway. That prohibition is unchanged in every brief.
+
+---
+
+## AMENDMENT B — Design-Lead's Wave-3 delivery. **New unit P3-EXT.**
+
+`docs/06-design/` now holds the direction, per-screen specs (B1–B5), reference pass, and the AA fix.
+Two of its gaps are contract changes upstream of SEED-W3, so they get their own unit.
+
+**Unit P3-EXT** (`backend-engineer`, Fable 5, **Full**, T0a). Three items, all specified line-by-line by
+Design-Lead so the worker invents nothing:
+
+1. `ClipSchema.focalPoint {x, y}` — additive, defaulted `{0.5, 0.5}`, non-breaking. One clip is composed at
+   four aspect ratios across the journey; without a focal point a centre crop decapitates makers in the 4:5
+   feed card.
+2. `HeroVideoBlockSchema.props.statement?: string`, max ~48 chars, maker-authored, D10 applies. Today `props`
+   is `z.strictObject({ showCraftLine: boolean })` — `strictObject` **rejects** an unknown key, so there is
+   currently no way for a maker to author the one big line over their film.
+3. The AA ship-blocker. Design-Lead measured that the ticket named the wrong culprit: `sunbaked --muted`
+   passes at 5.23:1. What fails is `EmptyPrompt`'s hint line, where `bg-surface/60` and `text-muted/80`
+   compound to **3.63:1**, and the same un-audited alpha-modifier pattern fails in **8 of 10 palette-modes**.
+   `EmptyPrompt` is the empty state of every Wave-3 screen. Includes the repo-wide guard test forbidding an
+   opacity modifier on any ink token.
+
+The **Wave-3 motion tokens** (`--dur-grow`, `--dur-ungrow`, `--dur-dock`, `--dur-swap`, `--return-ratio`)
+are owned by **FILM-LAYER**, not P3-EXT — it is the layer that consumes them, and putting them there removes
+a serial edge. They must not be authored by B2–B5, which would be a four-way conflict on `globals.css`.
+
+`impact-stat` is recommended-not-blocking; deferred to Wave 6 as a `craft-story` sub-slot. Catalog stays at
+11 blocks. No SEED change, no catalog reseed.
+
+**Amend the five B1–B5 briefs before dispatch:** add `docs/06-design/KOL-wave3-screen-specs.md` and
+`KOL-wave3-design-direction.md` to "Read ONLY these", and **replace each brief's "Design-Lead seam"
+paragraph with a pointer to the relevant section.** Those paragraphs existed to prevent invention; the specs
+now exist, so workers follow the specs, not my defaults. Add Design-Lead's handover checklist (§6) as the
+completion bar, including its two hard prohibitions: no transition outside the edge table (§5.2), and no
+seller-themed element in B1 or B2 (Invariant I7).
+
+**Two open questions block dispatch and are not the CTO's to close:**
+- **OQ-1 (Founder/CPO)** — the Focus Film model amends B1's written AC from plural autoplaying cards to one
+  film at a time. **Blocks B1b.** Engineering read: adopt it. It is the only model that satisfies B2's edge
+  without contortion — you cannot promote one of eighteen concurrently-playing elements into the Film Layer
+  without first deciding which one is *the* film — and eighteen simultaneous videos is a performance problem
+  independent of the design argument.
+- **OQ-3 (Founder)** — the Lusion signature beat, open since 2026-07-20, blocking the `dimensional` preset.
+  Engineering read: accept Design-Lead's `depth-3d` fallback and unblock B3 now. Reversible, Lite-tier
+  visual decision.
+
+OQ-2 (seller accent in feed) defers to Wave 6. OQ-4 (`distinct on (store_id)` returns 4 cards at N=4 seed
+worlds, not 18) is folded into B1b via Design-Lead's N=1..4 spread patterns.
+
+---
+
+## AMENDED DISPATCH ORDER — supersedes §11
+
+```
+PRE   Wave-2 merge verified  ·  MIG-CHECK applied  ·  OQ-1 + OQ-3 signed
+T0a   { FILM-LAYER , P3-EXT , W2-WIRE }    3-way parallel
+T0b   SEED-W3                              after P3-EXT
+GATE1 QA-Lead over all four  →  MERGE TO MAIN
+T1    { B1a , B2 , B3 , B4 , B5 , S8 }     6-way parallel
+T1.5  B1b                                  after B1a
+GATE2 QA-Lead over the seven  →  MERGE TO MAIN
+T2    B6            after S8 + B5
+T3    B7a           after B6
+T3.5  { B7b , B8 }  2-way parallel, both after B7a
+GATE3 B7a Irreversible pipeline + Founder sign-off; full-spine Playwright E2E
+```
+
+New edges: `FILM-LAYER → {B1b, B2, B3, B4, B5}` · `P3-EXT → SEED-W3` · `P3-EXT → {B1b, B3}`.
+FILM-LAYER, P3-EXT and W2-WIRE are genuinely independent — render layer, contract, engine.
 
 ---
 
@@ -1004,6 +1137,13 @@ Tapping an image grows it into a "meet the person" moment. A second tap advances
 transition." A cut, pause, or reload here breaks the felt continuity that makes B3's unfold read as one
 physical motion. The whole product identity rests on it.
 
+>>> AMENDMENT A SUPERSEDES THE PARAGRAPH BELOW. The binding AC is now CPO's reframing: "the film frame
+>>> never unmounts and never shows a paused or black frame." FEED -> GROWN is a CROSS-TREE handoff (N feed
+>>> cards from N stores), which React cannot do by moving a DOM node. FILM-LAYER builds the mechanism; you
+>>> publish the feed-card rect and the centre-column rect and call the `grow` edge from the edge table
+>>> (design-direction §5.2, `--dur-grow`, `--ease-kol`). DO NOT write a test asserting a single `<video>`
+>>> node — A/B buffers use two, and such a test would fail a correct implementation. Tier is now FULL.
+
 You own an automated test asserting BOTH: the video element IDENTITY persists across FEED -> GROWN
 (same DOM node, not an equivalent one), and `paused` never flips true during the transition.
 `apps/kol/src/lib/renderer/hero-persistence.test.tsx` is the shipped precedent for how to assert this —
@@ -1108,6 +1248,12 @@ NEVER commit it, NEVER print it, NEVER echo its contents.
 This is the hardest renderer invariant in the product and P4 already implemented the machinery for it:
 `HeroStage` keeps an identical tree position across every stage so React never remounts the `<video>`;
 stages change classes and transforms only, never layout. Your unfold must live INSIDE that guarantee.
+
+>>> AMENDMENT A SUPERSEDES THE PARAGRAPH BELOW. Binding AC: "the film frame never unmounts and never shows
+>>> a paused or black frame." Assert against the Film Layer, not a `<video>` node. Your unfold choreography
+>>> is design-direction §3.3 — a 900 ms HARD CAP on `--ease-cinematic` in three timed bands (0-280 ground
+>>> wash + feed fade-out · 140-620 blocks rise in staggered waves, nearest-to-film first, 70 ms ·
+>>> 340-900 atmosphere and secondary media). Tier is now FULL, est. 300-420 LOC.
 
 You own an automated test asserting element identity persists and playback is continuous across
 GROWN -> WORLD_OPEN. Extend the idiom in apps/kol/src/lib/renderer/hero-persistence.test.tsx.
@@ -1217,6 +1363,10 @@ NEVER commit it, NEVER print it, NEVER echo its contents.
 - **SWAPS ARE SCORING-DRIVEN, NEVER RANDOM** (an AC). The choice comes from the engine's weighted-sum
   scoring; anti-repetition (stage 3) always runs after scoring so nothing loops within the session.
   There must be NO `Math.random` anywhere in your diff. QA-Lead will grep for it.
+- AMENDMENT A CORRECTS THE NEXT LINE. Changing `src` on a live `<video>` runs the media load algorithm:
+  readyState resets, playback stops, poster or black flashes. It is not physically satisfiable. Call
+  FILM-LAYER's `swapClip(src, poster)` instead — it loads the INACTIVE buffer, waits for `canplay`, and
+  cross-fades over `--dur-swap` (120 ms). Your unit gets SIMPLER, not harder; you own no film mechanism.
 - The element persists across swaps: change the `src`, never remount the `<video>`. Any block interaction
   must NOT pause or unmount the persistent film — assert this in a test.
 - No eligible `process`/`atmosphere` clip to swap to -> the player simply keeps the current clip. Graceful,
@@ -1289,7 +1439,11 @@ NEVER commit it, NEVER print it, NEVER echo its contents.
 1. docs/04-features/specs/contextual-narration-shrink.md — your spec.
 2. apps/kol/src/lib/renderer/HeroStage.tsx — READ THE DOCK CODE CLOSELY. `stage === "narrate-shrink"`
    already triggers a FLIP dock via the `kol-hero-docked` class, pinning the shell's in-flow height first
-   so the world never shifts. The dock transition IS ALREADY BUILT. You wire the real product surface to
+   so the world never shifts. AMENDMENT A: that FLIP MOVES INTO FILM-LAYER as the `dock` edge
+   (`--dur-dock` 440 ms on `--spring-video`, design-direction §5.2). You publish a corner rect via
+   `useFilmSlot` and own the EXCLUSION ZONE (screen-specs §5.3, which closes your open question and the
+   "dock covers the CTA" risk) plus the fallback chain. You do NOT reimplement the FLIP. Tier stays LITE.
+   The line below described the pre-amendment state. You wire the real product surface to
    it and own the engine selection; you do not reimplement the FLIP.
 3. apps/kol/src/lib/engine/eligible.ts — the `productScoped` function. It already implements your entire
    fallback chain. Read it so you match its behaviour rather than duplicating it in the UI.
@@ -2025,5 +2179,153 @@ Session file: docs/08-agents_work/sessions/2026-07-21-frontend-engineer-b8-thank
 
 ---
 
-*CTO · session `cto-wave3-packet` · 2026-07-21. No code written; thirteen briefs produced; no workers
-spawned (nested Task blocked by design in this session). Wave 3 remains gated on the Wave-2 merge.*
+# BRIEF 14 — FILM-LAYER · The persistent film layer (AMENDMENT A)
+
+```
+subagent_type: frontend-engineer
+model: fable            # Fable 5 — claude-fable-5
+name: frontend-engineer-film-layer
+isolation: worktree
+---
+You are the Fable design-build worker for KOL Wave 3, unit FILM-LAYER — the persistent film architecture.
+Risk tier: FULL (est. 400-600 LOC, and you REWRITE a QA-passed Wave-0 invariant). Model: Fable 5. ONE unit.
+
+This is the single biggest piece of Wave-3 frontend work. Five units are blocked on you. Nothing else in
+the buyer journey is buildable until this lands.
+
+## HARD PRECONDITION
+Wave 2 must be merged to `main`. Verify:
+  git -C /Users/adamks/VibeCoding/etsyc show main:apps/kol/src/lib/engine/eligible.ts | head -1
+If it errors, STOP and return BLOCKED with "Wave 2 not merged to main".
+
+## Why you exist — read this before you touch code
+Wave 0 shipped `HeroStage`, which keeps ONE `<video>` mounted at a stable tree position while the world
+folds and unfolds around it. That works, it is tested, and it is CORRECT — for one world.
+
+It cannot survive the real feed, for two independent reasons:
+
+1. **Cross-tree.** `HeroStage` renders INSIDE `StoreWorld`, scoped to one `config` (`data-store={config.storeId}`).
+   The real FEED is cross-maker — `eligible.ts` runs `newestPerStore(pool)` with no `storeScope`, so the feed
+   is N sibling cards from N different stores. Tapping card #7 must turn THAT card's film into store #7's
+   world hero. Those are different component trees, and React cannot relocate a host DOM node across parents
+   without unmounting it. No React primitive does this. `layoutId` does not either — it cross-fades two
+   nodes and animates the rect, which FAILS the invariant rather than satisfying it.
+   `view-transition-name` on `.kol-hero-stage` does not rescue it: the View Transitions API morphs
+   SNAPSHOTS — it captures old and new as images — so a `<video>` under a view transition shows a static
+   frozen frame for the whole morph, which is exactly what the invariant forbids.
+   `stages.ts` already admits this in its own comment: "FEED/GROWN belong to the feed surface (B1) in the
+   full app; the renderer carries them so the unfold can be simulated." Wave 0 SIMULATES feed and grown
+   inside one world.
+2. **Src mutation pauses.** `FilmFrame` renders `<video src={clip.src}>`. Changing `src` on a live `<video>`
+   runs the media load algorithm: `readyState` resets, playback stops, poster or black flashes. B4 needs the
+   film to swap to process/atmosphere clips mid-browse WITHOUT pausing. A single video element cannot do it.
+
+## Goal
+One film, mounted once, at app root — fixed-position, FLIPping between rects that screens publish, with two
+stacked video buffers cross-fading so a clip change never shows a paused or black frame.
+
+## THE BINDING AC (CPO-reframed — this exact wording, not the old one)
+"The film frame never unmounts and never shows a paused or black frame."
+The OLD wording — "the `<video>` element never unmounts" — is RETIRED. Do not write a test asserting a
+single `<video>` node; A/B buffers deliberately use two, and such a test would fail a correct implementation.
+
+## Worktree protocol (create from the MAIN REPO ROOT — never from inside a worktree)
+git -C /Users/adamks/VibeCoding/etsyc worktree add /Users/adamks/VibeCoding/etsyc/.worktrees/film-layer -b feat/film-layer main
+cd /Users/adamks/VibeCoding/etsyc/.worktrees/film-layer/apps/kol
+Conventional commits. Never commit to `main`. Never merge.
+
+## Read ONLY these
+1. docs/06-design/KOL-wave3-design-direction.md §5.1 (the tokens you own), §5.2 (the edge table — BINDING
+   choreography), §5.3 (the complete reduced-motion contract), §6 (the Film Layer mechanism). Your spec.
+2. apps/kol/src/lib/renderer/HeroStage.tsx, hero-persistence.ts, stages.ts, StoreWorld.tsx — what you are
+   demoting and why. Read all four before changing one line.
+3. apps/kol/src/lib/renderer/hero-persistence.test.tsx — the Wave-0 suite you must REWRITE, not delete.
+4. apps/kol/src/components/media/FilmFrame.tsx — the shipped film primitive, its scroll gate, its poster-first
+   behaviour, its mute/captions controls. The Film Layer inherits all of that behaviour.
+5. apps/kol/src/app/globals.css lines ~186-230 (`.kol-hero-stage`, `.kol-hero-stage-inner`,
+   `.kol-hero-docked`, the `[data-world-stage]` rules) — the CSS you are moving and generalising.
+
+## Build order — commit in EXACTLY this order
+STEP 1 (commit `feat(motion): wave-3 buyer-state transition tokens`):
+  - globals.css `:root` — add EXACTLY the five tokens from design-direction §5.1:
+      --dur-grow: var(--dur-reveal);  --dur-ungrow: 405ms;  --dur-dock: 440ms;
+      --dur-swap: 120ms;  --return-ratio: 0.78;
+    You OWN this block. B2-B5 consume it and must never add to it — that is why it is here and not in
+    their briefs (four parallel branches editing globals.css is a guaranteed conflict).
+STEP 2 (commit `feat(film): film layer with A/B buffers`):
+  - apps/kol/src/components/film/FilmLayer.tsx — ONE player, mounted ONCE, from app/layout.tsx.
+    `position: fixed`. Holds TWO stacked `<video>` buffers (A/B). Exposes, via context:
+      publishRect(slotId, rect)  — a screen tells the layer where the film should be
+      setActiveSlot(slotId)      — a screen claims the film; the layer FLIPs to that slot's rect
+      swapClip(src, poster)      — loads into the INACTIVE buffer, waits for `canplay`, cross-fades
+                                   over --dur-swap, then makes it active. NEVER a black frame, never a pause.
+    Inherit FilmFrame's behaviour: poster-first, muted until opt-in (the hard tone line), captions toggle,
+    quiet fallback to the poster on decode/404. Do NOT fork FilmFrame's controls — extract and share them.
+  - apps/kol/src/components/film/useFilmSlot.ts — the hook a screen calls to register a slot, publish its
+    rect on layout and on resize, and claim the film.
+STEP 3 (commit `refactor(renderer): demote HeroStage to a slot registrar`):
+  - HeroStage keeps `data-layout-id="hero-video"`, keeps pinning its in-flow height so the world never
+    reflows, and now PUBLISHES ITS RECT instead of owning a `<video>`. It renders no film element.
+  - Move the dock FLIP out of HeroStage and into the Film Layer as the `WORLD_BROWSE <-> NARRATE_SHRINK`
+    edge. B5 will publish a corner rect; it will not reimplement the FLIP.
+  - StoreWorld's hero-persistence guarantee is preserved in substance and relocated in mechanism. Its
+    defensive "only the first hero-video mounts" behaviour must survive.
+STEP 4 (commit `feat(film): the edge table`):
+  - Implement design-direction §5.2 EXACTLY: grow (`--dur-grow`, `--ease-kol`), unfold (`--dur-unfold`,
+    900ms hard cap, `--ease-cinematic`), dock (`--dur-dock`, `--spring-video`), undock and ungrow at
+    `--return-ratio` x forward. WORLD_OPEN -> WORLD_BROWSE has NO transition — it is a scroll, not an event.
+    Do not invent an edge that is not in that table.
+  - Reduced motion, per §5.3, in full: transforms and parallax removed; the change becomes an opacity
+    cross-fade at `--dur-state`; the layer SNAPS to the new rect; AND THE FILM KEEPS PLAYING. The FLIP must
+    SKIP its invert step rather than run it at 0.01ms, which would produce a visible jump.
+STEP 5 (commit `test(film): cross-tree persistence + buffer swap`):
+  - REWRITE apps/kol/src/lib/renderer/hero-persistence.test.tsx against the Film Layer. Every existing
+    behavioural guarantee must still be asserted; the mechanism it asserts against changes.
+  - Add apps/kol/src/components/film/__tests__/film-layer.test.tsx. MANDATORY named tests — QA-Lead will
+    grep for these exact strings:
+      "the film survives a cross-tree handoff between two different store worlds"
+        — render a feed of N>=2 cards from DIFFERENT store configs, claim the film from card A, then from
+          card B, and assert the film frame never unmounted and playback never stopped. THIS IS THE CASE
+          THE WAVE-0 SUITE COULD NOT TEST, and it is the whole reason this unit exists.
+      "a clip swap never shows a paused or black frame"
+        — swapClip cross-fades A to B; assert the outgoing buffer is still playing until the incoming one
+          reports canplay, and that neither a poster flash nor a paused state is observable.
+      "reduced motion snaps the rect and keeps the film playing"
+      "every edge duration matches the edge table"
+
+## Constraints
+- TypeScript strict. NO new dependency — in particular NO framer-motion / motion. An animation library
+  would not have solved the cross-tree problem either; the mechanism is an imperative FLIP plus CSS.
+  Return BLOCKED if you think you need one.
+- Do NOT delete the Wave-0 hero-persistence guarantees. You are relocating a QA-passed invariant, not
+  dropping it. If a guarantee cannot be preserved, return BLOCKED and say which — do not quietly weaken it.
+- No migration, no RPC, no schema change, no DB access of any kind. This unit is pure render layer.
+- Zero placeholder UI, zero TODOs.
+- Accessibility: axe-core clean; the fixed film layer must not trap focus and must not cover a CTA
+  (B5 owns the exclusion-zone rule; you must not make it impossible).
+- Auto-fix type errors and missing imports (Deviation Rules 1-3). Return BLOCKED rather than making an
+  architectural decision on your own.
+- Green before you finish: `pnpm typecheck`, `pnpm test`, `pnpm lint`. Every renderer and block test must
+  still pass, or be rewritten with its guarantee intact and the rewrite justified in decisions_made.
+
+## Skills — load exactly these 3, nothing more (read .claude/skills/<name>/SKILL.md)
+vercel-react-view-transitions · emilkowal-animations · react-patterns
+
+## Turn budget
+~19-tool-use cap and this is the largest unit in the wave — it is pre-split into 5 commits for exactly that
+reason. COMMIT AFTER EACH STEP. On approach, return PARTIAL with resume_point naming the STEP.
+STEPS 2 and 3 are what five other workers are blocked on. STEP 5's cross-tree test is the reason this unit
+exists — never leave it unlanded.
+
+## Return contract — structured JSON, exactly these keys
+{ "status": "COMPLETE|PARTIAL|BLOCKED", "branch", "worktree", "files_changed": [], "tests_added": [],
+  "loc_changed": 0, "summary", "decisions_made": [], "blockers": [], "resume_point": "" }
+List in `decisions_made` every Wave-0 guarantee you relocated and how you preserved it.
+Session file: docs/08-agents_work/sessions/2026-07-22-frontend-engineer-film-layer.md (≤10 lines).
+```
+
+---
+
+*CTO · session `cto-wave3-packet` · 2026-07-21, amended 2026-07-22. No code written; fifteen briefs
+produced; no workers spawned (nested Task blocked by design in this session). Wave 3 remains gated on the
+Wave-2 merge, and now additionally on OQ-1 and OQ-3 sign-off.*

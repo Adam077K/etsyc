@@ -80,8 +80,15 @@ A second tap on the grown video triggers the world to animate open around the pe
 - Given the world opens, when it renders, then the P4 renderer composes the maker's ordered `blocks[]` under the maker's theme (curated → token lookup; custom → apply `customPalette.roles` / `customPairing` as CSS props) with the store's atmosphere and motion preset.
 - Given the WORLD_OPEN state, when the engine resolves, then it keeps the store's signature clip in the persistent single-clip player (`page_eligibility @> {world}` ∧ `purpose && {intro, craft-story, atmosphere}`, store scope = `storeScope`, limit 1) — usually the same clip promoted from the feed, so the transition is seamless.
 
-**Hero persistence (load-bearing)**
-- Given the persistent video is playing, when the world unfolds, then the `hero-video` element MUST NOT unmount or pause — it is the SAME shared element carried from B2 (cite P4 `layoutId="hero-video"` persistence, the hardest renderer invariant). An automated test MUST assert element identity persists and playback is continuous across GROWN → WORLD_OPEN.
+**Hero persistence (load-bearing — amended 2026-07-21, CPO Ruling 1)**
+- `unfold` is a **same-source transition**: the clip does not change. Given the persistent video is playing, when the world unfolds, then the SAME video element carries playback across `GROWN → WORLD_OPEN` — it MUST NOT unmount, pause, re-source, or re-buffer, and **it MUST NOT cross-fade to a second buffer**. An automated test MUST assert element identity persists and `paused` never flips true across the transition.
+- Given the world unfolds, when the 900 ms choreography runs, then the Film Layer container node identity is the same node it was in `GROWN`, and moving footage of the maker is visible at every sampled frame of the unfold.
+
+*The full film-frame continuity contract — including the source-changing-swap case that governs B4/B5 — is stated once in [`grow-interaction.md`](./grow-interaction.md) "Film-frame continuity". B3 inherits it; the two criteria above are B3's share of it. `unfold` is deliberately the strictest case: a cross-fade during the signature moment would be a cut inside the one transition the whole product is built on.*
+
+**The maker's statement (added 2026-07-21, CPO Ruling 3)**
+- Given a world whose `hero-video` block carries `props.statement`, when the world opens, then that line renders over the film at `--fs-display-hero`, weight 400–500, `--on-media` ink over a mandatory `--scrim`, `[text-wrap:balance]`, at most once per world.
+- Given a world whose `hero-video` block has **no** `props.statement`, when the world opens, then the world renders with **no hero line at all**. It MUST NOT substitute a generated line, the promoted `maker.craft` line, the store name, or any other text. A test MUST assert that a config with `statement` absent produces zero display-tier text over the film. **A fabricated statement in the maker's voice is a D10 violation** — the words are hers or they are absent.
 
 **No flattening**
 - Given two different makers' worlds, when each unfolds, then they render with genuinely different layout, tokens, atmosphere, and motion (D15 "no flattening") — the world adopts the maker's `theme` (`kind:"curated"` or `kind:"custom"`), not KOL curated chrome.
@@ -241,7 +248,8 @@ Risk tier: **Lite** (frontend render + transition + one engine read; no API/DB/a
 | Date | Change | Author |
 |---|---|---|
 | 2026-07-20 | Initial draft | CPO (Phase-5 spec worker) |
+| 2026-07-21 | **AC amended (Ruling 1)** — "Hero persistence" restated as B3's share of the film-frame continuity contract; `unfold` pinned as a same-source transition where cross-fading is forbidden. **AC added (Ruling 3)** — the maker's statement, including the no-fallback D10 criterion. | CPO |
 
 ---
 
-_Last updated: 2026-07-20 | Updated by: CPO (Phase-5 spec worker W2)_
+_Last updated: 2026-07-21 | Updated by: CPO (Wave-3 AC rulings)_
