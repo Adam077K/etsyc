@@ -13,6 +13,8 @@
  * by contrast.ts), so a token edit that breaks AA fails here, not in QA.
  */
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { PALETTE_IDS, THEME_MODES } from "@/lib/store-config/schema";
 import type { CuratedTheme } from "@/lib/store-config/types";
@@ -74,5 +76,36 @@ describe.each(combos)("%s · %s", (paletteId, mode) => {
     expect(on("--on-block-b", "--block-b")).toBeGreaterThanOrEqual(AA_BODY);
     const blockCFloor = LARGE_TEXT_ONLY_BLOCK_C.has(paletteId) ? AA_LARGE_TEXT : AA_BODY;
     expect(on("--on-block-c", "--block-c")).toBeGreaterThanOrEqual(blockCFloor);
+  });
+});
+
+/**
+ * Chrome-default headroom (AA fix, 2026-07): sunbaked light is KOL's own
+ * chrome fallback (globals.css :root), rendered on every non-world page.
+ * `--muted` was regraded #6F6153 → #645648 specifically to buy headroom over
+ * the 4.5 body floor, so future translucent surfaces/scrims can't silently
+ * push it under. Encode the headroom — 5.5, not just 4.5 — so a regrade
+ * cannot silently spend it. (Sunbaked-light-only: the other palettes clear
+ * body AA at 4.78–5.27 light and are intentionally not regraded — see
+ * docs/06-design/KOL-wave3-aa-fix-muted.md §3.)
+ */
+describe("sunbaked light — chrome-default --muted headroom", () => {
+  const MUTED_HEADROOM = 5.5;
+  const vars = varsFor("sunbaked", "light");
+  const on = (fg: `--${string}`, bg: `--${string}`) =>
+    contrastRatio(resolveThemeColor(vars[fg] as string), resolveThemeColor(vars[bg] as string));
+
+  it("--muted clears 5.5:1 on ground and surface, not just the 4.5 floor", () => {
+    expect(on("--muted", "--ground")).toBeGreaterThanOrEqual(MUTED_HEADROOM);
+    expect(on("--muted", "--surface")).toBeGreaterThanOrEqual(MUTED_HEADROOM);
+  });
+
+  it("globals.css :root chrome fallback --muted matches the token", () => {
+    const css = readFileSync(
+      fileURLToPath(new URL("../../app/globals.css", import.meta.url)),
+      "utf8",
+    );
+    const fallback = /--muted:\s*(#[0-9a-fA-F]{3,6})/.exec(css)?.[1];
+    expect(fallback?.toLowerCase()).toBe(palettes.sunbaked.light.muted.toLowerCase());
   });
 });

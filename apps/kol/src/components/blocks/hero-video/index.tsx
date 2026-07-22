@@ -90,7 +90,7 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
             {data.maker.displayName}
           </h1>
           {block.props.showCraftLine ? (
-            <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media/90">
+            <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media">
               {data.maker.craft} · {data.maker.location}
             </p>
           ) : null}
