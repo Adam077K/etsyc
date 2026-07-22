@@ -168,6 +168,15 @@ test.describe("anti-grid hard gate — desktop 1440", () => {
       els.map((el) => el.textContent ?? ""),
     );
     expect(new Set(names).size).toBe(18);
+    // …and 18 DISTINCT poster stills: 8 images cycling under 18 names
+    // impose their own visual rhythm, which corrupts the very evidence
+    // the composition gate exists to produce
+    const posters = await page.$$eval(
+      "[data-feed-card] [data-feed-media] img",
+      (els) => els.map((el) => el.getAttribute("src") ?? ""),
+    );
+    expect(posters).toHaveLength(18);
+    expect(new Set(posters).size).toBe(18);
   });
 
   test("N=18: rendered composition is exactly the model's (parity gate)", async ({ page }) => {

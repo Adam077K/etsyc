@@ -37,14 +37,31 @@ const MAKERS: ReadonlyArray<{ name: string; craft: string; place: string }> = [
   { name: "Omar Benali", craft: "Zellige cutter", place: "Fez" },
 ];
 
+/**
+ * 18 DISTINCT poster stills — one per card at the engine limit, for the
+ * same reason as the 18 makers: the N=18 evidence is judged on visible
+ * repetition, and 8 images cycling under 18 names imposes its own visual
+ * rhythm on the page (it can mask grid-ness or manufacture it). Ordered
+ * so adjacent cards never share a palette family.
+ */
 const POSTERS: readonly string[] = [
   "/media/ashwork/intro-poster.svg",
   "/media/tinctura/vat-poster.svg",
+  "/seed/hollowgrain/storm-oak-bowl.svg",
+  "/seed/isoldeglass/sea-smoke-tumblers.svg",
   "/media/ashwork/wheel-poster.svg",
+  "/seed/maraleather/oxblood-sleeve.svg",
+  "/seed/ferreirapress/press-room.svg",
   "/media/tinctura/shibori-throw.svg",
+  "/seed/hollowgrain/spalted-vessel.svg",
   "/media/ashwork/sena-portrait.svg",
+  "/seed/isoldeglass/amber-swell-vase.svg",
+  "/seed/maraleather/ninefold-belt.svg",
   "/media/tinctura/noor-portrait.svg",
+  "/seed/ferreirapress/broadside-12.svg",
   "/media/ashwork/ash-bowl.svg",
+  "/seed/hollowgrain/walnut-boards.svg",
+  "/seed/isoldeglass/tide-line-carafe.svg",
   "/media/ashwork/ridge-tumbler.svg",
 ];
 
