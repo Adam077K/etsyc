@@ -4,13 +4,11 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { createEngineDeps, selectVideos } from "@/lib/engine";
+import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { createClient } from "@/lib/supabase/server";
 
-import {
-  ENGINE_RING_COOKIE,
-  KOL_SESSION_COOKIE,
-  type BrowseClipResult,
-} from "./contract";
+import { type BrowseClipResult } from "./contract";
 
 /**
  * The WORLD_BROWSE server boundary — the browser never touches the engine
@@ -27,9 +25,13 @@ import {
  */
 
 const StoreIdSchema = z.string().uuid();
-const SessionIdSchema = z.string().uuid();
 
-const COOKIE_OPTIONS = {
+/**
+ * Ring write attributes — byte-identical to getFeedSelection's set() (and
+ * kol_sid's minting in the middleware): diverging attributes make browsers
+ * fork the cookie by scope, silently splitting the ring between states.
+ */
+const RING_COOKIE_OPTIONS = {
   httpOnly: true,
   sameSite: "lax",
   path: "/",
@@ -52,14 +54,12 @@ export async function selectBrowseClip(storeId: string): Promise<BrowseClipResul
   try {
     const cookieStore = await cookies();
 
-    // Session identity: first-party, anonymous-safe, MINTED BY THE PROXY
-    // MIDDLEWARE (updateSession) on every matched request — never here
-    // (two minters = races; B1a convergence, 2026-07-22). The cookie is
-    // client input: anything but a uuid is treated as fresh-anonymous for
-    // THIS request only — never reused raw, never persisted from here.
-    const rawSession = cookieStore.get(KOL_SESSION_COOKIE)?.value;
-    const parsedSession = SessionIdSchema.safeParse(rawSession);
-    const sessionId = parsedSession.success ? parsedSession.data : crypto.randomUUID();
+    // Session identity: THE feed's session — same cookie, same validator —
+    // so the shopkeeper who greeted this buyer in the feed is the one
+    // talking in the world. Minted by the proxy middleware only (two
+    // minters = races); resolveFeedSessionId treats a missing/tampered
+    // value as fresh-anonymous for this request, never reusing raw input.
+    const sessionId = resolveFeedSessionId(cookieStore.get(FEED_SESSION_COOKIE)?.value);
 
     // Anon-safe buyer identity: null = anonymous (Relationship term is 0).
     const supabase = await createClient();
@@ -71,12 +71,12 @@ export async function selectBrowseClip(storeId: string): Promise<BrowseClipResul
     // anon client internally so eligibility can never see a signed-in
     // seller's drafts (§B0 / W2-WIRE). The ring value is engine-owned and
     // HMAC-signed — passed through opaque; a tampered ring reads as empty.
-    // This write IS the ring's persistence path across states (the ring
-    // written here is the ring the feed reads), and COOKIE_OPTIONS must
-    // stay identical to B1a's or browsers fork the cookie by scope.
+    // This write IS the ring's persistence path across states: the feed's
+    // RSC reads but cannot persist, so the ring written here is the ring
+    // the feed reads next.
     const deps = createEngineDeps({
-      read: () => cookieStore.get(ENGINE_RING_COOKIE)?.value,
-      write: (value) => cookieStore.set(ENGINE_RING_COOKIE, value, COOKIE_OPTIONS),
+      read: () => cookieStore.get(FEED_RING_COOKIE)?.value,
+      write: (value) => cookieStore.set(FEED_RING_COOKIE, value, RING_COOKIE_OPTIONS),
     });
 
     const selection = await selectVideos(
