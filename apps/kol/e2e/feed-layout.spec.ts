@@ -261,21 +261,43 @@ test.describe("anti-grid hard gate — desktop 1440", () => {
 test.describe("mobile at 375 — the left edge is the identity (§1.6)", () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
-  test("(d) adjacent media widths differ >8px; (e) the dominant edge breaks within any 3 cards", async ({ page }) => {
+  test("(d) PROOF — every adjacent pair of rendered widths differs >8px (getBoundingClientRect, full set)", async ({ page }) => {
+    // The critic cannot resolve an 8px width delta from a static capture,
+    // so this constraint is provable ONLY here: real rendered boxes at
+    // 375, every one of the N−1 adjacent pairs checked, N=18 AND N=8 —
+    // never a sampled pair. Mutation-verified: forcing the composer into
+    // a fixed 4-cycle (which puts equal-width M-OFF-L/M-OFF-R side by
+    // side) turns this red.
+    for (const n of [8, 18]) {
+      await page.goto(`/preview/feed?n=${n}`);
+      await expect(page.locator("[data-feed-card]")).toHaveCount(n);
+      const media = await measureMedia(page);
+      expect(media).toHaveLength(n);
+      const widths = media.map((m) => m.width);
+      const offences: string[] = [];
+      let pairsChecked = 0;
+      for (let i = 0; i + 1 < widths.length; i += 1) {
+        const a = widths[i];
+        const b = widths[i + 1];
+        if (a === undefined || b === undefined) continue;
+        pairsChecked += 1;
+        if (Math.abs(a - b) <= 8) {
+          offences.push(`cards ${i}/${i + 1}: ${a}px vs ${b}px`);
+        }
+      }
+      expect(pairsChecked).toBe(n - 1); // the full set, not a sample
+      expect(
+        offences,
+        `N=${n} rendered widths [${widths.join(", ")}] — adjacent pairs within 8px: ${offences.join("; ")}`,
+      ).toEqual([]);
+    }
+  });
+
+  test("(e) the dominant edge breaks within any 3 cards; edge and width carry the variety", async ({ page }) => {
     await page.goto("/preview/feed?n=18");
     await expect(page.locator("[data-feed-card]")).toHaveCount(18);
     const media = await measureMedia(page);
     expect(media).toHaveLength(18);
-
-    for (let i = 0; i + 1 < media.length; i += 1) {
-      const a = media[i];
-      const b = media[i + 1];
-      if (!a || !b) continue;
-      expect(
-        Math.abs(a.width - b.width),
-        `cards ${i},${i + 1} share a rendered width`,
-      ).toBeGreaterThan(8);
-    }
 
     // ≥3 distinct left edges and ≥3 distinct widths — edge AND height
     // carry the variety, never width equality
