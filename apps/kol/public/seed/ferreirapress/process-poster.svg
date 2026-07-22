@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 608 760" role="img" aria-label="Ferreira Press — process (placeholder film)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 608 760" role="img" aria-label="Ferreira Press — process film still">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#efe6d5"/>
@@ -8,5 +8,4 @@
   </defs>
   <rect width="608" height="760" fill="url(#g)"/>
   <circle cx="212.79999999999998" cy="349.59999999999997" r="170.24" fill="#b5310c" opacity="0.55"/>
-  <text x="36.48" y="722" font-family="system-ui, sans-serif" font-size="21" fill="#1c1917" opacity="0.85">Ferreira Press — process (placeholder film)</text>
 </svg>
