@@ -73,9 +73,12 @@ export function customThemeVars(theme: CustomTheme): ThemeVars {
     "--on-block-b": roles.bg,
     "--block-c": roles.accent,
     "--on-block-c": roles.accentInk,
-    // scrim PAINT only — band geometry lives in globals.css .kol-scrim
-    // (same seam as curated: the theme layer owns the color, not the shape)
-    "--scrim": `color-mix(in oklab, ${roles.bg} 45%, black)`,
+    "--scrim": `linear-gradient(to top, color-mix(in oklab, ${roles.bg} 45%, black) 0%, transparent 55%)`,
+    // solid text-backdrop scrim — same contract as the curated path (the
+    // hero chrome band paints this opaque under set lines; gate-2 / I5).
+    // keep=40% in oklab bounds the result's luminance ≤ ~0.06 for ANY hex
+    // bg, so the custom AA gate on on-media is what carries the guarantee.
+    "--scrim-strong": `color-mix(in oklab, ${roles.bg} 40%, black)`,
     // customPairing — families from the hosted font catalog (pipeline §5.5),
     // mapped through the catalog so next/font faces actually resolve
     "--font-display": resolveFamily(pairing.displayFamily, "system-ui, sans-serif"),

@@ -179,12 +179,16 @@ describe("gate-2 P1 — the chrome band is clipped to the film rect and paints i
     expect(html).not.toMatch(/<p[^>]*class="mt-2 /);
   });
 
-  it("mobile band ruling: full-frame variants go 4:5 below sm; the statement clamps to 2 lines below sm", () => {
+  it("mobile band ruling: full-frame variants go 4:5 below sm; statement scales (8cqi) and is NEVER clamped", () => {
     const html = markup(cloneSena()); // sena hero is center-column
     expect(html).toMatch(/aspect-\[4\/5\] sm:aspect-video/);
-    // hard 2-line cap with ellipsis at mobile — 8cqi + -webkit clamp
     expect(html).toContain("text-[min(var(--fs-display-hero),8cqi)]");
     expect(html).toContain("sm:text-[min(var(--fs-display-hero),10cqi)]");
-    expect(html).toContain("max-sm:[-webkit-line-clamp:2]");
+    // the 2-line clamp was ruled then WITHDRAWN (Design-Lead: "the defect
+    // pattern wearing a safety label") — a clamp reproduces the 1.04:1
+    // failure structure with green metrics: full text in the DOM, sentence
+    // cut mid-thought on the face. fitStatementScale already proves the
+    // statement fits ≤3 lines; nothing may then hide what it proved fits.
+    expect(html).not.toContain("-webkit-line-clamp");
   });
 });

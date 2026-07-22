@@ -154,7 +154,7 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
           {statement ? (
             <h1
               ref={statementRef}
-              className="font-display font-medium leading-[0.92] tracking-[-0.01em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),8cqi)] sm:text-[min(var(--fs-display-hero),10cqi)] max-sm:[display:-webkit-box] max-sm:[-webkit-line-clamp:2] max-sm:[-webkit-box-orient:vertical] max-sm:overflow-hidden"
+              className="font-display font-medium leading-[0.92] tracking-[-0.01em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),8cqi)] sm:text-[min(var(--fs-display-hero),10cqi)]"
             >
               {statement}
             </h1>
