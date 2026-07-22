@@ -14,6 +14,8 @@ import {
 } from "@/lib/engine";
 import { createAnonClient } from "@/lib/supabase/anon";
 
+import { firstPartyCookieOptions as ringCookieOptions } from "./session";
+
 /**
  * Discovery-feed data layer (W3-B1a — discovery-feed spec §Technical).
  *
@@ -40,25 +42,18 @@ export const FEED_LIMIT_DEFAULT = 18;
 export const FEED_RING_COOKIE = "kol_ring";
 
 /**
- * The ring cookie's WRITE ATTRIBUTES — the single declaration every ring
- * writer imports, beside the name it belongs to (the DECISIONS.md cookie
- * canon covers attributes, not just names: four independently re-typed
- * copies agreed by luck, and diverging attributes make browsers fork the
- * cookie by scope, silently splitting the ring between journey states).
- * A FUNCTION, not a const: `secure` must resolve NODE_ENV at write time,
- * never freeze at import (gate-2 F2 — the browse module-const had exactly
- * that freeze). Writers: the feed read-path below, grow, browse,
- * narration. The middleware's kol_sid mint re-types the same shape but
- * cannot import from here (edge runtime vs this module's server graph).
+ * The ring cookie's WRITE ATTRIBUTES — an ALIAS of the one first-party
+ * cookie attribute canon in lib/feed/session.ts (same function object).
+ * The declaration cannot live here: the middleware's kol_sid mint shares
+ * the set, and the edge runtime cannot import this module (server-only +
+ * the engine graph). Ring writers (the feed read-path below, grow,
+ * browse, narration) import THIS name; the middleware imports
+ * firstPartyCookieOptions directly. Diverging attributes make browsers
+ * fork the cookie by scope, silently splitting the ring between journey
+ * states — cookie identity is (name, domain, path); `Secure` is not part
+ * of the key (gate-2 F2).
  */
-export function ringCookieOptions() {
-  return {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  } as const;
-}
+export { ringCookieOptions };
 
 export type FeedCardAspect = "1:1" | "4:5" | "3:2" | "16:9";
 

@@ -7,7 +7,11 @@ import {
   classifyRoute,
   landingPathFor,
 } from "@/lib/auth/routes";
-import { FEED_SESSION_COOKIE, isFeedSessionId } from "@/lib/feed/session";
+import {
+  FEED_SESSION_COOKIE,
+  firstPartyCookieOptions,
+  isFeedSessionId,
+} from "@/lib/feed/session";
 
 import type { Database } from "./database.types";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
@@ -66,12 +70,12 @@ export async function updateSession(request: NextRequest) {
   // (discovery-feed AC). Set AFTER getUser (whose cookie sync may replace
   // supabaseResponse); redirectTo() below copies it onto redirects.
   if (!isFeedSessionId(request.cookies.get(FEED_SESSION_COOKIE)?.value)) {
-    supabaseResponse.cookies.set(FEED_SESSION_COOKIE, crypto.randomUUID(), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-    });
+    supabaseResponse.cookies.set(
+      FEED_SESSION_COOKIE,
+      crypto.randomUUID(),
+      // the canonical attribute set — imported, never re-typed (DECISIONS)
+      firstPartyCookieOptions(),
+    );
   }
 
   // Any redirect must carry the refreshed auth cookies, or the new token is

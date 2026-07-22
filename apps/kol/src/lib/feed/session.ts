@@ -15,6 +15,28 @@ import { z } from "zod";
 
 export const FEED_SESSION_COOKIE = "kol_sid";
 
+/**
+ * The first-party cookie WRITE-ATTRIBUTE canon — the single declaration
+ * for BOTH first-party cookies: kol_sid (minted by the proxy middleware
+ * below in the request path) and kol_ring (written by the feed/grow/
+ * browse/narration boundaries; lib/feed/select.ts re-exports this as
+ * `ringCookieOptions`). It lives HERE because this module is
+ * middleware-safe (edge runtime, zod-only graph) while select.ts is
+ * server-only + the engine graph. A FUNCTION, not a const: `secure` must
+ * resolve NODE_ENV at write time, never freeze at import (gate-2 F2).
+ * Diverging attributes make browsers fork a cookie by scope — cookie
+ * identity is (name, domain, path); `Secure` is not part of the key, so
+ * one diverged writer silently REPLACES the canonical cookie for all.
+ */
+export function firstPartyCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  } as const;
+}
+
 /** External input (a client-supplied cookie value) — never trusted unparsed. */
 const feedSessionIdSchema = z.uuid();
 
