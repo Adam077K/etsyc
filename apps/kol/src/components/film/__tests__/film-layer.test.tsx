@@ -637,4 +637,130 @@ describe("FilmLayer — the persistent film architecture", () => {
     // …and the hero stage lifts its chrome (heading/craft/scrim) over the bed
     expect(css).toMatch(/\.kol-hero-stage\s*\{[^}]*z-index:\s*var\(--z-film-chrome\)/);
   });
+
+  it("G1-F2 wiring: a non-uniform grow FLIP counter-transforms the REAL buffers + poster, and dispose clears it on supersede and unmount", async () => {
+    // The counter math is pinned in aspect-counter.test.ts against a
+    // synthetic rig — this test pins the WIRING: FilmLayer engages the
+    // counter at the epsilon gate, the counter reaches the media the layer
+    // actually renders (found by structure, NOT by the classnames the
+    // counter selects on — a renamed classname must fail the counter, not
+    // this lookup), and the flight's dispose is the single stop path from
+    // both supersede and unmount.
+    const clip = senaStore.media.clips[0];
+    if (!clip) throw new Error("fixture store has no clips");
+    const { container, unmount } = render(
+      <FilmLayerProvider>
+        <Card store={senaStore} edge="grow" />
+        <Card store={senaStore} />
+        <Card store={senaStore} edge="grow" />
+      </FilmLayerProvider>,
+    );
+    const frame = frameOf(container);
+    const [growCard, snapCard, uniformCard] = Array.from(
+      container.querySelectorAll<HTMLElement>(`[data-card="${senaStore.storeId}"]`),
+    );
+    expect(growCard && snapCard && uniformCard).toBeTruthy();
+    // grow slot: 4:5 feed card, re-claimed later at the 16:9 centre column
+    const growRect = vi
+      .spyOn(growCard!, "getBoundingClientRect")
+      .mockReturnValue(domRect(0, 0, 320, 400));
+    vi.spyOn(snapCard!, "getBoundingClientRect").mockReturnValue(domRect(40, 40, 200, 320));
+    // exactly 2× the snap rect — a NON-identity but UNIFORM-scale edge
+    vi.spyOn(uniformCard!, "getBoundingClientRect").mockReturnValue(domRect(0, 0, 400, 640));
+    makeFrameMeasurable(frame);
+
+    // first claim parks→snaps onto the card; the clip loads so the poster
+    // underlay exists — the full media set the counter must reach
+    fireEvent.click(growCard!);
+    reportCanPlay(frame);
+    await waitForFrontSrc(frame, clip.src);
+    const bufferA = frame.querySelector<HTMLVideoElement>('video[data-film-buffer="a"]')!;
+    const bufferB = frame.querySelector<HTMLVideoElement>('video[data-film-buffer="b"]')!;
+    const poster = frame.querySelector<HTMLImageElement>("img")!;
+    expect(bufferA && bufferB && poster).toBeTruthy();
+
+    // counter prerequisites jsdom cannot supply: a measurable layout box…
+    Object.defineProperty(frame, "offsetWidth", { value: 720, configurable: true });
+    Object.defineProperty(frame, "offsetHeight", { value: 405, configurable: true });
+    // …a manual rAF pump (each pump runs the sampled frames queued so far)…
+    const rafQueue = new Map<number, FrameRequestCallback>();
+    let rafId = 0;
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      rafQueue.set(++rafId, cb);
+      return rafId;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => {
+      rafQueue.delete(id);
+    });
+    const pump = () => {
+      const pending = Array.from(rafQueue.values());
+      rafQueue.clear();
+      for (const cb of pending) cb(0);
+    };
+    // …and a mid-flight computed matrix (jsdom never interpolates): the
+    // grow delta below is 320×400 → 720×405, sx = 0.4̄, sy = 0.98̄
+    const sx = 320 / 720;
+    const sy = 400 / 405;
+    const realGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, "getComputedStyle").mockImplementation((el: Element) => {
+      if (el === frame) {
+        return {
+          ...realGetComputedStyle(el),
+          transform: `matrix(${sx}, 0, 0, ${sy}, -120, -640)`,
+        } as CSSStyleDeclaration;
+      }
+      return realGetComputedStyle(el);
+    });
+
+    // the SAME slot re-claims at the 16:9 column rect — the grow FLIP
+    growRect.mockReturnValue(domRect(120, 640, 720, 405));
+    fireEvent.click(growCard!);
+    expect(frame.dataset.filmEdge).toBe("grow"); // the FLIP itself ran
+
+    // one sampled frame: the counter reaches the media FilmLayer renders
+    pump();
+    for (const media of [bufferA, bufferB, poster]) {
+      expect(media.style.transform).toContain("scale(");
+      expect(media.style.transformOrigin).toBe("0 0");
+    }
+    // …and it is the cover inverse: visible scale uniform in both axes
+    const applied = /scale\(([-\d.]+), ([-\d.]+)\)/.exec(bufferA.style.transform);
+    expect(applied).not.toBeNull();
+    expect(sx * Number.parseFloat(applied![1]!)).toBeCloseTo(
+      sy * Number.parseFloat(applied![2]!),
+      6,
+    );
+
+    // SUPERSEDE: a new claim disposes the in-flight FLIP — the counter
+    // must stop and clear through the flight's single dispose path
+    fireEvent.click(snapCard!);
+    for (const media of [bufferA, bufferB, poster]) {
+      expect(media.style.transform).toBe("");
+      expect(media.style.transformOrigin).toBe("");
+    }
+    pump(); // the cancelled loop must be DEAD, not just cleared once
+    expect(bufferA.style.transform).toBe("");
+
+    // the OTHER side of the epsilon gate: a uniform-scale FLIP runs the
+    // edge but must never start the sampling loop
+    fireEvent.click(uniformCard!);
+    expect(frame.dataset.filmEdge).toBe("grow");
+    expect(rafQueue.size).toBe(0);
+    pump();
+    expect(bufferA.style.transform).toBe("");
+
+    // re-engage (400×640 → 720×405 is non-uniform again) so a flight with
+    // a live counter is in flight at unmount…
+    fireEvent.click(growCard!);
+    pump();
+    expect(bufferA.style.transform).toContain("scale(");
+
+    // UNMOUNT: the provider tears down mid-flight — dispose clears the
+    // counter even though the transition never ended
+    unmount();
+    expect(bufferA.style.transform).toBe("");
+    expect(poster.style.transform).toBe("");
+    pump(); // no orphaned rAF loop survives the unmount
+    expect(bufferA.style.transform).toBe("");
+  });
 });
