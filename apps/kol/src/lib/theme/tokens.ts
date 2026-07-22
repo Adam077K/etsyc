@@ -24,6 +24,7 @@ import type {
   MotionPreset,
   PaletteId,
   RadiusIdentity,
+  StrokeClass,
   ThemeMode,
 } from "@/lib/store-config/types";
 
@@ -172,6 +173,19 @@ export function getPaletteTokens(id: PaletteId, mode: ThemeMode): PaletteModeTok
 // (Fontshare faces via their hosted CSS; Google faces via next/font/google).
 // ---------------------------------------------------------------------------
 
+/**
+ * Stroke class (design-direction §2.1a) — optical mass over film is a
+ * property of stroke CONTRAST, not of a numeric weight. `modulated` faces
+ * (real thick/thin variation — optical serifs) stay airy at display-hero/700;
+ * `uniform` faces (geometric / neo-grotesque, near-equal stems) at the same
+ * numbers read as a stamped logotype, so their nameplate drops a size role
+ * AND a weight step. The renderer reads the derived --nameplate-* vars and
+ * never branches on a font name. The type lives in store-config/types
+ * (custom pairings declare it at authoring time, v1.3 additive-optional);
+ * re-exported here as part of the token vocabulary.
+ */
+export type { StrokeClass };
+
 export interface FontPairing {
   id: FontPairingId;
   /** font-family stacks referencing the loaded @font-face / next-font vars */
@@ -180,7 +194,23 @@ export interface FontPairing {
   mono: string;
   displayWeight: number;
   textWeight: number;
+  /** §2.1a — drives the nameplate register (modulated: Fraunces only). */
+  strokeClass: StrokeClass;
 }
+
+/**
+ * The nameplate register per stroke class (§2.1a / R1). Two axes, not one:
+ * the statement is larger-and-lighter, the nameplate smaller-and-heavier —
+ * a flat 500–600 single-axis correction under-corrects on heavy uniform
+ * faces, which is why `uniform` also steps DOWN a size tier.
+ */
+export const nameplateRegisters: Record<
+  StrokeClass,
+  { size: string; weight: string; tracking: string }
+> = {
+  modulated: { size: "var(--fs-display-hero)", weight: "700", tracking: "-0.03em" },
+  uniform: { size: "var(--fs-display)", weight: "600", tracking: "-0.025em" },
+};
 
 export const fontPairings: Record<FontPairingId, FontPairing> = {
   // §3.1 — Kotn energy. For sunbaked, orchard.
@@ -191,6 +221,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-geist-mono), ui-monospace, monospace",
     displayWeight: 700,
     textWeight: 400,
+    strokeClass: "uniform",
   },
   // §3.2 — Faire warmth, Fraunces set BIG. For market-plum.
   "warm-serif": {
@@ -200,6 +231,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-geist-mono), ui-monospace, monospace",
     displayWeight: 650,
     textWeight: 400,
+    strokeClass: "modulated",
   },
   // §3.3 — Cuberto polish. For cuberto-noir.
   "modern-mono-grotesk": {
@@ -209,6 +241,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-jetbrains-mono), ui-monospace, monospace",
     displayWeight: 800,
     textWeight: 400,
+    strokeClass: "uniform",
   },
   // §3.4 — the maximal pole. For bazaar.
   "character-maximal": {
@@ -218,6 +251,7 @@ export const fontPairings: Record<FontPairingId, FontPairing> = {
     mono: "var(--font-space-mono), ui-monospace, monospace",
     displayWeight: 700,
     textWeight: 400,
+    strokeClass: "uniform",
   },
 };
 

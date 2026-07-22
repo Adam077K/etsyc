@@ -20,6 +20,11 @@ export interface RenderStoreOptions {
   isPreview?: boolean;
   /** Simulated buyer-journey stage the world starts in (default world-open). */
   initialStage?: WorldStage;
+  /**
+   * The engine's WORLD_OPEN pick for the persistent single-clip slot — the
+   * engine ↔ renderer seam at videos.id ≡ media.clips[].id (see StoreWorld).
+   */
+  pinnedClipId?: string;
 }
 
 /**
@@ -42,6 +47,7 @@ export function renderStore(config: StoreConfig, options: RenderStoreOptions = {
       blockStates={options.blockStates}
       isPreview={options.isPreview}
       initialStage={options.initialStage}
+      pinnedClipId={options.pinnedClipId}
     />
   );
 }

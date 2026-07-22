@@ -99,6 +99,15 @@ export const RADIUS_IDENTITIES = ["sharp", "soft", "round"] as const;
 export const DENSITIES = ["airy", "standard"] as const;
 export const THEME_MODES = ["light", "dark"] as const;
 
+/**
+ * Design-direction §2.1a — the nameplate register is read off the display
+ * face's stroke contrast, never off a family name or a bare weight.
+ * Curated pairings declare it in the token registry; custom pairings MAY
+ * declare it at authoring time and fall back to `uniform` (the lower-mass
+ * fail-safe) when absent.
+ */
+export const STROKE_CLASSES = ["modulated", "uniform"] as const;
+
 const themeModeSchema = z.enum(THEME_MODES);
 
 export const CuratedThemeSchema = z.strictObject({
@@ -143,6 +152,9 @@ export const CustomThemeSchema = z.strictObject({
     scaleRatio: z.number().positive(),
     displayWeight: z.number().positive(),
     textWeight: z.number().positive(),
+    // §2.1a nameplate register — optional, additive (existing stored
+    // configs carry no declaration and take the uniform fail-safe)
+    strokeClass: z.enum(STROKE_CLASSES).optional(),
   }),
   motionPreset: z.enum(MOTION_PRESETS),
   radiusIdentity: z.enum(RADIUS_IDENTITIES),

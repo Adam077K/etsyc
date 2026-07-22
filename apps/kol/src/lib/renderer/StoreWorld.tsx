@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { HeroStage } from "./HeroStage";
 import { renderBlock } from "./render-block";
 import { isWorldUnfolded, STAGE_LABELS, WORLD_STAGES, type WorldStage } from "./stages";
+import { unfoldTiming } from "./unfold";
 import { useProductNarration } from "./useProductNarration";
 import { WorldInteractionContext, type WorldInteraction } from "./world-interaction";
 
@@ -35,6 +36,15 @@ export interface StoreWorldProps {
    * recorded → the engine's store-wide narration fallback applies.
    */
   narrationProductId?: string | null;
+  /**
+   * The engine's WORLD_OPEN pick (Selection.clips[0].videoId) — the store's
+   * signature clip for the persistent single-clip slot. The engine and the
+   * renderer meet ONLY here, at videos.id ≡ media.clips[].id: when the id is
+   * among the hero's own clipTags it is preferred; otherwise the seller's
+   * binding order stands (the engine can bias the slot, never force a clip
+   * the seller didn't bind).
+   */
+  pinnedClipId?: string;
 }
 
 /**
@@ -67,6 +77,7 @@ export function StoreWorld({
   initialStage = "world-open",
   onProductSelect,
   narrationProductId = null,
+  pinnedClipId,
 }: StoreWorldProps) {
   const [stage, setStage] = useState<WorldStage>(initialStage);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -118,7 +129,8 @@ export function StoreWorld({
 
   const ordered = [...config.blocks].sort((a, b) => a.order - b.order);
   const heroIndex = ordered.findIndex((block) => block.type === "hero-video");
-  const hero = heroIndex === -1 ? undefined : ordered[heroIndex];
+  const heroBlock = heroIndex === -1 ? undefined : ordered[heroIndex];
+  const hero = heroBlock === undefined ? undefined : pinHeroClip(heroBlock, pinnedClipId);
   const before = heroIndex === -1 ? ordered : ordered.slice(0, heroIndex);
   const after =
     heroIndex === -1
@@ -127,6 +139,9 @@ export function StoreWorld({
 
   const stateOf = (block: StoreBlock): BlockState => blockStates?.[block.id] ?? state;
   const unfolded = isWorldUnfolded(stage);
+  // Parallax depth scale for the §3.3 unfold — the furthest block in EITHER
+  // direction sets the world's depth so both sides rise on one scale.
+  const maxDistance = Math.max(before.length, after.length, 1);
 
   return (
     <div
@@ -139,14 +154,24 @@ export function StoreWorld({
       data-narration={narrationStatus}
       style={themeStyle(config.theme)}
       className={cn(
-        "kol-world flex min-h-screen flex-col bg-ground font-text text-body text-ink",
+        // background-color comes from the .kol-world rule in globals.css
+        // (NOT the bg-ground utility) so the §3.3 band-1 ground wash —
+        // transparent in feed/grown, the world's --ground from world-open
+        // on — can win in the components layer.
+        "kol-world flex min-h-screen flex-col font-text text-body text-ink",
         "gap-[var(--space-section)] pb-[var(--space-section)]",
       )}
     >
       <WorldInteractionContext.Provider value={interaction}>
         {before.length > 0 ? (
           <WorldBody unfolded={unfolded}>
-            {before.map((block) => renderBlock(block, data, stateOf(block), isPreview))}
+            {before.map((block, i) => (
+              // above the film: the LAST block borders the hero → distance 1,
+              // counted outward (nearest-to-film first in both directions)
+              <UnfoldItem key={block.id} block={block} distance={before.length - i} maxDistance={maxDistance}>
+                {renderBlock(block, data, stateOf(block), isPreview)}
+              </UnfoldItem>
+            ))}
           </WorldBody>
         ) : null}
         {hero ? (
@@ -154,7 +179,11 @@ export function StoreWorld({
         ) : null}
         {after.length > 0 ? (
           <WorldBody unfolded={unfolded}>
-            {after.map((block) => renderBlock(block, data, stateOf(block), isPreview))}
+            {after.map((block, i) => (
+              <UnfoldItem key={block.id} block={block} distance={i + 1} maxDistance={maxDistance}>
+                {renderBlock(block, data, stateOf(block), isPreview)}
+              </UnfoldItem>
+            ))}
           </WorldBody>
         ) : null}
       </WorldInteractionContext.Provider>
@@ -176,10 +205,68 @@ export function StoreWorld({
 }
 
 /**
+ * The engine ↔ renderer seam (videos.id ≡ media.clips[].id): prefer the
+ * engine's WORLD_OPEN pick by moving it to the front of the hero's OWN
+ * clipTags. A pick outside the seller's bindings is ignored — the engine
+ * biases the persistent slot, it never overrides the seller's authoring.
+ */
+function pinHeroClip(hero: StoreBlock, pinnedClipId: string | undefined): StoreBlock {
+  if (!pinnedClipId || hero.type !== "hero-video") return hero;
+  const { clipTags } = hero.bindings;
+  if (!clipTags.includes(pinnedClipId) || clipTags[0] === pinnedClipId) return hero;
+  return {
+    ...hero,
+    bindings: {
+      ...hero.bindings,
+      clipTags: [pinnedClipId, ...clipTags.filter((tag) => tag !== pinnedClipId)],
+    },
+  };
+}
+
+/**
+ * One world-body block in the §3.3 unfold choreography. Writes the timing
+ * (unfold.ts) as CSS custom properties; the folded/unfolded transitions
+ * themselves live on .kol-unfold-item in globals.css — transform + opacity
+ * only, --ease-cinematic, everything settled by t=900. Atmosphere bands
+ * resolve in band 3 (the world "breathes out"), other blocks rise in band-2
+ * waves, nearest-to-film first. Reduced motion: globals.css collapses this
+ * to an instant fade (no translate, no parallax) — the film never pauses.
+ */
+function UnfoldItem({
+  block,
+  distance,
+  maxDistance,
+  children,
+}: {
+  block: StoreBlock;
+  distance: number;
+  maxDistance: number;
+  children: ReactNode;
+}) {
+  const timing = unfoldTiming(distance, maxDistance, block.type === "atmosphere");
+  return (
+    <div
+      className="kol-unfold-item"
+      data-unfold-distance={distance}
+      style={
+        {
+          "--unfold-delay": `${timing.delayMs}ms`,
+          "--unfold-dur": `${timing.durationMs}ms`,
+          "--unfold-rise": `${timing.risePx}px`,
+        } as React.CSSProperties
+      }
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
  * The non-hero blocks around the film. Stays MOUNTED in feed/grown (so the
- * unfold is a fade-in, not a mount — and nothing inside loses state); CSS
- * fades it via [data-world-stage], inert removes it from tab order and the
- * accessibility tree while folded.
+ * unfold is a rise-in, not a mount — and nothing inside loses state); each
+ * child UnfoldItem carries its own §3.3 fold/rise CSS via [data-world-stage],
+ * and inert removes the body from tab order and the accessibility tree
+ * while folded.
  */
 function WorldBody({ unfolded, children }: { unfolded: boolean; children: ReactNode }) {
   return (

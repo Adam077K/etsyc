@@ -124,7 +124,9 @@ export const customStore: StoreConfig = {
       type: "hero-video",
       variant: "full-bleed",
       order: 0,
-      props: { showCraftLine: true },
+      // authored statement (E5 statement-present path on the custom/any-hex
+      // theme); 36 chars — under the 48 cap
+      props: { showCraftLine: true, statement: "The vat is alive. I ask; it answers." },
       bindings: { clipTags: ["clip_vat"], imageIds: [], productIds: [], voiceoverIds: [] },
     },
     {
