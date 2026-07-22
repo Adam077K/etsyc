@@ -54,6 +54,16 @@ export function FilmFrame({
       });
       return;
     }
+    // B4 reduced-motion rule: supporting reels (process-reel, any non-hero
+    // frame) go STATIC — the poster is the designed still, no autoplay.
+    // Only the persistent film is exempt (it is content, not decoration,
+    // and playback continuity is its own AC) — that path returned above.
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
     if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       (entries) => {
