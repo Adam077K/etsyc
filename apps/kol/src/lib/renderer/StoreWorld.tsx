@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { HeroStage } from "./HeroStage";
 import { renderBlock } from "./render-block";
 import { isWorldUnfolded, STAGE_LABELS, WORLD_STAGES, type WorldStage } from "./stages";
+import { useProductNarration } from "./useProductNarration";
 
 export interface StoreWorldProps {
   config: StoreConfig;
@@ -18,6 +19,12 @@ export interface StoreWorldProps {
   isPreview?: boolean;
   /** Simulated buyer-journey stage the world starts in. */
   initialStage?: WorldStage;
+  /**
+   * Product the dock narrates at NARRATE_SHRINK (B4's product-click wiring
+   * sets it; B6 keeps it while the product page renders around the dock).
+   * null/omitted → the engine's store-wide narration fallback applies.
+   */
+  narrationProductId?: string | null;
 }
 
 /**
@@ -48,8 +55,19 @@ export function StoreWorld({
   blockStates,
   isPreview = false,
   initialStage = "world-open",
+  narrationProductId = null,
 }: StoreWorldProps) {
   const [stage, setStage] = useState<WorldStage>(initialStage);
+
+  // B5: entering NARRATE_SHRINK asks the engine for the product's
+  // narration clip and cross-fades it into the docked film; no match /
+  // any fault → the persistent clip plays on, indistinguishable (§5.4).
+  // `data-narration` below is the QA/e2e observability hook — invisible.
+  const { status: narrationStatus } = useProductNarration({
+    storeId: config.storeId,
+    productId: narrationProductId,
+    active: stage === "narrate-shrink",
+  });
 
   // Renderer-level EMPTY: an unpublished world never renders a broken shell.
   // Preview is the seller/critic surface — it may look at any status.
@@ -82,6 +100,7 @@ export function StoreWorld({
       data-theme-kind={config.theme.kind}
       data-motion-preset={config.theme.motionPreset}
       data-world-stage={stage}
+      data-narration={narrationStatus}
       style={themeStyle(config.theme)}
       className={cn(
         "kol-world flex min-h-screen flex-col bg-ground font-text text-body text-ink",
