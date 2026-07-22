@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { ErrorInline } from "@/components/states/ErrorInline";
 import { Skeleton } from "@/components/states/Skeleton";
+import { useWorldInteraction } from "@/lib/renderer/world-interaction";
 import type { Product } from "@/lib/store-config/types";
 import { cn, formatPrice } from "@/lib/utils";
 import {
@@ -150,12 +151,13 @@ function ProductCard({
   oversized?: boolean;
 }) {
   const image = imageById(data, product.mediaIds[0]);
+  const interaction = useWorldInteraction();
   const voiceover = voiceoverIds
     .map((id) => voiceoverById(data, id))
     .find((vo) => vo?.elementRef.kind === "product" && vo.elementRef.id === product.id);
 
-  return (
-    <article className="group transition-transform duration-state ease-kol hover:-translate-y-0.5">
+  const body = (
+    <>
       <div className="overflow-hidden rounded-md transition-shadow duration-state ease-kol group-hover:shadow-card">
         {image ? (
           <SmartImage image={image} rounded={false} className={cn(oversized && "md:aspect-[4/5]")} />
@@ -176,6 +178,28 @@ function ProductCard({
         </div>
         {product.badges[0] ? <Badge>{product.badges[0]}</Badge> : null}
       </div>
+    </>
+  );
+
+  return (
+    <article className="group transition-transform duration-state ease-kol hover:-translate-y-0.5">
+      {/* B4: in a live world the card is the doorway toward NARRATE_SHRINK.
+          A native button (keyboard + global :focus-visible ring) whose
+          accessible name IS the card content; TapToHear stays a SIBLING —
+          nested interactive controls are invalid and unreachable. Without
+          the world context (preview matrix, bare mounts) the card renders
+          exactly as Wave 2 shipped. */}
+      {interaction ? (
+        <button
+          type="button"
+          onClick={() => interaction.onProductSelect(product.id)}
+          className="block w-full cursor-pointer text-left"
+        >
+          {body}
+        </button>
+      ) : (
+        body
+      )}
       {voiceover ? (
         <TapToHear src={voiceover.src} label={voiceover.label} className="mt-2 px-3 py-1.5" />
       ) : null}

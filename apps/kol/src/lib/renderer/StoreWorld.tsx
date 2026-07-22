@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import type { BlockState } from "@/components/blocks/shared";
+import { BrowseSwapController } from "@/lib/browse/BrowseSwapController";
 import type { StoreBlock, StoreConfig } from "@/lib/store-config/types";
 import { themeStyle } from "@/lib/theme/apply-theme";
 import { cn } from "@/lib/utils";
 import { HeroStage } from "./HeroStage";
 import { renderBlock } from "./render-block";
 import { isWorldUnfolded, STAGE_LABELS, WORLD_STAGES, type WorldStage } from "./stages";
+import { WorldInteractionContext, type WorldInteraction } from "./world-interaction";
 
 export interface StoreWorldProps {
   config: StoreConfig;
@@ -18,6 +20,11 @@ export interface StoreWorldProps {
   isPreview?: boolean;
   /** Simulated buyer-journey stage the world starts in. */
   initialStage?: WorldStage;
+  /**
+   * B5/B6 hook: fires alongside the built-in NARRATE_SHRINK advance when a
+   * buyer clicks a product (B4 exposes the handoff; B5 owns the shrink).
+   */
+  onProductSelect?: (productId: string) => void;
 }
 
 /**
@@ -48,8 +55,26 @@ export function StoreWorld({
   blockStates,
   isPreview = false,
   initialStage = "world-open",
+  onProductSelect,
 }: StoreWorldProps) {
   const [stage, setStage] = useState<WorldStage>(initialStage);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
+  // B4 → B5 handoff: a product click advances toward NARRATE_SHRINK (the
+  // Film Layer's dock edge fires via HeroStage) and records the product on
+  // the world root; B5 narrates it, B4 never builds the shrink.
+  const interaction = useMemo<WorldInteraction>(
+    () => ({
+      selectedProductId,
+      onProductSelect: (productId: string) => {
+        setSelectedProductId(productId);
+        onProductSelect?.(productId);
+        setStage("narrate-shrink");
+      },
+    }),
+    [selectedProductId, onProductSelect],
+  );
 
   // Renderer-level EMPTY: an unpublished world never renders a broken shell.
   // Preview is the seller/critic surface — it may look at any status.
@@ -78,28 +103,44 @@ export function StoreWorld({
 
   return (
     <div
+      ref={rootRef}
       data-store={config.storeId}
       data-theme-kind={config.theme.kind}
       data-motion-preset={config.theme.motionPreset}
       data-world-stage={stage}
+      data-selected-product={selectedProductId ?? undefined}
       style={themeStyle(config.theme)}
       className={cn(
         "kol-world flex min-h-screen flex-col bg-ground font-text text-body text-ink",
         "gap-[var(--space-section)] pb-[var(--space-section)]",
       )}
     >
-      {before.length > 0 ? (
-        <WorldBody unfolded={unfolded}>
-          {before.map((block) => renderBlock(block, data, stateOf(block), isPreview))}
-        </WorldBody>
-      ) : null}
+      <WorldInteractionContext.Provider value={interaction}>
+        {before.length > 0 ? (
+          <WorldBody unfolded={unfolded}>
+            {before.map((block) => renderBlock(block, data, stateOf(block), isPreview))}
+          </WorldBody>
+        ) : null}
+        {hero ? (
+          <HeroStage stage={stage}>{renderBlock(hero, data, stateOf(hero), isPreview)}</HeroStage>
+        ) : null}
+        {after.length > 0 ? (
+          <WorldBody unfolded={unfolded}>
+            {after.map((block) => renderBlock(block, data, stateOf(block), isPreview))}
+          </WorldBody>
+        ) : null}
+      </WorldInteractionContext.Provider>
+      {/* B4 — the WORLD_BROWSE choreographer: first-scroll stage advance +
+          scoring-driven clip swaps at block boundaries. Headless; only a
+          world with a hero (a film to swap) mounts it. */}
       {hero ? (
-        <HeroStage stage={stage}>{renderBlock(hero, data, stateOf(hero), isPreview)}</HeroStage>
-      ) : null}
-      {after.length > 0 ? (
-        <WorldBody unfolded={unfolded}>
-          {after.map((block) => renderBlock(block, data, stateOf(block), isPreview))}
-        </WorldBody>
+        <BrowseSwapController
+          storeId={config.storeId}
+          clips={config.media.clips}
+          stage={stage}
+          worldRef={rootRef}
+          onEnterBrowse={() => setStage("world-browse")}
+        />
       ) : null}
       {isPreview ? <StageRail stage={stage} onStage={setStage} /> : null}
     </div>
