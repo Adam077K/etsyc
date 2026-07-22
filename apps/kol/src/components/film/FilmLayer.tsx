@@ -14,6 +14,7 @@ import { FilmControls } from "@/components/media/FilmControls";
 import { PosterStill } from "@/components/media/PosterStill";
 import { cn } from "@/lib/utils";
 import { EDGE_TABLE, resolveEdgeMs, resolveSwapMs, type FilmEdge } from "./edge-table";
+import { readSpringVideoParams, springLinearEasing } from "./spring-easing";
 
 /**
  * FilmLayer — ONE film, mounted once at app root, for the life of the
@@ -197,14 +198,23 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       const sy = first.height / last.height;
 
       const spec = EDGE_TABLE[edge];
+      const durationMs = resolveEdgeMs(edge, options);
       frame.style.transition = "none";
       frame.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
       void frame.getBoundingClientRect();
       frame.style.transitionProperty = "transform";
-      frame.style.transitionDuration = `${resolveEdgeMs(edge, options)}ms`;
-      // literal fallback first; the var() form overwrites where supported
+      frame.style.transitionDuration = `${durationMs}ms`;
+      // literal fallback first; richer forms overwrite where supported —
+      // an engine that rejects a value keeps the previous one
       frame.style.transitionTimingFunction = spec.easingFallback;
       frame.style.setProperty("transition-timing-function", spec.easing);
+      if (spec.spring) {
+        // dock/undock ride the --spring-video linear() curve (§5.2)
+        frame.style.setProperty(
+          "transition-timing-function",
+          springLinearEasing(readSpringVideoParams(), durationMs),
+        );
+      }
       frame.style.transform = "";
     },
     [],

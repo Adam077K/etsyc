@@ -283,4 +283,12 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* §5.3 — the film is content, not decoration. Under reduced motion the
+     Film Layer SNAPS to its new rect (the FLIP's invert step is skipped in
+     JS, never run at 0.01ms) and the film keeps playing; the in-frame clip
+     swap remains a real opacity cross-fade at --dur-state. The class
+     outranks the * collapse above at equal importance. */
+  .kol-film-buffer {
+    transition-duration: var(--dur-state) !important;
+  }
 }

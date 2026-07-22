@@ -26,6 +26,8 @@ export interface EdgeSpec {
   easing: string;
   /** Literal curve for style engines that reject var() in timing functions. */
   easingFallback: string;
+  /** FLIP release rides a linear() spring generated from --spring-video. */
+  spring?: boolean;
 }
 
 const EASE_KOL = "cubic-bezier(0.32, 0.72, 0, 1)";
@@ -60,6 +62,7 @@ export const EDGE_TABLE: Record<FilmEdge, EdgeSpec> = {
     fallbackMs: 440,
     easing: "var(--ease-cinematic)",
     easingFallback: EASE_CINEMATIC,
+    spring: true,
   },
   /** NARRATE_SHRINK → WORLD_BROWSE — dock reversed at --return-ratio. */
   undock: {
@@ -68,6 +71,7 @@ export const EDGE_TABLE: Record<FilmEdge, EdgeSpec> = {
     returnRatio: true,
     easing: "var(--ease-cinematic)",
     easingFallback: EASE_CINEMATIC,
+    spring: true,
   },
 };
 
