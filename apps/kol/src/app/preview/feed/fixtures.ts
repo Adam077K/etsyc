@@ -9,6 +9,13 @@ import type { FeedCard } from "@/lib/feed/select";
  * posters, which is the designed quiet-failure path.
  */
 
+/**
+ * 18 DISTINCT makers — one per card at the full engine limit. The gate-2
+ * critic ruled the N=18 capture unevidenced because 12 makers cycled
+ * (`MAKERS[i % MAKERS.length]`) and 6 appeared twice; the engine itself
+ * never repeats a store (`distinct on (store_id)`), so the fixture pool
+ * must be at least as distinct as the data it stands in for.
+ */
 const MAKERS: ReadonlyArray<{ name: string; craft: string; place: string }> = [
   { name: "Sena Okafor", craft: "Ceramicist", place: "Lisbon" },
   { name: "Noor Haddad", craft: "Natural dyer", place: "Amman" },
@@ -22,6 +29,12 @@ const MAKERS: ReadonlyArray<{ name: string; craft: string; place: string }> = [
   { name: "Priya Raghavan", craft: "Block printer", place: "Jaipur" },
   { name: "Anouk Visser", craft: "Basket weaver", place: "Utrecht" },
   { name: "Kofi Mensah", craft: "Kente weaver", place: "Kumasi" },
+  { name: "Hana Yoshida", craft: "Indigo dyer", place: "Tokushima" },
+  { name: "Lars Eklund", craft: "Chairmaker", place: "Malmö" },
+  { name: "Beatriz Solano", craft: "Silversmith", place: "Taxco" },
+  { name: "Femi Adeyemi", craft: "Adire dyer", place: "Abeokuta" },
+  { name: "Greta Kalniņa", craft: "Willow weaver", place: "Riga" },
+  { name: "Omar Benali", craft: "Zellige cutter", place: "Fez" },
 ];
 
 const POSTERS: readonly string[] = [
