@@ -1,16 +1,45 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import type { Clip } from "@/lib/store-config/types";
 
 /**
- * True only inside the renderer's persistent hero slot (HeroStage).
- * FilmFrame reads this to switch off scroll-gated pausing: the hero film
- * NEVER pauses on a world-stage transition (spec P4 — the signature
- * invariant; the film always wins). Everywhere else the default (false)
- * keeps the catalog's scroll-gated play/pause behavior.
+ * The hero-slot contract between HeroStage (the slot registrar) and
+ * FilmFrame (the film primitive), post-Amendment-A.
+ *
+ * Wave 0 made this a boolean: "you are the persistent hero — play on
+ * mount, never pause." The persistence guarantee has since moved UP a
+ * layer: the film element lives in the app-root Film Layer, and the hero
+ * slot only registers geometry + clip. Three modes:
+ *
+ *   null    — outside any hero slot: FilmFrame keeps its catalog
+ *             behaviour (own <video>, scroll-gated play/pause).
+ *   "self"  — inside HeroStage with no FilmLayerProvider above (bare
+ *             renderer mounts, unit rigs): FilmFrame owns its <video> and
+ *             plays persistently — the exact Wave-0 behaviour.
+ *   "layer" — the real app: FilmFrame renders the poster underlay only
+ *             and registers its frame + clip; the Film Layer's root
+ *             player IS the film. It never unmounts and never shows a
+ *             paused or black frame (spec P4, relocated).
  */
-export const HeroPersistenceContext = createContext(false);
+export type HeroFilmSlot =
+  | { mode: "self" }
+  | {
+      mode: "layer";
+      registerFilm: (element: HTMLElement, clip: Clip) => () => void;
+      /**
+       * True while the film is claimed AWAY from the hero slot (docked at
+       * the corner) — the slot shows its own poster again. While the film
+       * IS here, the slot is a transparent window beneath the layer's
+       * --z-film-bed plane, and the slot's chrome (heading, craft line,
+       * scrim) reads over the film per the stacking contract in
+       * globals.css.
+       */
+      filmAway: boolean;
+    };
 
-export function useHeroPersistence(): boolean {
+export const HeroPersistenceContext = createContext<HeroFilmSlot | null>(null);
+
+export function useHeroPersistence(): HeroFilmSlot | null {
   return useContext(HeroPersistenceContext);
 }

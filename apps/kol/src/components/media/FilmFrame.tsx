@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Captions, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useHeroPersistence } from "@/lib/renderer/hero-persistence";
 import type { Clip } from "@/lib/store-config/types";
 import { cn } from "@/lib/utils";
+import { FilmControls } from "./FilmControls";
 import { clipObjectPosition } from "./focal-point";
 import { PosterStill } from "./PosterStill";
 
@@ -14,9 +14,12 @@ import { PosterStill } from "./PosterStill";
  * captions toggle, quiet fallback to the poster frame on decode/404 failure
  * so the world stays usable around the still. Autoplay is scroll-gated
  * (catalog §6): plays on scroll-into-view, pauses on scroll-out — EXCEPT
- * inside the renderer's persistent hero slot (HeroPersistenceContext),
- * where the film plays on mount and is never paused by this component
- * (spec P4: the hero never pauses across world-stage transitions).
+ * inside the renderer's hero slot (HeroPersistenceContext), where the film
+ * never pauses (spec P4). Post-Amendment-A the hero slot has two shapes:
+ * in "layer" mode the app-root Film Layer owns the video and this frame is
+ * only the SLOT — a poster underlay registering its rect + clip; in "self"
+ * mode (no FilmLayerProvider above — bare renderer mounts, unit rigs) this
+ * frame owns its video and plays persistently, exactly as Wave 0 did.
  */
 export function FilmFrame({
   clip,
@@ -31,7 +34,8 @@ export function FilmFrame({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const persistent = useHeroPersistence();
+  const heroSlot = useHeroPersistence();
+  const persistent = heroSlot?.mode === "self";
   const [failed, setFailed] = useState(false);
   const [muted, setMuted] = useState(true);
   const [captionsOn, setCaptionsOn] = useState(false);
@@ -76,6 +80,19 @@ export function FilmFrame({
     const track = video.textTracks[0];
     if (track) track.mode = captionsOn ? "showing" : "hidden";
   }, [captionsOn, failed]);
+
+  // "layer" mode: the Film Layer owns the film element — this frame is the
+  // slot registrar and the poster-first paint beneath it.
+  if (heroSlot?.mode === "layer") {
+    return (
+      <FilmSlotFrame
+        clip={clip}
+        className={className}
+        register={heroSlot.registerFilm}
+        filmAway={heroSlot.filmAway}
+      />
+    );
+  }
 
   if (failed) {
     return (
@@ -125,32 +142,71 @@ export function FilmFrame({
         ) : null}
       </video>
       {/* minimal controls: mute + captions only — appear on hover/focus */}
-      <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 transition-opacity duration-state ease-kol focus-within:opacity-100 group-hover:opacity-100">
-        <button
-          type="button"
-          aria-label={muted ? "Unmute" : "Mute"}
-          aria-pressed={!muted}
-          onClick={() => setMuted((m) => !m)}
-          className="flex h-11 w-11 items-center justify-center rounded-pill bg-surface/85 text-ink transition-transform duration-tap ease-kol active:scale-[0.98]"
-        >
-          {muted ? (
-            <VolumeX className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <Volume2 className="h-4 w-4" aria-hidden="true" />
-          )}
-        </button>
-        {clip.captionsSrc ? (
-          <button
-            type="button"
-            aria-label={captionsOn ? "Hide captions" : "Show captions"}
-            aria-pressed={captionsOn}
-            onClick={() => setCaptionsOn((c) => !c)}
-            className="flex h-11 w-11 items-center justify-center rounded-pill bg-surface/85 text-ink transition-transform duration-tap ease-kol active:scale-[0.98]"
-          >
-            <Captions className="h-4 w-4" aria-hidden="true" />
-          </button>
-        ) : null}
-      </div>
+      <FilmControls
+        muted={muted}
+        onMuteToggle={() => setMuted((m) => !m)}
+        captionsOn={captionsOn}
+        onCaptionsToggle={() => setCaptionsOn((c) => !c)}
+        showCaptionsToggle={clip.captionsSrc !== null}
+      />
+    </div>
+  );
+}
+
+/**
+ * The hero slot under a Film Layer: registers its frame + clip with
+ * HeroStage, which claims the film per stage. Once claimed, the slot is a
+ * TRANSPARENT WINDOW — its poster and surface hide, and the film paints
+ * through from the --z-film-bed plane BELOW the slot's chrome (stacking
+ * contract, globals.css), so the maker's headline, craft line and
+ * .kol-scrim read over the film exactly as Wave 0 shipped. The poster is
+ * the SSR/pre-claim paint (never a posterless hero before hydration) and
+ * returns whenever the film is away at the docked corner.
+ */
+function FilmSlotFrame({
+  clip,
+  className,
+  register,
+  filmAway,
+}: {
+  clip: Clip;
+  className?: string;
+  register: (element: HTMLElement, clip: Clip) => () => void;
+  filmAway: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [claimed, setClaimed] = useState(false);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const release = register(element, clip);
+    // the claim lands synchronously inside register — hide the poster in
+    // the same pre-paint flush (the layer's own underlay takes over)
+    setClaimed(true);
+    return () => {
+      setClaimed(false);
+      release();
+    };
+  }, [register, clip]);
+  const showPoster = !claimed || filmAway;
+  return (
+    <div
+      ref={ref}
+      data-film-slot=""
+      data-film-away={filmAway ? "true" : undefined}
+      className={cn(
+        "relative w-full overflow-hidden",
+        showPoster && "bg-surface",
+        className,
+      )}
+    >
+      {showPoster ? (
+        <PosterStill
+          src={clip.poster}
+          className="absolute inset-0 h-full w-full object-cover"
+          objectPosition={clipObjectPosition(clip)}
+        />
+      ) : null}
     </div>
   );
 }

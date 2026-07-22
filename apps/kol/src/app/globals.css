@@ -79,6 +79,42 @@
   --spring-video: 210 26 1;
   --spring-liquid: 140 18 1.2;
 
+  /* --- Wave-3 buyer-state transition grammar (design-direction §5.1).
+         OWNED BY FILM-LAYER — B2–B5 consume these and never add here
+         (four parallel branches editing this block is a guaranteed
+         conflict; Amendment A). --- */
+  --dur-grow: var(--dur-reveal); /* 520ms — FEED → GROWN */
+  --dur-ungrow: 405ms; /* 0.78 × grow — GROWN → FEED */
+  --dur-dock: 440ms; /* WORLD_BROWSE ↔ NARRATE_SHRINK spring settle */
+  --dur-swap: 120ms; /* in-frame clip cross-fade — never a black frame */
+  --return-ratio: 0.78; /* every reverse edge runs at 0.78 × its forward edge */
+
+  /* --- film stacking contract (gate-1 P1 z-order). B3/B4/B5 layer against
+     this — change only with a DECISIONS.md entry. The app-root Film Layer
+     is a SIBLING of all page content, so film-vs-world paint order is
+     decided here, in root-level z bands:
+       --z-film-bed    (30)  the UNDOCKED film plane — above world flow
+                             content, below slot chrome.
+       --z-film-chrome (35)  slot overlay chrome. .kol-hero-stage lifts
+                             here, so the maker's headline, craft line and
+                             .kol-scrim read OVER the film (the shipped
+                             Wave-0 guarantee, and B3's statement AC). A
+                             claimed slot is a transparent window — its
+                             FilmSlotFrame hides poster + surface. Any
+                             future slot whose chrome must read over the
+                             film (B1b cards) lifts its chrome the same
+                             way, and must keep the chrome's ancestor
+                             chain free of intervening stacking contexts.
+       --z-film        (40)  the DOCKED film plane (the old
+                             .kol-hero-docked z) — the corner card floats
+                             over chrome. data-film-docked flips the layer
+                             between planes AT CLAIM TIME, so the whole
+                             dock/undock flight rides the docked plane.
+     App chrome above every film plane stays at z >= 50 (StageRail). --- */
+  --z-film-bed: 30;
+  --z-film-chrome: 35;
+  --z-film: 40;
+
   /* --- app-chrome fallback palette (KOL's own UI = sunbaked light,
          design-system §2.1) so pages outside a world root are never
          unstyled. Worlds override every one of these at their root. --- */
@@ -178,25 +214,29 @@
     pointer-events: none;
   }
 
-  /* ---- P4 world-stage choreography — the film always wins.
-          Transform/opacity only; the hero <video> itself is never
-          touched (HeroStage keeps its DOM identity). The global
-          reduced-motion block below collapses every transition
-          here to instant — the hero still persists. ---- */
+  /* ---- P4 world-stage choreography — the film always wins. The film
+          ELEMENT lives in the app-root Film Layer (Amendment A): the layer
+          FLIPs between the rects HeroStage publishes per stage (the old
+          0.55/0.82 scales and the .kol-hero-docked corner geometry moved
+          there), and the rules here only fold the world + the hero slot's
+          chrome. Opacity only. The global reduced-motion block below
+          collapses these; the layer snaps its rect and keeps playing. ---- */
   .kol-hero-stage {
     view-transition-name: hero-video;
+    /* slot chrome band: the hero's heading, craft line and scrim paint
+       over the undocked film per the stacking contract. Flex item of the
+       world root, so z-index applies and lifts this subtree whole; the
+       claimed slot inside is a transparent window for the film. */
+    z-index: var(--z-film-chrome);
   }
   .kol-hero-stage-inner {
-    transform-origin: 50% 0;
-    transition: transform var(--dur-cinema) var(--ease-cinematic);
-    will-change: transform;
+    transition: opacity var(--dur-state) var(--ease-kol);
   }
-  /* feed/grown: the film at card scale, the world folded away around it */
-  [data-world-stage="feed"] .kol-hero-stage-inner {
-    transform: scale(0.55);
-  }
+  /* feed/grown: the world (and the hero slot's headline chrome) is folded
+     away — the Film Layer at card/centre scale IS the surface */
+  [data-world-stage="feed"] .kol-hero-stage-inner,
   [data-world-stage="grown"] .kol-hero-stage-inner {
-    transform: scale(0.82);
+    opacity: 0;
   }
   .kol-world-body {
     transition: opacity var(--dur-unfold) var(--ease-kol);
@@ -206,27 +246,56 @@
     opacity: 0;
     pointer-events: none;
   }
-  /* narrate-shrink: the film docks to a corner (FLIP transform in
-     HeroStage); the docked frame fills its box edge-to-edge, overriding
-     the hero block's in-flow page gutters without the block knowing */
-  .kol-hero-docked {
-    position: fixed;
-    right: var(--space-2);
-    bottom: var(--space-2);
-    z-index: 40;
-    width: clamp(240px, 32vw, 320px);
-    border-radius: var(--radius-md);
+
+  /* ---- the Film Layer (design-direction §6.2, Amendment A) — ONE film,
+          mounted once at app root, FLIPping between published rects.
+          Geometry (position/left/top/size + the FLIP transform) is
+          imperative in FilmLayer.tsx; these classes carry the paint.
+          bg surface means a decode gap can never read as a black frame. ---- */
+  .kol-film-layer {
+    position: fixed; /* pre-claim default; the layer flips absolute/fixed per slot */
+    top: 0;
+    left: 0;
+    /* undocked bed plane — slot chrome (--z-film-chrome) reads over the
+       film; see the stacking contract at the token block */
+    z-index: var(--z-film-bed);
     overflow: hidden;
+    background-color: var(--surface);
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  /* parked (no slot claimed): hidden but never unmounted */
+  .kol-film-layer[data-film-parked] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+  /* docked (viewport-fixed) slots read as the corner film card, floating
+     on the film plane above slot chrome for the whole dock flight */
+  .kol-film-layer[data-film-docked] {
+    z-index: var(--z-film);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-raised);
   }
-  .kol-hero-docked section {
-    padding: 0;
-  }
-  .kol-hero-docked section > div {
-    margin: 0;
+  .kol-film-poster {
+    position: absolute;
+    inset: 0;
+    height: 100%;
     width: 100%;
-    max-width: none;
-    border-radius: 0;
+    object-fit: cover;
+  }
+  /* A/B buffers — a clip swap cross-fades INSIDE the frame over --dur-swap;
+     same-source transitions never touch these (true element persistence) */
+  .kol-film-buffer {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity var(--dur-swap) linear;
+  }
+  .kol-film-front {
+    opacity: 1;
   }
 }
 
@@ -247,5 +316,13 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* §5.3 — the film is content, not decoration. Under reduced motion the
+     Film Layer SNAPS to its new rect (the FLIP's invert step is skipped in
+     JS, never run at 0.01ms) and the film keeps playing; the in-frame clip
+     swap remains a real opacity cross-fade at --dur-state. The class
+     outranks the * collapse above at equal importance. */
+  .kol-film-buffer {
+    transition-duration: var(--dur-state) !important;
   }
 }

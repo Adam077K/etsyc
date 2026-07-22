@@ -28,16 +28,19 @@ export interface StoreWorldProps {
  *     broken shell); loading/error: threaded PER BLOCK via `blockStates`
  *     (progressive skeletons, local degrade), with `state` as the fallback;
  *     success: the full interactive world.
- *  2. Hero persistence — exactly one hero-video mounts inside HeroStage
- *     (`layoutId="hero-video"`) at a stable tree position; world-stage
- *     transitions never remount or pause it. Extra hero blocks (a validator
- *     invariant upstream, P3) are defensively dropped rather than mounting
- *     a second shared element.
+ *  2. Hero persistence — exactly one hero-video block mounts inside
+ *     HeroStage (`layoutId="hero-video"`), which registers the ONE film
+ *     slot with the app-root Film Layer (Amendment A): the film frame
+ *     never unmounts and never shows a paused or black frame across
+ *     world-stage transitions. Extra hero blocks (a validator invariant
+ *     upstream, P3) are defensively dropped rather than registering a
+ *     second shared slot.
  *  3. Stage choreography — `data-world-stage` drives the unfold: in
  *     feed/grown the body is faded out (opacity + inert, CSS in
  *     globals.css); world-open reveals it on --ease-kol; narrate-shrink
- *     docks the film (HeroStage). Blocks keep their own §4.2 reveals —
- *     the renderer never double-animates them.
+ *     docks the film (the Film Layer's dock edge, claimed by HeroStage).
+ *     Blocks keep their own §4.2 reveals — the renderer never
+ *     double-animates them.
  */
 export function StoreWorld({
   config,
