@@ -1,6 +1,9 @@
 import { fileURLToPath } from "node:url";
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -43,9 +46,13 @@ const sellerEmail = `kol-w2wire-live-${runStamp}@example.com`;
 describe.skipIf(!hasKeys)("W2-WIRE live composition (staging DB)", () => {
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 60_000 });
 
-  const admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  // F12 (QA-Lead gate-1 must-fix 5): vitest executes this describe BODY at
+  // collection even under skipIf(true) — only hooks and tests are skipped.
+  // Constructing the client here throws `supabaseUrl is required` on a
+  // keyless checkout, turning the documented auto-skip into a hard FAIL.
+  // beforeAll never runs for a skipped suite, so the fixture client is
+  // built there and nothing at describe scope may touch the network or env.
+  let admin: SupabaseClient<Database>;
 
   let ownerId = "";
   let storeId = "";
@@ -78,6 +85,10 @@ describe.skipIf(!hasKeys)("W2-WIRE live composition (staging DB)", () => {
   }
 
   beforeAll(async () => {
+    admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
     const seller = await admin.auth.admin.createUser({
       email: sellerEmail,
       email_confirm: true,
