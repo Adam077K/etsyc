@@ -330,7 +330,20 @@ is not a rule — it is removing the ability to break it, plus a sweep of the ex
 `live-composition.test.ts` had the collection fix months earlier tagged `F12 (QA-Lead gate-1 must-fix
 5)`; it was fixed in one file and never swept, so six siblings shipped broken. Same lesson.
 
+**The oracle rule (added after implementation):** when centralizing a constant, the *call sites* must
+import it, but the *tests* must keep independently re-typed expected values. If every writer's test
+asserted against the shared declaration, a canon-wide drift would pass all of them at once. As the
+implementing engineer put it: **"re-typed expectations are the oracle; re-typed source was the defect."**
+
+**Corollary — test workarounds can mask the bug they appear to cover.** Browse's suite carried a
+`vi.resetModules` + fresh-import dance that existed solely to work around the frozen `NODE_ENV`. It
+codified the freeze rather than failing it, and would have passed the re-freeze mutation. Removing
+the workaround is what made the assertion load-bearing. Treat any test scaffolding that exists to
+accommodate a known wart as a suspect, not as neutral.
+
 **Reversibility:** reversible
 **Owner:** ceo
 **Affects:** cto, all workers — cookie writes, design tokens, shared selectors, any cross-unit constant
-**Status:** Adopted. Structural fix in flight on `integ/wave3-dryrun`.
+**Status:** Adopted and implemented on `integ/wave3-dryrun` (`ringCookieOptions()` exported once, four
+writers import, three mutations verified red). Seventh instance — the `kol_sid` mint in
+`lib/supabase/middleware.ts` — sanctioned for the same treatment via `lib/feed/session.ts`.
