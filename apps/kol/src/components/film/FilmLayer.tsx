@@ -14,6 +14,7 @@ import { FilmControls } from "@/components/media/FilmControls";
 import { clipObjectPosition } from "@/components/media/focal-point";
 import { PosterStill } from "@/components/media/PosterStill";
 import { cn } from "@/lib/utils";
+import { startAspectCounter, ASPECT_EPSILON } from "./aspect-counter";
 import { EDGE_TABLE, parseCssTime, resolveEdgeMs, resolveSwapMs, type FilmEdge } from "./edge-table";
 import { readSpringVideoParams, springLinearEasing } from "./spring-easing";
 
@@ -326,6 +327,14 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       frame.dataset.filmEdgeMs = String(durationMs);
       frame.style.transform = "";
 
+      // G1-F2: a non-uniform FLIP (grow — 4:5 card → 16:9 column) would
+      // stretch the cover-fit media with the frame for the whole edge.
+      // Counter-scale the buffers + poster per sampled frame so only the
+      // FRAME changes aspect, never the film. Uniform-scale edges skip it
+      // (identity inverse); the flight's dispose is the single stop path.
+      const stopAspectCounter =
+        Math.abs(sx / sy - 1) >= ASPECT_EPSILON ? startAspectCounter(frame) : null;
+
       // track the release so mid-flight rect maintenance defers and then
       // lands as a snap when the transform transition ends
       const token = ++flightTokenRef.current;
@@ -359,6 +368,7 @@ export function FilmLayerProvider({ children }: { children: ReactNode }) {
       flightRef.current = {
         token,
         dispose: () => {
+          stopAspectCounter?.();
           window.clearTimeout(timer);
           frame.removeEventListener("transitionend", onTransitionEnd);
           frame.removeEventListener("transitioncancel", onTransitionEnd);
