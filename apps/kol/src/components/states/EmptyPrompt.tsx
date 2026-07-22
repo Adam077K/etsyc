@@ -22,7 +22,11 @@ export function EmptyPrompt({
       )}
     >
       <p className="font-display text-h3 text-muted">{prompt}</p>
-      {hint ? <p className="max-w-measure text-body text-muted/80">{hint}</p> : null}
+      {/* Hint hierarchy comes from the type scale (caption), never an alpha on
+          an ink token — an 80% alpha on the muted ink over this bg-surface/60
+          backdrop composited to 3.63:1 and failed AA body in 8 of 10
+          palette-modes (no-ink-alpha.test.ts). */}
+      {hint ? <p className="max-w-measure text-caption text-muted">{hint}</p> : null}
     </div>
   );
 }

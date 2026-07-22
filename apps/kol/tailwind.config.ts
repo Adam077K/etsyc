@@ -29,9 +29,12 @@ const config: Config = {
       colors: {
         // palette contract (design-system §2 token contract).
         // CSS relative color wraps every var so Tailwind slash-opacity
-        // (bg-surface/85, text-on-media/90, hover:bg-accent/90 …) composes
+        // (bg-surface/85, bg-surface/60, hover:bg-accent/90 …) composes
         // with the runtime hex vars from BOTH theme paths — a bare var()
         // silently drops every alpha modifier in Tailwind 3.4.
+        // BACKGROUND tokens only: alpha modifiers on ink tokens (text-ink/*,
+        // text-muted/*, text-on-media/*, …) are banned — they compound into
+        // un-audited sub-AA colors (no-ink-alpha.test.ts enforces).
         ...tokenColors([
           "ground",
           "surface",
