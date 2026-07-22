@@ -4,6 +4,40 @@
 
 ---
 
+## ✅ WAVE 3 T1 IS MERGED — `main` @ `2abb982` (2026-07-22)
+
+**Gate 2: PASS, Full tier, zero P0/P1.** Founder-authorised and merged. `origin/main` @ **`2abb982`**.
+
+Post-merge verification on `main` **with keys**: **58 files, 934 passed, 1 skipped, 0 failed** (all nine live suites executing against staging) · typecheck 0 · lint clean.
+
+Gate evidence at the cleared tip `d7bf5d7`, produced on a **pristine detached worktree**:
+- vitest keyless **875 passed / 60 skipped / 0 failed**
+- **Playwright 23/23** — including **`(e) LITERAL`**, the constraint that was *provably unsatisfiable* before the slot table was fixed at its root, and the anti-grid **negative control** rejecting a uniform grid of the same cards
+- critical paths verified **by inspection, not assertion** — one substring hit (`theme/tokens.ts`) opened and confirmed to be design-token hexes; zero credential-shaped strings across the whole range
+
+**The buyer spine is connected end to end for the first time: feed → grow → world → browse → narrate.**
+
+### A fold decision worth preserving
+Merging `test/film-interleave` wholesale conflicted across 10+ files. The cause was material: **that branch carries the pre-rebase B1b (`1bb9c57`) and does not contain `fa513f8`** — merging it would have silently regressed the slot-table work. Only `apps/kol/e2e/film-handoff.spec.ts` was taken, which is what QA-Lead specified. Verified after: the `narrationProductId ?? selectedProductId` seam wiring survived.
+
+### Wave-close conditions — neither blocks the merge, both block "T1 COMPLETE"
+1. **P2-A** — re-run `film-handoff.spec.ts` against post-merge `main` for sign-off (it passes on the gated tip). Related, still open: the spec asserts the frame **survives** navigation but **not that the film keeps playing** — approved for strengthening, never written. *"The film never stops"* is the premise, so a test that proves the element survived hasn't tested the claim.
+2. **P2-B** — the **curated modulated absent-statement nameplate has never been viewed at world scale.** Every seed world authors a statement, so that path never runs on a curated modulated face; it is covered today only through the custom path via noor. Needs a `/preview` fixture with the statement off on hollowgrain or sena.
+
+### Still open, carried forward
+- **R1 uniform nameplate → `display-hero`/600** — ruled, unimplemented. Tracking stays `-0.025em`; `display-hero`/700 is the named fallback only if size alone shows stamping
+- **Constants Register** (`KOL-design-system.md` §6) with the approved **`Proxy-for`** field — ruled, unwritten
+- **6 of 10 palette × mode combinations have never been rendered** — so Design-Lead's shadow-blend and badge-opacity findings *cannot be measured*; the evidence base itself has the hole
+- `--atmosphere-tint-pct` · `blockGround` schema union · `model3d_id` ownership migration (Irreversible) · an **uncommitted** `film-interleave.spec.ts` in the `e2e-interleave` worktree, on no branch, one `git checkout` from gone
+- **`fix/s8-currency-minor-unit` @ `9f6ef09` is NOT merged** — the ISO-4217 exponent work, including an int4 overflow guard that only became reachable once three-decimal currencies were allowed
+
+### Founder items
+1. **Re-apply `supabase/seed/002_w3_seed_worlds.sql`** — all upserts. Two seed worlds still render in the system font stack **on staging**; the fix is merged in code and untrue in production until this runs
+2. **Real maker footage** — gates both wave-close conditions and five acceptance criteria. Every judgement in this document was made against synthetic gradients from one generative template
+3. **`store-media` bucket** — public read, authenticated write
+
+---
+
 ## 🛑 SPEND LIMIT AGAIN — EXACT RESUME POINT (2026-07-22 ~18:00)
 
 **All workers died on `You've hit your monthly spend limit`.** Nothing was lost — everything is committed. **Gate 2 is TWO FOLDS AND ONE TEST RUN from a verdict.** QA-Lead has already committed to issuing PASS on four artifacts without re-reading the 143-file base diff.
