@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { HeroStage } from "./HeroStage";
 import { renderBlock } from "./render-block";
 import { isWorldUnfolded, STAGE_LABELS, WORLD_STAGES, type WorldStage } from "./stages";
+import { useProductNarration } from "./useProductNarration";
 import { WorldInteractionContext, type WorldInteraction } from "./world-interaction";
 
 export interface StoreWorldProps {
@@ -25,6 +26,15 @@ export interface StoreWorldProps {
    * buyer clicks a product (B4 exposes the handoff; B5 owns the shrink).
    */
   onProductSelect?: (productId: string) => void;
+  /**
+   * Product the dock narrates at NARRATE_SHRINK. Normally OMITTED — the
+   * in-world journey wires itself: B4's product click records
+   * `selectedProductId` and the narration hook consumes it directly. Pass
+   * this only to OVERRIDE that wiring (B6: the product page renders around
+   * the dock and owns which product is open). null/omitted with no click
+   * recorded → the engine's store-wide narration fallback applies.
+   */
+  narrationProductId?: string | null;
 }
 
 /**
@@ -56,6 +66,7 @@ export function StoreWorld({
   isPreview = false,
   initialStage = "world-open",
   onProductSelect,
+  narrationProductId = null,
 }: StoreWorldProps) {
   const [stage, setStage] = useState<WorldStage>(initialStage);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -75,6 +86,22 @@ export function StoreWorld({
     }),
     [selectedProductId, onProductSelect],
   );
+
+  // B5: entering NARRATE_SHRINK asks the engine for the product's
+  // narration clip and cross-fades it into the docked film; no match /
+  // any fault → the persistent clip plays on, indistinguishable (§5.4).
+  // `data-narration` below is the QA/e2e observability hook — invisible.
+  //
+  // THE B4 → B5 SEAM (integration wiring — the two units shipped unwired):
+  // the productId is B4's recorded click unless the caller overrides it.
+  // Without this line the hook read only the prop, nobody passed it on the
+  // in-world journey, and NARRATE_SHRINK narrated the store-wide fallback
+  // instead of the product the buyer tapped.
+  const { status: narrationStatus } = useProductNarration({
+    storeId: config.storeId,
+    productId: narrationProductId ?? selectedProductId,
+    active: stage === "narrate-shrink",
+  });
 
   // Renderer-level EMPTY: an unpublished world never renders a broken shell.
   // Preview is the seller/critic surface — it may look at any status.
@@ -109,6 +136,7 @@ export function StoreWorld({
       data-motion-preset={config.theme.motionPreset}
       data-world-stage={stage}
       data-selected-product={selectedProductId ?? undefined}
+      data-narration={narrationStatus}
       style={themeStyle(config.theme)}
       className={cn(
         "kol-world flex min-h-screen flex-col bg-ground font-text text-body text-ink",

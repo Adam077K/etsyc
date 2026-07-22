@@ -15,6 +15,7 @@ import {
   type FilmSlotOptions,
 } from "@/components/film/FilmLayer";
 import type { Clip } from "@/lib/store-config/types";
+import { dockRectFor } from "./dock-geometry";
 import { HeroPersistenceContext, type HeroFilmSlot } from "./hero-persistence";
 import { heroEdgeFor } from "./stage-edges";
 import type { WorldStage } from "./stages";
@@ -34,8 +35,9 @@ import type { WorldStage } from "./stages";
  *     (feed/grown at Wave-0's simulated card scales, world stages at the
  *     frame's own box) and claims the film on the §5.2 edge for each stage
  *     pair. The dock FLIP moved out of here into the Film Layer as the
- *     WORLD_BROWSE ↔ NARRATE_SHRINK edge — B5 will publish the corner
- *     rect itself and must not reimplement the FLIP;
+ *     WORLD_BROWSE ↔ NARRATE_SHRINK edge — the corner rect is B5's §5.3
+ *     exclusion-zone geometry (dock-geometry.ts); the FLIP stays the
+ *     layer's;
  *   - keeps pinning its in-flow height so the world never reflows while
  *     the film sits in the viewport-fixed corner rect;
  *   - renders no film element. FilmFrame, via HeroPersistenceContext,
@@ -73,23 +75,19 @@ export function HeroStage({ stage, children }: { stage: WorldStage; children: Re
     (s: WorldStage): { slotId: string; rect: FilmRect; options: FilmSlotOptions } | null => {
       const element = filmElRef.current;
       if (!element) return null;
-      const base = element.getBoundingClientRect();
       if (s === "narrate-shrink") {
-        // the old .kol-hero-docked geometry, now computed: clamp(240px,
-        // 32vw, 320px) wide, --space-2 off the corner. B5 replaces this
-        // with its exclusion-zone-aware rect.
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const margin = 16;
-        const width = Math.min(320, Math.max(240, vw * 0.32));
-        const aspect = base.width > 0 ? base.height / base.width : 9 / 16;
-        const height = width * aspect;
+        // B5: the §5.3 exclusion-zone geometry (dock-geometry.ts) —
+        // breakpoint-sized 16:9 dock, bottom-right ≥768 / bottom-centre
+        // below, inset inside the CTA exclusion zone the product layout
+        // (B6) reserves. Size is spec-locked (320×180 at ≥1440); the
+        // radius snaps here and the shadow rides [data-film-docked].
         return {
           slotId: dockSlotId,
-          rect: { left: vw - width - margin, top: vh - height - margin, width, height },
+          rect: dockRectFor(window.innerWidth, window.innerHeight),
           options: { fixed: true, radius: "var(--radius-md)" },
         };
       }
+      const base = element.getBoundingClientRect();
       const scale = STAGE_FILM_SCALE[s];
       return {
         slotId,
