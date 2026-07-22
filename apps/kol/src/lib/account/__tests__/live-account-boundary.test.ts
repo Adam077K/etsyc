@@ -155,7 +155,7 @@ describe.skipIf(!hasKeys)("P2 live account boundary (staging DB)", () => {
     expect(scan.error).toBeNull();
     for (const row of scan.data ?? []) {
       expect(row.id === userAId || row.role === "seller").toBe(true);
-      expect(row.bio).not.toContain("B-PRIVATE-BIO");
+      expect(row.bio ?? "").not.toContain("B-PRIVATE-BIO");
     }
   });
 
