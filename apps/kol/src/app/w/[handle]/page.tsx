@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { createEngineDeps, selectVideos } from "@/lib/engine";
-import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_RING_COOKIE, ringCookieOptions } from "@/lib/feed/select";
 import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { renderStore } from "@/lib/renderer/render-store";
 import { validateStoreConfig } from "@/lib/store-config/schema";
@@ -86,12 +86,8 @@ async function selectSignatureClipId(storeId: string): Promise<string | undefine
       read: () => cookieStore.get(FEED_RING_COOKIE)?.value,
       write: (value: string) => {
         try {
-          cookieStore.set(FEED_RING_COOKIE, value, {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
-            path: "/",
-          });
+          // the canonical attribute set — imported, never re-typed (DECISIONS)
+          cookieStore.set(FEED_RING_COOKIE, value, ringCookieOptions());
         } catch {
           // read-only cookie store during RSC render — deliberate, not a gap
         }

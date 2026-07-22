@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -54,6 +54,7 @@ const RING_WRITER_FILES = [
   "src/lib/grow/actions.ts",
   "src/lib/browse/select-browse-clip.ts",
   "src/lib/narration/actions.ts",
+  "src/app/w/[handle]/page.tsx",
 ] as const;
 
 /** The kol_sid mint — the middleware is the SOLE session-cookie writer. */
@@ -62,6 +63,19 @@ const SESSION_MINT_FILE = "src/lib/supabase/middleware.ts";
 function sourceOf(file: string): string {
   // vitest runs with cwd = apps/kol (film-layer.test.tsx precedent)
   return readFileSync(join(process.cwd(), file), "utf8");
+}
+
+/** Every non-test source file under src — the scan the list is checked against. */
+function allSourceFiles(): string[] {
+  const root = process.cwd();
+  return readdirSync(join(root, "src"), { recursive: true, withFileTypes: true })
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        /\.(ts|tsx)$/.test(entry.name) &&
+        !/\.test\.(ts|tsx)$/.test(entry.name),
+    )
+    .map((entry) => relative(root, join(entry.parentPath, entry.name)));
 }
 
 describe("firstPartyCookieOptions — the canonical attribute set", () => {
@@ -97,6 +111,29 @@ describe("firstPartyCookieOptions — the canonical attribute set", () => {
 });
 
 describe("cookie writers — single declaration, no re-typed attribute sets", () => {
+  it("the writer LIST matches a full tree scan — an unlisted writer fails here, not silently", () => {
+    // The gap this closes: B3's world page arrived as a FIFTH ring writer
+    // with an inline attribute set, and the list-based conformance below
+    // never looked at it — a suite that audits only the files it already
+    // knows about cannot catch the writer it doesn't. The scan is the
+    // census; the list is the audit roster; they must agree.
+    const ringWriters = allSourceFiles()
+      .filter((file) => /\.set\(\s*FEED_RING_COOKIE/.test(sourceOf(file)))
+      .sort();
+    expect(ringWriters).toEqual([...RING_WRITER_FILES].sort());
+
+    const sessionWriters = allSourceFiles()
+      .filter((file) => /\.set\(\s*FEED_SESSION_COOKIE/.test(sourceOf(file)))
+      .sort();
+    expect(sessionWriters).toEqual([SESSION_MINT_FILE]);
+
+    // and nobody outside the canon declares the attribute set at all
+    const declarers = allSourceFiles()
+      .filter((file) => /httpOnly/.test(sourceOf(file)))
+      .sort();
+    expect(declarers).toEqual([CANON_FILE]);
+  });
+
   it("every ring write passes ringCookieOptions() — never an inline object", () => {
     for (const file of RING_WRITER_FILES) {
       const source = sourceOf(file);
