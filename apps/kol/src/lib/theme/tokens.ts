@@ -69,7 +69,10 @@ export const palettes: Record<PaletteId, Palette> = {
   sunbaked: {
     id: "sunbaked",
     light: {
-      ground: "#F6EFE3", surface: "#FFFBF3", ink: "#221C15", muted: "#6F6153",
+      // muted regraded #6F6153 → #645648 (AA headroom fix, 2026-07): sunbaked
+      // light is KOL's own chrome default, so it gets real headroom — 6.19:1
+      // on ground vs 5.23 before. Locked ≥5.5 in aa-audit.test.ts.
+      ground: "#F6EFE3", surface: "#FFFBF3", ink: "#221C15", muted: "#645648",
       line: "#E7DCC8", accent: "#C64A2C", accent2: "#3E7E8C", onMedia: "#FBF3E8",
     },
     dark: {

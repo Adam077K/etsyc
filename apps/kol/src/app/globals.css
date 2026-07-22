@@ -85,7 +85,7 @@
   --ground: #f6efe3;
   --surface: #fffbf3;
   --ink: #221c15;
-  --muted: #6f6153;
+  --muted: #645648; /* must match tokens.ts sunbaked light (aa-audit.test.ts) */
   --line: #e7dcc8;
   --accent: #c64a2c;
   --accent-2: #3e7e8c;
