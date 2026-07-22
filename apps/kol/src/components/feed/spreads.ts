@@ -675,7 +675,14 @@ export interface MobileSlotSpec {
 export const MOBILE_SLOTS: Record<MobileSlotName, MobileSlotSpec> = {
   "M-BLEED": { name: "M-BLEED", leftInsetPx: 0, rightInsetPx: 0, aspect: "16:9" },
   "M-FULL": { name: "M-FULL", leftInsetPx: 32, rightInsetPx: 32, aspect: "4:5" },
-  "M-OFF-L": { name: "M-OFF-L", leftInsetPx: 32, rightInsetPx: 128, aspect: "1:1" },
+  // M-OFF-L's right inset is --space-14 (112), NOT --space-16: at 128 the
+  // two offset slots were 215px width-equal mirrors, so (d)'s 8px guard
+  // deleted their adjacency edge and (d), (e), the bleed cadence and
+  // anti-periodicity could not all hold at once (gate-2 slot-table fix).
+  // The bilateral symmetry was an accident, not a design choice — the
+  // left-anchored card is the heavier presence, and 231×231 reads as an
+  // editorial plate where a narrowed 3:2 would read as a thumbnail.
+  "M-OFF-L": { name: "M-OFF-L", leftInsetPx: 32, rightInsetPx: 112, aspect: "1:1" },
   "M-OFF-R": { name: "M-OFF-R", leftInsetPx: 128, rightInsetPx: 32, aspect: "3:2" },
 };
 
@@ -688,10 +695,11 @@ const MOBILE_SLOT_ORDER: readonly MobileSlotName[] = [
 
 /**
  * Mobile weighs the edge penalty far harder than desktop: the left edge
- * IS the mobile identity (§1.6), and two same-edge cards in a row put a
- * repeating rule on a single screen — §1.7(e) wants every viewport to
- * show a broken edge. Hard constraint 3 still permits a run of two as
- * the escape hatch; this weight makes it a last resort, not a habit.
+ * IS the mobile identity (§1.6). Consecutive same-edge is now a HARD
+ * rule (constraint 3, literal §1.7(e)), so of edgePenalty's two terms
+ * only the second-last-match half is live here — this weight keeps the
+ * edge stream from echoing at distance two as well (32,128,32 is forced
+ * grammar; 32,128,32,128,32,128… without a bleed break is a metronome).
  */
 const MOBILE_EDGE_WEIGHT = 0.95;
 
@@ -713,10 +721,17 @@ export interface MobileAssignment {
  *   1. no slot repeats consecutively;
  *   2. M-BLEED never twice within five cards (which subsumes "at most
  *      once per four");
- *   3. the leading edge never repeats more than twice consecutively;
+ *   3. the leading edge NEVER repeats consecutively — §1.7(e) in its
+ *      literal form. Achievable only since the slot-table fix: with the
+ *      215px mirrors, (d) deleted the M-OFF-L↔M-OFF-R edge and the
+ *      graph degenerated. Now every 32-edge card always has OR (128) or
+ *      B (0) as a legal successor, so the rule cannot deadlock and the
+ *      relax ladder never needs to leak a same-edge pair;
  *   4. no two adjacent cards share a rendered width within 8px at 375
- *      (assertion (d) as a constraint — M-OFF-L and M-OFF-R are
- *      equal-width mirrors and therefore never adjacent).
+ *      (assertion (d) as a constraint — since the §1.6 slot-table fix
+ *      the four widths are 375/311/231/215, all >8px apart, so this
+ *      guard is a tripwire against future table edits rather than an
+ *      edge-deleter: every slot pair may be adjacent again).
  */
 export function composeMobileFeed(
   cards: readonly ComposableCard[],
@@ -751,8 +766,7 @@ export function composeMobileFeed(
     }
     if (
       !relax.skipEdgeRun &&
-      state.edge1 === spec.leftInsetPx &&
-      state.edge2 === spec.leftInsetPx
+      state.edge1 === spec.leftInsetPx
     ) {
       return false;
     }
