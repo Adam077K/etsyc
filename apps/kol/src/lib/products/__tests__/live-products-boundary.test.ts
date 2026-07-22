@@ -1,7 +1,10 @@
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -50,22 +53,18 @@ const PRICE_MINOR = 4850; // £48.50 — integer minor units, the only price any
 describe.skipIf(!hasKeys)("S8 live products boundary (staging DB)", () => {
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 90_000 });
 
-  const admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const asSellerA = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const asSellerB = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const asBuyerC = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  // vitest executes this describe BODY at collection even under skipIf(true)
+  // — only hooks and tests are skipped. Constructing the clients here throws
+  // `supabaseUrl is required` on a keyless checkout, turning the documented
+  // auto-skip into a hard FAIL (the live-suite-collection-fix pattern; this
+  // suite was written on a branch cut before that fix landed). beforeAll
+  // never runs for a skipped suite, so the clients are built there.
+  let admin: SupabaseClient<Database>;
+  let asSellerA: SupabaseClient<Database>;
+  let asSellerB: SupabaseClient<Database>;
+  let asBuyerC: SupabaseClient<Database>;
   // Bare anon client — NO session.
-  const asAnon = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  let asAnon: SupabaseClient<Database>;
 
   let sellerAId = "";
   let sellerBId = "";
@@ -100,6 +99,15 @@ describe.skipIf(!hasKeys)("S8 live products boundary (staging DB)", () => {
   }
 
   beforeAll(async () => {
+    const clientOptions = {
+      auth: { autoRefreshToken: false, persistSession: false },
+    };
+    admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", clientOptions);
+    asSellerA = createSupabaseClient<Database>(url ?? "", anonKey ?? "", clientOptions);
+    asSellerB = createSupabaseClient<Database>(url ?? "", anonKey ?? "", clientOptions);
+    asBuyerC = createSupabaseClient<Database>(url ?? "", anonKey ?? "", clientOptions);
+    asAnon = createSupabaseClient<Database>(url ?? "", anonKey ?? "", clientOptions);
+
     sellerAId = await createUser(emailA, "S8 Live Seller A");
     sellerBId = await createUser(emailB, "S8 Live Seller B");
     buyerCId = await createUser(emailC, "S8 Live Buyer C");

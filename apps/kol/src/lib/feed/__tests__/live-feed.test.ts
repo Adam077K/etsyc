@@ -1,7 +1,10 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -88,14 +91,16 @@ async function callFeed(opts: {
 describe.skipIf(!hasKeys)("B1a live feed selection boundary (staging DB)", () => {
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 60_000 });
 
-  const admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  // vitest executes this describe BODY at collection even under skipIf(true)
+  // — only hooks and tests are skipped. Constructing the clients here throws
+  // `supabaseUrl is required` on a keyless checkout, turning the documented
+  // auto-skip into a hard FAIL (the live-suite-collection-fix pattern; this
+  // suite was written on a branch cut before that fix landed). beforeAll
+  // never runs for a skipped suite, so the clients are built there.
+  let admin: SupabaseClient<Database>;
   // Holds the seller's session — proves an authed session exists while the
   // feed still reads as anon.
-  const asSeller = createSupabaseClient<Database>(url ?? "", anonKey ?? "", {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  let asSeller: SupabaseClient<Database>;
 
   let sellerId = "";
   let unpubStoreId = "";
@@ -103,6 +108,12 @@ describe.skipIf(!hasKeys)("B1a live feed selection boundary (staging DB)", () =>
   let seedStoreIds: string[] = [];
 
   beforeAll(async () => {
+    const clientOptions = {
+      auth: { autoRefreshToken: false, persistSession: false },
+    };
+    admin = createSupabaseClient<Database>(url ?? "", serviceRoleKey ?? "", clientOptions);
+    asSeller = createSupabaseClient<Database>(url ?? "", anonKey ?? "", clientOptions);
+
     // Seed worlds must be live (SEED-W3 merged + applied).
     const seeds = await admin
       .from("stores")
