@@ -686,6 +686,15 @@ const MOBILE_SLOT_ORDER: readonly MobileSlotName[] = [
   "M-BLEED",
 ];
 
+/**
+ * Mobile weighs the edge penalty far harder than desktop: the left edge
+ * IS the mobile identity (§1.6), and two same-edge cards in a row put a
+ * repeating rule on a single screen — §1.7(e) wants every viewport to
+ * show a broken edge. Hard constraint 3 still permits a run of two as
+ * the escape hatch; this weight makes it a last resort, not a habit.
+ */
+const MOBILE_EDGE_WEIGHT = 0.95;
+
 /** The 375px reference — assertion (d) is checked at this width. */
 export const MOBILE_REF_VIEWPORT_PX = 375;
 
@@ -716,6 +725,9 @@ export function composeMobileFeed(
   const placed: MobileSlotName[] = [];
   const edges: number[] = [];
   const usage = new Map<MobileSlotName, number>();
+  /** Per slot, the successors it received on its last two runs — the same
+   *  anti-period device as the desktop transition echo. */
+  const lastSuccessors = new Map<MobileSlotName, MobileSlotName[]>();
   let lastBleed = -Infinity;
 
   // The four hard rules, stateless so the strand lookahead can ask "would
@@ -800,6 +812,14 @@ export function composeMobileFeed(
     const minUsage = Math.min(
       ...MOBILE_SLOT_ORDER.map((name) => usage.get(name) ?? 0),
     );
+    const transitionEcho = (name: MobileSlotName): number => {
+      const prev = placed[placed.length - 1];
+      if (prev === undefined) return 0;
+      const answers = lastSuccessors.get(prev) ?? [];
+      if (answers[0] === name) return WEIGHT_TRANSITION;
+      if (answers[1] === name) return WEIGHT_TRANSITION / 2;
+      return 0;
+    };
     let best: MobileSlotName = first;
     let bestCost = Number.POSITIVE_INFINITY;
     for (const name of names) {
@@ -807,7 +827,8 @@ export function composeMobileFeed(
       const cost =
         aspectFitCost(card, spec.aspect) +
         WEIGHT_REPEAT * repeatPenalty(name, placed, 1) +
-        WEIGHT_EDGE * edgePenalty(spec.leftInsetPx, edges) +
+        MOBILE_EDGE_WEIGHT * edgePenalty(spec.leftInsetPx, edges) +
+        transitionEcho(name) +
         WEIGHT_BALANCE * ((usage.get(name) ?? 0) - minUsage) +
         WEIGHT_SPREAD * contentSpread(card.videoId, name);
       const better =
@@ -820,6 +841,13 @@ export function composeMobileFeed(
       }
     }
 
+    const predecessor = placed[placed.length - 1];
+    if (predecessor !== undefined) {
+      lastSuccessors.set(predecessor, [
+        best,
+        ...(lastSuccessors.get(predecessor) ?? []).slice(0, 1),
+      ]);
+    }
     out.push({ slot: MOBILE_SLOTS[best], cardIndex: i });
     placed.push(best);
     edges.push(MOBILE_SLOTS[best].leftInsetPx);
