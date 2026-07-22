@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AccountBar } from "@/components/auth/AccountBar";
@@ -46,6 +47,14 @@ export default async function SellerDashboardPage() {
         The full dashboard — orders, films, your store world — arrives with
         Batch 3 seller onboarding. Your seller identity and shop ownership are
         already tied to this account.
+      </p>
+      <p className="text-body-lg">
+        <Link
+          href="/seller/products"
+          className="rounded-sm text-ink underline decoration-line underline-offset-4 outline-offset-4 transition-colors duration-state ease-kol hover:decoration-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+        >
+          Manage your pieces →
+        </Link>
       </p>
     </main>
   );
