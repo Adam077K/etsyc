@@ -23,30 +23,31 @@ import {
   isValidElement,
   use,
   useEffect,
-  useMemo,
   useState,
   type CSSProperties,
 } from "react";
 import { Film } from "@/components/chrome/Film";
 import { useHeroStage } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
-import {
-  formatPrice,
-  getMaker,
-  productsByMaker,
-  sellerBlocks,
-  type MockMaker,
-  type MockProduct,
-} from "@/lib/mock/db";
+import { Skeleton, SkeletonLines } from "@/components/states/Skeleton";
+import { getData, type Maker, type Product } from "@/lib/data";
+import { formatPrice, sellerBlocks } from "@/lib/mock/db";
 import { useKolSession } from "@/lib/mock/session";
 import { SELLER_SLUG } from "@/lib/mock/seller-state";
 import { useKolStore, type StoreOverride } from "@/lib/mock/store";
 import { renderStore } from "@/lib/renderer/render-store";
-import { customStore } from "@/lib/store-config/fixtures/custom";
-import { senaStore } from "@/lib/store-config/fixtures/sena";
 import type { StoreBlock, StoreConfig } from "@/lib/store-config/types";
 import { isHexColor, readableInk } from "@/lib/theme/contrast";
 import { cn } from "@/lib/utils";
+
+/** What the live fetch resolves to — the maker, her published world, her shelf. */
+interface WorldData {
+  /** The slug this snapshot answered — a mismatch with the route reads as loading. */
+  slug: string;
+  maker: Maker | null;
+  config: StoreConfig | null;
+  rail: Product[];
+}
 
 export default function MakerWorldPage({
   params,
@@ -54,40 +55,97 @@ export default function MakerWorldPage({
   params: Promise<{ maker: string }>;
 }) {
   const { maker: slug } = use(params);
-  const maker = getMaker(slug);
   // WORLD_OPEN: the persistent film docks top-right and keeps playing — it is
   // the same node that grew on the feed, so the clock never resets. Declared
-  // before the notFound guard so the hook order stays unconditional.
-  useHeroStage("world", maker?.slug ?? null);
+  // before any early return so the hook order stays unconditional; the slug is
+  // known synchronously, so the stage never waits on the fetch.
+  useHeroStage("world", slug);
 
   // The maker's own draft state — what she arranged in /sell/edit is what a
-  // buyer opens here. Hooks stay above the notFound guard.
+  // buyer opens here. This is the seller's editor draft (a synchronous client
+  // store), distinct from the LIVE published data fetched below. Hooks stay
+  // above every early return.
   const override = useKolStore().overrideFor(slug);
-  const baseConfig = slug === "sena" ? senaStore : slug === "noor" ? customStore : null;
-  const worldConfig = useMemo(
-    () =>
-      baseConfig && slug === SELLER_SLUG && override.order
-        ? reorderBlocks(baseConfig, override.order)
-        : baseConfig,
-    [baseConfig, slug, override.order],
-  );
 
-  if (!maker) notFound();
+  const [data, setData] = useState<WorldData | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const source = getData();
+    void (async () => {
+      const maker = await source.getMaker(slug);
+      if (!maker) {
+        if (active) setData({ slug, maker: null, config: null, rail: [] });
+        return;
+      }
+      // A maker exists; her published world and shelf load together.
+      const [config, rail] = await Promise.all([
+        source.getStoreConfig(slug),
+        source.productsByMaker(slug),
+      ]);
+      if (active) setData({ slug, maker, config, rail });
+    })();
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  // A snapshot for a different slug (route just changed) reads as loading.
+  if (!data || data.slug !== slug) return <WorldSkeleton />;
+  if (!data.maker) notFound();
+
+  // The seller's editor draft can reorder her own world's blocks; the LIVE
+  // published config is the base. An untouched order is a no-op.
+  const worldConfig =
+    data.config && slug === SELLER_SLUG && override.order
+      ? reorderBlocks(data.config, override.order)
+      : data.config;
+
+  const maker = data.maker;
+  // The world renders only when a published store-config came back. A maker
+  // with no world yet gets the honest stub — never a crash, never a fake world.
+  const hasWorld = worldConfig !== null;
 
   return (
     <div className="min-h-screen">
       <MakerStrip
         maker={maker}
-        showWorldLinks={maker.hasWorld}
-        override={maker.hasWorld ? override : null}
+        showWorldLinks={hasWorld}
+        override={hasWorld ? override : null}
       />
-      {maker.hasWorld && worldConfig ? (
+      {hasWorld && worldConfig ? (
         <WorldUnfold>
           <ThemedWorld config={worldConfig} theme={override.theme} linkBase={`/m/${slug}`} />
         </WorldUnfold>
       ) : (
-        <StubWorld maker={maker} />
+        <StubWorld maker={maker} rail={data.rail} />
       )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Loading — KOL chrome skeleton while the live world resolves.        */
+/* ------------------------------------------------------------------ */
+
+function WorldSkeleton() {
+  return (
+    <div className="min-h-screen">
+      <div className="border-b border-line bg-surface">
+        <div className="mx-auto flex w-full max-w-page items-center gap-x-3 px-[var(--space-2)] py-3 md:px-[var(--space-6)]">
+          <Skeleton className="h-7 w-40" />
+          <Skeleton className="ml-auto h-11 w-28 rounded-pill" />
+        </div>
+      </div>
+      <div className="mx-auto w-full max-w-page px-[var(--space-2)] py-[var(--space-8)] md:px-[var(--space-6)]">
+        <Skeleton className="aspect-[16/9] w-full rounded-md" />
+        <div className="mt-[var(--space-6)] max-w-measure">
+          <Skeleton className="h-9 w-2/3" />
+          <div className="mt-3">
+            <SkeletonLines lines={3} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -191,7 +249,7 @@ function MakerStrip({
   showWorldLinks,
   override,
 }: {
-  maker: MockMaker;
+  maker: Maker;
   showWorldLinks: boolean;
   override: StoreOverride | null;
 }) {
@@ -304,9 +362,7 @@ function WorldUnfold({ children }: { children: React.ReactNode }) {
 /* world (tomas, mira, elias). Built from db data only; no fake blocks.*/
 /* ------------------------------------------------------------------ */
 
-function StubWorld({ maker }: { maker: MockMaker }) {
-  const rail = productsByMaker(maker.slug);
-
+function StubWorld({ maker, rail }: { maker: Maker; rail: Product[] }) {
   return (
     <main className="pb-[var(--space-16)]">
       {/* hero — full-bleed film in the maker's own footage class */}
@@ -396,7 +452,7 @@ function StubWorld({ maker }: { maker: MockMaker }) {
   );
 }
 
-function ContactStrip({ maker }: { maker: MockMaker }) {
+function ContactStrip({ maker }: { maker: Maker }) {
   const session = useKolSession();
   const following = session.isFollowing(maker.slug);
 
@@ -437,7 +493,7 @@ function ContactStrip({ maker }: { maker: MockMaker }) {
 
 /* ------------------------------------------------------------------ */
 
-function inventoryShort(product: MockProduct): string {
+function inventoryShort(product: Product): string {
   switch (product.inventory.status) {
     case "in-stock":
       return product.inventory.qty !== undefined
@@ -450,7 +506,7 @@ function inventoryShort(product: MockProduct): string {
   }
 }
 
-function leadShort(product: MockProduct): string {
+function leadShort(product: Product): string {
   if (product.inventory.status === "made-to-order") {
     return product.inventory.leadWeeks !== undefined
       ? `${product.inventory.leadWeeks}-wk`

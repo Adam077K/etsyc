@@ -28,6 +28,7 @@
  */
 
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import type { StoreConfig } from "@/lib/store-config/types";
 import { z } from "zod";
 import {
   DomainMappingError,
@@ -267,6 +268,79 @@ const publicProfileSchema = z.object({
   display_name: z.string(),
 });
 
+/* --- 0002 additions: notifications, collections, community ---------- */
+
+/** `notifications` (B16, migration 0002). Read-own; RLS-scoped. */
+const notificationRowSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  actor_maker_id: z.string().nullable(),
+  subject_type: z.string(),
+  subject_id: z.string(),
+  body_key: z.string(),
+  body_vars: z.unknown().nullable(),
+  read_at: z.string().nullable(),
+  created_at: z.string(),
+});
+
+/** `collection_items` (B17, migration 0002). */
+const collectionItemRowSchema = z.object({
+  subject_type: z.enum(["product", "maker", "video"]),
+  subject_id: z.string(),
+  position: z.number().int(),
+});
+
+/** `collections` (B17, migration 0002) + its embedded items. */
+const collectionRowSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  visibility: z.enum(["private", "public"]),
+  slug: z.string(),
+  collection_items: z.array(collectionItemRowSchema).optional(),
+});
+
+/** `communities` record (B15/D17, migration 0002). Content is RLS-gated. */
+const communityRowSchema = z.object({
+  id: z.string(),
+  maker_id: z.string(),
+  mode: z.enum(["broadcast", "private"]),
+  name: z.string(),
+  description: z.string().nullable(),
+});
+
+/** `community_posts` (migration 0002). */
+const communityPostRowSchema = z.object({
+  id: z.string(),
+  community_id: z.string(),
+  author_id: z.string(),
+  body: z.string().nullable(),
+  pinned: z.boolean(),
+  hidden_at: z.string().nullable(),
+  created_at: z.string(),
+});
+
+/** `post_comments` (migration 0002). Single-level — no parent_comment_id. */
+const postCommentRowSchema = z.object({
+  id: z.string(),
+  post_id: z.string(),
+  author_id: z.string(),
+  body: z.string(),
+  hidden_at: z.string().nullable(),
+  created_at: z.string(),
+});
+
+/**
+ * A `videos` row (group 03) joined to its store and one-to-one `video_profiles`
+ * — the raw material the discovery feed is DERIVED from. There is no feed table.
+ */
+const videoFeedRowSchema = z.object({
+  id: z.string(),
+  poster: z.string().nullable(),
+  created_at: z.string(),
+  stores: z.unknown(),
+  video_profiles: z.unknown().optional(),
+});
+
 /* ------------------------------------------------------------------ */
 /* Adapter                                                             */
 /* ------------------------------------------------------------------ */
@@ -275,6 +349,106 @@ const STORE_COLUMNS = "id, owner_id, handle, name, craft, bio, published, config
 const PRODUCT_COLUMNS =
   "id, store_id, title, description, materials, price_amount, currency, " +
   "inventory_status, inventory_qty, product_specs(*), product_provenance(*)";
+const COLLECTION_COLUMNS =
+  "id, title, visibility, slug, collection_items(subject_type, subject_id, position)";
+const COMMUNITY_POST_COLUMNS =
+  "id, community_id, author_id, body, pinned, hidden_at, created_at";
+
+/**
+ * `size` and `aspect` are feed-card PRESENTATION tokens with no column in
+ * `videos`/`video_profiles`. Until a curation pass owns them, they cycle so the
+ * masonry stays visually varied rather than collapsing to one shape.
+ */
+const FEED_SIZES: FeedItem["size"][] = ["a", "b", "c", "d", "e", "f"];
+const FEED_ASPECTS: FeedItem["aspect"][] = ["tall", "square", "wide", "portrait"];
+
+/**
+ * `notification_type` (0002 enum) → the domain's coarse six-way bucket. The
+ * schema is finer-grained than `MockNotification["type"]`, so this projection
+ * is intentionally lossy (draft/version/follower events all read as a generic
+ * maker update). Unknown values fall back to "maker-update".
+ */
+const NOTIFICATION_TYPE: Record<string, Notification["type"]> = {
+  maker_new_product: "release",
+  maker_new_store_version: "maker-update",
+  commission_message_reply: "reply",
+  commission_draft_new_version: "commission-milestone",
+  order_status_paid: "order",
+  order_status_fulfilled: "order",
+  order_status_cancelled: "order",
+  order_status_refunded: "order",
+  question_answered: "reply",
+  new_follower: "maker-update",
+  community_new_post: "community",
+};
+
+/**
+ * Best-effort route from a notification's polymorphic (subject_type, subject_id)
+ * pair. A fuller resolver (product → /m/[slug]/p/[id]) needs joins this one-way
+ * surface does not fetch; these are the safe, non-throwing fallbacks.
+ */
+function notificationDeepLink(
+  subjectType: string,
+  subjectId: string,
+  makerSlug: string,
+): string {
+  switch (subjectType) {
+    case "order":
+      return `/orders/${subjectId}`;
+    case "thread":
+    case "commission":
+      return `/inbox/${subjectId}`;
+    case "community_post":
+      return makerSlug ? `/m/${makerSlug}/community` : "/notifications";
+    default:
+      return makerSlug ? `/m/${makerSlug}` : "/notifications";
+  }
+}
+
+/** `collections` row → domain `Collection`. Pure; safe at module scope. */
+function toCollection(row: z.infer<typeof collectionRowSchema>): Collection {
+  const items = (row.collection_items ?? [])
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    // Domain item `kind` is only 'product' | 'maker'. A 'video' item (0002
+    // permits it) has no domain representation, so it is DROPPED rather than
+    // mis-cast. Widening MockCollection item kind to include 'video' would
+    // carry these through — flagged in the return message.
+    .filter((it) => it.subject_type !== "video")
+    .map((it) => ({
+      kind: it.subject_type === "maker" ? ("maker" as const) : ("product" as const),
+      // `ref` is the raw subject uuid. For 'product' this is `products.id` (what
+      // getProduct expects). For 'maker' it is the maker's profile/store uuid,
+      // NOT a handle — a later pass resolves it to a slug for /m/[slug].
+      ref: it.subject_id,
+    }));
+  return { slug: row.slug, title: row.title, visibility: row.visibility, items };
+}
+
+/** `community_posts` row + its comments → domain `Post`. Pure. */
+function toPost(
+  row: z.infer<typeof communityPostRowSchema>,
+  makerId: string,
+  comments: z.infer<typeof postCommentRowSchema>[],
+  names: Map<string, string>,
+): Post {
+  return {
+    id: row.id,
+    author: names.get(row.author_id) ?? "A member",
+    // isMaker is DERIVED from authorship, never a stored flag: the owning maker
+    // is `communities.maker_id`.
+    isMaker: row.author_id === makerId,
+    body: row.body ?? "",
+    when: row.created_at,
+    ...(row.pinned ? { pinned: true } : {}),
+    comments: comments.map((c) => ({
+      author: names.get(c.author_id) ?? "A member",
+      body: c.body,
+      when: c.created_at,
+      ...(c.hidden_at === null ? {} : { hidden: true }),
+    })),
+  };
+}
 
 export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource {
   /* --- shared plumbing ------------------------------------------- */
@@ -390,6 +564,70 @@ export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource 
     };
   }
 
+  /** maker slug → its `communities` row (or null). Record is public-read. */
+  async function communityByMakerSlug(makerSlug: string) {
+    const store = await storeByHandle(makerSlug);
+    if (!store) return null;
+    const db = await getClient();
+    // `communities.maker_id` is the store OWNER's profile id (one per maker).
+    const { data, error } = await db
+      .from("communities")
+      .select("id, maker_id, mode, name, description")
+      .eq("maker_id", store.owner_id)
+      .maybeSingle();
+    if (error) fail(`communities for '${makerSlug}'`, error);
+    if (!data) return null;
+    return parse(communityRowSchema, data, "communities row");
+  }
+
+  /**
+   * Posts (with single-level comments) for a community. RLS
+   * (`community_posts_read`) already scopes visibility — broadcast → any authed,
+   * private → members only, hidden → author/owner only — so this trusts the gate
+   * and never re-checks membership client-side.
+   */
+  async function loadPosts(community: z.infer<typeof communityRowSchema>): Promise<Post[]> {
+    const db = await getClient();
+    const { data: postData, error: postErr } = await db
+      .from("community_posts")
+      .select(COMMUNITY_POST_COLUMNS)
+      .eq("community_id", community.id)
+      .order("pinned", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (postErr) fail("community_posts select", postErr);
+    const posts = (postData ?? []).map((raw) =>
+      parse(communityPostRowSchema, raw, "community_posts row"),
+    );
+    if (posts.length === 0) return [];
+
+    const { data: commentData, error: commentErr } = await db
+      .from("post_comments")
+      .select("id, post_id, author_id, body, hidden_at, created_at")
+      .in(
+        "post_id",
+        posts.map((p) => p.id),
+      )
+      .order("created_at", { ascending: true });
+    if (commentErr) fail("post_comments select", commentErr);
+    const comments = (commentData ?? []).map((raw) =>
+      parse(postCommentRowSchema, raw, "post_comments row"),
+    );
+
+    const names = await displayNames([
+      ...posts.map((p) => p.author_id),
+      ...comments.map((c) => c.author_id),
+    ]);
+
+    const commentsByPost = new Map<string, z.infer<typeof postCommentRowSchema>[]>();
+    for (const c of comments) {
+      const list = commentsByPost.get(c.post_id) ?? [];
+      list.push(c);
+      commentsByPost.set(c.post_id, list);
+    }
+
+    return posts.map((p) => toPost(p, community.maker_id, commentsByPost.get(p.id) ?? [], names));
+  }
+
   /* --- interface -------------------------------------------------- */
 
   return {
@@ -458,14 +696,62 @@ export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource 
       });
     },
 
+    async getStoreConfig(slug: string): Promise<StoreConfig | null> {
+      // The full renderable config lives in stores.config (jsonb). Same parse
+      // the mappers use — a malformed/absent blob yields null, not a crash.
+      const row = await storeByHandle(slug);
+      if (!row) return null;
+      // stores.config holds the full StoreConfig authored by the seller
+      // pipeline (P3 Zod-validates it at WRITE time). The renderer degrades
+      // gracefully on any malformed block, so we hand it the raw config and
+      // return null only when there is no world to render yet.
+      const config = row.config as StoreConfig | null;
+      if (!config || !Array.isArray(config.blocks) || config.blocks.length === 0) return null;
+      return config;
+    },
+
     async listFeed(): Promise<FeedItem[]> {
-      throw new NotInSchemaError(
-        "The discovery feed",
-        "`videos` + `video_profiles` (OQ-2) are the canonical, GIN-indexed clip " +
-          "source, but they carry no feed-card presentation fields — no title, " +
-          "no `size`, no `aspect` — and no ranking. Implement this against the " +
-          "D5 selection engine route once it exists, not as a raw table read.",
-      );
+      const db = await getClient();
+      // No dedicated feed table BY DESIGN (OQ-2). The feed is DERIVED from the
+      // canonical clip source — `videos` joined to its published `stores`, plus
+      // the one-to-one `video_profiles` that carries `purpose`. RLS already
+      // restricts both to published stores. An empty DB yields an empty feed.
+      const { data, error } = await db
+        .from("videos")
+        .select("id, poster, created_at, stores!inner(handle, name, published), video_profiles(purpose)")
+        .eq("stores.published", true)
+        .order("created_at", { ascending: false });
+      if (error) fail("videos feed select", error);
+
+      const items: FeedItem[] = [];
+      let i = 0;
+      for (const raw of data ?? []) {
+        const row = parse(videoFeedRowSchema, raw, "feed video row");
+        const profile = one(row.video_profiles as unknown) as { purpose?: unknown } | null;
+        const purpose = Array.isArray(profile?.purpose) ? (profile.purpose as string[]) : [];
+        // HARD RULE: a thank-you clip can NEVER appear in discovery.
+        if (purpose.includes("thankyou")) continue;
+
+        const store = parse(
+          z.object({ handle: z.string(), name: z.string() }),
+          one(row.stores),
+          "feed store",
+        );
+        // `title`/`size`/`aspect` have no clip-level column (see FEED_SIZES).
+        // A later ranking pass adds: real per-clip titles, engine `reason`
+        // strings (from buyer_signals, OQ-4), and a size/aspect learned from the
+        // poster's true dimensions. Title falls back to the store name today.
+        items.push({
+          id: row.id,
+          makerSlug: store.handle,
+          title: store.name || store.handle,
+          kind: "video",
+          size: FEED_SIZES[i % FEED_SIZES.length] ?? "a",
+          aspect: FEED_ASPECTS[i % FEED_ASPECTS.length] ?? "square",
+        });
+        i += 1;
+      }
+      return items;
     },
 
     async forYouReason(): Promise<string | null> {
@@ -692,13 +978,56 @@ export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource 
 
     /* --- notifications -------------------------------------------- */
     async listNotifications(): Promise<Notification[]> {
-      throw new NotInSchemaError(
-        "Notifications",
-        "ADR-0001 has no `notifications` table. B16 notifications are one-way, " +
-          "maker-attributed copy that must be WRITTEN server-side on real " +
-          "events (ship, reply, draft posted) — a service-role emitter beside " +
-          "`buyer_signals` (P2-4), not a client insert. Needs a migration group.",
+      const db = await getClient();
+      // Read-own (0002 `notifications_recipient_read`): rows are scoped to
+      // `recipient_id = auth.uid()`. Anon → [] (no throw). Emission stays
+      // service-role only; there is no client write path.
+      const { data, error } = await db
+        .from("notifications")
+        .select(
+          "id, type, actor_maker_id, subject_type, subject_id, body_key, body_vars, read_at, created_at",
+        )
+        .order("created_at", { ascending: false });
+      if (error) fail("notifications select", error);
+      const rows = (data ?? []).map((raw) => parse(notificationRowSchema, raw, "notifications row"));
+      if (rows.length === 0) return [];
+
+      // `actor_maker_id` is a maker PROFILE id; the domain wants the maker slug
+      // (store handle). Resolve the set in one query.
+      const actorIds = Array.from(
+        new Set(rows.flatMap((r) => (r.actor_maker_id === null ? [] : [r.actor_maker_id]))),
       );
+      const handles = new Map<string, string>();
+      if (actorIds.length > 0) {
+        const { data: storeRows, error: storeErr } = await db
+          .from("stores")
+          .select("owner_id, handle")
+          .in("owner_id", actorIds);
+        if (storeErr) fail("stores for notification actors", storeErr);
+        for (const s of storeRows ?? []) {
+          handles.set(
+            String((s as { owner_id: unknown }).owner_id),
+            String((s as { handle: unknown }).handle),
+          );
+        }
+      }
+
+      return rows.map((row) => {
+        const makerSlug = row.actor_maker_id === null ? "" : (handles.get(row.actor_maker_id) ?? "");
+        return {
+          id: row.id,
+          type: NOTIFICATION_TYPE[row.type] ?? "maker-update",
+          makerSlug,
+          // `line` is the copy-template KEY, not rendered prose. 0002 stores
+          // `body_key` + `body_vars` precisely so no write path can put arbitrary
+          // text before a buyer under a maker's name (D10). Rendering the
+          // maker-voiced line from (body_key, body_vars) is a presentation-layer
+          // concern with a copy catalog this adapter does not own.
+          line: row.body_key,
+          deepLink: notificationDeepLink(row.subject_type, row.subject_id, makerSlug),
+          when: row.created_at,
+        };
+      });
     },
 
     /* --- orders --------------------------------------------------- */
@@ -786,31 +1115,141 @@ export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource 
     },
 
     /* --- community ------------------------------------------------ */
-    async getCommunity(): Promise<Community | null> {
-      throw communityGap();
+    async getCommunity(makerSlug: string): Promise<Community | null> {
+      const community = await communityByMakerSlug(makerSlug);
+      if (!community) return null;
+      const db = await getClient();
+      // Member count is itself RLS-gated (a non-member sees only their own row),
+      // so this is best-effort — 0 for a viewer who cannot see the roster.
+      const { count, error } = await db
+        .from("community_members")
+        .select("id", { count: "exact", head: true })
+        .eq("community_id", community.id);
+      if (error) fail("community_members count", error);
+
+      return {
+        makerSlug,
+        visibility: community.mode === "private" ? "private" : "public",
+        members: count ?? 0,
+        posts: await loadPosts(community),
+        // `exclusives` (member perks) has NO column in 0002 — `communities`
+        // carries only name/description/mode. Empty until a perks table exists,
+        // never faked.
+        exclusives: [],
+      };
     },
-    async postsFor(): Promise<Post[]> {
-      throw communityGap();
+
+    async postsFor(makerSlug: string): Promise<Post[]> {
+      const community = await communityByMakerSlug(makerSlug);
+      if (!community) return [];
+      return loadPosts(community);
     },
-    async addPost(): Promise<Post> {
-      throw communityGap();
+
+    async addPost(makerSlug: string, body: string, asMaker = false): Promise<Post> {
+      const community = await communityByMakerSlug(makerSlug);
+      if (!community) throw new Error(`no community for maker '${makerSlug}'`);
+      const db = await getClient();
+      const { data: userData } = await db.auth.getUser();
+      const myId = userData.user?.id;
+      if (!myId) throw new Error("posting to a community requires an authenticated session");
+
+      // B0: `author_id` is set to the caller's OWN id — the `community_posts_write`
+      // WITH CHECK requires `author_id = auth.uid()`, and RLS decides whether this
+      // caller may post at all (broadcast → owner only; private → owner or member).
+      // `asMaker` is NOT a client-settable flag: maker authorship is derived from
+      // `author_id === communities.maker_id`, so the arg is deliberately unused for
+      // attribution here (kept for interface parity with the mock).
+      void asMaker;
+      const { data, error } = await db
+        .from("community_posts")
+        .insert({ community_id: community.id, author_id: myId, body, kind: "text" })
+        .select(COMMUNITY_POST_COLUMNS)
+        .single();
+      if (error) fail("community_posts insert", error);
+      const row = parse(communityPostRowSchema, data, "community_posts row");
+      const names = await displayNames([row.author_id]);
+      return toPost(row, community.maker_id, [], names);
     },
-    async addComment(): Promise<void> {
-      throw communityGap();
+
+    async addComment(makerSlug: string, postId: string, body: string): Promise<void> {
+      void makerSlug; // read path resolves the post; slug is not needed server-side.
+      const db = await getClient();
+      const { data: userData } = await db.auth.getUser();
+      const myId = userData.user?.id;
+      if (!myId) throw new Error("commenting requires an authenticated session");
+      // Single-level only: `post_comments` has no parent_comment_id by
+      // construction. The read gate IS the write gate (0002) — if you can read
+      // the post you may comment; RLS enforces it. `author_id` is the caller's id.
+      const { error } = await db
+        .from("post_comments")
+        .insert({ post_id: postId, author_id: myId, body });
+      if (error) fail("post_comments insert", error);
     },
-    async toggleHidden(): Promise<void> {
-      throw communityGap();
+
+    async toggleHidden(key: string): Promise<void> {
+      const db = await getClient();
+      // Hide-only moderation (0002): flip `community_posts.hidden_at` (never a
+      // hard delete). `key` is a post id. RLS lets only the post's author or the
+      // owning maker see a hidden row and update it, so an unauthorised caller
+      // reads nothing and this is a no-op. Comment-level hiding is not addressable
+      // here: the domain `MockPost.comments[]` carry no id to target.
+      const { data, error } = await db
+        .from("community_posts")
+        .select("id, hidden_at")
+        .eq("id", key)
+        .maybeSingle();
+      if (error) fail("community_posts hidden lookup", error);
+      if (!data) return;
+      const row = parse(
+        z.object({ id: z.string(), hidden_at: z.string().nullable() }),
+        data,
+        "community_posts hidden row",
+      );
+      const next = row.hidden_at === null ? new Date().toISOString() : null;
+      const { error: updateErr } = await db
+        .from("community_posts")
+        .update({ hidden_at: next })
+        .eq("id", key);
+      if (updateErr) fail("community_posts hide update", updateErr);
     },
+
     async listHidden(): Promise<string[]> {
-      throw communityGap();
+      const db = await getClient();
+      // Ids of hidden posts the caller can still see — per `community_posts_read`,
+      // only those they authored or moderate as the owning maker. Anon → []; never
+      // throws on a permissionless read.
+      const { data, error } = await db
+        .from("community_posts")
+        .select("id")
+        .not("hidden_at", "is", null);
+      if (error) fail("community_posts hidden list", error);
+      return (data ?? []).map((r) => parse(z.object({ id: z.string() }), r, "hidden id row").id);
     },
 
     /* --- collections ---------------------------------------------- */
     async listCollections(): Promise<Collection[]> {
-      throw collectionsGap();
+      const db = await getClient();
+      // RLS returns only boards the caller may see: their own (any visibility)
+      // plus every `visibility = 'public'` board. Anon → public boards only.
+      const { data, error } = await db.from("collections").select(COLLECTION_COLUMNS);
+      if (error) fail("collections select", error);
+      return (data ?? []).map((raw) =>
+        toCollection(parse(collectionRowSchema, raw, "collections row")),
+      );
     },
-    async getCollection(): Promise<Collection | null> {
-      throw collectionsGap();
+
+    async getCollection(slug: string): Promise<Collection | null> {
+      const db = await getClient();
+      // A private or missing slug returns NO row under RLS — so this yields null
+      // (a 404 upstream), never a throw and never a 403 that would leak existence.
+      const { data, error } = await db
+        .from("collections")
+        .select(COLLECTION_COLUMNS)
+        .eq("slug", slug)
+        .maybeSingle();
+      if (error) fail(`collections by slug '${slug}'`, error);
+      if (!data) return null;
+      return toCollection(parse(collectionRowSchema, data, "collections row"));
     },
 
     /* --- seller: store draft + publish gate ------------------------ */
@@ -919,24 +1358,11 @@ export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource 
 }
 
 /* ------------------------------------------------------------------ */
-/* Documented schema gaps                                              */
+/* Remaining documented schema gap                                     */
 /* ------------------------------------------------------------------ */
-
-function communityGap(): NotInSchemaError {
-  return new NotInSchemaError(
-    "Maker communities",
-    "ADR-0001 has no `communities`, `posts`, `post_comments` or moderation " +
-      "table. B15 community (single-level comments, hide-only moderation, " +
-      "membership = follows) was folded into the product after the schema was " +
-      "authored and needs its own migration group with RLS keyed on `follows`.",
-  );
-}
-
-function collectionsGap(): NotInSchemaError {
-  return new NotInSchemaError(
-    "Collections",
-    "ADR-0001 has `saves` (polymorphic product|store, OQ-7) but no " +
-      "`collections` / `collection_items` table, and no public-board " +
-      "visibility flag. B17 needs a migration group before this can be real.",
-  );
-}
+//
+// The community, collections and notifications gaps were CLOSED by migration
+// 0002. The only capability still without a backing table is the 5-step order
+// PRODUCTION TIMELINE (`advanceOrder`): `orders.status` is a payment/fulfilment
+// enum with no `stage` column and no `order_updates` table in either migration,
+// so that method still throws `NotInSchemaError` (see its body above).

@@ -20,6 +20,9 @@
  */
 
 import { createPersistentStore } from "@/lib/mock/persistent-store";
+import { senaStore } from "@/lib/store-config/fixtures/sena";
+import { customStore } from "@/lib/store-config/fixtures/custom";
+import type { StoreConfig } from "@/lib/store-config/types";
 import {
   collections as seedCollections,
   communities as seedCommunities,
@@ -117,6 +120,12 @@ export function createMockAdapter(): KolDataSource {
     },
     async getMaker(slug: string): Promise<Maker | null> {
       return seedGetMaker(slug) ?? null;
+    },
+    async getStoreConfig(slug: string): Promise<StoreConfig | null> {
+      // The two seeded worlds are fixtures; other makers have no built world.
+      if (slug === "sena") return senaStore;
+      if (slug === "noor") return customStore;
+      return null;
     },
     async listFeed(): Promise<FeedItem[]> {
       return feedItems;

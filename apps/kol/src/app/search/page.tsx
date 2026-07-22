@@ -10,18 +10,13 @@
  */
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import {
-  formatPrice,
-  getMaker,
-  makers,
-  productsByMaker,
-  type MockMaker,
-  type MockProduct,
-} from "@/lib/mock/db";
+import { useEffect, useMemo, useState } from "react";
+import type { Maker, Product } from "@/lib/data";
+import { formatPrice } from "@/lib/mock/db";
 import { Film } from "@/components/chrome/Film";
 import { useHeroPlayer } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
+import { Skeleton } from "@/components/states/Skeleton";
 
 /* ------------------------------------------------------------------ */
 /* Filter vocabulary — every option reads a real field in the mock db. */
@@ -53,24 +48,27 @@ const SHIPS_FROM = ["US", "EU"] as const;
 type Region = (typeof SHIPS_FROM)[number];
 type Availability = "ready" | "made-to-order";
 
-function regionOf(maker: MockMaker): Region {
+function regionOf(maker: Maker): Region {
   return maker.location.includes("Lisbon") ? "EU" : "US";
 }
 
 /** Everything searchable/matchable about a maker, lowercased once. */
-function makerHaystack(maker: MockMaker): string {
-  const productText = productsByMaker(maker.slug)
-    .map((p) => `${p.title} ${p.provenance.materials}`)
-    .join(" ");
+function makerHaystack(maker: Maker, pieces: Product[]): string {
+  const productText = pieces.map((p) => `${p.title} ${p.provenance.materials}`).join(" ");
   return `${maker.name} ${maker.craft} ${maker.craftLine} ${maker.location} ${productText}`.toLowerCase();
 }
 
 interface MakerResult {
-  maker: MockMaker;
+  maker: Maker;
   /** pieces that survive query + product-level filters — shown in the rail */
-  pieces: MockProduct[];
+  pieces: Product[];
   makerMatched: boolean;
 }
+
+type CatalogueState =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; makers: Maker[]; byMaker: Map<string, Product[]> };
 
 function Chip({
   active,
@@ -119,19 +117,56 @@ export default function SearchPage() {
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [shipsFrom, setShipsFrom] = useState<Region | null>(null);
 
+  // Live catalogue (getData → Supabase when env is present). The whole maker +
+  // product set loads once; the filter logic below is unchanged, it just reads
+  // from these instead of the synchronous mock imports.
+  const [data, setData] = useState<CatalogueState>({ status: "loading" });
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        // Lazy import keeps the data seam out of this client component's SSR
+        // graph (useEffect is browser-only → the browser Supabase client).
+        const { getData } = await import("@/lib/data");
+        const source = getData();
+        const [makerList, productList] = await Promise.all([
+          source.listMakers(),
+          source.listProducts(),
+        ]);
+        if (!active) return;
+        const byMaker = new Map<string, Product[]>();
+        for (const p of productList) {
+          const arr = byMaker.get(p.makerSlug);
+          if (arr) arr.push(p);
+          else byMaker.set(p.makerSlug, [p]);
+        }
+        setData({ status: "ready", makers: makerList, byMaker });
+      } catch {
+        if (active) setData({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const results: MakerResult[] = useMemo(() => {
+    if (data.status !== "ready") return [];
+    const { makers: makerList, byMaker } = data;
+    const piecesOf = (slug: string): Product[] => byMaker.get(slug) ?? [];
     const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const hit = (text: string) => terms.every((t) => text.includes(t));
     const priceRange = priceIdx !== null ? PRICE_RANGES[priceIdx] : undefined;
     const productFilterActive = priceRange !== undefined || availability !== null;
 
-    return makers.flatMap((maker) => {
+    return makerList.flatMap((maker) => {
       if (category !== null && maker.craft !== category) return [];
       if (shipsFrom !== null && regionOf(maker) !== shipsFrom) return [];
-      const haystack = makerHaystack(maker);
+      const haystack = makerHaystack(maker, piecesOf(maker.slug));
       if (material !== null && !haystack.includes(material)) return [];
 
-      const withinFilters = productsByMaker(maker.slug).filter((p) => {
+      const withinFilters = piecesOf(maker.slug).filter((p) => {
         if (priceRange && (p.priceMinor < priceRange.min || p.priceMinor >= priceRange.max))
           return false;
         if (availability === "ready" && p.inventory.status !== "in-stock") return false;
@@ -160,11 +195,14 @@ export default function SearchPage() {
         },
       ];
     });
-  }, [query, category, material, priceIdx, availability, shipsFrom]);
+  }, [data, query, category, material, priceIdx, availability, shipsFrom]);
 
-  const suggested = SUGGESTED_SLUGS.map((s) => getMaker(s)).filter(
-    (m): m is MockMaker => m !== undefined,
-  );
+  const suggested =
+    data.status === "ready"
+      ? SUGGESTED_SLUGS.map((s) => data.makers.find((m) => m.slug === s)).filter(
+          (m): m is Maker => m !== undefined,
+        )
+      : [];
 
   return (
     <>
@@ -295,7 +333,38 @@ export default function SearchPage() {
 
           {/* results column — makers on film, products nested under */}
           <Reveal as="section" delayMs={STAGGER_MS} className="md:col-span-4">
-            {results.length > 0 ? (
+            {data.status === "loading" ? (
+              /* ====== loading — maker-card skeletons, never a grid ====== */
+              <div className="flex flex-col gap-8" aria-hidden="true">
+                {[0, 1].map((i) => (
+                  <div key={i} className="overflow-hidden rounded-md border border-line bg-surface">
+                    <Skeleton className="aspect-video w-full rounded-none" />
+                    <div className="p-4">
+                      <Skeleton className="h-4 w-2/5" />
+                      <Skeleton className="mt-3 h-3.5 w-3/5" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : data.status === "error" ? (
+              /* ====== error — inline, calm ====== */
+              <div className="rounded-md border border-line bg-surface px-6 py-12 text-center">
+                <p className="text-caption uppercase text-muted">Couldn’t load makers</p>
+                <p className="mx-auto mt-2 max-w-measure text-body text-ink">
+                  Something went wrong reaching the catalogue. Refresh to try again.
+                </p>
+              </div>
+            ) : data.makers.length === 0 ? (
+              /* ====== empty database — nobody on KOL yet ====== */
+              <div className="rounded-lg border border-dashed border-line bg-surface/60 px-6 py-12 text-center">
+                <p className="text-caption uppercase text-muted">Nothing filmed yet</p>
+                <p className="mt-2 font-display text-h2 text-ink">No makers yet.</p>
+                <p className="mx-auto mt-3 max-w-measure text-body text-muted">
+                  There are no makers on KOL to search yet. Once the first workshop films,
+                  their world becomes findable here.
+                </p>
+              </div>
+            ) : results.length > 0 ? (
               <>
                 <p className="mb-3 text-caption uppercase text-muted">
                   {results.length} {results.length === 1 ? "maker matches" : "makers match"} ·

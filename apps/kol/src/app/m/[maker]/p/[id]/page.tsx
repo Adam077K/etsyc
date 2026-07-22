@@ -18,27 +18,34 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Film } from "@/components/chrome/Film";
 import { useHeroStage } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
+import { Skeleton, SkeletonLines } from "@/components/states/Skeleton";
 import {
-  expectKeys,
-  formatPrice,
-  getMaker,
-  getProduct,
-  questions,
-  type MockMaker,
-  type MockProduct,
-  type MockQA,
-  type MockReview,
-} from "@/lib/mock/db";
+  getData,
+  type Maker,
+  type Product,
+  type Question,
+  type Review,
+} from "@/lib/data";
+import { expectKeys, formatPrice } from "@/lib/mock/db";
 import { useKolSession } from "@/lib/mock/session";
-import { useKolStore } from "@/lib/mock/store";
-import { customStore } from "@/lib/store-config/fixtures/custom";
-import { senaStore } from "@/lib/store-config/fixtures/sena";
 import { themeStyle } from "@/lib/theme/apply-theme";
+import type { Theme } from "@/lib/store-config/types";
 import { cn } from "@/lib/utils";
+
+/** What the live fetch resolves to — the piece, its maker, its proof. */
+interface DetailData {
+  /** The `maker/id` this snapshot answered — a mismatch reads as loading. */
+  key: string;
+  maker: Maker | null;
+  product: Product | null;
+  reviews: Review[];
+  questions: Question[];
+  worldTheme: Theme | null;
+}
 
 export default function ProductPage({
   params,
@@ -46,29 +53,65 @@ export default function ProductPage({
   params: Promise<{ maker: string; id: string }>;
 }) {
   const { maker: makerSlug, id } = use(params);
-  // Reviews come from the mutable store, so a review written in /me/reviews
-  // lands here. Everything else on this page still reads the immutable seed.
-  const store = useKolStore();
-  const maker = getMaker(makerSlug);
-  const product = getProduct(id);
+  const routeKey = `${makerSlug}/${id}`;
+
+  const [data, setData] = useState<DetailData | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const source = getData();
+    void (async () => {
+      const [maker, product] = await Promise.all([
+        source.getMaker(makerSlug),
+        source.getProduct(id),
+      ]);
+      // Unknown product/maker, or a product that isn't this maker's, is a 404.
+      if (!maker || !product || product.makerSlug !== maker.slug) {
+        if (active) {
+          setData({ key: routeKey, maker: null, product: null, reviews: [], questions: [], worldTheme: null });
+        }
+        return;
+      }
+      // Proof, questions, and the maker's world palette load together.
+      const [reviews, productQuestions, config] = await Promise.all([
+        source.reviewsForProduct(product.id),
+        source.questionsForProduct(product.id),
+        source.getStoreConfig(maker.slug),
+      ]);
+      if (active) {
+        setData({
+          key: routeKey,
+          maker,
+          product,
+          reviews,
+          questions: productQuestions,
+          worldTheme: config?.theme ?? null,
+        });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [makerSlug, id, routeKey]);
+
   // NARRATE_SHRINK: the same film that grew on the feed moves to the corner
   // and starts narrating this piece. HeroPlayer owns the element; this only
-  // declares the stage. Kept above the notFound guard so hooks stay ordered.
-  useHeroStage("narrate", maker?.slug ?? null, product?.title ?? null);
-  if (!maker || !product || product.makerSlug !== maker.slug) notFound();
+  // declares the stage. Kept above every early return so hooks stay ordered;
+  // the slug is known synchronously, the title updates when the fetch lands.
+  useHeroStage("narrate", makerSlug, data?.product?.title ?? null);
 
-  // Maker-world theming (D15b): fixture worlds carry their palette onto the
-  // product page; stub makers fall back to app chrome (no products exist for
-  // them today, but the guard keeps this route honest).
-  const worldTheme =
-    maker.slug === "sena"
-      ? senaStore.theme
-      : maker.slug === "noor"
-        ? customStore.theme
-        : null;
+  // A snapshot for a different route (params just changed) reads as loading.
+  if (!data || data.key !== routeKey) return <ProductSkeleton />;
+  if (!data.maker || !data.product) notFound();
 
-  const productQuestions = questions.filter((q) => q.productId === product.id);
-  const productReviews = store.reviewsFor(product.id);
+  const maker = data.maker;
+  const product = data.product;
+  // Maker-world theming (D15b): a maker with a published world carries her
+  // palette onto the product page; a maker without one falls back to app
+  // chrome. Same semantic utilities either way.
+  const worldTheme = data.worldTheme;
+  const productQuestions = data.questions;
+  const productReviews = data.reviews;
 
   return (
     <div
@@ -217,7 +260,12 @@ export default function ProductPage({
         {productReviews.length > 0 ? (
           <div className="flex flex-col gap-[var(--space-3)]">
             {productReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} product={product} />
+              <ReviewCard
+                key={review.id}
+                review={review}
+                product={product}
+                makerName={maker.name}
+              />
             ))}
           </div>
         ) : (
@@ -238,10 +286,36 @@ export default function ProductPage({
 }
 
 /* ------------------------------------------------------------------ */
+/* Loading — decision-layout skeleton while the live piece resolves.   */
+/* ------------------------------------------------------------------ */
+
+function ProductSkeleton() {
+  return (
+    <div className="min-h-screen bg-ground pb-[var(--space-16)] font-text text-body text-ink">
+      <main className="mx-auto w-full max-w-page px-[var(--space-2)] py-[var(--space-6)] md:px-[var(--space-6)]">
+        <div className="grid items-start gap-[var(--space-8)] lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+          <Skeleton className="aspect-[3/4] w-full rounded-md" />
+          <div className="flex flex-col gap-[var(--space-3)]">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-9 w-2/3" />
+            <div className="flex flex-col gap-[var(--space-2)] rounded-md border border-line bg-surface p-[var(--space-3)]">
+              <Skeleton className="h-8 w-28" />
+              <SkeletonLines lines={2} />
+              <Skeleton className="h-12 w-full rounded-pill" />
+            </div>
+            <SkeletonLines lines={3} />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Decision column                                                     */
 /* ------------------------------------------------------------------ */
 
-function DecisionColumn({ maker, product }: { maker: MockMaker; product: MockProduct }) {
+function DecisionColumn({ maker, product }: { maker: Maker; product: Product }) {
   const session = useKolSession();
   const [added, setAdded] = useState(false);
   const soldOut = product.inventory.status === "sold-out";
@@ -319,7 +393,7 @@ function DecisionColumn({ maker, product }: { maker: MockMaker; product: MockPro
   );
 }
 
-function InventoryTruth({ product }: { product: MockProduct }) {
+function InventoryTruth({ product }: { product: Product }) {
   switch (product.inventory.status) {
     case "in-stock":
       return (
@@ -360,7 +434,7 @@ function InventoryTruth({ product }: { product: MockProduct }) {
 /* Q&A + reviews                                                       */
 /* ------------------------------------------------------------------ */
 
-function QuestionCard({ q, makerName }: { q: MockQA; makerName: string }) {
+function QuestionCard({ q, makerName }: { q: Question; makerName: string }) {
   return (
     <div className="rounded-md border border-line bg-surface p-[var(--space-3)]">
       <p className="max-w-measure text-body">
@@ -393,8 +467,15 @@ function QuestionCard({ q, makerName }: { q: MockQA; makerName: string }) {
   );
 }
 
-function ReviewCard({ review, product }: { review: MockReview; product: MockProduct }) {
-  const maker = getMaker(product.makerSlug);
+function ReviewCard({
+  review,
+  product,
+  makerName,
+}: {
+  review: Review;
+  product: Product;
+  makerName: string;
+}) {
   return (
     <div className="rounded-md border border-line bg-surface p-[var(--space-3)]">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -433,7 +514,7 @@ function ReviewCard({ review, product }: { review: MockReview; product: MockProd
           {review.makerResponse ? (
             <div className="mt-[var(--space-2)] rounded-md bg-accent/10 p-[var(--space-2)]">
               <p className="text-caption uppercase tracking-[0.08em] text-muted">
-                {maker ? maker.name : "Maker"} replied
+                {makerName} replied
               </p>
               <p className="mt-1 max-w-measure text-body">{review.makerResponse}</p>
             </div>

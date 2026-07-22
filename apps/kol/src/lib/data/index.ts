@@ -20,15 +20,21 @@ let cached: KolDataSource | null = null;
 let announced = false;
 
 /**
- * Resolves the right Supabase client for wherever this is running. The server
- * client is imported dynamically because it pulls in `next/headers`, which
- * cannot exist in a client bundle.
+ * The browser client for this (client-reachable) data seam.
+ *
+ * This module is imported by `"use client"` pages, so it must NEVER pull in
+ * the server client — that one imports `next/headers`, which is illegal in a
+ * client component even during SSR (a client component can render without a
+ * request). The `typeof window` trick doesn't help: SSR of a client component
+ * also has no `window`, so it would wrongly take the server branch and drag
+ * `next/headers` into the client graph.
+ *
+ * Client pages read with the anon key and fetch inside `useEffect` (browser
+ * only), so the browser client is always the right one here. Server Components
+ * or route handlers that need the cookie-bound session use
+ * `@/lib/supabase/server` directly — never through this entry point.
  */
 async function resolveClient(): Promise<SupabaseClient> {
-  if (typeof window === "undefined") {
-    const { getServerClient } = await import("@/lib/supabase/server");
-    return getServerClient();
-  }
   const { getBrowserClient } = await import("@/lib/supabase/client");
   return getBrowserClient();
 }

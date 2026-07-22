@@ -10,21 +10,15 @@
  */
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import {
-  feedItems,
-  getMaker,
-  type FeedItem,
-  type FeedSize,
-  type MockMaker,
-} from "@/lib/mock/db";
+import { useEffect, useMemo, useState } from "react";
+import type { FeedItem, Maker } from "@/lib/data";
 import { Film } from "@/components/chrome/Film";
 import { useHeroPlayer } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
 import { Skeleton } from "@/components/states/Skeleton";
 
 /** Magazine spans per mockup `.m-a…f` — mixed sizes, full width below md. */
-const SPAN: Record<FeedSize, string> = {
+const SPAN: Record<FeedItem["size"], string> = {
   a: "md:col-span-3",
   b: "md:col-span-2",
   c: "md:col-span-4",
@@ -92,7 +86,7 @@ function FeedTile({
   onGrow,
 }: {
   item: FeedItem;
-  maker: MockMaker;
+  maker: Maker;
   index: number;
   onGrow: (makerSlug: string) => void;
 }) {
@@ -146,21 +140,119 @@ function StatementBlock() {
   );
 }
 
+/** Loading — skeletons matched to the magazine layout, never a spinner. */
+function FeedSkeletonGrid() {
+  const spans = [
+    "md:col-span-3",
+    "md:col-span-2",
+    "md:col-span-4",
+    "md:col-span-2",
+    "md:col-span-3",
+    "md:col-span-6",
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-6" aria-hidden="true">
+      {spans.map((span, i) => (
+        <div key={i} className={span}>
+          <div className="flex h-full flex-col rounded-md border border-line bg-surface p-4">
+            <Skeleton className="h-44 rounded-md" />
+            <Skeleton className="mt-3 h-3.5 w-3/5" />
+            <Skeleton className="mt-1 h-3.5 w-2/5" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Empty — a fresh, seedless database. The honest "nobody has filmed yet". */
+function FeedEmpty() {
+  return (
+    <Reveal>
+      <div className="rounded-lg border border-dashed border-line bg-surface/60 px-8 py-16 text-center">
+        <p className="text-caption uppercase text-muted">Nothing filmed yet</p>
+        <p className="mt-2 font-display text-h2 text-ink">No makers yet.</p>
+        <p className="mx-auto mt-3 max-w-measure text-body text-muted">
+          No maker has filmed for KOL yet. The moment the first workshop goes live, their
+          film opens here — never a grid of stock photos in the meantime.
+        </p>
+      </div>
+    </Reveal>
+  );
+}
+
+/** Error — inline, calm, no error chrome. */
+function FeedError() {
+  return (
+    <Reveal>
+      <div className="rounded-md border border-line bg-surface px-6 py-12 text-center">
+        <p className="text-caption uppercase text-muted">Couldn’t load the feed</p>
+        <p className="mx-auto mt-2 max-w-measure text-body text-ink">
+          Something went wrong reaching the makers. Refresh the page to try again.
+        </p>
+      </div>
+    </Reveal>
+  );
+}
+
+type FeedState =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; feed: FeedItem[]; makers: Map<string, Maker> };
+
 export default function DiscoverPage() {
   const [seed, setSeed] = useState(0);
   // The feed declares no stage of its own: the film is entered by tapping a
   // tile and left via the player's own dismiss, so nothing here can reset it.
   const { setHero } = useHeroPlayer();
 
-  const items = useMemo(() => seededShuffle(feedItems, seed), [seed]);
+  // Live data (getData → Supabase when env is present, mock otherwise). Same
+  // FeedItem/Maker shapes as before, so only the source and the async wrapper
+  // change; the magazine JSX below is untouched.
+  const [state, setState] = useState<FeedState>({ status: "loading" });
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        // Lazy import keeps the data seam (and its server-only Supabase branch)
+        // out of this client component's SSR module graph — useEffect is
+        // browser-only, so the module resolves to the browser client here.
+        const { getData } = await import("@/lib/data");
+        const data = getData();
+        const [feed, makerList] = await Promise.all([data.listFeed(), data.listMakers()]);
+        if (!active) return;
+        setState({
+          status: "ready",
+          feed,
+          makers: new Map(makerList.map((m) => [m.slug, m])),
+        });
+      } catch {
+        if (active) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const items = useMemo(
+    () => seededShuffle(state.status === "ready" ? state.feed : [], seed),
+    [state, seed],
+  );
 
   const grow = (makerSlug: string) => setHero({ stage: "grown", makerSlug });
 
-  const tiles = items.flatMap((item, i) => {
-    const maker = getMaker(item.makerSlug);
-    if (!maker) return [];
-    return [<FeedTile key={item.id} item={item} maker={maker} index={i} onGrow={grow} />];
-  });
+  const tiles =
+    state.status === "ready"
+      ? items.flatMap((item, i) => {
+          const maker = state.makers.get(item.makerSlug);
+          if (!maker) return [];
+          return [<FeedTile key={item.id} item={item} maker={maker} index={i} onGrow={grow} />];
+        })
+      : [];
+
+  const isEmpty = state.status === "ready" && tiles.length === 0;
 
   return (
     <>
@@ -184,37 +276,34 @@ export default function DiscoverPage() {
 
       {/* ============ the magazine feed — mixed sizes, never uniform ============ */}
       <main className="mx-auto w-full max-w-page px-6 pb-24">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-          {tiles.slice(0, 3)}
-          <StatementBlock />
-          {tiles.slice(3)}
-
-          {/* loading state — shown in situ, skeletons match the layout */}
-          <Reveal delayMs={STAGGER_MS} className="md:col-span-3">
-            <div className="flex h-full flex-col justify-center rounded-md border border-line bg-surface p-4">
-              <p className="text-caption uppercase text-muted">Loading state — shown in situ</p>
-              <Skeleton className="mt-2 h-44 rounded-md" />
-              <Skeleton className="mt-2 h-3.5 w-3/5" />
-              <Skeleton className="mt-1 h-3.5 w-2/5" />
-              <p className="mt-2 text-body text-muted">
-                Skeletons match the real layout. Never a spinner.
-              </p>
+        {state.status === "loading" ? (
+          <FeedSkeletonGrid />
+        ) : state.status === "error" ? (
+          <FeedError />
+        ) : isEmpty ? (
+          <FeedEmpty />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+              {tiles.slice(0, 3)}
+              <StatementBlock />
+              {tiles.slice(3)}
             </div>
-          </Reveal>
-        </div>
 
-        <div className="mt-16 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setSeed((s) => s + 1)}
-            className="rounded-pill border border-line bg-surface px-6 py-2.5 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
-          >
-            Reshuffle the feed
-          </button>
-        </div>
-        <p className="mt-3 text-center text-caption text-muted">
-          Different people every visit · anti-repetition holds for 50 clips
-        </p>
+            <div className="mt-16 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setSeed((s) => s + 1)}
+                className="rounded-pill border border-line bg-surface px-6 py-2.5 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
+              >
+                Reshuffle the feed
+              </button>
+            </div>
+            <p className="mt-3 text-center text-caption text-muted">
+              Different people every visit · anti-repetition holds for 50 clips
+            </p>
+          </>
+        )}
       </main>
       {/* GROWN (B2) and everything after it is rendered by HeroPlayer, which
           is mounted above the router so the film never restarts. */}

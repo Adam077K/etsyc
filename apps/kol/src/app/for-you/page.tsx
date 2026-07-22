@@ -9,21 +9,15 @@
  */
 
 import Link from "next/link";
-import {
-  feedItems,
-  forYouReasons,
-  getMaker,
-  makers,
-  type FeedItem,
-  type FeedSize,
-  type MockMaker,
-} from "@/lib/mock/db";
+import { useEffect, useState } from "react";
+import type { FeedItem, Maker } from "@/lib/data";
 import { useKolSession, type KolSession } from "@/lib/mock/session";
 import { Film } from "@/components/chrome/Film";
 import { useHeroPlayer } from "@/components/chrome/HeroPlayer";
 import { Reveal, STAGGER_MS } from "@/components/motion/Reveal";
+import { Skeleton } from "@/components/states/Skeleton";
 
-const SPAN: Record<FeedSize, string> = {
+const SPAN: Record<FeedItem["size"], string> = {
   a: "md:col-span-3",
   b: "md:col-span-2",
   c: "md:col-span-4",
@@ -37,8 +31,13 @@ const SPAN: Record<FeedSize, string> = {
  * stale "Because you follow…" if the follow was undone this session; then a
  * live follow-based fallback; then honest fresh-discovery framing.
  */
-function reasonFor(item: FeedItem, maker: MockMaker, session: KolSession): string {
-  const mapped = forYouReasons[item.id];
+function reasonFor(
+  item: FeedItem,
+  maker: Maker,
+  session: KolSession,
+  reasons: Record<string, string | null>,
+): string {
+  const mapped = reasons[item.id];
   if (mapped) {
     const staleFollow = mapped.startsWith("Because you follow") && !session.isFollowing(maker.slug);
     if (!staleFollow) return mapped;
@@ -55,53 +54,108 @@ function SignalChip({ children }: { children: React.ReactNode }) {
   );
 }
 
+type ForYouState =
+  | { status: "loading" }
+  | { status: "error" }
+  | {
+      status: "ready";
+      feed: FeedItem[];
+      makers: Map<string, Maker>;
+      reasons: Record<string, string | null>;
+    };
+
 export default function ForYouPage() {
   const session = useKolSession();
   // Same handoff as Discover: a tap grows the persistent film (B2), it does
   // not jump straight to the world.
   const { setHero } = useHeroPlayer();
 
-  const followedNames = session.follows
-    .map((slug) => getMaker(slug)?.name)
-    .filter((n): n is string => typeof n === "string");
+  // Live data (getData → Supabase when env is present). The buyer's own signals
+  // (follows/saves) still come from the session store — only the maker/feed
+  // catalogue moved to the seam. Ranking never reads popularity, as before.
+  const [state, setState] = useState<ForYouState>({ status: "loading" });
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        // Lazy import keeps the data seam out of this client component's SSR
+        // graph (useEffect is browser-only → the browser Supabase client).
+        const { getData } = await import("@/lib/data");
+        const data = getData();
+        const [feed, makerList] = await Promise.all([data.listFeed(), data.listMakers()]);
+        const reasonPairs = await Promise.all(
+          feed.map(async (item) => [item.id, await data.forYouReason(item.id)] as const),
+        );
+        if (!active) return;
+        setState({
+          status: "ready",
+          feed,
+          makers: new Map(makerList.map((m) => [m.slug, m])),
+          reasons: Object.fromEntries(reasonPairs),
+        });
+      } catch {
+        if (active) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const makerCount = state.status === "ready" ? state.makers.size : 0;
+  const followedNames =
+    state.status === "ready"
+      ? session.follows
+          .map((slug) => state.makers.get(slug)?.name)
+          .filter((n): n is string => typeof n === "string")
+      : [];
   const hasSignals = session.follows.length > 0 || session.saves.length > 0;
-  const unknownCount = Math.max(0, makers.length - session.follows.length);
+  const unknownCount = Math.max(0, makerCount - session.follows.length);
 
   // Relationship-first ordering: followed makers' clips lead; stable sort
   // keeps the authored magazine rhythm within each group.
-  const ordered = [...feedItems].sort(
-    (a, b) =>
-      Number(session.isFollowing(b.makerSlug)) - Number(session.isFollowing(a.makerSlug)),
-  );
+  const ordered =
+    state.status === "ready"
+      ? [...state.feed].sort(
+          (a, b) =>
+            Number(session.isFollowing(b.makerSlug)) - Number(session.isFollowing(a.makerSlug)),
+        )
+      : [];
 
-  const tiles = ordered.flatMap((item, i) => {
-    const maker = getMaker(item.makerSlug);
-    if (!maker) return [];
-    return [
-      <Reveal key={item.id} delayMs={(i % 4) * STAGGER_MS} className={SPAN[item.size]}>
-        <Link
-          href={`/m/${maker.slug}`}
-          onClick={(e) => {
-            e.preventDefault();
-            setHero({ stage: "grown", makerSlug: maker.slug });
-          }}
-          aria-label={`Play — ${item.title}`}
-          className="group block"
-        >
-          <Film
-            variant={maker.filmClass}
-            aspect={item.aspect}
-            craft={`${maker.craft} · ${maker.location}`}
-            title={item.title}
-            className="transition-transform duration-state ease-kol group-hover:scale-[1.01]"
-          />
-        </Link>
-        <p className="mt-1.5 inline-block rounded-pill border border-line bg-surface px-2.5 py-0.5 text-caption text-muted">
-          {reasonFor(item, maker, session)}
-        </p>
-      </Reveal>,
-    ];
-  });
+  const tiles =
+    state.status === "ready"
+      ? ordered.flatMap((item, i) => {
+          const maker = state.makers.get(item.makerSlug);
+          if (!maker) return [];
+          return [
+            <Reveal key={item.id} delayMs={(i % 4) * STAGGER_MS} className={SPAN[item.size]}>
+              <Link
+                href={`/m/${maker.slug}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setHero({ stage: "grown", makerSlug: maker.slug });
+                }}
+                aria-label={`Play — ${item.title}`}
+                className="group block"
+              >
+                <Film
+                  variant={maker.filmClass}
+                  aspect={item.aspect}
+                  craft={`${maker.craft} · ${maker.location}`}
+                  title={item.title}
+                  className="transition-transform duration-state ease-kol group-hover:scale-[1.01]"
+                />
+              </Link>
+              <p className="mt-1.5 inline-block rounded-pill border border-line bg-surface px-2.5 py-0.5 text-caption text-muted">
+                {reasonFor(item, maker, session, state.reasons)}
+              </p>
+            </Reveal>,
+          ];
+        })
+      : [];
+
+  const noMakers = state.status === "ready" && makerCount === 0;
 
   return (
     <>
@@ -132,8 +186,8 @@ export default function ForYouPage() {
         <Reveal>
           <p className="text-caption uppercase text-muted">
             Your feed · {session.follows.length}{" "}
-            {session.follows.length === 1 ? "maker" : "makers"} you know, {unknownCount} you
-            don’t yet
+            {session.follows.length === 1 ? "maker" : "makers"} you know
+            {state.status === "ready" ? `, ${unknownCount} you don’t yet` : ""}
           </p>
         </Reveal>
         <Reveal delayMs={STAGGER_MS}>
@@ -150,7 +204,53 @@ export default function ForYouPage() {
         </Reveal>
       </header>
 
-      {!hasSignals ? (
+      {state.status === "loading" ? (
+        /* ============ loading — skeletons matched to the feed layout ============ */
+        <main className="mx-auto w-full max-w-page px-6 pb-24">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-6" aria-hidden="true">
+            {["md:col-span-3", "md:col-span-2", "md:col-span-4", "md:col-span-3"].map(
+              (span, i) => (
+                <div key={i} className={span}>
+                  <Skeleton className="h-44 rounded-md" />
+                  <Skeleton className="mt-2 h-3.5 w-2/5 rounded-pill" />
+                </div>
+              ),
+            )}
+          </div>
+        </main>
+      ) : state.status === "error" ? (
+        /* ============ error — inline, calm ============ */
+        <main className="mx-auto w-full max-w-page px-6 pb-24">
+          <div className="rounded-md border border-line bg-surface px-6 py-12 text-center">
+            <p className="text-caption uppercase text-muted">Couldn’t load your feed</p>
+            <p className="mx-auto mt-2 max-w-measure text-body text-ink">
+              Something went wrong reaching the makers. Refresh the page to try again.
+            </p>
+          </div>
+        </main>
+      ) : noMakers ? (
+        /* ============ empty database — no makers on KOL yet ============ */
+        <main className="mx-auto w-full max-w-page px-6 pb-24">
+          <Reveal>
+            <div className="rounded-lg border border-dashed border-line bg-surface/60 px-8 py-16 text-center">
+              <p className="text-caption uppercase text-muted">Nothing filmed yet</p>
+              <p className="mt-2 font-display text-h2 text-ink">No makers yet.</p>
+              <p className="mx-auto mt-3 max-w-measure text-body text-muted">
+                There are no makers on KOL yet, so there is nothing to rank. Once the first
+                workshop films, follow them and your feed starts here.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/"
+                  className="rounded-pill border border-line bg-surface px-6 py-2.5 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground"
+                >
+                  Browse Discover
+                </Link>
+              </div>
+            </div>
+          </Reveal>
+        </main>
+      ) : !hasSignals ? (
         /* ============ empty state — signed out or brand new ============ */
         <main className="mx-auto w-full max-w-page px-6 pb-24">
           <Reveal>

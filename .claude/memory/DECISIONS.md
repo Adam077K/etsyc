@@ -228,3 +228,29 @@ until applied.
 **Affects:** Phase-6 Wave 1 unblocked; auth (P1), account (P2), and every persistence-dependent
 feature; deploy naming.
 **Status:** Approved — build proceeding.
+
+## 2026-07-21 — D18 FOLLOW-UP: migration APPLIED to staging (not just planned)
+
+The ADR-0001 schema is no longer a plan — it is applied and live on the KOL-Staging
+Supabase project (ref `ktezyykgvqkflmoksmhn`, AWS ca-central-1, Free/Nano), driven by
+Claude via the dashboard on Shaian's authorization with Adam present.
+
+Applied + verified in order:
+1. `0001_kol_initial.sql` → "Success" (ran without RLS-auto-inject; the migration sets RLS itself).
+2. Validation (web-safe rewrite of validate.sql): **31 tables · RLS on every table · KOL functions
+   pin search_path · no stray PUBLIC execute · 54 RLS policies · handle_new_user + guard_profile_role
+   present · get_public_profile callable by anon+authenticated**. (The full validate.sql uses psql
+   `\echo` meta-commands the web SQL editor can't run; a pure-SQL equivalent was used.)
+3. `0002_kol_prototype_additions.sql` → "Success" (notifications, collections, community — D17 layer).
+4. `seed.sql` → 10 profiles · 5 stores · 4 products · 2 reviews · 6 badges · 3 orders.
+5. End-to-end proof: the app's anon publishable key read all 5 stores + 4 products (USD) through
+   RLS from the browser. Chain env → client → live DB → RLS confirmed.
+
+Auth: Site URL + `/auth/callback` redirect registered in the dashboard. Connection env lives in
+`apps/kol/.env.development.local` (gitignored; URL + publishable key only — both public. The
+`sb_secret_...` service-role key was NOT taken and is not in any file Claude wrote).
+
+NOT YET DONE: app PAGES still read the mock data layer (the data-adapter seam exists but pages were
+deliberately not migrated). So real AUTH works against Supabase now, but feed/product/etc. still show
+mock data until pages are switched from `useKolStore()` to `getData()`. Also: OTP email round-trip
+unverified (needs a real inbox + SMTP/rate-limit check); prod apply not done (staging only).

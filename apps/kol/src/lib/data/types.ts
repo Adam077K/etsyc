@@ -34,6 +34,7 @@ import type {
   FeedItem as MockFeedItem,
 } from "@/lib/mock/db";
 import type { StoreOverride } from "@/lib/mock/store";
+import type { StoreConfig } from "@/lib/store-config/types";
 
 /* ------------------------------------------------------------------ */
 /* Entity shapes — identical to the mock types, by design.             */
@@ -91,6 +92,8 @@ export interface KolDataSource {
   /* --- discovery ------------------------------------------------- */
   listMakers(): Promise<Maker[]>;
   getMaker(slug: string): Promise<Maker | null>;
+  /** The full renderable store-config (blocks + theme) for the world renderer. */
+  getStoreConfig(slug: string): Promise<StoreConfig | null>;
   listFeed(): Promise<FeedItem[]>;
   /** The "why you're seeing this" line for a feed item, if any. */
   forYouReason(feedItemId: string): Promise<string | null>;
