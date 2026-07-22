@@ -76,6 +76,7 @@ export const EDGE_TABLE: Record<FilmEdge, EdgeSpec> = {
 };
 
 export const SWAP_FALLBACK_MS = 120;
+export const STATE_FALLBACK_MS = 200;
 export const RETURN_RATIO_FALLBACK = 0.78;
 
 /**
@@ -135,4 +136,14 @@ export function resolveEdgeMs(edge: FilmEdge, options?: { reverse?: boolean }): 
 /** The in-frame clip cross-fade duration (--dur-swap). */
 export function resolveSwapMs(): number {
   return readTokenMs("--dur-swap", SWAP_FALLBACK_MS);
+}
+
+/**
+ * The §1.5 state-change duration (--dur-state) — chrome leave/enter beats
+ * that JS must sequence against (e.g. B2's ungrow: chrome leaves first,
+ * THEN the film FLIPs back). Resolved here so the number is declared once,
+ * in CSS — never re-typed at a call site.
+ */
+export function resolveStateMs(): number {
+  return readTokenMs("--dur-state", STATE_FALLBACK_MS);
 }

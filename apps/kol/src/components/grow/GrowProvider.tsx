@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { resolveEdgeMs } from "@/components/film/edge-table";
+import { resolveEdgeMs, resolveStateMs } from "@/components/film/edge-table";
 import { useFilmSlot } from "@/components/film/useFilmSlot";
 import { requestGrownSelection } from "@/lib/grow/actions";
 import type { GrownSelection } from "@/lib/grow/types";
@@ -65,8 +65,6 @@ const GrowContext = createContext<GrowApi | null>(null);
 export function useGrow(): GrowApi | null {
   return useContext(GrowContext);
 }
-
-const CHROME_LEAVE_MS = 200; // --dur-state — type and affordance leave first
 
 export function GrowProvider({
   onOpenWorld,
@@ -156,7 +154,8 @@ export function GrowProvider({
             ),
           );
         },
-        reduced ? 0 : CHROME_LEAVE_MS,
+        // --dur-state via the token reader — type and affordance leave first
+        reduced ? 0 : resolveStateMs(),
       ),
     );
   }, [returnSlotClaim]);

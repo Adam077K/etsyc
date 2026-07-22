@@ -15,6 +15,8 @@
  * are removed, the change is opacity only, and the film snaps).
  */
 
+import { resolveEdgeMs } from "@/components/film/edge-table";
+
 export const FEED_CARD_ATTRIBUTE = "data-feed-card";
 export const PART_STAGGER_MS = 70;
 
@@ -91,6 +93,9 @@ export function partFeedCards(opts: {
         el.style.transform = "";
       });
       // let the return transition land, then hand the styles back untouched
+      // (duration resolves off --dur-ungrow — the same token the transition
+      // above rides; a re-typed 405 would strip styles mid-return the day
+      // the token moves)
       cleanupTimer = window.setTimeout(
         () => {
           for (const el of moved) {
@@ -99,7 +104,7 @@ export function partFeedCards(opts: {
             el.style.removeProperty("transform");
           }
         },
-        405 + moved.length * PART_STAGGER_MS + 120,
+        resolveEdgeMs("ungrow") + moved.length * PART_STAGGER_MS + 120,
       );
     },
   };
