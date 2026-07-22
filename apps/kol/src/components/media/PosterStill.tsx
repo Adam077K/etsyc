@@ -8,7 +8,16 @@ import { useState } from "react";
  * throw NotFoundError later). The ground-tinted parent fill is the designed
  * fallback underneath.
  */
-export function PosterStill({ src, className }: { src: string; className?: string }) {
+export function PosterStill({
+  src,
+  className,
+  objectPosition,
+}: {
+  src: string;
+  className?: string;
+  /** Focal-point crop anchor (clipObjectPosition) — omitted → browser default. */
+  objectPosition?: string;
+}) {
   const [failed, setFailed] = useState(false);
   if (failed) return null;
   return (
@@ -19,6 +28,7 @@ export function PosterStill({ src, className }: { src: string; className?: strin
       aria-hidden="true"
       onError={() => setFailed(true)}
       className={className}
+      style={objectPosition ? { objectPosition } : undefined}
     />
   );
 }

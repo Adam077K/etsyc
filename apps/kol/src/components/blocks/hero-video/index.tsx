@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FilmFrame } from "@/components/media/FilmFrame";
+import { clipObjectPosition } from "@/components/media/focal-point";
 import { PosterStill } from "@/components/media/PosterStill";
 import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { Skeleton } from "@/components/states/Skeleton";
@@ -33,7 +34,11 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
       <section className="mx-auto w-full max-w-page px-[var(--space-2)] md:px-[var(--space-6)]">
         <div className={cn("relative flex items-center justify-center overflow-hidden bg-surface", frameClass)}>
           {clip ? (
-            <PosterStill src={clip.poster} className="absolute inset-0 h-full w-full object-cover opacity-40" />
+            <PosterStill
+              src={clip.poster}
+              className="absolute inset-0 h-full w-full object-cover opacity-40"
+              objectPosition={clipObjectPosition(clip)}
+            />
           ) : null}
           <EmptyPrompt
             prompt="Add your first clip"
@@ -53,7 +58,11 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
       >
         <div className={cn("relative overflow-hidden bg-surface", frameClass)}>
           {/* poster shows immediately; shimmer is a progress edge, never a spinner */}
-          <PosterStill src={clip.poster} className="h-full w-full object-cover opacity-60" />
+          <PosterStill
+            src={clip.poster}
+            className="h-full w-full object-cover opacity-60"
+            objectPosition={clipObjectPosition(clip)}
+          />
           <Skeleton className="absolute inset-x-0 bottom-0 h-1 rounded-none" />
         </div>
       </section>
@@ -76,7 +85,11 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
       <div className={cn("kol-scrim relative overflow-hidden [container-type:inline-size]", frameClass)}>
         {showError ? (
           <div className="relative flex h-full w-full items-end bg-surface">
-            <PosterStill src={clip.poster} className="absolute inset-0 h-full w-full object-cover" />
+            <PosterStill
+              src={clip.poster}
+              className="absolute inset-0 h-full w-full object-cover"
+              objectPosition={clipObjectPosition(clip)}
+            />
             <p className="relative m-4 rounded-md bg-surface/85 px-3 py-2 text-caption text-muted">
               Couldn&rsquo;t load this clip
             </p>
@@ -84,11 +97,23 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
         ) : (
           <FilmFrame clip={clip} className="h-full" onError={() => setClipFailed(true)} />
         )}
-        {/* the one big line per world — display-hero over film, --on-media ink over the scrim */}
+        {/* the one big line per world — display-hero over film, --on-media ink
+            over the scrim. When the maker authored a statement it takes the
+            hero slot (screen-specs §3.2: weight 400–500, tracking -0.01em —
+            light and large, a guest on the maker's face); absent → NOTHING is
+            promoted into it (D10: never a generated line, the craft line, or
+            the store name AS the maker's words) — the name identity line
+            renders as before. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-[var(--space-4)] md:p-[var(--space-8)]">
-          <h1 className="font-display font-bold leading-[0.92] tracking-[-0.03em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),10cqi)]">
-            {data.maker.displayName}
-          </h1>
+          {block.props.statement ? (
+            <h1 className="font-display font-medium leading-[0.92] tracking-[-0.01em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),10cqi)]">
+              {block.props.statement}
+            </h1>
+          ) : (
+            <h1 className="font-display font-bold leading-[0.92] tracking-[-0.03em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),10cqi)]">
+              {data.maker.displayName}
+            </h1>
+          )}
           {block.props.showCraftLine ? (
             <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media">
               {data.maker.craft} · {data.maker.location}

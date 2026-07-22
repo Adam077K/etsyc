@@ -5,6 +5,7 @@ import { Captions, Volume2, VolumeX } from "lucide-react";
 import { useHeroPersistence } from "@/lib/renderer/hero-persistence";
 import type { Clip } from "@/lib/store-config/types";
 import { cn } from "@/lib/utils";
+import { clipObjectPosition } from "./focal-point";
 import { PosterStill } from "./PosterStill";
 
 /**
@@ -85,7 +86,11 @@ export function FilmFrame({
         )}
       >
         {/* the poster may 404 too — the ground-tinted fill IS the designed fallback */}
-        <PosterStill src={clip.poster} className="absolute inset-0 h-full w-full object-cover" />
+        <PosterStill
+          src={clip.poster}
+          className="absolute inset-0 h-full w-full object-cover"
+          objectPosition={clipObjectPosition(clip)}
+        />
         <p className="relative m-4 rounded-md bg-surface/85 px-3 py-2 text-caption text-muted">
           Couldn&rsquo;t load this clip
         </p>
@@ -111,6 +116,9 @@ export function FilmFrame({
           onError?.();
         }}
         className="h-full w-full object-cover"
+        // focal-point crop (v1.3 clips[].focalPoint, renderer-defaulted to
+        // centre) — applies to the playing frame AND the poster attribute
+        style={{ objectPosition: clipObjectPosition(clip) }}
       >
         {clip.captionsSrc ? (
           <track kind="captions" src={clip.captionsSrc} srcLang="en" label="English" />
