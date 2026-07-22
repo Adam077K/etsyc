@@ -18,6 +18,17 @@ import type { Candidate, EngineContext, VideoProfileRow, VideoRow } from "./type
  * there is no code path that adds a thank-you clip to the feed, and this
  * module must never grow a blocklist variant of that rule.
  *
+ * BOUNDED WINDOWS (F3, dispatch packet §6): every query orders by
+ * `video_profiles.created_at DESC` server-side and caps the transfer —
+ * FEED_CANDIDATE_CAP (300) cross-maker, SCOPED_CANDIDATE_CAP (100) for the
+ * store- and product-scoped states. The JS newest-first sort (by
+ * `videos.created_at`) and the newestPerStore reduction run INSIDE that
+ * window, so their semantics are unchanged; the FEED guarantee is now
+ * explicitly: one newest eligible clip per store, among the 300 most
+ * recently TAGGED clips. Without the cap the fetch is unbounded and
+ * Supabase `db-max-rows` truncation would drop rows BEFORE the JS sort —
+ * silently breaking newest-per-store with no error.
+ *
  * Tag arrays are bare `text[]` with no CHECK constraint: an unknown string
  * simply fails the set intersection (degrade-safe), and untagged footage
  * (empty arrays) matches no state query at all — invisible by default.
@@ -28,6 +39,19 @@ import type { Candidate, EngineContext, VideoProfileRow, VideoRow } from "./type
  */
 
 const CANDIDATE_SELECT = "*, videos!inner(*)";
+
+/**
+ * FEED's server-side candidate window (F3, §6): the 300 most recently tagged
+ * profiles. Bounded transfer, freshness-biased by design — a magazine feed
+ * wants the newest work anyway.
+ */
+export const FEED_CANDIDATE_CAP = 300;
+
+/**
+ * Store-/product-scoped window. A single store's clip count is naturally
+ * small, but an unbounded query is a defect regardless of current data.
+ */
+export const SCOPED_CANDIDATE_CAP = 100;
 
 type EligibleRow = VideoProfileRow & { videos: VideoRow };
 
@@ -68,7 +92,8 @@ function byNewestFirst(a: Candidate, b: Candidate): number {
  * FEED's `distinct on (v.store_id)` applied post-fetch (PostgREST has no
  * DISTINCT ON): input is newest-first, so the first clip seen per store is
  * that store's newest eligible clip — one hero candidate per store enters
- * scoring (magazine variety, §2.1).
+ * scoring (magazine variety, §2.1). Runs inside the FEED_CANDIDATE_CAP
+ * window (F3): "newest per store" is scoped to that window.
  */
 function newestPerStore(candidates: Candidate[]): Candidate[] {
   const seen = new Set<string | null>();
@@ -119,7 +144,9 @@ export function createEligible(
       profiles()
         .contains("page_eligibility", page)
         .overlaps("purpose", purposes)
-        .eq("videos.store_id", ctx.storeScope),
+        .eq("videos.store_id", ctx.storeScope)
+        .order("created_at", { ascending: false })
+        .limit(SCOPED_CANDIDATE_CAP),
       ctx.state,
     );
   }
@@ -147,14 +174,19 @@ export function createEligible(
         ctx.state === "PRODUCT_PAGE"
           ? primary.overlaps("purpose", ["product-narration", "process"])
           : primary.contains("purpose", ["product-narration"]);
-      const hit = await run(primary, ctx.state);
+      const hit = await run(
+        primary.order("created_at", { ascending: false }).limit(SCOPED_CANDIDATE_CAP),
+        ctx.state,
+      );
       if (hit.length > 0) return hit;
     }
     return run(
       profiles()
         .contains("page_eligibility", ["product"])
         .contains("purpose", ["product-narration"])
-        .eq("videos.store_id", ctx.storeScope),
+        .eq("videos.store_id", ctx.storeScope)
+        .order("created_at", { ascending: false })
+        .limit(SCOPED_CANDIDATE_CAP),
       ctx.state,
     );
   }
@@ -164,11 +196,16 @@ export function createEligible(
       case "FEED": {
         // §2.1 — cross-maker (store unrestricted), POSITIVE feed predicate,
         // one newest eligible clip per store. Mood is a scoring bias, never
-        // an eligibility filter (keep the pool wide).
+        // an eligibility filter (keep the pool wide). The window is bounded
+        // server-side (F3): newest-tagged first, capped at FEED_CANDIDATE_CAP,
+        // so the JS sort + reduction below always see the complete window —
+        // never a db-max-rows-truncated slice.
         const pool = await run(
           profiles()
             .contains("page_eligibility", ["feed"])
-            .overlaps("purpose", ["intro", "craft-story", "atmosphere"]),
+            .overlaps("purpose", ["intro", "craft-story", "atmosphere"])
+            .order("created_at", { ascending: false })
+            .limit(FEED_CANDIDATE_CAP),
           ctx.state,
         );
         return newestPerStore(pool);

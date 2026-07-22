@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
 
-import { createEligible } from "../eligible";
+import { createEligible, FEED_CANDIDATE_CAP, SCOPED_CANDIDATE_CAP } from "../eligible";
 import type { EngineContext } from "../types";
 
 /**
@@ -45,6 +45,12 @@ class FakeQuery {
   }
   eq(...args: unknown[]) {
     return this.record("eq", args);
+  }
+  order(...args: unknown[]) {
+    return this.record("order", args);
+  }
+  limit(...args: unknown[]) {
+    return this.record("limit", args);
   }
 
   then<T>(resolve: (value: FakeResult) => T): Promise<T> {
@@ -144,9 +150,20 @@ describe("FEED (§2.1)", () => {
     expect(call(query, "overlaps")).toEqual([
       { method: "overlaps", args: ["purpose", ["intro", "craft-story", "atmosphere"]] },
     ]);
+    // F3 (§6): the window is bounded SERVER-SIDE — newest-tagged first,
+    // capped — so db-max-rows truncation can never precede the JS sort.
+    expect(call(query, "order")).toEqual([
+      { method: "order", args: ["created_at", { ascending: false }] },
+    ]);
+    expect(call(query, "limit")).toEqual([
+      { method: "limit", args: [FEED_CANDIDATE_CAP] },
+    ]);
+    expect(FEED_CANDIDATE_CAP).toBe(300);
     // Cross-maker: no store restriction; and structurally no negative
     // (not/neq) predicate exists — the exclusion is the positive contains.
-    expect(methodsUsed(query)).toEqual(new Set(["from", "select", "contains", "overlaps"]));
+    expect(methodsUsed(query)).toEqual(
+      new Set(["from", "select", "contains", "overlaps", "order", "limit"]),
+    );
   });
 
   it("reduces to each store's newest eligible clip (distinct on store_id) with features/score null", async () => {
@@ -169,6 +186,33 @@ describe("FEED (§2.1)", () => {
     expect(candidates[0]?.ownerId).toBe("owner-1");
     expect(candidates[0]?.profile.page_eligibility).toEqual(["feed"]);
     expect(candidates[0]?.video.src).toContain(storeANew.video_id);
+  });
+
+  it("newest-per-store reduction holds within the capped window (F3)", async () => {
+    // The server returns AT MOST FEED_CANDIDATE_CAP rows, newest-tagged
+    // first. Whatever arrives, the JS sort + reduction still yield one
+    // newest clip per store — semantics unchanged inside the window.
+    const windowRows = [
+      row({ storeId: "store-a", createdAt: "2026-07-10T00:00:00+00:00" }),
+      row({ storeId: "store-b", createdAt: "2026-07-09T00:00:00+00:00" }),
+      row({ storeId: "store-a", createdAt: "2026-07-08T00:00:00+00:00" }),
+      row({ storeId: "store-c", createdAt: "2026-07-07T00:00:00+00:00" }),
+      row({ storeId: "store-b", createdAt: "2026-07-06T00:00:00+00:00" }),
+    ];
+    const { db, queries } = fakeDb([{ data: windowRows, error: null }]);
+
+    const candidates = await createEligible(db)(ctx({ state: "FEED" }));
+
+    expect(windowRows.length).toBeLessThanOrEqual(FEED_CANDIDATE_CAP);
+    expect(call(queries[0], "limit")).toEqual([
+      { method: "limit", args: [FEED_CANDIDATE_CAP] },
+    ]);
+    expect(candidates.map((c) => c.storeId)).toEqual(["store-a", "store-b", "store-c"]);
+    expect(candidates.map((c) => c.videoId)).toEqual([
+      windowRows[0]?.video_id,
+      windowRows[1]?.video_id,
+      windowRows[3]?.video_id,
+    ]);
   });
 });
 
@@ -195,6 +239,14 @@ describe("store-scoped states (§2 map)", () => {
     expect(call(query, "eq")).toEqual([
       { method: "eq", args: ["videos.store_id", "store-9"] },
     ]);
+    // F3: scoped states are bounded too — order + cap, semantics unchanged.
+    expect(call(query, "order")).toEqual([
+      { method: "order", args: ["created_at", { ascending: false }] },
+    ]);
+    expect(call(query, "limit")).toEqual([
+      { method: "limit", args: [SCOPED_CANDIDATE_CAP] },
+    ]);
+    expect(SCOPED_CANDIDATE_CAP).toBe(100);
   });
 
   it("null storeScope degrades to [] without issuing a query", async () => {
@@ -225,6 +277,9 @@ describe("NARRATE_SHRINK / PRODUCT_PAGE (§2.2)", () => {
     ]);
     expect(call(queries[0], "eq")).toEqual([
       { method: "eq", args: ["videos.store_id", "store-9"] },
+    ]);
+    expect(call(queries[0], "limit")).toEqual([
+      { method: "limit", args: [SCOPED_CANDIDATE_CAP] },
     ]);
     expect(result.map((c) => c.videoId)).toEqual([narration.video_id]);
   });
