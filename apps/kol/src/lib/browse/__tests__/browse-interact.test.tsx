@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FilmLayerProvider } from "@/components/film/FilmLayer";
 import { StoreWorld } from "@/lib/renderer/StoreWorld";
 import { senaStore } from "@/lib/store-config/fixtures/sena";
-import { SWAP_MIN_INTERVAL_MS } from "../contract";
+import { SWAP_MIN_INTERVAL_MS, type BrowseClipResult } from "../contract";
 import { selectBrowseClip } from "../select-browse-clip";
 
 /**
@@ -186,6 +186,167 @@ describe("B4 — store scroll & interact (WORLD_BROWSE)", () => {
     // a genuinely new crossing past the floor fires
     crossMidline(sections[2]!);
     await waitFor(() => expect(selectBrowseClipMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("the 12 s floor runs from MOUNT — a boundary crossed during the opening clip is consumed, not swapped", async () => {
+    selectBrowseClipMock.mockResolvedValue(null);
+    const { container } = renderBrowsingWorld();
+    await primeFilm(container);
+    const sections = container.querySelectorAll(".kol-world-body > *");
+
+    // NO clock advance: mount is attempt zero — the maker finishes the
+    // opening clip's first breath before changing subject (§4.2). Every
+    // other test here advances past the floor first, which is exactly why
+    // this line was never load-bearing before.
+    crossMidline(sections[0]!);
+    expect(selectBrowseClipMock).not.toHaveBeenCalled();
+
+    // past the floor a NEW boundary fires — the mount floor delays the
+    // first swap, it doesn't eat the mechanism
+    now += SWAP_MIN_INTERVAL_MS + 1;
+    crossMidline(sections[1]!);
+    await waitFor(() => expect(selectBrowseClipMock).toHaveBeenCalledTimes(1));
+  });
+
+  it("prefers the CONFIG clip over the engine payload — focalPoint rides the swap (CPO Ruling 3)", async () => {
+    // the engine view-model has no focalPoint field by design; only the
+    // config clip carries the crop (they meet at videos.id, §B0). The mock
+    // returns the SAME src either way — the crop landing on the buffer and
+    // the poster underlay is the observable that pins the preference.
+    const focalSena = {
+      ...senaStore,
+      media: {
+        ...senaStore.media,
+        clips: senaStore.media.clips.map((clip) =>
+          clip.id === wheel.id ? { ...clip, focalPoint: { x: 0.2, y: 0.8 } } : clip,
+        ),
+      },
+    };
+    selectBrowseClipMock.mockResolvedValue({
+      videoId: wheel.id,
+      src: wheel.src,
+      poster: wheel.poster,
+      captionsSrc: null, // engine payload deliberately leaner than the config clip
+    });
+    const { container } = renderBrowsingWorld({ config: focalSena });
+    const frame = await primeFilm(container);
+
+    now += SWAP_MIN_INTERVAL_MS + 1;
+    crossMidline(container.querySelector(".kol-world-body > *")!);
+    await waitFor(() => {
+      expect(
+        [...frame.querySelectorAll("video")].some(
+          (video) => video.getAttribute("src") === wheel.src,
+        ),
+      ).toBe(true);
+    });
+
+    const incoming = [...frame.querySelectorAll("video")].find(
+      (video) => video.getAttribute("src") === wheel.src,
+    )!;
+    expect(incoming.style.objectPosition).toBe("20% 80%");
+    expect(
+      frame.querySelector<HTMLImageElement>("img.kol-film-poster")?.style.objectPosition,
+    ).toBe("20% 80%");
+  });
+
+  it("fallback chain tail: posterless off-config selection keeps the current clip; engine src/poster swaps when unmirrored", async () => {
+    selectBrowseClipMock
+      .mockResolvedValueOnce({
+        videoId: "v_offconfig_bare",
+        src: "/media/engine/offconfig-bare.mp4",
+        poster: null, // the layer's poster-first contract has nothing to stand on
+        captionsSrc: null,
+      })
+      .mockResolvedValueOnce({
+        videoId: "v_offconfig_postered",
+        src: "/media/engine/offconfig-postered.mp4",
+        poster: "/media/engine/offconfig-postered.jpg",
+        captionsSrc: null,
+      });
+    const { container } = renderBrowsingWorld();
+    const frame = await primeFilm(container);
+    const sections = container.querySelectorAll(".kol-world-body > *");
+
+    // leg 1 — off-config AND posterless → keep the current clip, quietly
+    now += SWAP_MIN_INTERVAL_MS + 1;
+    crossMidline(sections[0]!);
+    await waitFor(() => expect(selectBrowseClipMock).toHaveBeenCalledTimes(1));
+    await act(async () => {}); // let the selection settle
+    expect(
+      [...frame.querySelectorAll("video")].some((video) =>
+        (video.getAttribute("src") ?? "").includes("offconfig-bare"),
+      ),
+    ).toBe(false);
+    expect(frame.querySelector(".kol-film-front")?.getAttribute("src")).toBe(
+      "/media/ashwork/intro.mp4",
+    );
+    expect(frame.textContent).not.toMatch(/Couldn.t load this clip/);
+
+    // leg 2 — off-config WITH a poster → the engine view-model swaps whole
+    now += SWAP_MIN_INTERVAL_MS + 1;
+    crossMidline(sections[1]!);
+    await waitFor(() => {
+      expect(
+        [...frame.querySelectorAll("video")].some(
+          (video) => video.getAttribute("src") === "/media/engine/offconfig-postered.mp4",
+        ),
+      ).toBe(true);
+    });
+    // poster-first: the underlay is already the incoming clip's poster
+    expect(
+      frame.querySelector<HTMLImageElement>("img.kol-film-poster")?.getAttribute("src"),
+    ).toBe("/media/engine/offconfig-postered.jpg");
+    for (const video of frame.querySelectorAll("video")) {
+      fireEvent(video, new Event("canplay"));
+    }
+    await waitFor(() => {
+      expect(frame.querySelector(".kol-film-front")?.getAttribute("src")).toBe(
+        "/media/engine/offconfig-postered.mp4",
+      );
+    });
+  });
+
+  it("a LATE selection landing after the buyer docked is DISCARDED — never change the subject under B5", async () => {
+    let resolveLate: ((value: BrowseClipResult) => void) | undefined;
+    selectBrowseClipMock.mockImplementation(
+      () =>
+        new Promise<BrowseClipResult>((resolve) => {
+          resolveLate = resolve;
+        }),
+    );
+    const { container, getByRole } = renderBrowsingWorld();
+    const frame = await primeFilm(container);
+
+    now += SWAP_MIN_INTERVAL_MS + 1;
+    crossMidline(container.querySelector(".kol-world-body > *")!);
+    expect(selectBrowseClipMock).toHaveBeenCalledTimes(1); // in flight…
+
+    // …and while it's pending the buyer goes deeper: WORLD_BROWSE ends
+    fireEvent.click(getByRole("button", { name: /Ridge Tumbler/i }));
+    expect(
+      container.querySelector("[data-world-stage]")?.getAttribute("data-world-stage"),
+    ).toBe("narrate-shrink");
+
+    // the response lands late — a valid, config-mirrored clip
+    await act(async () => {
+      resolveLate!({
+        videoId: wheel.id,
+        src: wheel.src,
+        poster: wheel.poster,
+        captionsSrc: wheel.captionsSrc,
+      });
+    });
+
+    // discarded: no buffer ever loads it; the docked film plays on unchanged
+    expect(
+      [...frame.querySelectorAll("video")].some(
+        (video) => video.getAttribute("src") === wheel.src,
+      ),
+    ).toBe(false);
+    expect(frame.querySelector(".kol-film-front")?.getAttribute("src")).toBe(
+      "/media/ashwork/intro.mp4",
+    );
   });
 
   it("keeps the current clip when nothing is eligible — graceful, no error chrome", async () => {
