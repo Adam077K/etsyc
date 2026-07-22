@@ -39,6 +39,27 @@ export const FEED_LIMIT_DEFAULT = 18;
  */
 export const FEED_RING_COOKIE = "kol_ring";
 
+/**
+ * The ring cookie's WRITE ATTRIBUTES — the single declaration every ring
+ * writer imports, beside the name it belongs to (the DECISIONS.md cookie
+ * canon covers attributes, not just names: four independently re-typed
+ * copies agreed by luck, and diverging attributes make browsers fork the
+ * cookie by scope, silently splitting the ring between journey states).
+ * A FUNCTION, not a const: `secure` must resolve NODE_ENV at write time,
+ * never freeze at import (gate-2 F2 — the browse module-const had exactly
+ * that freeze). Writers: the feed read-path below, grow, browse,
+ * narration. The middleware's kol_sid mint re-types the same shape but
+ * cannot import from here (edge runtime vs this module's server graph).
+ */
+export function ringCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  } as const;
+}
+
 export type FeedCardAspect = "1:1" | "4:5" | "3:2" | "16:9";
 
 /** 0–1 art-direction anchor (the maker's FACE) for cross-aspect crops. */
@@ -260,12 +281,7 @@ export async function getFeedSelection(opts: {
       read: () => cookieStore.get(FEED_RING_COOKIE)?.value,
       write: (value) => {
         try {
-          cookieStore.set(FEED_RING_COOKIE, value, {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
-            path: "/",
-          });
+          cookieStore.set(FEED_RING_COOKIE, value, ringCookieOptions());
         } catch {
           // Called from a Server Component render, where the cookie store
           // is read-only (same idiom as lib/supabase/server.ts setAll).

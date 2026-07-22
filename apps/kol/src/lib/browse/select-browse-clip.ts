@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { createEngineDeps, selectVideos } from "@/lib/engine";
-import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_RING_COOKIE, ringCookieOptions } from "@/lib/feed/select";
 import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,18 +25,6 @@ import { type BrowseClipResult } from "./contract";
  */
 
 const StoreIdSchema = z.string().uuid();
-
-/**
- * Ring write attributes — byte-identical to getFeedSelection's set() (and
- * kol_sid's minting in the middleware): diverging attributes make browsers
- * fork the cookie by scope, silently splitting the ring between states.
- */
-const RING_COOKIE_OPTIONS = {
-  httpOnly: true,
-  sameSite: "lax",
-  path: "/",
-  secure: process.env.NODE_ENV === "production",
-} as const;
 
 /**
  * Select the next `process`/`atmosphere` clip for a browsing buyer, or
@@ -76,7 +64,10 @@ export async function selectBrowseClip(storeId: string): Promise<BrowseClipResul
     // the feed reads next.
     const deps = createEngineDeps({
       read: () => cookieStore.get(FEED_RING_COOKIE)?.value,
-      write: (value) => cookieStore.set(FEED_RING_COOKIE, value, RING_COOKIE_OPTIONS),
+      // the canonical attribute set — imported, never re-typed (DECISIONS);
+      // a function so `secure` resolves NODE_ENV at write time, and diverging
+      // attributes cannot fork the cookie by scope between journey states
+      write: (value) => cookieStore.set(FEED_RING_COOKIE, value, ringCookieOptions()),
     });
 
     const selection = await selectVideos(

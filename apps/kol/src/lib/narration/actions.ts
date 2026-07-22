@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { createEngineDeps, selectVideos } from "@/lib/engine";
-import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_RING_COOKIE, ringCookieOptions } from "@/lib/feed/select";
 import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,23 +36,12 @@ const narrationInputSchema = z.object({
   productId: z.uuid().nullable(),
 });
 
-/**
- * The shared first-party cookie attribute set — B4's RING_COOKIE_OPTIONS
- * shape; the proxy middleware, B1a and every other writer set exactly
- * these. Cookie identity is (name, domain, path) — `Secure` is NOT part of
- * the key — so a write WITHOUT it would REPLACE the middleware's cookie
- * and strip the attribute, putting the HMAC-bearing ring on plaintext
- * http:// requests in production (gate-2 F2). A function, not a module
- * const: NODE_ENV must resolve at write time, never freeze at import.
- */
-function ringCookieOptions() {
-  return {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  } as const;
-}
+// Ring write attributes come from the ONE canonical declaration
+// (lib/feed/select.ts ringCookieOptions — imported above). Cookie identity
+// is (name, domain, path) — `Secure` is NOT part of the key — so a write
+// with a diverged set would REPLACE the canonical cookie and strip the
+// attribute, putting the HMAC-bearing ring on plaintext http:// requests
+// in production (gate-2 F2).
 
 /** Serializable slice of SelectedClip the dock swap needs. */
 export interface NarrationClip {

@@ -199,13 +199,12 @@ describe("selectBrowseClip — the one engine read", () => {
   });
 
   it("ring writes carry `secure` in production — an attribute-stripping replace is the F2 defect", async () => {
-    // RING_COOKIE_OPTIONS is evaluated at MODULE scope (boot-time NODE_ENV,
-    // stable in production) — a fresh import is required to observe it
+    // the canonical ringCookieOptions() resolves NODE_ENV at WRITE time —
+    // no fresh import needed (the old module-const froze it at import and
+    // this test had to resetModules around the freeze; that freeze is gone)
     vi.stubEnv("NODE_ENV", "production");
-    vi.resetModules();
-    const { selectBrowseClip: prodSelectBrowseClip } = await import("./select-browse-clip");
 
-    await prodSelectBrowseClip(STORE_ID);
+    await selectBrowseClip(STORE_ID);
 
     const [cookieOpts] = mocks.createEngineDeps.mock.calls[0]! as [
       { read: () => string | undefined; write: (value: string) => void },

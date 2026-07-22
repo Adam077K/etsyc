@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { z } from "zod";
 
-import { FEED_RING_COOKIE } from "@/lib/feed/select";
+import { FEED_RING_COOKIE, ringCookieOptions } from "@/lib/feed/select";
 import { FEED_SESSION_COOKIE, resolveFeedSessionId } from "@/lib/feed/session";
 import { createClient } from "@/lib/supabase/server";
 import { getGrownSelection } from "./select";
@@ -52,13 +52,8 @@ export async function requestGrownSelection(input: {
     cookies: {
       read: () => jar.get(FEED_RING_COOKIE)?.value,
       write: (value) =>
-        // same attributes as the feed's ring write (lib/feed/select.ts)
-        jar.set(FEED_RING_COOKIE, value, {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-        }),
+        // the canonical attribute set — imported, never re-typed (DECISIONS)
+        jar.set(FEED_RING_COOKIE, value, ringCookieOptions()),
     },
   });
 }
