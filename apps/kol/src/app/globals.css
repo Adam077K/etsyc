@@ -238,13 +238,53 @@
   [data-world-stage="grown"] .kol-hero-stage-inner {
     opacity: 0;
   }
-  .kol-world-body {
-    transition: opacity var(--dur-unfold) var(--ease-kol);
+
+  /* ---- B3 world-unfold choreography (screen-specs §3.3 — 900ms HARD CAP
+          on --ease-cinematic, three bands; timings computed per block in
+          renderer/unfold.ts and carried as --unfold-* item props).
+
+          Band 1, 0–280: the ground wash. The world root paints its own
+          --ground (owned HERE, not by the bg-ground utility — a utility
+          would outrank the folded override below); folded stages leave it
+          transparent so whatever sits behind (the feed's neutral chrome)
+          shows through, and the unfold cross-fades it in over 280ms.  ---- */
+  .kol-world {
+    background-color: var(--ground);
+    transition: background-color 280ms var(--ease-cinematic);
   }
+  .kol-world[data-world-stage="feed"],
+  .kol-world[data-world-stage="grown"] {
+    background-color: transparent;
+  }
+
+  /*      Bands 2+3, 140–900: blocks rise in staggered waves (translateY
+          var(--unfold-rise) → 0, nearest-to-film first, 70ms stagger,
+          parallax depth on the rise distance); atmosphere resolves last,
+          340–900 — the world "breathes out". These are the TARGET-state
+          transitions, so they run on the unfold; the folded rules below
+          override duration/delay for the fold-back.                     ---- */
+  .kol-unfold-item {
+    transition:
+      opacity var(--unfold-dur, var(--dur-enter)) var(--ease-cinematic),
+      transform var(--unfold-dur, var(--dur-enter)) var(--ease-cinematic);
+    transition-delay: var(--unfold-delay, 0ms);
+  }
+  /* the world body stays MOUNTED while folded (unfold = rise, not mount);
+     inert (StoreWorld) + pointer-events cover interaction, items carry the
+     visual fold so each can rise on its own §3.3 slot */
   [data-world-stage="feed"] .kol-world-body,
   [data-world-stage="grown"] .kol-world-body {
-    opacity: 0;
     pointer-events: none;
+  }
+  [data-world-stage="feed"] .kol-unfold-item,
+  [data-world-stage="grown"] .kol-unfold-item {
+    opacity: 0;
+    transform: translateY(var(--unfold-rise, 18px));
+    /* fold-back (WORLD_OPEN → GROWN, preview back-walk) is the DERIVED
+       reverse: --dur-unfold × --return-ratio = 702ms, one motion, no
+       stagger — never a new edge (§5.1/§5.2) */
+    transition-duration: calc(var(--dur-unfold) * var(--return-ratio));
+    transition-delay: 0ms;
   }
 
   /* ---- the Film Layer (design-direction §6.2, Amendment A) — ONE film,
@@ -324,5 +364,15 @@
      outranks the * collapse above at equal importance. */
   .kol-film-buffer {
     transition-duration: var(--dur-state) !important;
+  }
+  /* B3 binding AC: the animated unfold becomes an INSTANT FADE — no
+     spatial motion, no parallax, no stagger (durations already collapse
+     via the * rule above); the film persists and keeps playing. */
+  [data-world-stage="feed"] .kol-unfold-item,
+  [data-world-stage="grown"] .kol-unfold-item {
+    transform: none;
+  }
+  .kol-unfold-item {
+    transition-delay: 0ms !important;
   }
 }
