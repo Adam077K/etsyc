@@ -124,6 +124,23 @@ The last one is the aspect-counter pattern exactly: **B2's parting test plants i
 
 ⚠️ **UNREVIEWED ARCHITECTURE — route to QA-Lead.** Design-Lead flagged, correctly, that it approved the scrim's *behaviour* but has no authority over its *structure*: `.kol-hero-chrome` replaces the original `::before` approach and `kol-scrim` moved to the frame container on `feat/b3-world-unfold`. Load-bearing, design-approved, **never code-reviewed.**
 
+### ✅ ALL 13 ORIGINAL DESIGN-CRITIC FINDINGS RESOLVED
+
+The last to close was the isoldeglass "stray warm band" (P3), and it resolved as **correct behaviour + a catalog spec gap** — not a theme leak, not a B3 defect, and explicitly **not** bad configuration.
+
+**Mechanism.** `atmosphere/index.tsx:31` renders `ground → color-mix(in oklab, accent 10%, ground) → ground`. The formula is right; the **10% constant is perceptually weighted, so its effect scales with the luminance distance between the inputs**:
+- cream baseline (ground L\*≈95) → midpoint L\*≈94: a ~1 L\* delta, invisible, reads as seamless connective tissue
+- near-black ground (L\*≈1–2) with a warm accent (L\*≈50+) → midpoint L\*≈6–8: a **4–6 L\* delta**, a clearly visible warm stripe
+
+That is perceptual non-linearity in oklab near the luminance floor, not a rendering error.
+
+**Why it isn't the seller's fault** — the reasoning generalizes past this block:
+> *"The supposedly neutral fallback (`var(--surface)`) is not safe on dark palettes either: on a dark-world theme `--surface` is measurably lighter than `--ground` and produces a visible brightness band rather than a hue band. The catalog provides no configuration that behaves correctly on near-black grounds. **It is not honest to call this a configuration error when the correct configuration does not exist.**"*
+
+**Future cycle, catalog-tier — Option A preferred:** introduce `--atmosphere-tint-pct` (default `10%`); dark-palette world themes set `3–4%`. One line, no block logic change, no schema change — a calibration lever at the theme layer. Option B (seller-facing documentation telling authors to avoid the variant on dark worlds) shifts the burden to guidance instead of fixing it.
+
+**The pattern worth carrying:** this is the *third* instance this wave of **a single constant calibrated implicitly against one context and wrong in another** — nameplate weight across stroke classes (R1), caption margin across descender depths (Lever 6), and now atmosphere tint across ground luminance. Each looked like a value bug and was really a missing axis. When a design constant is a bare number, ask what it was calibrated against and what happens at the other end of that range.
+
 ### 🔍 TWO EVIDENCE DEFECTS THAT INVALIDATE EARLIER REVIEWS
 1. **Capture contamination.** `playwright.config.ts` hardcoded `localhost:3000` with `reuseExistingServer: true`, and this repo runs ~60 worktrees. A worker's first capture run silently screenshotted **another worktree's dev server**. **Any capture-based review predating the `KOL_E2E_PORT` fix should be treated with suspicion.** Mitigating: the critic's Gate-B numbers were independently reconstructed from theme math on the correct build, so those findings were real.
 2. **`/preview` renders no film at all.** The app-root Film Layer holds a **0×0 rect** there, so the hero backdrop is bare `--surface` cream. This is why the statement measured 1.04:1, why "contrast measured against a fiction" recurred all session, and why a design critic could judge a *video-native* surface showing no video. **Fix in flight** — after it lands, re-capture the five heroes on a private port and re-judge the band ruling against a frame that actually contains footage.
