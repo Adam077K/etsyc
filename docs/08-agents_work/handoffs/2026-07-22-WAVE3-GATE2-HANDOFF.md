@@ -84,7 +84,14 @@ The fix produced a band covering ~85% of the hero at 1440px and **the entire fra
 
 **Lever 5 (2-line clamp) was ruled, then CHALLENGED BY CEO AND WITHDRAWN.** It reproduced the 1.04:1 failure structure exactly — full text in the DOM, screen readers fine, contrast green, and a maker's statement stopping mid-sentence in production. Design-Lead's own verdict: *"That's not belt-and-suspenders. That's the defect pattern wearing a safety label."* Residual risk relocated to the authoring layer: a `maxlength` on the seller editor, and word count (~10 words) as a better proxy than character count at display-hero scale — a CPO spec revision, not a CSS clamp.
 
-**Implement against a film-rendering surface**, not `/preview` as it stands — see below.
+**RE-CONFIRMED against film-backed captures** (2026-07-22, after the 0×0 fix). Design-Lead re-judged all three open questions with footage actually in the frame and **amended nothing**:
+- `aspect-[4/5]` at mobile is *more* confirmed — at 375px the film shows only as a sliver through the rounded corners; a 375×211px landscape frame cannot show chrome and film simultaneously regardless of footage.
+- ~50% coverage on name-only at 1440 reads as **intentional editorial composition** with film present: *"the maker's world occupies the top, the maker's name occupies the bottom"* — not "a band covering half the hero."
+
+**⚠️ NEW, UNRESOLVED, AND STRUCTURAL — scrim legibility depends on footage luminance.**
+> *"Light footage makes the scrim band visually harder than dark footage. In the Sena statement capture the warm-to-charcoal transition is clearly visible — the band reads as a dark card placed over the bottom of the film. In Noor's dark navy captures the scrim is invisible as a design element; text appears to live naturally inside the frame. Both pass contrast; the difference is perceptual, not measured."*
+
+This **cannot be resolved while meeting ≥5.5:1 over light footage** — the alpha ≥ 0.953 arithmetic forecloses it. It is not a defect and no lever fixes it. The suggested direction is **world-specific scrim tinting** (a warm-tinted scrim for sunbaked-palette worlds instead of neutral ground-tinted charcoal), which is a design-system palette question for a later cycle. **Re-evaluate the moment real footage lands** — every judgement here is still against synthetic gradient art, which is better evidence than cream but not final evidence.
 
 ### 🔍 TWO EVIDENCE DEFECTS THAT INVALIDATE EARLIER REVIEWS
 1. **Capture contamination.** `playwright.config.ts` hardcoded `localhost:3000` with `reuseExistingServer: true`, and this repo runs ~60 worktrees. A worker's first capture run silently screenshotted **another worktree's dev server**. **Any capture-based review predating the `KOL_E2E_PORT` fix should be treated with suspicion.** Mitigating: the critic's Gate-B numbers were independently reconstructed from theme math on the correct build, so those findings were real.
