@@ -139,6 +139,9 @@ export default function SellPublishPage() {
   const preconditions = publishPreconditions.map((p) => ({ ...p, met: met[p.key] ?? false }));
   const blocked = preconditions.some((p) => !p.met);
 
+  // the near-floor coherence call-out reads the same block data the badges do
+  const voiceQuoteBlock = sellerBlocks.find((b) => b.type === "voice-quote");
+
   const unresolved = sellerBlocks.filter((b) => !draft.isApproved(b.id));
   const dirtyCount = sellerBlocks.filter((b) => draft.isDirty(b.id)).length;
   const unreviewedCount = unresolved.length - dirtyCount;
@@ -283,15 +286,18 @@ export default function SellPublishPage() {
                       <span className="text-caption uppercase tracking-[0.04em] text-accent">
                         ✕ failed gate ① → auto-regenerated
                       </span>
-                      <span className="font-mono text-caption text-muted">attempt 1 of 3</span>
+                      <span className="font-mono text-caption text-muted">
+                        worked example · not your data
+                      </span>
                     </div>
                     <p className="mt-1 text-caption text-muted">
-                      Gate ① failed: caption <span className="font-mono">#8A7D6B</span> on ground{" "}
-                      <span className="font-mono">#EFE7D8</span> measured{" "}
+                      Example of how a regen reads: a caption{" "}
+                      <span className="font-mono">#8A7D6B</span> on ground{" "}
+                      <span className="font-mono">#EFE7D8</span> would measure{" "}
                       <span className="font-mono">3.9 : 1</span> — below the{" "}
-                      <span className="font-mono">4.5 : 1</span> floor. The critic nudged the
-                      caption darker and re-ran. Regen keeps your content — it only adjusts to
-                      clear the hard gate. You still approved it.
+                      <span className="font-mono">4.5 : 1</span> floor — so the critic nudges the
+                      caption darker and re-runs. Regen keeps your content — it only adjusts to
+                      clear the hard gate. You still approve it.
                     </p>
                   </div>
                 ) : null}
@@ -355,8 +361,15 @@ export default function SellPublishPage() {
             </ol>
             <p className="mt-[var(--space-2)] text-caption text-muted">
               Order is strict: ① then ②. A block failing ① is auto-regenerated (max 3) before it
-              can reach ②. voice-quote sits at{" "}
-              <span className="font-mono">0.79</span> — above the floor, close enough to watch.
+              can reach ②.
+              {voiceQuoteBlock ? (
+                <>
+                  {" "}
+                  voice-quote sits at{" "}
+                  <span className="font-mono">{voiceQuoteBlock.coherence.toFixed(2)}</span> —
+                  above the floor, close enough to watch.
+                </>
+              ) : null}
             </p>
           </div>
 

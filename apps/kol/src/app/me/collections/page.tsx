@@ -8,39 +8,49 @@
  * saved things stripped of their maker. We refuse that — every thumb is
  * maker-attributed and on film, and the layout is mixed-size (no uniform
  * product grid anywhere on this page).
+ *
+ * Data seam: boards come from the LIVE data layer (getData → Supabase when env
+ * is present, mock otherwise), read async inside a browser-only effect (see
+ * src/app/page.tsx). The buyer's own follows stay local via `useKolSession`.
+ * An empty database shows the honest "no boards yet" state plus the designed
+ * first-run specimen — never fabricated boards.
  */
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Film, type FilmVariant } from "@/components/chrome/Film";
-import { collections, getMaker, getProduct, type MockCollection } from "@/lib/mock/db";
+import { Skeleton } from "@/components/states/Skeleton";
+import type { Collection, Maker, Product } from "@/lib/data";
 import { useKolSession } from "@/lib/mock/session";
 
 type Visibility = "public" | "private";
 
 /** resolve a board item to its film treatment — the maker never drops off */
-function itemFilm(item: MockCollection["items"][number]): {
-  variant: FilmVariant;
-  craft: string;
-  name: string;
-} {
+function itemFilm(
+  item: Collection["items"][number],
+  makers: Map<string, Maker>,
+  products: Map<string, Product>,
+): { variant: FilmVariant; craft: string; name: string } {
   if (item.kind === "product") {
-    const p = getProduct(item.ref);
-    const m = p ? getMaker(p.makerSlug) : undefined;
+    const p = products.get(item.ref);
+    const m = p ? makers.get(p.makerSlug) : undefined;
     return {
       variant: p?.filmClass ?? "v1",
       craft: m ? `${m.name} · ${m.craft}` : "",
       name: p?.title ?? item.ref,
     };
   }
-  const m = getMaker(item.ref);
+  const m = makers.get(item.ref);
   return { variant: m?.filmClass ?? "v1", craft: m?.craft ?? "", name: m?.name ?? item.ref };
 }
 
-function makerCount(c: MockCollection): number {
+function makerCount(
+  c: Collection,
+  products: Map<string, Product>,
+): number {
   const slugs = new Set(
     c.items.map((it) =>
-      it.kind === "maker" ? it.ref : (getProduct(it.ref)?.makerSlug ?? it.ref),
+      it.kind === "maker" ? it.ref : (products.get(it.ref)?.makerSlug ?? it.ref),
     ),
   );
   return slugs.size;
@@ -49,17 +59,57 @@ function makerCount(c: MockCollection): number {
 /* deliberately mixed spans — two boards, two different widths */
 const BOARD_SPANS = ["md:col-span-7", "md:col-span-5"];
 
+type CollectionsState =
+  | { status: "loading" }
+  | { status: "error" }
+  | {
+      status: "ready";
+      collections: Collection[];
+      makers: Map<string, Maker>;
+      products: Map<string, Product>;
+    };
+
 export default function CollectionsPage() {
   const session = useKolSession();
-  const [visibility, setVisibility] = useState<Record<string, Visibility>>(() =>
-    Object.fromEntries(collections.map((c) => [c.slug, c.visibility])),
-  );
+  const [state, setState] = useState<CollectionsState>({ status: "loading" });
+  const [visibility, setVisibility] = useState<Record<string, Visibility>>({});
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
-  const savedMakers = session.follows.flatMap((slug) => {
-    const m = getMaker(slug);
-    return m ? [m] : [];
-  });
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        const { getData } = await import("@/lib/data");
+        const data = getData();
+        const [collections, makerList, productList] = await Promise.all([
+          data.listCollections(),
+          data.listMakers(),
+          data.listProducts(),
+        ]);
+        if (!active) return;
+        setVisibility(Object.fromEntries(collections.map((c) => [c.slug, c.visibility])));
+        setState({
+          status: "ready",
+          collections,
+          makers: new Map(makerList.map((m) => [m.slug, m])),
+          products: new Map(productList.map((p) => [p.id, p])),
+        });
+      } catch {
+        if (active) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const data = state.status === "ready" ? state : null;
+  const savedMakers: Maker[] = data
+    ? session.follows.flatMap((slug) => {
+        const m = data.makers.get(slug);
+        return m ? [m] : [];
+      })
+    : [];
 
   const copyLink = async (slug: string) => {
     const url = `${window.location.origin}/c/${slug}`;
@@ -114,96 +164,128 @@ export default function CollectionsPage() {
           </button>
         </div>
 
-        <div className="mt-[var(--space-4)] grid grid-cols-1 gap-5 md:grid-cols-12">
-          {collections.map((board, i) => {
-            const vis = visibility[board.slug] ?? board.visibility;
-            const isPublic = vis === "public";
-            const thumbs = board.items.slice(0, 2).map(itemFilm);
-            return (
-              <div
-                key={board.slug}
-                className={`overflow-hidden rounded-lg border border-line bg-surface shadow-card ${
-                  BOARD_SPANS[i % BOARD_SPANS.length] ?? "md:col-span-6"
-                }`}
-              >
-                {/* two small film thumbs — maker-attributed, on film */}
-                <div className="flex gap-0.5">
-                  {thumbs.map((t, j) => (
-                    <div key={j} className="min-w-0 flex-1">
-                      <Film
-                        variant={t.variant}
-                        aspect="square"
-                        craft={t.craft}
-                        title={t.name}
-                        play={false}
-                        rounded={false}
-                        className="shadow-none"
-                      />
-                    </div>
-                  ))}
-                </div>
-
+        {state.status === "loading" ? (
+          <div className="mt-[var(--space-4)] grid grid-cols-1 gap-5 md:grid-cols-12" aria-hidden>
+            {BOARD_SPANS.map((span, i) => (
+              <div key={i} className={`overflow-hidden rounded-lg border border-line bg-surface ${span}`}>
+                <Skeleton className="h-40 rounded-none" />
                 <div className="p-[var(--space-3)]">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-display text-h3 text-ink">{board.title}</h3>
-                    <span
-                      className={`rounded-pill border px-2.5 py-0.5 text-caption ${
-                        isPublic
-                          ? "border-accent bg-accent/10 text-ink"
-                          : "border-line bg-ground text-muted"
-                      }`}
-                    >
-                      {isPublic ? "Public" : "Private"}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-caption text-muted">
-                    {board.items.length} items · {makerCount(board)}{" "}
-                    {makerCount(board) === 1 ? "maker" : "makers"}
-                  </p>
-
-                  {/* visibility toggle — client state */}
-                  <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={isPublic}
-                      onChange={(e) =>
-                        setVisibility((v) => ({
-                          ...v,
-                          [board.slug]: e.target.checked ? "public" : "private",
-                        }))
-                      }
-                      aria-label={`Make “${board.title}” public`}
-                      className="h-6 w-6 accent-accent"
-                    />
-                    <span className="text-caption text-muted">Private ↔ Public</span>
-                  </label>
-
-                  {/* share affordance — public boards only */}
-                  {isPublic && (
-                    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-line bg-ground p-2.5">
-                      <code className="min-w-0 flex-1 truncate font-mono text-caption text-muted">
-                        /c/{board.slug}
-                      </code>
-                      <button
-                        type="button"
-                        onClick={() => void copyLink(board.slug)}
-                        className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-3 text-caption uppercase text-ink transition-colors duration-state ease-kol hover:bg-ground"
-                      >
-                        {copiedSlug === board.slug ? "Copied ✓" : "Copy link"}
-                      </button>
-                      <Link
-                        href={`/c/${board.slug}`}
-                        className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
-                      >
-                        View as visitor →
-                      </Link>
-                    </div>
-                  )}
+                  <Skeleton className="h-5 w-2/5" />
+                  <Skeleton className="mt-2 h-3 w-1/3" />
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : state.status === "error" ? (
+          <div className="mt-[var(--space-4)] rounded-lg border border-line bg-surface p-[var(--space-6)]">
+            <p className="text-caption uppercase text-muted">Couldn&rsquo;t load your boards</p>
+            <p className="mt-2 max-w-measure text-body text-ink">
+              Something went wrong reaching your boards. Refresh the page to try again.
+            </p>
+          </div>
+        ) : data && data.collections.length === 0 ? (
+          <div className="mt-[var(--space-4)] rounded-lg border border-dashed border-line bg-surface p-[var(--space-6)]">
+            <p className="font-display text-h3 text-ink">No boards yet</p>
+            <p className="mt-2 max-w-measure text-body text-muted">
+              You haven&rsquo;t made a board yet. When you do, each one keeps its makers on film
+              — see the specimen below for exactly what a first board looks like.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-[var(--space-4)] grid grid-cols-1 gap-5 md:grid-cols-12">
+            {data?.collections.map((board, i) => {
+              const vis = visibility[board.slug] ?? board.visibility;
+              const isPublic = vis === "public";
+              const thumbs = board.items
+                .slice(0, 2)
+                .map((it) => itemFilm(it, data.makers, data.products));
+              const makers = makerCount(board, data.products);
+              return (
+                <div
+                  key={board.slug}
+                  className={`overflow-hidden rounded-lg border border-line bg-surface shadow-card ${
+                    BOARD_SPANS[i % BOARD_SPANS.length] ?? "md:col-span-6"
+                  }`}
+                >
+                  {/* two small film thumbs — maker-attributed, on film */}
+                  <div className="flex gap-0.5">
+                    {thumbs.map((t, j) => (
+                      <div key={j} className="min-w-0 flex-1">
+                        <Film
+                          variant={t.variant}
+                          aspect="square"
+                          craft={t.craft}
+                          title={t.name}
+                          play={false}
+                          rounded={false}
+                          className="shadow-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-[var(--space-3)]">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="font-display text-h3 text-ink">{board.title}</h3>
+                      <span
+                        className={`rounded-pill border px-2.5 py-0.5 text-caption ${
+                          isPublic
+                            ? "border-accent bg-accent/10 text-ink"
+                            : "border-line bg-ground text-muted"
+                        }`}
+                      >
+                        {isPublic ? "Public" : "Private"}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-caption text-muted">
+                      {board.items.length} items · {makers}{" "}
+                      {makers === 1 ? "maker" : "makers"}
+                    </p>
+
+                    {/* visibility toggle — client state */}
+                    <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={isPublic}
+                        onChange={(e) =>
+                          setVisibility((v) => ({
+                            ...v,
+                            [board.slug]: e.target.checked ? "public" : "private",
+                          }))
+                        }
+                        aria-label={`Make “${board.title}” public`}
+                        className="h-6 w-6 accent-accent"
+                      />
+                      <span className="text-caption text-muted">Private ↔ Public</span>
+                    </label>
+
+                    {/* share affordance — public boards only */}
+                    {isPublic && (
+                      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-line bg-ground p-2.5">
+                        <code className="min-w-0 flex-1 truncate font-mono text-caption text-muted">
+                          /c/{board.slug}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => void copyLink(board.slug)}
+                          className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-3 text-caption uppercase text-ink transition-colors duration-state ease-kol hover:bg-ground"
+                        >
+                          {copiedSlug === board.slug ? "Copied ✓" : "Copy link"}
+                        </button>
+                        <Link
+                          href={`/c/${board.slug}`}
+                          className="inline-flex min-h-11 items-center text-caption uppercase text-muted transition-colors duration-state ease-kol hover:text-ink"
+                        >
+                          View as visitor →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* ---- first-run empty state — designed specimen, shown in situ ---- */}
@@ -220,7 +302,7 @@ export default function CollectionsPage() {
           </p>
           <p className="mt-4 text-caption uppercase text-muted">Ready to drop in — from your saves</p>
           <div className="mt-2 flex gap-3 overflow-x-auto pb-1">
-            {(savedMakers.length > 0 ? savedMakers : []).slice(0, 3).map((m) => (
+            {savedMakers.slice(0, 3).map((m) => (
               <div key={m.slug} className="w-36 flex-none">
                 <Film variant={m.filmClass} aspect="portrait" title={m.name} play={false} />
               </div>

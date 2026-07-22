@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  expectKeys,
   formatPrice,
   getProduct,
   productsByMaker,
@@ -49,6 +50,11 @@ export default function SellDashboardPage() {
   const { orders, advanceOrder } = useKolStore();
   const senaOrders = orders.filter((o) => o.makerSlug === "sena");
   const senaProducts = productsByMaker("sena");
+  // P14 completeness, derived from the same product data "Listed" counts —
+  // a product blocks publish when any of the 11 required spec fields is empty
+  const specsIncomplete = senaProducts.filter((p) =>
+    expectKeys.some((k) => !(p.expect[k] ?? "").trim()),
+  ).length;
 
   // store status reads the same draft the editor writes and the gate checks
   const draft = useSellerDraft();
@@ -141,11 +147,17 @@ export default function SellDashboardPage() {
               </div>
               <div className="flex items-center justify-between border-t border-line py-[var(--space-2)]">
                 <span className="flex items-center gap-[var(--space-2)]">
-                  <span className="rounded-pill border border-line bg-surface px-2.5 py-0.5 text-caption text-muted">•</span>
-                  <span>1 product missing required specs</span>
+                  <span className="rounded-pill border border-line bg-surface px-2.5 py-0.5 text-caption text-muted">
+                    {specsIncomplete > 0 ? "•" : "✓"}
+                  </span>
+                  <span>
+                    {specsIncomplete > 0
+                      ? `${specsIncomplete} ${specsIncomplete === 1 ? "product" : "products"} missing required specs`
+                      : "Every product's required specs are complete"}
+                  </span>
                 </span>
                 <Link href="/sell/products" className="text-caption uppercase tracking-[0.04em] text-accent">
-                  Fix specs →
+                  {specsIncomplete > 0 ? "Fix specs →" : "Review specs →"}
                 </Link>
               </div>
             </div>
@@ -297,10 +309,12 @@ export default function SellDashboardPage() {
               </div>
               <div className="flex items-center justify-between border-t border-line py-[var(--space-1)]">
                 <span className="flex items-center gap-[var(--space-1)]">
-                  <span className="rounded-pill border border-line bg-surface px-2 py-0.5 text-caption text-muted">•</span>
+                  <span className="rounded-pill border border-line bg-surface px-2 py-0.5 text-caption text-muted">
+                    {specsIncomplete > 0 ? "•" : "✓"}
+                  </span>
                   Blocking publish
                 </span>
-                <span className="font-mono">1</span>
+                <span className="font-mono">{specsIncomplete}</span>
               </div>
             </div>
             <Link
@@ -317,20 +331,21 @@ export default function SellDashboardPage() {
             <div className="mt-[var(--space-2)] border-t border-line">
               <div className="flex items-center justify-between py-[var(--space-2)]">
                 <span>People who opened your world</span>
-                <span className="font-mono">312</span>
+                <span className="font-mono">—</span>
               </div>
               <div className="flex items-center justify-between border-t border-line py-[var(--space-2)]">
                 <span>Follows</span>
-                <span className="font-mono">214</span>
+                <span className="font-mono">—</span>
               </div>
               <div className="flex items-center justify-between border-t border-line py-[var(--space-2)]">
                 <span>Saves</span>
-                <span className="font-mono">89</span>
+                <span className="font-mono">—</span>
               </div>
             </div>
             <p className="mt-[var(--space-2)] text-caption text-muted">
-              Counts, not scores. No streaks, no &ldquo;you&rsquo;re on fire&rdquo; — just what
-              happened. Nothing here changes what a buyer sees.
+              Counts appear once your world is live. Counts, not scores — no streaks, no
+              &ldquo;you&rsquo;re on fire&rdquo;, just what happened. Nothing here changes what a
+              buyer sees.
             </p>
           </div>
 

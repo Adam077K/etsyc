@@ -884,31 +884,38 @@ on conflict (id) do update set
 -- Money is integer MINOR units (cents) + currency, per store-config §2.4.
 -- Prices and inventory come from `db.ts` — the columns are what `create_order()`
 -- reads, so they are the commerce truth. See conflict note 2 in the header.
+--
+-- `config_id` (migration 0003 — apply it before this file) is the store-config
+-- SYMBOLIC product id the rendered world links to (`/m/[slug]/p/p_ridge_tumbler`).
+-- It equals `config.products[].id` in the D4 fixture, so `getProduct` resolves
+-- the same id a world emits (closes the OQ-2 product id-space gap). The
+-- commission quilt has no world presence, so its `config_id` is NULL.
 -- ============================================================================
 
 insert into public.products
-  (id, store_id, title, description, materials, price_amount, currency, inventory_status, inventory_qty, badges) values
-  ('33333333-0000-4000-8000-000000000001','22222222-2222-4222-8222-000000000002',
+  (id, store_id, config_id, title, description, materials, price_amount, currency, inventory_status, inventory_qty, badges) values
+  ('33333333-0000-4000-8000-000000000001','22222222-2222-4222-8222-000000000002','p_shibori_throw',
    'Shibori throw — deep indigo',
    'Vat-dyed linen throw, bound and dipped nine times. The unevenness you can see in the film is the point — no two skeins leave the same.',
    'European flax linen; natural indigo, madder root',
    24500,'USD','made-to-order', null, '{one-of-a-kind}'),
-  ('33333333-0000-4000-8000-000000000002','22222222-2222-4222-8222-000000000001',
+  ('33333333-0000-4000-8000-000000000002','22222222-2222-4222-8222-000000000001','p_ridge_tumbler',
    'Ridge tumbler — ash glaze',
    'Wheel-thrown stoneware tumbler with the ridge line left proud. Ash glaze breaks amber where the flame hits.',
    'Local stoneware clay; hardwood-ash glaze',
    6800,'USD','in-stock', 7, '{}'),
-  ('33333333-0000-4000-8000-000000000003','22222222-2222-4222-8222-000000000001',
+  ('33333333-0000-4000-8000-000000000003','22222222-2222-4222-8222-000000000001','p_ash_bowl',
    'Ash bowl — wide',
    'Wide serving bowl, ash glaze pooled at the well.',
    'Local stoneware; hardwood-ash glaze',
    12400,'USD','in-stock', 3, '{}'),
-  ('33333333-0000-4000-8000-000000000004','22222222-2222-4222-8222-000000000002',
+  ('33333333-0000-4000-8000-000000000004','22222222-2222-4222-8222-000000000002', null,
    'Commissioned indigo quilt (co-created)',
    'Full co-creation piece — brief, drafts, and approval before the vat opens.',
    'Linen top, cotton batting, natural indigo',
    88000,'USD','made-to-order', null, '{one-of-a-kind,made-to-order}')
 on conflict (id) do update set
+  config_id = excluded.config_id,
   title = excluded.title, description = excluded.description,
   materials = excluded.materials, price_amount = excluded.price_amount,
   currency = excluded.currency, inventory_status = excluded.inventory_status,

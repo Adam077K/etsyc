@@ -9,13 +9,15 @@
  * Cold start is designed, never blank.
  */
 
-import { use, useState, type FormEvent } from "react";
+import { use, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { communityFor, getMaker, type MockPost } from "@/lib/mock/db";
+// Type-only (erased) — the live seam loads lazily inside browser-only effects
+// and handlers, never as a static import from this "use client" page.
+import type { Community, Maker, Post } from "@/lib/data";
 import { useKolSession } from "@/lib/mock/session";
-import { useKolStore } from "@/lib/mock/store";
 import { Film } from "@/components/chrome/Film";
+import { Skeleton } from "@/components/states/Skeleton";
 
 /** Single-level comment composer. There is no reply-to-a-reply — nesting is a
  *  moderation-cost multiplier and the spec keeps discussion one level deep. */
@@ -186,43 +188,154 @@ function PostComposer({
   );
 }
 
+type CommunityState =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "missing" } // no such maker — 404, honest
+  | { status: "no-community"; maker: Maker }
+  | { status: "ready"; maker: Maker; community: Community };
+
 export default function CommunityPage({ params }: { params: Promise<{ maker: string }> }) {
   const { maker: slug } = use(params);
+  // Membership rides on follows — kept on the local session store.
   const session = useKolSession();
-  const store = useKolStore();
+  const [state, setState] = useState<CommunityState>({ status: "loading" });
+  // Posts and hidden keys are held locally so writes reflect at once; they are
+  // seeded from the live seam on load.
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [hidden, setHidden] = useState<Set<string>>(() => new Set());
 
-  const maker = getMaker(slug);
-  if (!maker) notFound();
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        // Lazy import — browser-only effect keeps `@/lib/data` (and its
+        // server-only Supabase branch) out of the SSR module graph.
+        const { getData } = await import("@/lib/data");
+        const data = getData();
+        const maker = await data.getMaker(slug);
+        if (!active) return;
+        if (!maker) {
+          setState({ status: "missing" });
+          return;
+        }
+        const community = await data.getCommunity(slug);
+        if (!active) return;
+        if (!community) {
+          setState({ status: "no-community", maker });
+          return;
+        }
+        const hiddenKeys = await data.listHidden();
+        if (!active) return;
+        setPosts(community.posts);
+        setHidden(new Set(hiddenKeys));
+        setState({ status: "ready", maker, community });
+      } catch {
+        if (active) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [slug]);
 
-  const community = communityFor(slug);
   const member = session.isFollowing(slug);
 
-  // Hide-only moderation lives in the shared store, so a hide survives a reload.
+  // Community WRITES go through the live seam. Under Supabase RLS these require
+  // an AUTHENTICATED session to succeed (a signed-out visitor is rejected, and
+  // the room is simply left unchanged); the mock accepts them directly.
+  const submitPost = async (body: string) => {
+    try {
+      const { getData } = await import("@/lib/data");
+      const post = await getData().addPost(slug, body);
+      setPosts((prev) => [post, ...prev]);
+    } catch {
+      /* not authenticated — RLS rejects the write; leave the room as-is */
+    }
+  };
+  const submitComment = async (postId: string, body: string) => {
+    try {
+      const { getData } = await import("@/lib/data");
+      await getData().addComment(slug, postId, body);
+      // addComment resolves void; reflect the reply locally so it shows at once.
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, comments: [...p.comments, { author: "You", body, when: "just now" }] }
+            : p,
+        ),
+      );
+    } catch {
+      /* not authenticated — RLS rejects the write */
+    }
+  };
+
+  // Hide-only moderation, also persisted through the seam (needs auth under RLS).
+  const persistHidden = async (key: string) => {
+    try {
+      const { getData } = await import("@/lib/data");
+      await getData().toggleHidden(key);
+    } catch {
+      /* signed-out visitor — the local hide still holds for this session */
+    }
+  };
   const hide = (key: string) => {
-    if (!store.isHidden(key)) store.toggleHidden(key);
+    if (hidden.has(key)) return;
+    setHidden((s) => new Set(s).add(key));
+    void persistHidden(key);
   };
   const unhide = (key: string) => {
-    if (store.isHidden(key)) store.toggleHidden(key);
+    if (!hidden.has(key)) return;
+    setHidden((s) => {
+      const next = new Set(s);
+      next.delete(key);
+      return next;
+    });
+    void persistHidden(key);
   };
-  const isHidden = (key: string, dbHidden?: boolean) =>
-    Boolean(dbHidden) || store.isHidden(key);
+  const isHidden = (key: string, dbHidden?: boolean) => Boolean(dbHidden) || hidden.has(key);
 
-  // no community entry — quiet, not an error
-  if (!community) {
+  // ---- state gates (all hooks above run unconditionally) -------------------
+  if (state.status === "loading") {
+    return (
+      <main className="mx-auto w-full max-w-page px-6 pb-24">
+        <div className="mx-auto max-w-[640px] py-20">
+          <div className="rounded-lg border border-line bg-surface p-6 shadow-subtle">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="mt-4 h-24 rounded-md" />
+          </div>
+        </div>
+      </main>
+    );
+  }
+  if (state.status === "error") {
+    return (
+      <main className="mx-auto w-full max-w-page px-6 pb-24">
+        <div className="mx-auto max-w-[560px] py-20 text-center">
+          <p className="text-caption uppercase text-muted">Couldn’t load this room</p>
+          <p className="mx-auto mt-2 max-w-measure text-body text-ink">
+            Something went wrong reaching the community. Refresh the page to try again.
+          </p>
+        </div>
+      </main>
+    );
+  }
+  if (state.status === "missing") notFound();
+  if (state.status === "no-community") {
     return (
       <main className="mx-auto w-full max-w-page px-6 pb-24">
         <div className="mx-auto max-w-[560px] py-20">
           <div className="rounded-lg border border-dashed border-line bg-surface/60 px-6 py-10 text-center">
             <p className="font-display text-h3 text-ink">No community yet</p>
             <p className="mx-auto mt-2 max-w-measure text-body text-muted">
-              {maker.name} hasn&rsquo;t opened a room around the work. The world itself is
+              {state.maker.name} hasn&rsquo;t opened a room around the work. The world itself is
               where everything lives for now.
             </p>
             <Link
               href={`/m/${slug}`}
               className="mt-5 inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-6 text-body text-ink transition-colors duration-state ease-kol hover:bg-ground"
             >
-              Back to {maker.name}&rsquo;s world
+              Back to {state.maker.name}&rsquo;s world
             </Link>
           </div>
         </div>
@@ -230,21 +343,18 @@ export default function CommunityPage({ params }: { params: Promise<{ maker: str
     );
   }
 
-  // Posts come from the mutable store — the seed lives in db.ts, everything
-  // written in this room since then lives here.
-  const posts = store.postsFor(slug);
+  // ---- ready ---------------------------------------------------------------
+  const maker = state.maker;
+  const community = state.community;
   const makerPosts = posts
     .filter((p) => p.isMaker)
     .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)));
   const memberPosts = posts.filter((p) => !p.isMaker);
   const coldStart = posts.length === 0;
 
-  const submitPost = (body: string) => store.addPost(slug, body);
-  const submitComment = (postId: string, body: string) => store.addComment(slug, postId, body);
-
   const memberNames = Array.from(
     new Set(
-      posts.flatMap((p: MockPost) => [
+      posts.flatMap((p: Post) => [
         ...(p.isMaker ? [] : [p.author]),
         ...p.comments.filter((c) => c.author !== maker.name).map((c) => c.author),
       ]),

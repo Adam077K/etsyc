@@ -77,10 +77,15 @@ test.describe("every route renders", () => {
       expect(response, `no response for ${route}`).not.toBeNull();
       expect(response?.status(), `status for ${route}`).toBe(200);
 
-      // the client-rendered body has to actually paint something
-      await expect(page.locator("body")).not.toBeEmpty();
-      const text = await page.locator("body").innerText();
-      expect(text.trim().length, `body text length for ${route}`).toBeGreaterThan(120);
+      // The client-rendered body has to actually paint something. Pages
+      // fetch async now, so poll: a skeleton frame right after hydration
+      // has little text and is not a failure — never settling is.
+      await expect
+        .poll(async () => (await page.locator("body").innerText()).trim().length, {
+          message: `body text length for ${route}`,
+          timeout: 15_000,
+        })
+        .toBeGreaterThan(120);
 
       await assertNoErrorOverlay(page);
     });
@@ -98,11 +103,24 @@ test.describe("guards", () => {
 
   for (const { route, why } of NOT_FOUND) {
     test(`${route} 404s (${why})`, async ({ page }) => {
-      const response = await page.goto(route);
-      expect(response?.status(), `status for ${route}`).toBe(404);
+      // These routes fetch client-side (the data seam resolves the browser
+      // Supabase client), so the SERVER answers 200 and the 404 boundary
+      // renders after hydration. What the guard actually protects is that
+      // the not-found UI shows and NOTHING about the resource leaks —
+      // assert that, not the transport status. (Status-level 404 returns
+      // with the post-MVP SSR pass.)
+      await page.goto(route);
       await expect(page.getByText(/could not be found|404/i).first()).toBeVisible();
     });
   }
+
+  test("a private collection leaks nothing of its contents", async ({ page }) => {
+    await page.goto("/c/c-2b7d0x1p");
+    await expect(page.getByText(/could not be found|404/i).first()).toBeVisible();
+    // the private board's title and items must never appear
+    await expect(page.getByText(/Kitchen, eventually/i)).toHaveCount(0);
+    await expect(page.getByText(/Ridge tumbler/i)).toHaveCount(0);
+  });
 
   test("/c/c-9f3k2m8q — the public collection is still readable", async ({ page }) => {
     const response = await page.goto("/c/c-9f3k2m8q");
@@ -111,9 +129,12 @@ test.describe("guards", () => {
   });
 
   test("a product cannot be read through the wrong maker's world", async ({ page }) => {
-    // shibori-throw belongs to noor; sena must not be able to host it
-    const response = await page.goto("/m/sena/p/shibori-throw");
-    expect(response?.status()).toBe(404);
+    // shibori-throw belongs to noor; sena must not be able to host it.
+    // Client-side fetch → server answers 200; the mismatch guard renders
+    // the 404 boundary and none of the product's details.
+    await page.goto("/m/sena/p/shibori-throw");
+    await expect(page.getByText(/could not be found|404/i).first()).toBeVisible();
+    await expect(page.getByText(/Shibori throw/i)).toHaveCount(0);
   });
 
   test("/orders/o-9999 refuses to render a stranger's order", async ({ page }) => {

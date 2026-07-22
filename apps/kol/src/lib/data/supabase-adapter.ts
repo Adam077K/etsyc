@@ -156,6 +156,10 @@ const storeRowSchema = z.object({
 const productRowSchema = z.object({
   id: z.string(),
   store_id: z.string(),
+  // `config_id` (migration 0003) carries the store-config SYMBOLIC product id
+  // (e.g. 'p_ridge_tumbler') that a rendered world's links use. Nullable: a
+  // commission-only product that never appears in a world has none.
+  config_id: z.string().nullable().optional(),
   title: z.string(),
   description: z.string().nullable(),
   materials: z.string().nullable(),
@@ -347,8 +351,17 @@ const videoFeedRowSchema = z.object({
 
 const STORE_COLUMNS = "id, owner_id, handle, name, craft, bio, published, config";
 const PRODUCT_COLUMNS =
-  "id, store_id, title, description, materials, price_amount, currency, " +
+  "id, store_id, config_id, title, description, materials, price_amount, currency, " +
   "inventory_status, inventory_qty, product_specs(*), product_provenance(*)";
+
+/**
+ * Canonical uuid shape. `getProduct` uses it to decide which id space its
+ * argument belongs to: a uuid is a `products.id` PK, anything else is a
+ * store-config symbolic id resolved via `products.config_id`. It must NEVER be
+ * compared against the uuid `id` column directly — a non-uuid literal raises a
+ * 22P02 cast error in Postgres, which is why the column is chosen, not OR-ed.
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const COLLECTION_COLUMNS =
   "id, title, visibility, slug, collection_items(subject_type, subject_id, position)";
 const COMMUNITY_POST_COLUMNS =
@@ -542,6 +555,10 @@ export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource 
 
     return {
       id: row.id,
+      // The config symbolic id, when this product has a world presence. Kept so
+      // the domain Product mirrors the mock (MockProduct.configId) — one product,
+      // two id spaces, both resolvable by getProduct.
+      ...(row.config_id ? { configId: row.config_id } : {}),
       makerSlug,
       title: row.title,
       // Money stays an integer in minor units end to end (ADR-0001 rationale 4).
@@ -778,12 +795,23 @@ export function createSupabaseAdapter(getClient: ClientProvider): KolDataSource 
 
     async getProduct(id: string): Promise<Product | null> {
       const db = await getClient();
+      // OQ-2 id-space gap: a maker world renders from `stores.config` (jsonb),
+      // whose product refs are SYMBOLIC ids (`p_ridge_tumbler`), while
+      // `products.id` is a uuid PK. So the id a link carries is EITHER a uuid (a
+      // direct catalogue/collection/notification link) OR a config symbolic id
+      // (a link a rendered world emitted, e.g. /m/sena/p/p_ridge_tumbler).
+      // `products.config_id` (migration 0003) stores the symbolic id; resolve
+      // against whichever space the argument belongs to. A non-uuid literal
+      // against the uuid `id` column raises a 22P02 cast error, so the column is
+      // CHOSEN, never OR-ed.
+      const column = UUID_RE.test(id) ? "id" : "config_id";
       const { data, error } = await db
         .from("products")
         .select(`${PRODUCT_COLUMNS}, stores(handle)`)
-        .eq("id", id)
+        .eq(column, id)
+        .limit(1)
         .maybeSingle();
-      if (error) fail(`products by id '${id}'`, error);
+      if (error) fail(`products by ${column} '${id}'`, error);
       if (!data) return null;
       const row = parse(productRowSchema, data, "products row");
       const store = one((data as { stores?: unknown }).stores);

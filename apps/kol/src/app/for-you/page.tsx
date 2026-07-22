@@ -298,12 +298,6 @@ export default function ForYouPage() {
                     <SignalChip>
                       Saves <b className="font-mono">{session.saves.length}</b>
                     </SignalChip>
-                    <SignalChip>
-                      Questions asked <b className="font-mono">1</b>
-                    </SignalChip>
-                    <SignalChip>
-                      Past orders <b className="font-mono">1</b>
-                    </SignalChip>
                   </div>
                   <Link
                     href="/settings"

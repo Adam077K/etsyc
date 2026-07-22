@@ -318,21 +318,10 @@ function ProductEditor({
             </div>
             <div className="flex items-center justify-between rounded-md border border-line bg-ground p-[var(--space-2)]">
               <span>Linked narration clip</span>
-              {product.voiceoverLine ? (
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-pill border border-line px-4 py-1.5 text-caption text-muted transition-colors duration-state ease-kol hover:text-ink"
-                >
-                  <span aria-hidden className="flex items-end gap-0.5">
-                    {[6, 12, 8, 14].map((h, i) => (
-                      <span key={i} style={{ height: `${h}px` }} className="w-0.5 rounded-pill bg-accent" />
-                    ))}
-                  </span>
-                  <span className="font-mono">0:19</span>
-                </button>
-              ) : (
-                <span className="text-caption text-muted">none · record one in Voice (optional)</span>
-              )}
+              <span className="text-caption text-muted">
+                <span className="font-mono">—</span> · no clip linked yet · record one in Voice
+                (optional)
+              </span>
             </div>
             {product.voiceoverLine ? (
               <p className="max-w-measure text-caption text-muted">

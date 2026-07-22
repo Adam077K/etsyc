@@ -254,3 +254,24 @@ NOT YET DONE: app PAGES still read the mock data layer (the data-adapter seam ex
 deliberately not migrated). So real AUTH works against Supabase now, but feed/product/etc. still show
 mock data until pages are switched from `useKolStore()` to `getData()`. Also: OTP email round-trip
 unverified (needs a real inbox + SMTP/rate-limit check); prod apply not done (staging only).
+
+## 2026-07-21 — MVP DEPLOY-READY: all pages on live data, zero fake content
+
+Every buyer surface now reads the live Supabase DB through the data seam
+(client-safe lazy import; browser client only in client bundles). The staging
+DB is wiped of all fictional people/content (system reference kept: 11 blocks,
+7 categories). Every invented figure is gone from the UI — feed "41 makers",
+dashboard 312/214/89, "Questions asked 1"/"Past orders 1", fake USPS tracking,
+fabricated approval checkpoint, fake clip durations — replaced by live-derived
+values or honest "—"/empty states. 0003 (products.config_id) applied live, so
+world links resolve products in both id spaces.
+
+Verified: 60/60 e2e green (mock mode); tsc/eslint clean; production build (32
+routes); live-empty smoke — all buyer routes 200 with no fake strings, /sell/*
+correctly 307s to sign-in under the live auth gate.
+
+Deploy is staged in apps/kol/DEPLOY.md, gated ONLY on the founder naming call
+(no "etsyc" in the URL; "KOL" trademark check still un-run). Deliberate limits
+documented there: empty launch, gradient film until D12, client-side 404s,
+no order-timeline table, Supabase built-in SMTP.
+**Owner:** session kol-mvp-page-design. **Status:** engineering complete.

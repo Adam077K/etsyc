@@ -8,16 +8,83 @@
  * a red count badge.
  */
 
-import { useState, type MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
-import { getMaker, threads } from "@/lib/mock/db";
+// Type-only (erased) — the live seam is loaded lazily inside a browser-only
+// effect below, never statically, so this client page keeps the server-only
+// Supabase branch out of its module graph.
+import type { Maker, Thread } from "@/lib/data";
 import { Film } from "@/components/chrome/Film";
+import { Skeleton } from "@/components/states/Skeleton";
 import { ThreadView, THREAD_TYPE_LABEL } from "./thread-view";
 
+type InboxState =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; threads: Thread[]; makers: Map<string, Maker> };
+
+/** Loading — quiet skeleton of the thread list, never a spinner. */
+function InboxSkeleton() {
+  return (
+    <aside
+      aria-hidden="true"
+      className="overflow-hidden rounded-md border border-line bg-surface shadow-subtle"
+    >
+      {[0, 1, 2].map((i) => (
+        <div key={i} className={`p-4 ${i > 0 ? "border-t border-line" : ""}`}>
+          <Skeleton className="h-3 w-24" />
+          <div className="mt-3 flex items-center gap-3">
+            <Skeleton className="h-10 w-10 rounded-pill" />
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-3.5 w-2/5" />
+              <Skeleton className="mt-1.5 h-3 w-3/5" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </aside>
+  );
+}
+
 export default function InboxPage() {
-  const first = threads[0];
-  const [selectedId, setSelectedId] = useState<string | null>(first?.id ?? null);
-  const selected = threads.find((t) => t.id === selectedId) ?? first;
+  // Live conversations (getData → Supabase when env is present, mock otherwise).
+  // Same Thread/Maker shapes as before, so only the source and the async wrapper
+  // change; the two-pane JSX below is untouched.
+  const [state, setState] = useState<InboxState>({ status: "loading" });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        // Lazy import — useEffect is browser-only, so `@/lib/data` resolves to
+        // the browser client here and never reaches the SSR module graph.
+        const { getData } = await import("@/lib/data");
+        const data = getData();
+        const [threadList, makerList] = await Promise.all([
+          data.listThreads(),
+          data.listMakers(),
+        ]);
+        if (!active) return;
+        setState({
+          status: "ready",
+          threads: threadList,
+          makers: new Map(makerList.map((m) => [m.slug, m])),
+        });
+        setSelectedId(threadList[0]?.id ?? null);
+      } catch {
+        if (active) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const threads = state.status === "ready" ? state.threads : [];
+  const makerFor = (slug: string) =>
+    state.status === "ready" ? (state.makers.get(slug) ?? null) : null;
+  const selected = threads.find((t) => t.id === selectedId) ?? threads[0] ?? null;
 
   // On md+ the list drives the right pane; below md the link navigates.
   function handleSelect(e: MouseEvent<HTMLAnchorElement>, id: string) {
@@ -49,79 +116,103 @@ export default function InboxPage() {
         </div>
       </header>
 
-      <div className="grid items-start gap-4 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
-        {/* thread list */}
-        <aside
-          aria-label="Conversations"
-          className="overflow-hidden rounded-md border border-line bg-surface shadow-subtle"
-        >
-          {threads.map((t, i) => {
-            const maker = getMaker(t.makerSlug);
-            const active = selected?.id === t.id;
-            const last = t.messages[t.messages.length - 1];
-            return (
-              <Link
-                key={t.id}
-                href={`/inbox/${t.id}`}
-                onClick={(e) => handleSelect(e, t.id)}
-                aria-current={active ? "true" : undefined}
-                className={`block p-4 transition-colors duration-state ease-kol hover:bg-ground ${
-                  i > 0 ? "border-t border-line" : ""
-                } ${active ? "md:bg-ground" : ""}`}
-              >
-                <span className="flex items-center justify-between gap-2">
-                  <span className="rounded-pill border border-line bg-ground px-2.5 py-0.5 text-caption uppercase tracking-[0.06em] text-muted">
-                    {THREAD_TYPE_LABEL[t.type]}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    {t.unread ? (
-                      <span
-                        aria-label="unread"
-                        className="inline-block h-2 w-2 rounded-pill bg-accent"
-                      />
-                    ) : null}
-                    <span className="text-caption text-muted">
-                      {last?.when ?? ""}
-                    </span>
-                  </span>
-                </span>
-                <span className="mt-2 flex items-center gap-3">
-                  <Film
-                    variant={maker?.filmClass ?? "v1"}
-                    aspect="square"
-                    play={false}
-                    rounded={false}
-                    className="w-10 flex-none rounded-pill shadow-none"
-                  />
-                  <span className="min-w-0">
-                    <span
-                      className={`block text-body text-ink ${t.unread ? "font-semibold" : ""}`}
-                    >
-                      {maker?.name ?? t.makerSlug}
-                    </span>
-                    <span className="block truncate text-caption text-muted">{t.subject}</span>
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
-        </aside>
-
-        {/* conversation pane — md+ only; below md, threads open their own route */}
-        <div className="hidden md:block">
-          {selected ? (
-            <ThreadView key={selected.id} thread={selected} />
-          ) : (
-            <div className="rounded-lg border border-dashed border-line bg-surface/60 px-6 py-12 text-center">
-              <p className="font-display text-h3 text-ink">No conversations yet</p>
-              <p className="mx-auto mt-2 max-w-measure text-body text-muted">
-                Ask a maker a question or start a commission, and the whole back-and-forth
-                lives here — yours to keep.
-              </p>
+      {state.status === "loading" ? (
+        <div className="grid items-start gap-4 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+          <InboxSkeleton />
+          <div className="hidden md:block">
+            <div className="rounded-md border border-line bg-surface p-5 shadow-card">
+              <Skeleton className="h-40 rounded-md" />
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      ) : state.status === "error" ? (
+        <div className="rounded-md border border-line bg-surface px-6 py-12 text-center">
+          <p className="text-caption uppercase text-muted">Couldn’t load your inbox</p>
+          <p className="mx-auto mt-2 max-w-measure text-body text-ink">
+            Something went wrong reaching your conversations. Refresh the page to try again.
+          </p>
+        </div>
+      ) : threads.length === 0 ? (
+        /* honest empty state — an inbox nobody has written to yet */
+        <div className="rounded-lg border border-dashed border-line bg-surface/60 px-6 py-16 text-center">
+          <p className="text-caption uppercase text-muted">No messages</p>
+          <p className="mt-2 font-display text-h2 text-ink">No conversations yet</p>
+          <p className="mx-auto mt-3 max-w-measure text-body text-muted">
+            Ask a maker a question or start a commission, and the whole back-and-forth lives
+            here — two-way, human-written, yours to keep.
+          </p>
+        </div>
+      ) : (
+        <div className="grid items-start gap-4 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+          {/* thread list */}
+          <aside
+            aria-label="Conversations"
+            className="overflow-hidden rounded-md border border-line bg-surface shadow-subtle"
+          >
+            {threads.map((t, i) => {
+              const maker = makerFor(t.makerSlug);
+              const active = selected?.id === t.id;
+              const last = t.messages[t.messages.length - 1];
+              return (
+                <Link
+                  key={t.id}
+                  href={`/inbox/${t.id}`}
+                  onClick={(e) => handleSelect(e, t.id)}
+                  aria-current={active ? "true" : undefined}
+                  className={`block p-4 transition-colors duration-state ease-kol hover:bg-ground ${
+                    i > 0 ? "border-t border-line" : ""
+                  } ${active ? "md:bg-ground" : ""}`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="rounded-pill border border-line bg-ground px-2.5 py-0.5 text-caption uppercase tracking-[0.06em] text-muted">
+                      {THREAD_TYPE_LABEL[t.type]}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      {t.unread ? (
+                        <span
+                          aria-label="unread"
+                          className="inline-block h-2 w-2 rounded-pill bg-accent"
+                        />
+                      ) : null}
+                      <span className="text-caption text-muted">
+                        {last?.when ?? ""}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="mt-2 flex items-center gap-3">
+                    <Film
+                      variant={maker?.filmClass ?? "v1"}
+                      aspect="square"
+                      play={false}
+                      rounded={false}
+                      className="w-10 flex-none rounded-pill shadow-none"
+                    />
+                    <span className="min-w-0">
+                      <span
+                        className={`block text-body text-ink ${t.unread ? "font-semibold" : ""}`}
+                      >
+                        {maker?.name ?? t.makerSlug}
+                      </span>
+                      <span className="block truncate text-caption text-muted">{t.subject}</span>
+                    </span>
+                  </span>
+                </Link>
+              );
+            })}
+          </aside>
+
+          {/* conversation pane — md+ only; below md, threads open their own route */}
+          <div className="hidden md:block">
+            {selected ? (
+              <ThreadView
+                key={selected.id}
+                thread={selected}
+                maker={makerFor(selected.makerSlug)}
+              />
+            ) : null}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

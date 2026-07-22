@@ -382,10 +382,10 @@ export default function SellVerifyPage() {
                 </span>
               </div>
               <p className="mt-[var(--space-2)] max-w-measure text-body">
-                A founder is reviewing your clip by hand. During the seed phase (the first{" "}
-                <span className="font-mono">4</span> makers) every voice anchor is checked by a
-                human, not an automated system — so this takes a little longer and gives you a
-                real person to reach if anything&rsquo;s off.
+                A founder is reviewing your clip by hand. During the seed phase (the first
+                makers) every voice anchor is checked by a human, not an automated system — so
+                this takes a little longer and gives you a real person to reach if
+                anything&rsquo;s off.
               </p>
               <ol className="mt-[var(--space-3)] flex flex-col gap-[var(--space-2)]">
                 <li className="flex items-center gap-[var(--space-2)]">

@@ -9,27 +9,69 @@
  * badge, never urgency chrome.
  */
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getMaker, notifications, type MockNotification } from "@/lib/mock/db";
+// Type-only (erased) — the live seam loads lazily in a browser-only effect.
+import type { Maker, Notification } from "@/lib/data";
 import { useKolSession } from "@/lib/mock/session";
 import { Film } from "@/components/chrome/Film";
+import { Skeleton } from "@/components/states/Skeleton";
 
-function typeCaption(type: MockNotification["type"]): string {
+function typeCaption(type: Notification["type"]): string {
   return type.replace(/-/g, " ");
 }
 
+type NotificationsState =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; notifications: Notification[]; makers: Map<string, Maker> };
+
 export default function NotificationsPage() {
+  // Read/unread still rides on the local session (buyer_signals stand-in) — the
+  // notifications themselves now come from the live seam.
   const session = useKolSession();
+  const [state, setState] = useState<NotificationsState>({ status: "loading" });
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        // Lazy import — browser-only effect, so `@/lib/data` resolves to the
+        // browser client and stays out of the SSR module graph.
+        const { getData } = await import("@/lib/data");
+        const data = getData();
+        const [notes, makerList] = await Promise.all([
+          data.listNotifications(),
+          data.listMakers(),
+        ]);
+        if (!active) return;
+        setState({
+          status: "ready",
+          notifications: notes,
+          makers: new Map(makerList.map((m) => [m.slug, m])),
+        });
+      } catch {
+        if (active) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const notifications = state.status === "ready" ? state.notifications : [];
+  const getMaker = (slug: string): Maker | null =>
+    state.status === "ready" ? (state.makers.get(slug) ?? null) : null;
 
   // group by maker (first-appearance order == most-recent-first), then time
-  const groups: { slug: string; items: MockNotification[] }[] = [];
+  const groups: { slug: string; items: Notification[] }[] = [];
   for (const n of notifications) {
     const g = groups.find((x) => x.slug === n.makerSlug);
     if (g) g.items.push(n);
     else groups.push({ slug: n.makerSlug, items: [n] });
   }
 
-  const isUnread = (n: MockNotification) => !session.readNotifications.includes(n.id);
+  const isUnread = (n: Notification) => !session.readNotifications.includes(n.id);
   const anyUnread = notifications.some(isUnread);
 
   return (
@@ -70,7 +112,27 @@ export default function NotificationsPage() {
         </div>
       </header>
 
-      {notifications.length === 0 ? (
+      {state.status === "loading" ? (
+        /* loading — quiet skeleton rows, never a spinner */
+        <section aria-hidden="true" className="mt-8 overflow-hidden rounded-md border border-line shadow-subtle">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className={`flex items-center gap-3 p-4 ${i > 0 ? "border-t border-line" : ""}`}>
+              <Skeleton className="h-2 w-2 rounded-pill" />
+              <div className="min-w-0 flex-1">
+                <Skeleton className="h-3.5 w-3/5" />
+                <Skeleton className="mt-1.5 h-3 w-1/4" />
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : state.status === "error" ? (
+        <section className="mt-8 rounded-md border border-line bg-surface px-6 py-12 text-center">
+          <p className="text-caption uppercase text-muted">Couldn’t load your updates</p>
+          <p className="mx-auto mt-2 max-w-measure text-body text-ink">
+            Something went wrong reaching your notifications. Refresh the page to try again.
+          </p>
+        </section>
+      ) : notifications.length === 0 ? (
         /* designed first-run empty state — never a blank page */
         <section
           aria-label="Nothing yet"

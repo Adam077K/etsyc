@@ -382,9 +382,10 @@ export default function SellEditPage() {
             <div className="mt-[var(--space-2)] flex items-center gap-[var(--space-2)]">
               <Film variant="v1" aspect="square" play={false} rounded className="w-16 shrink-0" />
               <div>
-                <b>clip_1104 · wild-clay-dig</b>
+                <b>No clip linked yet</b>
                 <p className="text-caption text-muted">
-                  <span className="font-mono">0:41</span> · filmed Oct 3 · your footage
+                  <span className="font-mono">—</span> · no footage yet · film a piece and it
+                  binds here
                 </p>
               </div>
             </div>
@@ -393,7 +394,7 @@ export default function SellEditPage() {
               onClick={touch}
               className="mt-[var(--space-2)] w-full rounded-pill px-4 py-2 text-body text-muted transition-colors duration-state ease-kol hover:bg-ink/5 hover:text-ink"
             >
-              Replace clip from your reels
+              Choose a clip from your reels
             </button>
           </div>
 

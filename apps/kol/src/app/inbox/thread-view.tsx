@@ -9,8 +9,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getMaker, type MockMessage, type MockThread, type ThreadType } from "@/lib/mock/db";
+// Type-only imports (erased at build) — the LIVE data seam. Shapes are
+// identical to the former mock types, so the renderer below is untouched.
+import type { Maker, Thread } from "@/lib/data";
 import { Film } from "@/components/chrome/Film";
+
+type Message = Thread["messages"][number];
+type ThreadType = Thread["type"];
+type FilmClass = Maker["filmClass"];
 
 export const THREAD_TYPE_LABEL: Record<ThreadType, string> = {
   commission: "Commission",
@@ -40,10 +46,10 @@ function DraftCard({
   makerName,
   filmClass,
 }: {
-  message: MockMessage;
+  message: Message;
   makerSlug: string;
   makerName: string;
-  filmClass: "v1" | "v2" | "v3" | "v4" | "v5";
+  filmClass: FilmClass;
 }) {
   const latest = message.draftVersion ?? 1;
   const [rev, setRev] = useState<number>(latest);
@@ -118,10 +124,10 @@ function Message({
   makerSlug,
   filmClass,
 }: {
-  message: MockMessage;
+  message: Message;
   makerName: string;
   makerSlug: string;
-  filmClass: "v1" | "v2" | "v3" | "v4" | "v5";
+  filmClass: FilmClass;
 }) {
   if (message.from === "you") {
     return (
@@ -188,10 +194,17 @@ function Message({
   );
 }
 
-export function ThreadView({ thread }: { thread: MockThread }) {
-  const maker = getMaker(thread.makerSlug);
+export function ThreadView({
+  thread,
+  maker,
+}: {
+  thread: Thread;
+  // Resolved by the parent from the live seam and passed down, so this shared
+  // renderer performs no data reads of its own.
+  maker: Maker | null;
+}) {
   const makerName = maker?.name ?? thread.makerSlug;
-  const filmClass = maker?.filmClass ?? "v1";
+  const filmClass: FilmClass = maker?.filmClass ?? "v1";
 
   return (
     <section

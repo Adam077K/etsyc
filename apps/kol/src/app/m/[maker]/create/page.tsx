@@ -8,11 +8,16 @@
  * deposit split, and timeline are visible before any money moves.
  */
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatPrice, getMaker, getProduct } from "@/lib/mock/db";
+// `formatPrice` is a pure formatter — safe to keep from the mock module. The
+// entity reads now come from the live seam, loaded lazily in a browser-only
+// effect (never a static import from this "use client" page).
+import { formatPrice } from "@/lib/mock/db";
+import type { Maker, Product } from "@/lib/data";
 import { Film } from "@/components/chrome/Film";
+import { Skeleton } from "@/components/states/Skeleton";
 
 const STEPS = ["Brief", "Conversation", "Drafts & revisions", "Approve", "Make"] as const;
 
@@ -47,15 +52,72 @@ function VoicePill({ label }: { label: string }) {
   );
 }
 
+type CreateState =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "missing" } // no such maker — 404, honest
+  | { status: "ready"; maker: Maker; quilt: Product | null };
+
 export default function CoCreatePage({ params }: { params: Promise<{ maker: string }> }) {
   const { maker: slug } = use(params);
   const [rev, setRev] = useState<number>(3);
   const [approved, setApproved] = useState(false);
+  const [state, setState] = useState<CreateState>({ status: "loading" });
 
-  const maker = getMaker(slug);
-  if (!maker) notFound();
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        // Lazy import — browser-only effect keeps the server-only Supabase
+        // branch out of this client page's SSR module graph.
+        const { getData } = await import("@/lib/data");
+        const data = getData();
+        const maker = await data.getMaker(slug);
+        if (!active) return;
+        if (!maker) {
+          setState({ status: "missing" });
+          return;
+        }
+        const quilt = await data.getProduct("commission-quilt");
+        if (!active) return;
+        setState({ status: "ready", maker, quilt });
+      } catch {
+        if (active) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [slug]);
 
-  const quilt = getProduct("commission-quilt");
+  // ---- state gates (all hooks above run unconditionally) -------------------
+  if (state.status === "loading") {
+    return (
+      <main className="mx-auto w-full max-w-page px-6 pb-24">
+        <div className="py-10">
+          <Skeleton className="h-8 w-72" />
+          <Skeleton className="mt-4 h-40 rounded-md" />
+        </div>
+      </main>
+    );
+  }
+  if (state.status === "error") {
+    return (
+      <main className="mx-auto w-full max-w-page px-6 pb-24">
+        <div className="mx-auto max-w-[560px] py-20 text-center">
+          <p className="text-caption uppercase text-muted">Couldn’t start a commission</p>
+          <p className="mx-auto mt-2 max-w-measure text-body text-ink">
+            Something went wrong reaching this maker. Refresh the page to try again.
+          </p>
+        </div>
+      </main>
+    );
+  }
+  if (state.status === "missing") notFound();
+
+  // ---- ready ---------------------------------------------------------------
+  const maker = state.maker;
+  const quilt = state.quilt;
   const totalMinor = quilt?.priceMinor ?? 88000;
   const depositMinor = Math.round(totalMinor * 0.4);
   const balanceMinor = totalMinor - depositMinor;
