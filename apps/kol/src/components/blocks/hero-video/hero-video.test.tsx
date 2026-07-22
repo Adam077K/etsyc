@@ -62,7 +62,10 @@ describe("hero-video statement + identity line — E5 ruling (D10)", () => {
     // lead, it does not disappear (B3 is deep-linkable; a cold arrival
     // must be able to name the person whose words they are reading)
     expect(html).toContain("Sena Okonkwo");
-    expect(html).toMatch(/<span>Sena Okonkwo<\/span> · /);
+    // gate-2 identity claim: the demoted name owns one step of separation
+    // (+100 weight, never opacity — §0.4) so a scanning cold arrival finds
+    // the name/craft boundary, not just the em dash inside materials
+    expect(html).toMatch(/<span class="font-medium">Sena Okonkwo<\/span> · /);
   });
 
   it("statement present + craft line hidden → the caption line still renders, carrying the name alone", () => {
@@ -73,7 +76,7 @@ describe("hero-video statement + identity line — E5 ruling (D10)", () => {
     const html = markup(config);
     expect(html.match(/<h1/g)).toHaveLength(1);
     // name present with showCraftLine either true or false (binding AC)
-    expect(html).toContain("<span>Sena Okonkwo</span>");
+    expect(html).toContain('<span class="font-medium">Sena Okonkwo</span>');
     // the craft line itself is genuinely off
     expect(html).not.toContain("hand-thrown stoneware");
   });
@@ -86,9 +89,16 @@ describe("hero-video statement + identity line — E5 ruling (D10)", () => {
     // exactly one display-tier line and its content is maker.displayName
     expect(html.match(/<h1/g)).toHaveLength(1);
     expect(html).toMatch(/<h1[^>]*>Sena Okonkwo<\/h1>/);
-    // nameplate register, never the speech register (weight/tracking split
-    // is the load-bearing part of E5)
-    expect(html).toMatch(/<h1[^>]*font-bold[^>]*tracking-\[-0\.03em\]/);
+    // nameplate register, never the speech register — and per §2.1a / R1 the
+    // register is VAR-DRIVEN (stroke-contrast-aware): the renderer reads the
+    // three --nameplate-* custom properties and never a font name or a flat
+    // numeric weight. Two axes: statement larger-and-lighter, nameplate
+    // smaller-and-heavier.
+    expect(html).toMatch(
+      /<h1[^>]*\[font-weight:var\(--nameplate-weight\)\][^>]*\[letter-spacing:var\(--nameplate-tracking\)\][^>]*text-\[min\(var\(--nameplate-size\),10cqi\)\]/,
+    );
+    // the pre-R1 flat register is gone
+    expect(html).not.toMatch(/<h1[^>]*font-bold/);
   });
 
   it("statement absent + craft line hidden → still no promotion of anything into the hero slot", () => {
@@ -132,5 +142,49 @@ describe("clips[].focalPoint — cross-aspect crop anchor", () => {
     expect(clipObjectPosition({ focalPoint: { x: 0, y: 1 } })).toBe("0% 100%");
     expect(clipObjectPosition({})).toBe("50% 50%");
     expect(DEFAULT_CLIP_FOCAL_POINT).toEqual({ x: 0.5, y: 0.5 });
+  });
+});
+
+describe("gate-2 P1 — the chrome band is clipped to the film rect and paints its own scrim", () => {
+  it("the statement + caption band renders INSIDE the overflow-hidden film frame (nothing can paint on page ground)", () => {
+    const html = markup(cloneSena());
+    const frameAt = html.indexOf("kol-scrim");
+    const clipAt = html.indexOf("overflow-hidden");
+    const chromeAt = html.indexOf("kol-hero-chrome");
+    const h1At = html.indexOf("<h1");
+    // frame (kol-scrim + overflow-hidden) opens before the chrome band,
+    // which opens before the display line: band ⊂ clip rect, by structure
+    expect(frameAt).toBeGreaterThan(-1);
+    expect(clipAt).toBeGreaterThan(-1);
+    expect(chromeAt).toBeGreaterThan(frameAt);
+    expect(h1At).toBeGreaterThan(chromeAt);
+    // one section, one frame, one band — no second chrome path outside the clip
+    expect(html.match(/kol-hero-chrome/g)).toHaveLength(1);
+  });
+
+  it("the band carries the solid-backdrop class in BOTH hero variants (statement present and absent)", () => {
+    const withStatement = markup(cloneSena());
+    const config = cloneSena();
+    const { block } = heroSetup(config);
+    delete block.props.statement;
+    const nameplate = markup(config);
+    expect(withStatement).toContain("kol-hero-chrome");
+    expect(nameplate).toContain("kol-hero-chrome");
+  });
+
+  it("caption clears the display descender: mt-10 desktop / mt-4 mobile (band ruling — ~60px descender→cap at desktop, ≥40px target)", () => {
+    const html = markup(cloneSena());
+    expect(html).toContain("mt-4 md:mt-10");
+    // the old 8px gap (25–29px optical, descenders touching the caption) is gone
+    expect(html).not.toMatch(/<p[^>]*class="mt-2 /);
+  });
+
+  it("mobile band ruling: full-frame variants go 4:5 below sm; the statement clamps to 2 lines below sm", () => {
+    const html = markup(cloneSena()); // sena hero is center-column
+    expect(html).toMatch(/aspect-\[4\/5\] sm:aspect-video/);
+    // hard 2-line cap with ellipsis at mobile — 8cqi + -webkit clamp
+    expect(html).toContain("text-[min(var(--fs-display-hero),8cqi)]");
+    expect(html).toContain("sm:text-[min(var(--fs-display-hero),10cqi)]");
+    expect(html).toContain("max-sm:[-webkit-line-clamp:2]");
   });
 });

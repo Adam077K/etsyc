@@ -141,6 +141,16 @@
     color-mix(in oklab, var(--ground) 45%, black) 0%,
     transparent 55%
   );
+  /* solid text-backdrop scrim (gate-2 / I5) — must match the theme paths'
+     `color-mix(in oklab, ground 40%, black)`; sunbaked-light value here
+     (#F6EFE3 @ 40% → 9.07:1 vs --on-media, verified in scrim-strong.test.ts) */
+  --scrim-strong: #45423f;
+
+  /* nameplate register fallback (§2.1a / R1) — the app-chrome pairing is
+     statement-grotesk, a uniform-stroke face: display / 600 / -0.025em */
+  --nameplate-size: var(--fs-display);
+  --nameplate-weight: 600;
+  --nameplate-tracking: -0.025em;
 
   /* pairing fallback until a world root sets its own */
   --font-display: var(--font-clash-display, var(--font-fraunces)), serif;
@@ -212,6 +222,26 @@
     inset: 0;
     background: var(--scrim);
     pointer-events: none;
+  }
+
+  /* ---- hero chrome band (gate-2 P1 / invariant I5, no waiver) ----
+     The band paints its OWN backdrop: solid --scrim-strong under the
+     content box, fading to transparent across the padding-top zone —
+     which reserves the fade for film, keeping every set line on FULL
+     scrim. Bottom-anchored inside the overflow-hidden frame, the band
+     grows downward-into-scrim WITH the text: coverage is guaranteed by
+     construction, so over-film contrast is contrast(--on-media,
+     --scrim-strong) — deterministic; real footage cannot take it lower.
+     The fade shortens in sub-page containers (matrix cells, docked). */
+  .kol-hero-chrome {
+    --hero-chrome-fade: min(128px, 12cqw);
+    padding-top: var(--hero-chrome-fade);
+    background: linear-gradient(
+      to top,
+      var(--scrim-strong) 0%,
+      var(--scrim-strong) calc(100% - var(--hero-chrome-fade)),
+      transparent 100%
+    );
   }
 
   /* ---- P4 world-stage choreography — the film always wins. The film

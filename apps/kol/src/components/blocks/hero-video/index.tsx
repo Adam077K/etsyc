@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { FilmFrame } from "@/components/media/FilmFrame";
 import { clipObjectPosition } from "@/components/media/focal-point";
 import { PosterStill } from "@/components/media/PosterStill";
@@ -8,6 +8,7 @@ import { EmptyPrompt } from "@/components/states/EmptyPrompt";
 import { Skeleton } from "@/components/states/Skeleton";
 import { cn } from "@/lib/utils";
 import { firstClip, type BlockProps } from "../shared";
+import { fitHeroStatement } from "./statement-fit";
 
 /**
  * Block 1 · hero-video — the persistent maker film the world unfolds around.
@@ -18,10 +19,35 @@ import { firstClip, type BlockProps } from "../shared";
 export function HeroVideoBlock({ block, data, state = "success", isPreview }: BlockProps<"hero-video">) {
   const clip = firstClip(data, block.bindings.clipTags);
   const [clipFailed, setClipFailed] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const chromeRef = useRef<HTMLDivElement>(null);
+  const statementRef = useRef<HTMLHeadingElement>(null);
+  const statement = block.props.statement;
 
+  // Lines-after-balance fit (gate-2 P1): the ≤48-char budget could not bound
+  // a line count across five pairings, so the statement is fitted in the
+  // ACTUAL rect — step the display size down until it sets ≤3 lines and the
+  // chrome band stays within its frame cap. Re-fits on frame resize.
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    const chrome = chromeRef.current;
+    const h1 = statementRef.current;
+    if (!frame || !chrome || !h1 || !statement) return;
+    const refit = () => fitHeroStatement({ frame, chrome, statement: h1 });
+    refit();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(refit);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [statement, state, clip]);
+
+  // Mobile aspect (design-lead band ruling): 16:9 at 375px leaves 211px of
+  // frame — chrome alone needs ~140px, so no scrim tuning can show film in
+  // it. The two full-frame variants go 4:5 below sm (469px tall at 375px:
+  // ~60% film stays visible); corner-shrunk stays widescreen.
   const frameClass = {
-    "full-bleed": "aspect-video w-full", // edge-to-edge, radius 0
-    "center-column": "mx-auto aspect-video w-full max-w-page rounded-lg md:w-[72%]",
+    "full-bleed": "aspect-[4/5] sm:aspect-video w-full", // edge-to-edge, radius 0
+    "center-column": "mx-auto aspect-[4/5] sm:aspect-video w-full max-w-page rounded-lg md:w-[72%]",
     "corner-shrunk": "ml-auto aspect-video w-80 rounded-md shadow-raised",
   }[block.variant];
 
@@ -76,13 +102,18 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
       className={cn(
         block.variant === "full-bleed"
           ? "w-full"
-          : "mx-auto w-full max-w-page px-[var(--space-2)] md:px-[var(--space-6)]",
+          : // panel variants get a deliberate top inset (gate-2 P2: a panel
+            // flush to y=0 with only bottom radii reads pushed out of frame)
+            "mx-auto w-full max-w-page px-[var(--space-2)] pt-[var(--space-2)] md:px-[var(--space-6)] md:pt-[var(--space-4)]",
       )}
     >
       {/* container-query root: display-hero sizes to the FRAME, not the
           viewport, so sub-page-width containers (matrix cells, docked
           variants) scale the line down instead of clipping mid-word */}
-      <div className={cn("kol-scrim relative overflow-hidden [container-type:inline-size]", frameClass)}>
+      <div
+        ref={frameRef}
+        className={cn("kol-scrim relative overflow-hidden [container-type:inline-size]", frameClass)}
+      >
         {showError ? (
           <div className="relative flex h-full w-full items-end bg-surface">
             <PosterStill
@@ -102,17 +133,33 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
             ruling, screen-specs §3.2): a maker-authored statement takes the
             hero slot light and open (weight 400–500, -0.01em — speech, a
             guest on the maker's face); absent → the maker's NAME holds the
-            tier bold and tight (weight 700, -0.03em — a nameplate, stored
-            identity, not attributed speech). Nothing else is ever promoted
+            tier in the NAMEPLATE REGISTER (§2.1a / R1: --nameplate-size/
+            -weight/-tracking resolved from the pairing's strokeClass —
+            modulated: display-hero/700/-0.03em; uniform: display/600/
+            -0.025em. Smaller-and-heavier vs the statement's larger-and-
+            lighter; stored identity, not attributed speech). Nothing else is ever promoted
             into the tier (D10: no generated line, no craft-line promotion,
             no store name AS the maker's words). */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-[var(--space-4)] md:p-[var(--space-8)]">
-          {block.props.statement ? (
-            <h1 className="font-display font-medium leading-[0.92] tracking-[-0.01em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),10cqi)]">
-              {block.props.statement}
+        {/* the chrome band paints its OWN backdrop (gate-2 P1 / invariant I5):
+            solid --scrim-strong under every set line, fading out over the
+            reserved padding-top zone above. Bottom-anchored inside the
+            overflow-hidden frame, it grows DOWN-INTO covered scrim with the
+            text by construction — a line can never sit on bare film or page
+            ground, so over-film contrast is contrast(on-media, scrim-strong):
+            deterministic, footage-independent. */}
+        <div
+          ref={chromeRef}
+          className="kol-hero-chrome pointer-events-none absolute inset-x-0 bottom-0 z-10 px-[var(--space-4)] pb-[var(--space-4)] md:px-[var(--space-8)] md:pb-[var(--space-8)]"
+        >
+          {statement ? (
+            <h1
+              ref={statementRef}
+              className="font-display font-medium leading-[0.92] tracking-[-0.01em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),8cqi)] sm:text-[min(var(--fs-display-hero),10cqi)] max-sm:[display:-webkit-box] max-sm:[-webkit-line-clamp:2] max-sm:[-webkit-box-orient:vertical] max-sm:overflow-hidden"
+            >
+              {statement}
             </h1>
           ) : (
-            <h1 className="font-display font-bold leading-[0.92] tracking-[-0.03em] text-on-media [text-wrap:balance] text-[min(var(--fs-display-hero),10cqi)]">
+            <h1 className="font-display leading-[0.92] text-on-media [text-wrap:balance] [font-weight:var(--nameplate-weight)] [letter-spacing:var(--nameplate-tracking)] text-[min(var(--nameplate-size),10cqi)]">
               {data.maker.displayName}
             </h1>
           )}
@@ -122,16 +169,23 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
               name DEMOTES to lead this caption line (showCraftLine true or
               false); absent → the name is already the display line above and
               the caption stays craft · location. Never truncated — a name
-              wraps before it is cut. */}
-          {block.props.statement ? (
-            <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media">
-              <span>{data.maker.displayName}</span>
+              wraps before it is cut.
+              Gap under display-hero (gate-2 P2 crowding, band ruling):
+              mt-10 at desktop puts ~60px between descender-bottom and
+              caption cap-height (≥40px target, measured from the DESCENDER
+              — tight 0.92 leading lets descenders overhang the line box);
+              mt-4 at mobile is proportionate to the 8cqi scale. Name gets
+              one step of separation (+100 weight — gate-2 P2 identity
+              claim; never opacity, §0.4). */}
+          {statement ? (
+            <p className="mt-4 md:mt-10 font-text text-caption uppercase tracking-[0.08em] text-on-media">
+              <span className="font-medium">{data.maker.displayName}</span>
               {block.props.showCraftLine ? (
                 <> · {data.maker.craft} · {data.maker.location}</>
               ) : null}
             </p>
           ) : block.props.showCraftLine ? (
-            <p className="mt-2 font-text text-caption uppercase tracking-[0.08em] text-on-media">
+            <p className="mt-4 md:mt-10 font-text text-caption uppercase tracking-[0.08em] text-on-media">
               {data.maker.craft} · {data.maker.location}
             </p>
           ) : null}
