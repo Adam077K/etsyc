@@ -170,22 +170,24 @@ export function HeroVideoBlock({ block, data, state = "success", isPreview }: Bl
               false); absent → the name is already the display line above and
               the caption stays craft · location. Never truncated — a name
               wraps before it is cut.
-              Gap under display-hero (gate-2 P2 crowding, band ruling):
-              mt-10 at desktop puts ~60px between descender-bottom and
-              caption cap-height (≥40px target, measured from the DESCENDER
-              — tight 0.92 leading lets descenders overhang the line box);
-              mt-4 at mobile is proportionate to the 8cqi scale. Name gets
+              Gap under display-hero (gate-2 P2 crowding, band re-ruling):
+              the bound is INK-TO-INK ≥40px — box margin minus descender
+              overhang minus caption half-leading (tight 0.92 leading lets
+              descenders overhang the line box). mt-12 (48px) clears it on
+              both stroke classes (grotesk ~50px, Fraunces ~46px); mt-10
+              left Fraunces ~2px short. mt-4 at mobile is proportionate
+              to the 8cqi scale. Name gets
               one step of separation (+100 weight — gate-2 P2 identity
               claim; never opacity, §0.4). */}
           {statement ? (
-            <p className="mt-4 md:mt-10 font-text text-caption uppercase tracking-[0.08em] text-on-media">
+            <p className="mt-4 md:mt-12 font-text text-caption uppercase tracking-[0.08em] text-on-media">
               <span className="font-medium">{data.maker.displayName}</span>
               {block.props.showCraftLine ? (
                 <> · {data.maker.craft} · {data.maker.location}</>
               ) : null}
             </p>
           ) : block.props.showCraftLine ? (
-            <p className="mt-4 md:mt-10 font-text text-caption uppercase tracking-[0.08em] text-on-media">
+            <p className="mt-4 md:mt-12 font-text text-caption uppercase tracking-[0.08em] text-on-media">
               {data.maker.craft} · {data.maker.location}
             </p>
           ) : null}
