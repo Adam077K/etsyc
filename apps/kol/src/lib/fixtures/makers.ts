@@ -338,7 +338,7 @@ export const MAKERS: Maker[] = [
     blurb: "A costume isn't clothes — it's permission. For one afternoon they get to be the whole story.",
     image: "/media/twodots/feed-poster.jpg",
     kind: "film",
-    duration: "0:39",
+    duration: "0:24",
     // Portrait (tall) footprint — she is the issue's FEATURED maker, pinned first
     // (see Feed). Her discovery film is a 9:16 talking-head; a portrait tile frames
     // her face head-to-shoulders (a full-width 16/9 hero tile crops a portrait clip
