@@ -29,12 +29,15 @@ import { rise, calm, easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const REQUIRED = DRAFT_BLOCKS.filter((b) => !b.optional).length;
+const OPTIONAL = DRAFT_BLOCKS.filter((b) => b.optional).length;
 
 export function SellStudio() {
   const reduce = useReducedMotion();
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string>(
-    DRAFT_BLOCKS.find((b) => !b.draftApproved)?.id ?? DRAFT_BLOCKS[0]!.id,
+    DRAFT_BLOCKS.find((b) => !b.draftApproved)?.id ??
+      DRAFT_BLOCKS.at(0)?.id ??
+      "hero",
   );
   const [approved, setApproved] = useState<Record<string, boolean>>(
     () => Object.fromEntries(DRAFT_BLOCKS.map((b) => [b.id, b.draftApproved])),
@@ -48,9 +51,19 @@ export function SellStudio() {
   const [refreshed, setRefreshed] = useState<Set<string>>(new Set());
   const [seconds, setSeconds] = useState(0);
 
-  // The AI composes the first draft on arrival — a genuine loading beat.
+  // The AI composes the first draft on arrival — a genuine loading beat. As it
+  // reveals, honour any deep-link (e.g. publish's "Add the closing line" ->
+  // ?section=voice); reading the URL post-mount avoids a hydration mismatch on
+  // the statically-prerendered page.
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), reduce ? 200 : 1300);
+    const t = setTimeout(
+      () => {
+        setLoading(false);
+        const s = new URLSearchParams(window.location.search).get("section");
+        if (s && DRAFT_BLOCKS.some((b) => b.id === s)) setSelectedId(s);
+      },
+      reduce ? 200 : 1300,
+    );
     return () => clearTimeout(t);
   }, [reduce]);
 
@@ -214,6 +227,9 @@ export function SellStudio() {
                 {approvedRequired} of {REQUIRED}
               </span>{" "}
               sections approved
+              {OPTIONAL > 0 && (
+                <span className="text-bone/55"> · {OPTIONAL} optional</span>
+              )}
             </p>
           </div>
           <Link
