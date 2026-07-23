@@ -25,14 +25,21 @@ import { Magnetic } from "./magnetic";
 import { cn } from "@/lib/utils";
 
 type Phase = "ready" | "publishing" | "live";
-const ACCENT = "#B4462A"; // Lena's kiln-clay accent
+// Lena's kiln-clay accent (screens-only demo). WIRING TODO: a real integration
+// pass must read the maker's accent selection from the studio state / store
+// config instead of hardcoding it here.
+const ACCENT = "#B4462A";
 
 export function SellPublish() {
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<Phase>("ready");
 
-  const approved = PUBLISH_SECTIONS.filter((s) => s.approved).length;
-  const total = PUBLISH_SECTIONS.length;
+  // Required-only denominator, matching the studio's "of 5" fraction. The
+  // optional Closing line stays listed below with its dashed/Later treatment.
+  const total = PUBLISH_SECTIONS.filter((s) => !s.optional).length;
+  const approved = PUBLISH_SECTIONS.filter(
+    (s) => !s.optional && s.approved,
+  ).length;
 
   function publish() {
     setPhase("publishing");
@@ -222,10 +229,12 @@ function LiveState({ reduce }: { reduce: boolean }) {
             sizes="28rem"
             className="object-cover"
           />
+          {/* Bottom blends to near-ink so the kicker/title clear AA; the clay
+              tint carries mid-card warmth (matches the preview scrim rule). */}
           <div
             className="absolute inset-0"
             style={{
-              background: `linear-gradient(to top, ${ACCENT}E6, transparent 70%)`,
+              background: `linear-gradient(to top, rgba(28,22,19,0.94), ${ACCENT}80 46%, transparent)`,
             }}
           />
           {/* LIVE seal stamps in */}
@@ -314,7 +323,7 @@ function LiveState({ reduce }: { reduce: boolean }) {
             </Link>
           </Magnetic>
           <Link
-            href="/sell/studio"
+            href="/sell/studio?section=voice"
             className="flex items-center gap-2 rounded-full border border-bone/30 px-6 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/70 hover:bg-bone/5"
           >
             Add the closing line
