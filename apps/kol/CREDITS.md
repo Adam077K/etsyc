@@ -112,6 +112,8 @@ costume portraits (governance — see below).
 | File | Depicts | Source | Face |
 |---|---|---|---|
 | video/two-dots.mp4 | Top-down: adult hands making a small felt craft (the hero clip) | Founder video "Hands-on video.mp4" — muted H.264, faststart | none |
+| video/two-dots-feed.mp4 | Sharon (adult, the maker) talking to camera in her Two Dots tee, then holding up a felt-scale costume — the DISCOVERY/feed film | Founder-provided promo video `TWO DOTS (1).mp4`, 2026-07-23; **compliant cut** — the child-face b-roll (a costume-model beauty shot, ~t=1–3.7s of the source) was EXCLUDED pending model-guardian permission; kept Sharon talking-head + faceless b-roll only (source t=4.0→end). Re-encoded 540×960 muted H.264, yuv420p, +faststart. Verified frame-by-frame (1fps + scene cuts): zero identifiable child faces in the output. | none (adult maker) |
+| twodots/feed-poster.jpg | Sharon face-forward in her Two Dots tee (poster for the discovery film) | frame at 0:06 of the compliant cut above (adult, no child) | none (adult maker) |
 | video/product-butterfly-wings.mp4 | Child (fully **hooded** — face covered by the costume) spinning to show butterfly wings | Founder video "Show-coustum.mp4" — re-encoded 30fps, muted | none (hood covers face) |
 | twodots/hero-poster.jpg | Hands + a handmade "MY CAT" matchbox craft (poster for the hero clip) | frame from Hands-on video | none |
 | twodots/materials.jpg | Sewing-materials flat-lay (beads, denim, fabric, scissors, yarn) | photo #47, cropped to remove course-promo text | none |
