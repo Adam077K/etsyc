@@ -501,7 +501,12 @@ function ProductsSection({
                 <div>
                   <div className="flex items-baseline justify-between gap-4">
                     <h3 className="font-display text-2xl font-bold text-bone sm:text-3xl">
-                      {product.name}
+                      <Link
+                        href={`/m/${world.slug}/p/${product.id}`}
+                        className="transition-colors hover:text-marigold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                      >
+                        {product.name}
+                      </Link>
                     </h3>
                     <span className="font-display text-2xl font-bold text-marigold">
                       {product.price}
@@ -513,16 +518,19 @@ function ProductsSection({
                 </div>
                 <div className="flex items-center gap-3">
                   <Magnetic strength={0.2}>
-                    <button className="flex items-center gap-2.5 rounded-full bg-marigold px-6 py-3 font-ui text-base font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink">
-                      <Handbag size={18} weight="fill" />
-                      Add to bag
-                    </button>
+                    <Link
+                      href={`/m/${world.slug}/p/${product.id}`}
+                      className="flex items-center gap-2.5 rounded-full bg-marigold px-6 py-3 font-ui text-base font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                    >
+                      View the piece
+                      <ArrowUpRight size={18} weight="bold" />
+                    </Link>
                   </Magnetic>
                   <button
-                    aria-label={`View ${product.name}`}
+                    aria-label={`Save ${product.name}`}
                     className="grid h-12 w-12 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   >
-                    <ArrowUpRight size={20} weight="bold" />
+                    <Heart size={20} />
                   </button>
                 </div>
                 <p className="font-ui text-xs text-bone-dim">

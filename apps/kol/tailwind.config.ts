@@ -21,12 +21,22 @@ const config: Config = {
         },
         plum: "#43223B",
         olive: "#4E5A2A",
-        clay: "#B4462A",
-        sky: "#557E8F",
+        clay: {
+          DEFAULT: "#B4462A",
+          // AA-safe (~6.4:1 on ink) tint for small accent text on dark grounds.
+          bright: "#E08462",
+        },
+        sky: {
+          DEFAULT: "#557E8F",
+          // AA-safe (~6.8:1 on ink) tint for small accent text on dark grounds.
+          bright: "#7FA6B8",
+        },
         marigold: {
           DEFAULT: "#E4922C",
           bright: "#F2A93B",
         },
+        // Form validation — a warm coral that stays within the palette family.
+        error: "#F0876B",
         line: "rgba(239,230,214,0.14)",
       },
       fontFamily: {
