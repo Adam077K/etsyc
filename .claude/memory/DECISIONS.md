@@ -420,3 +420,31 @@ same video node keeps playing world→product.
 **Why:** DESIGN.md reserves marigold as the single through-signal, and the buyer feed is the warm/vivid surface where that signal belongs. The seller workspace is KOL's calm "operate" chrome (concept-lock D15, fixed system) — a quiet productivity tool. There, marigold is reserved for the maker's *primary actions* (Publish, "Answer on film"); if a mere filter-state also went marigold it would compete with those CTAs and flatten the signal hierarchy. A calmer bone active-fill reads as tool-state, not call-to-action, which is the right register for the seller side. (Answers the design-critic batch-2 P2-F question; the alternative — standardize everything to marigold — was rejected for this reason.)
 
 **Reversibility:** trivially reversible (one class per seller chip). **Owner:** design-lead · **Affects:** seller workspace chrome only · **Risk:** lite.
+
+## 2026-07-23 — Etsy brand skin: accent system re-badged to Etsy's palette (pre-pitch)
+
+**Decision:** For the Etsy-panel pitch, re-badge KOL's ACCENT system to Etsy's brand palette by changing token VALUES (tailwind.config.ts + globals.css + swept literals), not class names — so the whole app (wave-4 fixes included) recolors coherently. Ink ground + bone text system UNCHANGED (the dark editorial world is the product identity; this is not a light-theme flip). Signal → Etsy Orange; spread grounds → Etsy Collage family, keeping the warm editorial temperature and dark-ground legibility.
+
+**Mapping (old → new, with scripted WCAG ratios at the real usages):**
+
+| Token | Old | New | Etsy family | Key pairing (usage) | Ratio | Min | Pass |
+|---|---|---|---|---|---|---|---|
+| marigold DEFAULT | `#E4922C` | **`#F1641E`** | Etsy Orange | ink text on orange fill (CTA) | 5.61:1 | 4.5 | ✅ |
+| " | " | " | " | orange text/link on ink | 5.61:1 | 4.5 | ✅ |
+| marigold bright | `#F2A93B` | **`#FF7A3C`** | Etsy Orange (light) | bright display accent on ink ("on film.") | 6.90:1 | 3.0 | ✅ |
+| " | " | " | " | ink on bright (CTA hover) / focus ring | 6.90:1 | 4.5 | ✅ |
+| clay DEFAULT | `#B4462A` | **`#AE4328`** | Terracotta / Brick | bone body on clay (stat spread) | 4.95:1 | 4.5 | ✅ |
+| clay bright | `#E08462` | `#E08462` (kept) | " | clay-bright kicker on ink | 6.52:1 | 4.5 | ✅ |
+| plum | `#43223B` | **`#4C2740`** | Fig (bubblegum/lavender dk) | bone on plum / bone-dim on plum | 10.15 / 6.94 | 4.5 | ✅ |
+| olive | `#4E5A2A` | `#4E5A2A` (kept) | Moss (slime-green dk) | bone on olive / bone/70 eyebrow¹ | 6.01 / 6.01 | 4.5 | ✅ |
+| sky DEFAULT | `#557E8F` | **`#41628C`** | Denim | bone on sky (was 3.5:1) | 5.06:1 | 4.5 | ✅ |
+| sky bright | `#7FA6B8` | **`#7FA6C8`** | " | sky-bright kicker on ink | 6.98:1 | 4.5 | ✅ |
+| ink / bone / error | — | unchanged | — | — | — | — | — |
+
+¹ Two opacity AA-fixes shipped alongside: StatSpread meta `text-bone/80`→`text-bone` (on the darkened clay) and ValuesSpread eyebrow `text-bone/70`→`text-bone` (on olive), each cleared its ground to ≥4.5.
+
+**Why:** Etsy Orange is darker/redder than the old golden marigold, so ink-on-accent dropped from 7.5:1 to 5.61:1 and orange-on-ink from 7.2:1 to 5.61:1 — both still AA. Where a pairing failed, the DERIVED tone was adjusted (clay darkened a step, sky→denim which actually *improved* bone contrast 3.5→5.06), never the pairing structure. Literals swept: globals.css selection/focus, liquid.tsx blob fills, sell-preview accent map + fallback, sell-home chart, sell-publish ACCENT, sell.ts palette picker.
+
+**Honest regressions (flagged for the Founder/critic):** (1) the golden "premium golden-hour" glow of the old marigold is gone — Etsy Orange reads louder/more commercial (on-brand for Etsy, but less editorial-premium). (2) Terracotta `#AE4328` is now a near-cousin of Etsy Orange `#F1641E`, so the clay stat-spread ground and the accent read as the same warm-orange family — the old marigold(gold)-vs-clay(red) distinction is softened.
+
+**Reversibility:** fully reversible (token values on a dedicated branch `feat/kol-etsy-colors`). A later full LIGHT Etsy theme was explicitly NOT preempted. **Owner:** design-lead · **Affects:** every surface (accent only) · **Risk:** lite (values only, no structure).
