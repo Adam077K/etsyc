@@ -892,7 +892,9 @@ function MakeReel({
                 cardRefs.current[i] = el;
               }}
               className={cn(
-                "w-[80vw] shrink-0 overflow-hidden rounded-3xl bg-ink-soft ring-1 transition-[opacity,box-shadow] duration-500 sm:w-[52vw] lg:w-[38vw] lg:max-w-[520px]",
+                // 77vw (not the full 80) so card 02 peeks past the right edge on
+                // mobile — the universal touch cue that the reel is draggable.
+                "w-[77vw] shrink-0 overflow-hidden rounded-3xl bg-ink-soft ring-1 transition-[opacity,box-shadow] duration-500 sm:w-[52vw] lg:w-[38vw] lg:max-w-[480px]",
                 i === active
                   ? "opacity-100 ring-bone/25"
                   : "opacity-70 ring-line",
@@ -905,7 +907,7 @@ function MakeReel({
                     poster={step.image}
                     alt={step.title}
                     reduce={reduce}
-                    sizes="(max-width: 640px) 80vw, (max-width: 1024px) 52vw, 38vw"
+                    sizes="(max-width: 640px) 77vw, (max-width: 1024px) 52vw, 38vw"
                     className="object-cover"
                     drift={false}
                   />
@@ -915,7 +917,7 @@ function MakeReel({
                     alt={step.title}
                     fill
                     draggable={false}
-                    sizes="(max-width: 640px) 80vw, (max-width: 1024px) 52vw, 38vw"
+                    sizes="(max-width: 640px) 77vw, (max-width: 1024px) 52vw, 38vw"
                     className="pointer-events-none select-none object-cover transition-transform duration-[900ms] ease-out-expo group-hover/r:scale-105"
                   />
                 )}
@@ -970,6 +972,14 @@ function MakeReel({
             {String(active + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
           </span>
         </div>
+      )}
+      {/* Touch cue — the desktop header carries "Drag the reel"; below sm the
+          header hint is hidden, so surface it here (plus the card-02 peek). */}
+      {multi && (
+        <p className="mt-4 flex items-center justify-center gap-1.5 font-ui text-xs text-bone-dim sm:hidden">
+          <HandTap size={15} weight="regular" />
+          Drag the reel — or tap the bars
+        </p>
       )}
       {multi && (
         <span aria-live="polite" aria-atomic="true" className="sr-only">
@@ -1110,7 +1120,13 @@ function ProductsSection({
   onView: () => void;
 }) {
   return (
-    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
+    // Extra bottom clearance so the corner-docked film never overlaps the last
+    // product's actions (the same fix Two Dots' ProductsSection got in its gate).
+    // NOTE: the dock is moving TOP-LEFT for store routes on the parallel branch —
+    // this bottom clearance stays correct for THIS branch, but the overlap will
+    // re-manifest top-left after the dock-move rebase; revisit clearance direction
+    // then (pair with the interlude re-dock target flagged in the return brief).
+    <section className="mx-auto max-w-issue px-5 pb-[260px] sm:px-8 sm:pb-[260px]">
       <Reveal reduce={reduce} onView={onView}>
         <p className="meta mb-3 text-bone-dim">The work</p>
         <h2
