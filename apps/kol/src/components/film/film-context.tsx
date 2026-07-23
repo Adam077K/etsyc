@@ -67,6 +67,11 @@ export interface FilmMotion {
   originY: MotionValue<number>;
   /** 0–1 drop-shadow strength. */
   shadow: MotionValue<number>;
+  /** 0–1 top-edge clip fraction. Uniform scale forces the docked film to the
+      viewport aspect, so on a portrait phone the corner card balloons tall and
+      buries the page beneath it. Clipping the top (never distorting the film)
+      crops the dock to a fixed landscape card. Hero/full-bleed states keep 0. */
+  clip: MotionValue<number>;
 }
 
 export type FilmTarget = Partial<{
@@ -78,6 +83,7 @@ export type FilmTarget = Partial<{
   originX: number;
   originY: number;
   shadow: number;
+  clip: number;
 }>;
 
 /** Optional pointer interaction the active route grants the stage. */
@@ -128,10 +134,11 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
   const originX = useMotionValue(50);
   const originY = useMotionValue(50);
   const shadow = useMotionValue(0);
+  const clip = useMotionValue(0);
 
   const m = useMemo<FilmMotion>(
-    () => ({ scale, x, y, radius, opacity, originX, originY, shadow }),
-    [scale, x, y, radius, opacity, originX, originY, shadow],
+    () => ({ scale, x, y, radius, opacity, originX, originY, shadow, clip }),
+    [scale, x, y, radius, opacity, originX, originY, shadow, clip],
   );
 
   // Track running animations so a new drive cancels the previous one per value.
@@ -190,8 +197,9 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
       if (t.originX !== undefined) originX.set(t.originX);
       if (t.originY !== undefined) originY.set(t.originY);
       if (t.shadow !== undefined) shadow.set(t.shadow);
+      if (t.clip !== undefined) clip.set(t.clip);
     },
-    [scale, x, y, radius, opacity, originX, originY, shadow],
+    [scale, x, y, radius, opacity, originX, originY, shadow, clip],
   );
 
   const driveTo = useCallback(
@@ -209,6 +217,7 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
         [originX, t.originX],
         [originY, t.originY],
         [shadow, t.shadow],
+        [clip, t.clip],
       ];
       // Origin must jump before a move (animating origin warps the path).
       if (t.originX !== undefined) originX.set(t.originX);
@@ -219,7 +228,7 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
       }
       runningRef.current = next;
     },
-    [scale, x, y, radius, opacity, originX, originY, shadow],
+    [scale, x, y, radius, opacity, originX, originY, shadow, clip],
   );
 
   const value = useMemo<FilmController>(

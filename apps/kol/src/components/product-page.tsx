@@ -34,7 +34,7 @@ import { Magnetic } from "./magnetic";
 import { TrustBadge } from "./trust-badge";
 import { ReviewStory } from "./review-story";
 import { useFilm } from "./film/film-context";
-import { cornerTarget } from "./film/film-geometry";
+import { cornerTarget, dockAspect } from "./film/film-geometry";
 import { cn } from "@/lib/utils";
 
 // AA-safe accent text/icon tints (small meta kickers need ≥4.5:1 on ink).
@@ -606,7 +606,7 @@ function ContextualFilm({
       const vh = window.innerHeight;
       const width = mobile ? 148 : 208;
       const margin = mobile ? 16 : 24;
-      setCard({ width, margin, ratio: vw / vh });
+      setCard({ width, margin, ratio: dockAspect(vw, vh) });
       if (open) {
         driveTo(cornerTarget(vw, vh, { width, margin, radius: 18 }), {
           reduce: prefersReduced,

@@ -35,6 +35,11 @@ export function FilmStage() {
     ["0 0 0 rgba(0,0,0,0)", "0 30px 60px -20px rgba(0,0,0,0.8)"],
   );
   const transformOrigin = useMotionTemplate`${m.originX}% ${m.originY}%`;
+  // Crop the top of the (uniformly-scaled, undistorted) film so the corner dock
+  // reads as a landscape card instead of a viewport-aspect column on portrait
+  // phones. `round` keeps all four corners on the radius. Zero on hero/desktop.
+  const clipTop = useTransform(m.clip, (v) => v * 100);
+  const clipPath = useMotionTemplate`inset(${clipTop}% 0px 0px 0px round ${m.radius}px)`;
 
   if (!intent) return null;
 
@@ -59,6 +64,7 @@ export function FilmStage() {
             borderRadius: m.radius,
             boxShadow,
             transformOrigin,
+            clipPath,
           }}
           onClick={interaction?.onActivate}
           onKeyDown={
