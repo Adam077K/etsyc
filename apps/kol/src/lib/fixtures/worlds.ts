@@ -49,6 +49,12 @@ export interface MakerWorld {
   /** 2-3 short paragraphs — the maker's own story */
   story: string[];
   storyImage: string;
+  /**
+   * Optional accurate alt for storyImage. Set it when the still is NOT a
+   * portrait of the maker (the maker-world default alt names the person); an
+   * object/scene still needs its own description. Falls back to name + studio.
+   */
+  storyImageAlt?: string;
   /** section headers authored per-maker, in their own voice (no flattening) */
   processSectionHeader: string;
   process: WorldProcessStep[];
@@ -234,6 +240,7 @@ export const WORLDS: Record<string, MakerWorld> = {
       "Everything is decanted by hand into glazed stoneware, sealed with wax, and labelled with the day it was made. Plastic never touches it. Neither does a hurry.",
     ],
     storyImage: "/media/salt-ceramics.jpg",
+    storyImageAlt: "Hand-glazed stoneware bottles for decanting botanical oils, sealed with wax",
     processSectionHeader: "I work by nose, not by clock.",
     process: [
       {
@@ -287,6 +294,7 @@ export const WORLDS: Record<string, MakerWorld> = {
       "Two inks, cotton paper, a hand-cranked letterpress for the type. That's the whole studio. The limits are the fun — I've made more with two colours than I ever did with a full-colour printer.",
     ],
     storyImage: "/media/riso-overprint.jpg",
+    storyImageAlt: "A two-colour risograph overprint, the misregistered inks glowing a third colour",
     processSectionHeader: "Two inks. A hundred happy accidents.",
     process: [
       {

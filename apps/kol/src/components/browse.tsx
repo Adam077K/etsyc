@@ -130,7 +130,7 @@ export function Browse() {
       </section>
 
       {/* Sticky craft rail. */}
-      <div className="sticky top-[68px] z-30 bg-ink/85 backdrop-blur-md">
+      <div className="sticky top-[var(--header-h)] z-30 bg-ink/85 backdrop-blur-md">
         <div className="mx-auto max-w-issue px-5 py-3 sm:px-8">
           <CraftFilter active={active} onChange={setActive} counts={counts} />
         </div>

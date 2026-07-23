@@ -8,6 +8,13 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
 - **[2026-07-22, arc 1] Liquid divider phase.** Gold blobs now run the inverted
   cy phase `[20, 27, 14, 20]` so the goo seam pinches/billows from frame one
   (design-critic polish) — done in `liquid.tsx`.
+- **[2026-07-23, cleanup] Sticky rail magic number.** Promoted to the
+  `--header-h` CSS var on `:root`; feed + browse sticky rails and the sign-in
+  pane now share one source of truth (globals.css).
+- **[2026-07-23, cleanup] Scroll cue as a real link.** The hero ↓ cue is now a
+  keyboard-navigable `<a href="#feed">` with a focus ring (hero-spread.tsx).
+- **[wave 2] CTA copy/anchor mismatch.** Hero "How KOL works" now links to the
+  real `/how` explainer (hero-spread.tsx).
 
 ## Design / content
 - **Olive values spread + surface the dead `values` data.** Every `Maker` carries
@@ -29,9 +36,4 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
   is the page's best-loved moment; only change the mechanism.
 
 ## Copy / IA / a11y polish
-- **CTA copy/anchor mismatch.** Hero "How KOL works" links to `#feed`; either
-  give it a real explainer target or rename it.
-- **Sticky rail magic number.** Feed filter rail uses `top-[68px]` (the masthead
-  height). Promote to a CSS var shared with the masthead so they can't drift.
-- **Scroll cue as a real link.** The hero ↓ cue is decorative; make it a
-  keyboard-navigable link to `#feed`.
+- _(All prior items in this section applied — see Applied above.)_

@@ -67,7 +67,7 @@ export function SignIn() {
     <div className="min-h-screen bg-ink">
       {/* Calm KOL chrome. */}
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
+        <div className="mx-auto flex min-h-[var(--header-h)] max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link
             href="/"
             className="group flex items-center gap-2 font-ui text-sm text-bone-dim transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
@@ -88,7 +88,7 @@ export function SignIn() {
         </div>
       </header>
 
-      <main className="mx-auto grid min-h-[calc(100vh-65px)] max-w-issue lg:grid-cols-2">
+      <main className="mx-auto grid min-h-[calc(100vh_-_var(--header-h))] max-w-issue lg:grid-cols-2">
         {/* Form / success panel. */}
         <div className="flex items-center px-5 py-16 sm:px-8 lg:px-16">
           <motion.div

@@ -107,7 +107,7 @@ export function Feed() {
       </div>
 
       {/* Sticky filter rail. */}
-      <div className="sticky top-[68px] z-30 -mx-5 mb-8 bg-ink/85 px-5 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
+      <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-8 bg-ink/85 px-5 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
         <div className="mx-auto max-w-issue">
           <CraftFilter active={active} onChange={selectFilter} counts={counts} />
         </div>

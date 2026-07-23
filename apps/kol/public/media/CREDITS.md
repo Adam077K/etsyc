@@ -49,7 +49,7 @@ change.
 
 | Surface | Slot | Interim | Proper shot |
 |---|---|---|---|
-| `/how` hero | Cinematic opener ground (`how-story.tsx`) | `indigo-dye.jpg` — an abstract dye swirl; reads impersonal in the least-scrimmed quadrant (interim fix: right scrim floored at `ink/30`) | A real maker's hands or face mid-process (throwing, dyeing, carving) — the thesis page's first human impression should be a person, not a texture |
+| `/how` hero | Cinematic opener ground (`how-story.tsx`) | ~~`indigo-dye.jpg`~~ **RESOLVED (cleanup wave)** — now `<MakerFilm>` on the human-presence slot: real maker footage (`COVER_MAKER.filmSrc`, odd-clay clip) with poster `clay-wheel.jpg` (Lena's hands at the wheel), degrading to the still. The thesis page opens on a person, not a texture. | Replace the odd-clay proof clip with Lena's real hero footage at the same fixture path — no code change (see `public/media/video/README.md`) |
 
 ## Worlds expansion — Grain & Groove + Ember & Rue + Risograph Room
 
