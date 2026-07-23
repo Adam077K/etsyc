@@ -31,10 +31,12 @@ export function GooDefs() {
 export function LiquidDivider({ className = "" }: { className?: string }) {
   const reduce = useReducedMotion();
   const blobs = [
-    { id: "clay-l", cx: 22, r: 30, fill: "#B4462A", dur: 9 },
-    { id: "gold-l", cx: 40, r: 38, fill: "#E4922C", dur: 11 },
-    { id: "clay-r", cx: 58, r: 30, fill: "#B4462A", dur: 8 },
-    { id: "gold-r", cx: 76, r: 40, fill: "#E4922C", dur: 12 },
+    { id: "clay-l", cx: 22, r: 30, fill: "#B4462A", dur: 9, cyKeys: [20, 12, 24, 20] },
+    // Gold blobs run the inverted cy phase so the seam pinches/billows from
+    // frame one instead of waiting for duration drift (design-critic polish).
+    { id: "gold-l", cx: 40, r: 38, fill: "#E4922C", dur: 11, cyKeys: [20, 27, 14, 20] },
+    { id: "clay-r", cx: 58, r: 30, fill: "#B4462A", dur: 8, cyKeys: [20, 12, 24, 20] },
+    { id: "gold-r", cx: 76, r: 40, fill: "#E4922C", dur: 12, cyKeys: [20, 27, 14, 20] },
   ];
   return (
     <div className={className} aria-hidden>
@@ -55,7 +57,7 @@ export function LiquidDivider({ className = "" }: { className?: string }) {
               animate={
                 reduce
                   ? { cy: 20 }
-                  : { cy: [20, 12, 24, 20], cx: [b.cx, b.cx + 4, b.cx - 3, b.cx] }
+                  : { cy: b.cyKeys, cx: [b.cx, b.cx + 4, b.cx - 3, b.cx] }
               }
               transition={{
                 duration: b.dur,

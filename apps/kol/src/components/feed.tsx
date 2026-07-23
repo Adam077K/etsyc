@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { ArrowClockwise } from "@phosphor-icons/react";
 import { MAKERS, CRAFTS, type Maker } from "@/lib/fixtures/makers";
 import { CraftFilter, type Filter } from "./craft-filter";
@@ -9,6 +10,7 @@ import { QuoteSpread } from "./quote-spread";
 import { StatSpread } from "./stat-spread";
 import { FeedSkeleton } from "./feed-skeleton";
 import { FeedEmpty } from "./feed-empty";
+import { ExpandedVideo } from "./expanded-video";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -29,6 +31,10 @@ export function Feed() {
   const [loading, setLoading] = useState(true);
   const [display, setDisplay] = useState<Maker[]>([]);
   const [nonce, setNonce] = useState(0);
+  // expanded-video overlay: openedId is fixed for the morph frame; browseIndex
+  // pages through films while open.
+  const [openedId, setOpenedId] = useState<string | null>(null);
+  const [browseIndex, setBrowseIndex] = useState(0);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -60,12 +66,19 @@ export function Feed() {
     setNonce((n) => n + 1);
   }
 
+  function openAt(i: number) {
+    const m = display[i];
+    if (!m) return;
+    setBrowseIndex(i);
+    setOpenedId(m.id);
+  }
+
   const isAll = active === "all";
 
   // Interleave the color-blocked spreads into the full issue (never a wall of
   // tiles): pull-quote after the opening spread, impact stat deeper in.
   const tiles = display.map((maker, i) => (
-    <MakerTile key={maker.id} maker={maker} index={i} />
+    <MakerTile key={maker.id} maker={maker} index={i} onOpen={() => openAt(i)} />
   ));
   const body: React.ReactNode[] = [];
   tiles.forEach((tile, i) => {
@@ -114,7 +127,7 @@ export function Feed() {
           <div className="mt-14 flex justify-center">
             <button
               onClick={reshuffle}
-              className="group flex items-center gap-2.5 rounded-full border border-bone/25 px-7 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/60 hover:bg-bone/5"
+              className="group flex items-center gap-2.5 rounded-full border border-bone/25 px-7 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               <ArrowClockwise
                 size={19}
@@ -125,6 +138,19 @@ export function Feed() {
           </div>
         </>
       )}
+
+      {/* expanded-video overlay (shared-element morph from the tapped tile). */}
+      <AnimatePresence>
+        {openedId && (
+          <ExpandedVideo
+            list={display}
+            openedId={openedId}
+            index={browseIndex}
+            onIndex={setBrowseIndex}
+            onClose={() => setOpenedId(null)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
