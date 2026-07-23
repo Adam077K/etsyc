@@ -24,7 +24,7 @@ import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -339,15 +339,27 @@ function WorldFilm({
       // the hero, then SNAP it to the docked corner past the hero so it never
       // covers the world content the buyer needs to read (no per-frame move).
       if (v > 0.6) {
-        snapTo({ scale: docked, x: -24, y: -24, radius: 64, opacity: 1, originX: 100, originY: 100, shadow: 1 });
+        snapTo({
+          scale: docked,
+          x: -24,
+          y: -24,
+          radius: 64,
+          opacity: 1,
+          originX: 100,
+          originY: 100,
+          shadow: 1,
+          clip: dockClip(window.innerWidth, window.innerHeight),
+        });
       } else {
         snapTo({ ...HERO_TARGET });
       }
       return;
     }
     if (!enteredRef.current) return;
-    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow).
-    applyDockFrame(m, v, docked);
+    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow); the
+    // clip crops the dock to a landscape card on portrait phones so it never
+    // buries the world copy it scrolls past.
+    applyDockFrame(m, v, docked, dockClip(window.innerWidth, window.innerHeight));
   });
 
   return null;

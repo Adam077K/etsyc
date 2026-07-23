@@ -26,7 +26,7 @@ import {
 import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
 
 /**
  * Thank-you — buyer journey step 8, and the payoff of the continuous film. The
@@ -64,7 +64,7 @@ export function ThankYou() {
         ref={heroRef}
         className="relative z-[45] flex h-[92svh] items-end justify-center overflow-hidden"
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/20" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/45" />
         {primary && primaryNote ? (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -273,8 +273,14 @@ function ThankYouFilm({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced || !enteredRef.current) return;
-    // Dock to the corner as the receipt scrolls up — shared settle with the world.
-    applyDockFrame(m, v, isMobileRef.current ? 0.22 : 0.28);
+    // Dock to the corner as the receipt scrolls up — shared settle with the
+    // world; clip crops it to a landscape card on portrait phones.
+    applyDockFrame(
+      m,
+      v,
+      isMobileRef.current ? 0.22 : 0.28,
+      dockClip(window.innerWidth, window.innerHeight),
+    );
   });
 
   return null;

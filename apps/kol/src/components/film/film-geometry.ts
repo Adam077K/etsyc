@@ -40,19 +40,25 @@ export function dockClip(vw: number, vh: number): number {
  * the persistent film's transform: it LANDS docked by 72% of the hero scroll,
  * insets 24px (matching cornerTarget's margin, so there's no seam into the
  * product PiP), and ramps the shadow linearly over [0.5, 0.9] — byte-parity
- * with the pre-continuous DockedFilm. Transform/opacity only. Clip stays 0 —
- * this scroll dock keeps its full-height settle so the FilmStage's top chip
- * (used on the thank-you/world payoff) is never cropped; only the cornerTarget
- * PiPs (bottom-labelled) crop to a landscape card.
+ * with the pre-continuous DockedFilm. Transform/opacity only. `clipAmt` (from
+ * `dockClip`) ramps in with the dock so a portrait phone lands on a landscape
+ * card instead of a full-height column that buries the page beneath it; the
+ * FilmStage fades its chip out as it docks (clip>0) so cropping the top never
+ * loses it. Stays 0 over the hero (p→0) and defaults to 0 (landscape viewport).
  */
-export function applyDockFrame(m: FilmMotion, v: number, docked: number): void {
+export function applyDockFrame(
+  m: FilmMotion,
+  v: number,
+  docked: number,
+  clipAmt = 0,
+): void {
   const p = DOCK_EASE(Math.min(v / 0.72, 1));
   m.scale.set(1 + (docked - 1) * p);
   m.x.set(-24 * p);
   m.y.set(-24 * p);
   m.radius.set(64 * DOCK_EASE(Math.min(v / 0.55, 1)));
   m.shadow.set(v <= 0.5 ? 0 : Math.min((v - 0.5) / 0.4, 1));
-  m.clip.set(0);
+  m.clip.set(clipAmt * p);
 }
 
 /** Full-bleed hero: the film fills the viewport (world / thank-you payoff). */

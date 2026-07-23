@@ -40,6 +40,9 @@ export function FilmStage() {
   // phones. `round` keeps all four corners on the radius. Zero on hero/desktop.
   const clipTop = useTransform(m.clip, (v) => v * 100);
   const clipPath = useMotionTemplate`inset(${clipTop}% 0px 0px 0px round ${m.radius}px)`;
+  // The stage chip is anchored top-left for the full-bleed hero; fade it out as
+  // the film docks so the landscape top-crop never severs it mid-word.
+  const chipOpacity = useTransform(m.clip, [0, 0.12], [1, 0]);
 
   if (!intent) return null;
 
@@ -101,9 +104,14 @@ export function FilmStage() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
 
           {/* Contextual chip — crossfades when the clip label swaps (step 5).
-              Hidden on the tiny PiP, where the route renders a legible label. */}
+              Hidden on the tiny PiP, where the route renders a legible label.
+              Anchored top-left for the full-bleed hero; it fades out as the film
+              docks (clip>0) so the landscape top-crop never clips it. */}
           {intent.stageChip !== false && (
-          <div className="absolute left-4 top-20 sm:left-8">
+          <motion.div
+            style={{ opacity: chipOpacity }}
+            className="absolute left-4 top-20 sm:left-8"
+          >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={intent.clipLabel ?? chipText}
@@ -119,7 +127,7 @@ export function FilmStage() {
                 </span>
               </motion.div>
             </AnimatePresence>
-          </div>
+          </motion.div>
           )}
         </motion.div>
       </motion.div>
