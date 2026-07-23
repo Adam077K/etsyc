@@ -60,7 +60,7 @@ export function SellPublish() {
             transition={{ duration: reduce ? 0.01 : 0.5, ease: easeOut }}
           >
             {/* Heading */}
-            <p className="meta text-marigold">The final step</p>
+            <p className="meta text-bone-dim">The final step</p>
             <h1
               className="mt-4 font-display font-extrabold leading-[0.95] text-bone"
               style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)" }}
@@ -270,7 +270,7 @@ function LiveState({ reduce }: { reduce: boolean }) {
         transition={{ delay: reduce ? 0 : 0.25, duration: reduce ? 0.01 : 0.6, ease: easeOut }}
         className="mt-8"
       >
-        <p className="flex items-center justify-center gap-2 meta text-marigold">
+        <p className="flex items-center justify-center gap-2 meta text-bone-dim">
           <Sparkle size={14} weight="fill" />
           You&#39;re published
         </p>

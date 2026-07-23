@@ -180,7 +180,7 @@ export function Feed() {
       {/* Section head. */}
       <div className="mb-8 flex flex-col gap-6 border-b border-line pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="meta text-marigold">The issue</p>
+          <p className="meta text-bone-dim">The issue</p>
           <h2
             className="mt-4 max-w-2xl font-display font-bold leading-[0.95] text-bone"
             style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}

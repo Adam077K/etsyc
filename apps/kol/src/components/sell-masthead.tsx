@@ -57,7 +57,7 @@ export function SellMasthead({
           <>
             <Stepper currentIndex={currentIndex} />
             {/* Condensed orientation below md, where the full rail is hidden. */}
-            <span className="font-mono text-xs text-marigold md:hidden">
+            <span className="font-mono text-xs text-bone-dim md:hidden">
               Step {currentIndex + 1} of {SELL_STOPS.length}
               <span className="text-bone/55"> · {SELL_STOPS[currentIndex]?.label}</span>
             </span>

@@ -26,7 +26,7 @@ import {
 import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
 
 /**
  * Thank-you — buyer journey step 8, and the payoff of the continuous film. The
@@ -64,7 +64,7 @@ export function ThankYou() {
         ref={heroRef}
         className="relative z-[45] flex h-[92svh] items-end justify-center overflow-hidden"
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/20" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/45" />
         {primary && primaryNote ? (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -72,7 +72,7 @@ export function ThankYou() {
             transition={reduce ? { duration: 0 } : { duration: 0.9, ease: easeOut, delay: 0.2 }}
             className="relative mx-auto w-full max-w-3xl px-5 pb-14 text-center sm:px-8 sm:pb-20"
           >
-            <p className="meta mb-4 flex items-center justify-center gap-2 text-marigold">
+            <p className="meta mb-4 flex items-center justify-center gap-2 text-bone-dim">
               <Check size={15} weight="bold" />
               Order {MOCK_ORDER.number}
             </p>
@@ -103,7 +103,7 @@ export function ThankYou() {
           </motion.div>
         ) : (
           <div className="relative mx-auto w-full max-w-2xl px-5 pb-20 text-center">
-            <p className="meta mb-4 flex items-center justify-center gap-2 text-marigold">
+            <p className="meta mb-4 flex items-center justify-center gap-2 text-bone-dim">
               <Check size={15} weight="bold" />
               Order {MOCK_ORDER.number}
             </p>
@@ -182,7 +182,7 @@ export function ThankYou() {
             </ul>
             <div className="flex items-baseline justify-between border-t border-line px-6 py-4">
               <span className="font-ui text-base font-semibold text-bone">Total paid</span>
-              <span className="font-display text-2xl font-bold text-marigold">
+              <span className="font-display text-2xl font-bold text-bone">
                 {gbp(totals.total)}
               </span>
             </div>
@@ -273,8 +273,14 @@ function ThankYouFilm({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced || !enteredRef.current) return;
-    // Dock to the corner as the receipt scrolls up — shared settle with the world.
-    applyDockFrame(m, v, isMobileRef.current ? 0.22 : 0.28);
+    // Dock to the corner as the receipt scrolls up — shared settle with the
+    // world; clip crops it to a landscape card on portrait phones.
+    applyDockFrame(
+      m,
+      v,
+      isMobileRef.current ? 0.22 : 0.28,
+      dockClip(window.innerWidth, window.innerHeight),
+    );
   });
 
   return null;

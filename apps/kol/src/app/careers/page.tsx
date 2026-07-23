@@ -15,7 +15,7 @@ export default function CareersPage() {
       <Link href="/" className="font-serif text-3xl leading-none text-bone">
         KOL
       </Link>
-      <p className="meta mt-10 text-marigold">Careers</p>
+      <p className="meta mt-10 text-bone-dim">Careers</p>
       <h1
         className="mt-5 max-w-2xl font-display font-extrabold leading-[0.95] text-bone"
         style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}

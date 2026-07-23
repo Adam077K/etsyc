@@ -80,9 +80,9 @@ export function SellWorkspaceNav({
             items can never collide with the wordmark or world link. */}
         <nav
           aria-label="Seller workspace"
-          className="min-w-0 flex-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="min-w-0 flex-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,#000_92%,transparent)] sm:[mask-image:none]"
         >
-          <ul className="flex items-center justify-start gap-0.5 sm:justify-center sm:gap-2">
+          <ul className="flex items-center justify-start gap-0 pr-2 sm:justify-center sm:gap-2 sm:pr-0">
             {WORKSPACE_NAV.map((item) => {
               const isActive = item.id === active;
               return (
@@ -91,7 +91,7 @@ export function SellWorkspaceNav({
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "relative block rounded-full px-1.5 py-2 font-ui text-[0.72rem] transition-colors sm:px-3.5 sm:py-1.5 sm:text-sm",
+                      "relative block rounded-full px-1 py-2 font-ui text-[0.72rem] transition-colors sm:px-3.5 sm:py-1.5 sm:text-sm",
                       isActive ? "text-bone" : "text-bone/55 hover:text-bone",
                     )}
                   >
@@ -99,7 +99,7 @@ export function SellWorkspaceNav({
                     <span
                       aria-hidden
                       className={cn(
-                        "absolute inset-x-1.5 bottom-1 h-px origin-left bg-marigold transition-transform duration-300 sm:inset-x-3.5 sm:-bottom-0.5",
+                        "absolute inset-x-1 bottom-1 h-px origin-left bg-marigold transition-transform duration-300 sm:inset-x-3.5 sm:-bottom-0.5",
                         isActive ? "scale-x-100" : "scale-x-0",
                       )}
                     />

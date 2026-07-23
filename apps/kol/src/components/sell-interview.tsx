@@ -180,7 +180,7 @@ export function SellInterview() {
     <div className="mx-auto grid min-h-[100svh] max-w-issue gap-8 px-5 pb-16 pt-28 sm:px-8 sm:pt-32 lg:grid-cols-[16rem_1fr] lg:gap-12">
       {/* ---- Beat rail ---- */}
       <aside className="lg:sticky lg:top-28 lg:h-fit">
-        <p className="meta text-marigold">The interview</p>
+        <p className="meta text-bone-dim">The interview</p>
         <h1 className="mt-3 font-display text-2xl font-bold leading-tight text-bone">
           Five beats, in your
           <br className="hidden lg:block" /> own time.

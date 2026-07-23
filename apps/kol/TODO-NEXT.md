@@ -15,25 +15,43 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
   keyboard-navigable `<a href="#feed">` with a focus ring (hero-spread.tsx).
 - **[wave 2] CTA copy/anchor mismatch.** Hero "How KOL works" now links to the
   real `/how` explainer (hero-spread.tsx).
+- **[wave 3, `4e176d2`] Olive values spread + surface the dead `values` data.**
+  Shipped as `values-spread.tsx` (olive "Shop by your values" spread wired into
+  the feed at index 6, drives a real value filter); object tiles also carry a
+  value chip. _Runtime-verified wave 4:_ mounted and rendered — `.bg-olive`
+  measures `width 1440, left 0` on the live feed (full-bleed). A prior "not
+  visible" audit was a false negative from a non-scrolled capture where the
+  tiles/spreads `whileInView` (opacity-0) never animated in; scroll-through
+  screenshot confirms it.
+- **[wave 3, `4e176d2`] Full-bleed spreads.** QuoteSpread + StatSpread now break
+  edge-to-edge (`-mx-5 sm:-mx-8`, no card) for the magazine "spread" feel.
+  _Runtime-verified wave 4:_ `.bg-plum` and `.bg-clay` both measure `width 1440,
+  left 0` on the live feed — genuinely edge-to-edge, not rounded cards.
+- **[wave 3, `4e176d2`] Hover blurb reveal → transform/clip.** EditorialTile now
+  reveals the blurb via `clip-path` + `transform` + opacity (absolutely
+  positioned, off the layout thread); the serif ink-in + marigold underline wipe
+  are preserved. Verified visually in wave 4.
+- **[wave 4, `2379f58`] Collapsed film-cue collision @375–430px.** The persistent
+  "Now playing" cue clipped the product H1 tail on phones; it now shrinks to a
+  round play control below `sm` (labelled pill unchanged at `sm+`).
 
 ## Design / content
-- **Olive values spread + surface the dead `values` data.** Every `Maker` carries
-  a `values[]` array (e.g. "Woman-owned", "Natural dye") that nothing renders yet.
-  Add an olive-ground "Shop by your values" spread (Faire pattern) and/or small
-  value chips on tiles.
-- **Full-bleed spreads.** QuoteSpread / StatSpread are rounded cards inside the
-  grid. Consider breaking them full-bleed edge-to-edge for a stronger magazine
-  "spread" feel.
 - **Humans-in-frame for product-only tiles.** A few tiles (jewellery, some
-  ceramics) are objects with no maker face. Kotn's "people lead every frame"
+  ceramics) are ObjectTiles with no maker face. Kotn's "people lead every frame"
   wants a maker portrait paired in or swapped where possible.
+  _Wave 4 note — deliberately still open._ Cannot be solved honestly with the
+  current `public/media/` assets: the only human/hands stills
+  (`clay-wheel.jpg`, `woodwork.jpg`, `maker-*.jpg`, `sabine.jpg`, `amara.jpg`)
+  are already the identity of *other, specific* synthetic makers, so reusing one
+  on a different maker's object tile would misattribute a face (dishonest per the
+  labelled-fixture rule). And the ObjectTile "product on a color field" is a
+  design-locked beat, so structurally pairing in a second portrait changes the
+  system rather than its execution. Resolve with real per-maker footage/portraits
+  when they arrive, or a from-scratch dual-frame ObjectTile variant — not by
+  borrowing another maker's face.
 
 ## Motion / interaction
-- **Rework the hover blurb reveal to transform/clip.** EditorialTile currently
-  reveals the blurb via `grid-rows: 0fr → 1fr` + margin (layout-animated).
-  Re-implement with `clip-path`/`transform` + opacity to stay off the layout
-  thread. NOTE: protect the *look* — the serif ink-in + marigold underline wipe
-  is the page's best-loved moment; only change the mechanism.
+- _(Hover blurb reveal reworked to clip-path/transform — see Applied.)_
 
 ## Copy / IA / a11y polish
 - _(All prior items in this section applied — see Applied above.)_

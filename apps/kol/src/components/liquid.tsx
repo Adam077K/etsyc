@@ -45,7 +45,7 @@ export function LiquidDivider({ className = "" }: { className?: string }) {
         preserveAspectRatio="none"
         className="h-16 w-full sm:h-24"
       >
-        <g style={{ filter: "url(#kol-goo)" }}>
+        <g style={{ filter: "url(#kol-goo)" }} className="opacity-[0.78] sm:opacity-[0.62]">
           {blobs.map((b) => (
             <motion.circle
               key={b.id}

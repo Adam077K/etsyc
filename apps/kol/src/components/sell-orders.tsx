@@ -72,7 +72,7 @@ export function SellOrders() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduce ? 0.01 : 0.5, ease: easeOut }}
       >
-        <p className="meta text-marigold">Your orders</p>
+        <p className="meta text-bone-dim">Your orders</p>
         <h1
           className="mt-4 font-display font-extrabold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)" }}
@@ -216,7 +216,7 @@ function OrderCard({ order, reduce }: { order: SellerOrder; reduce: boolean }) {
 
           {/* The connection: what she typed is what the buyer reads */}
           <div className="mt-5 rounded-2xl border border-line bg-ink/60 p-4">
-            <p className="flex items-center gap-1.5 meta text-marigold">
+            <p className="flex items-center gap-1.5 meta text-bone-dim">
               <Eye size={13} weight="fill" />
               This is what {order.buyerName} sees
             </p>

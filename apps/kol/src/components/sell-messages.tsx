@@ -152,7 +152,7 @@ function Header({ count, loading }: { count: number; loading: boolean }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
       <div>
-        <p className="meta text-marigold">Ask the Maker</p>
+        <p className="meta text-bone-dim">Ask the Maker</p>
         <h1 className="mt-3 font-display text-4xl font-bold leading-[0.95] text-bone sm:text-5xl">
           Your letters
         </h1>
@@ -258,7 +258,7 @@ function LetterRow({
             </span>
           </span>
           <span className="mt-0.5 flex items-center gap-1.5">
-            <span className="truncate font-ui text-xs text-marigold">
+            <span className="truncate font-ui text-xs text-bone-dim">
               {letter.subject}
             </span>
           </span>
@@ -332,7 +332,7 @@ function OpenLetter({
             {answered ? "You've answered" : "Waiting on you"}
           </p>
           {/* On mobile the About chip is hidden, so name the piece here. */}
-          <p className="mt-1 font-ui text-xs text-marigold sm:hidden">
+          <p className="mt-1 font-ui text-xs text-bone-dim sm:hidden">
             About · {letter.subject}
           </p>
         </div>

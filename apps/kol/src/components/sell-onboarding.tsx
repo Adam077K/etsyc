@@ -63,7 +63,7 @@ export function SellOnboarding() {
           animate="visible"
           className="relative mx-auto w-full max-w-issue px-5 pb-16 pt-32 sm:px-8 sm:pb-24"
         >
-          <motion.p variants={item} className="meta mb-6 text-marigold">
+          <motion.p variants={item} className="meta mb-6 text-bone-dim">
             For makers · The Maker&#39;s Issue
           </motion.p>
 
@@ -137,7 +137,7 @@ export function SellOnboarding() {
             viewport={inView}
             className="max-w-3xl"
           >
-            <p className="meta mb-4 text-marigold">How a world gets made</p>
+            <p className="meta mb-4 text-bone-dim">How a world gets made</p>
             <h2
               className="font-display font-extrabold leading-[0.95] text-bone"
               style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}
@@ -163,7 +163,7 @@ export function SellOnboarding() {
                   className="group grid gap-6 rounded-3xl border border-line bg-ink-soft p-7 transition-colors hover:border-bone/25 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-10 sm:p-9"
                 >
                   <div className="flex items-center gap-5">
-                    <span className="font-mono text-sm text-marigold">
+                    <span className="font-mono text-sm text-bone-dim">
                       {step.index}
                     </span>
                     <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-ink-raise text-marigold transition-colors group-hover:bg-marigold group-hover:text-ink">
@@ -188,7 +188,7 @@ export function SellOnboarding() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="meta text-marigold">KOL</dt>
+                      <dt className="meta text-bone-dim">KOL</dt>
                       <dd className="mt-2 max-w-[9rem] font-ui text-sm leading-snug text-bone/80">
                         {step.kolDoes}
                       </dd>
@@ -269,7 +269,7 @@ export function SellOnboarding() {
           viewport={inView}
           className="mx-auto max-w-issue px-5 py-24 text-center sm:px-8 sm:py-32"
         >
-          <p className="meta text-marigold">Ready when you are</p>
+          <p className="meta text-bone-dim">Ready when you are</p>
           <h2
             className="mx-auto mt-6 max-w-4xl font-display font-extrabold leading-[0.95] text-bone"
             style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}

@@ -57,7 +57,7 @@ export function SiteFooter() {
         viewport={inView}
         className="mx-auto max-w-issue px-5 py-20 sm:px-8 sm:py-28"
       >
-        <p className="meta text-marigold">Next issue, in your inbox</p>
+        <p className="meta text-bone-dim">Next issue, in your inbox</p>
         <h2
           className="mt-6 max-w-4xl font-display font-extrabold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}

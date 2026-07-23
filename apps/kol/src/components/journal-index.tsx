@@ -38,7 +38,7 @@ export function JournalIndex() {
       <section className="mx-auto max-w-issue px-5 pb-4 pt-28 sm:px-8 sm:pt-32">
         {/* Running head — the spine of the issue, in the colophon voice. */}
         <div className="flex flex-col gap-2 border-b border-line pb-4 font-mono text-[0.7rem] uppercase tracking-meta text-bone-dim sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-marigold">{ISSUE.dateline}</span>
+          <span className="text-bone-dim">{ISSUE.dateline}</span>
           <span className="hidden sm:block">{ISSUE.runningHead}</span>
           <span>{ISSUE.colophon}</span>
         </div>
@@ -79,7 +79,7 @@ export function JournalIndex() {
       {/* ── The rest of the issue — mixed scale, color-blocked spreads. ───── */}
       <section className="mx-auto max-w-issue px-5 pb-8 pt-24 sm:px-8 sm:pt-28">
         <div className="flex items-baseline justify-between gap-6 border-b border-line pb-6">
-          <p className="meta text-marigold">In this issue</p>
+          <p className="meta text-bone-dim">In this issue</p>
           <p className="meta text-bone-dim">Nº 02 — 04</p>
         </div>
       </section>
@@ -142,7 +142,7 @@ function LeadFeature({ entry, reduce }: { entry: JournalEntry; reduce: boolean }
 
           <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-12 lg:p-16">
             <div className="max-w-3xl">
-              <p className="meta mb-5 flex items-center gap-2 text-marigold">
+              <p className="meta mb-5 flex items-center gap-2 text-bone-dim">
                 <Icon size={15} weight="fill" aria-hidden />
                 {entry.kicker}
               </p>
@@ -307,7 +307,7 @@ function FilmEntry({
 
         <div className="absolute inset-0 flex flex-col justify-end gap-4 p-6 sm:p-12">
           <div className="flex items-center justify-between gap-4">
-            <p className="meta flex items-center gap-2 text-marigold">
+            <p className="meta flex items-center gap-2 text-bone-dim">
               <Icon size={14} weight="fill" aria-hidden />
               {entry.kicker}
             </p>
@@ -410,7 +410,7 @@ function NextIssueStrip({ reduce }: { reduce: boolean }) {
       <div className="rounded-3xl border border-line bg-ink-soft p-8 sm:p-12">
         <div className="flex flex-col gap-2 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="meta text-marigold">Still being set</p>
+            <p className="meta text-bone-dim">Still being set</p>
             <h2
               className="mt-4 font-display font-bold leading-[0.95] text-bone"
               style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}

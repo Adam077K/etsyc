@@ -171,7 +171,7 @@ function EditorialTile({
           “{maker.blurb}”
         </p>
 
-        <p className="meta mb-2 flex items-center gap-1.5 text-marigold">
+        <p className="meta mb-2 flex items-center gap-1.5 text-bone-dim">
           <Icon size={14} weight="fill" />
           {maker.discipline}
         </p>

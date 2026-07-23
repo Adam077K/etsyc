@@ -24,7 +24,7 @@ import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -94,7 +94,7 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
           transition={reduce ? { duration: 0 } : { duration: 0.9, ease: easeOut, delay: 0.15 }}
           className="relative mx-auto w-full max-w-issue px-5 pb-16 sm:px-8 sm:pb-20"
         >
-          <p className="meta mb-4 text-marigold">{maker.discipline}</p>
+          <p className="meta mb-4 text-bone-dim">{maker.discipline}</p>
           <h1
             className="font-display font-extrabold leading-[0.9] text-bone"
             style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}
@@ -111,7 +111,7 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
             {maker.place}
           </p>
         </motion.div>
-        <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-bone/50 md:block">
+        <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-bone/50">
           <ArrowDown size={22} className={reduce ? "" : "animate-float"} />
         </div>
       </section>
@@ -339,15 +339,27 @@ function WorldFilm({
       // the hero, then SNAP it to the docked corner past the hero so it never
       // covers the world content the buyer needs to read (no per-frame move).
       if (v > 0.6) {
-        snapTo({ scale: docked, x: -24, y: -24, radius: 64, opacity: 1, originX: 100, originY: 100, shadow: 1 });
+        snapTo({
+          scale: docked,
+          x: -24,
+          y: -24,
+          radius: 64,
+          opacity: 1,
+          originX: 100,
+          originY: 100,
+          shadow: 1,
+          clip: dockClip(window.innerWidth, window.innerHeight),
+        });
       } else {
         snapTo({ ...HERO_TARGET });
       }
       return;
     }
     if (!enteredRef.current) return;
-    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow).
-    applyDockFrame(m, v, docked);
+    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow); the
+    // clip crops the dock to a landscape card on portrait phones so it never
+    // buries the world copy it scrolls past.
+    applyDockFrame(m, v, docked, dockClip(window.innerWidth, window.innerHeight));
   });
 
   return null;
@@ -390,7 +402,7 @@ function StorySection({
       <Reveal reduce={reduce}>
         <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16">
           <div className="flex flex-col justify-center">
-            <p className="meta mb-5 text-marigold">The maker</p>
+            <p className="meta mb-5 text-bone-dim">The maker</p>
             <div className="space-y-6">
               {world.story.map((para, i) => (
                 <p
@@ -424,7 +436,7 @@ function ProcessSection({ world, reduce }: { world: World; reduce: boolean }) {
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
       <Reveal reduce={reduce}>
-        <p className="meta mb-3 text-marigold">How it&#39;s made</p>
+        <p className="meta mb-3 text-bone-dim">How it&#39;s made</p>
         <h2
           className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
@@ -479,7 +491,7 @@ function ProductsSection({
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
       <Reveal reduce={reduce}>
-        <p className="meta mb-3 text-marigold">The work</p>
+        <p className="meta mb-3 text-bone-dim">The work</p>
         <h2
           className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
@@ -521,7 +533,7 @@ function ProductsSection({
                         {product.name}
                       </Link>
                     </h3>
-                    <span className="font-display text-2xl font-bold text-marigold">
+                    <span className="font-display text-2xl font-bold text-bone">
                       {product.price}
                     </span>
                   </div>

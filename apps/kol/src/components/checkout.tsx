@@ -19,7 +19,7 @@ import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, stagger, inView } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { cornerTarget } from "./film/film-geometry";
+import { cornerTarget, dockAspect } from "./film/film-geometry";
 
 const ERR = "text-error";
 const NUM = ["", "One", "Two", "Three", "Four", "Five"];
@@ -338,7 +338,7 @@ export function Checkout() {
                 />
                 <div className="flex items-baseline justify-between border-t border-line pt-3">
                   <dt className="font-ui text-base font-semibold text-bone">Total</dt>
-                  <dd className="font-display text-2xl font-bold text-marigold">
+                  <dd className="font-display text-2xl font-bold text-bone">
                     {gbp(totals.total)}
                   </dd>
                 </div>
@@ -412,7 +412,7 @@ function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
       const vh = window.innerHeight;
       const width = mobile ? 132 : 176;
       const margin = mobile ? 16 : 24;
-      setCard({ width, margin, ratio: vw / vh });
+      setCard({ width, margin, ratio: dockAspect(vw, vh) });
       driveTo(cornerTarget(vw, vh, { width, margin, radius: 16 }), {
         reduce: prefersReduced,
         duration: 0.55,
@@ -464,7 +464,7 @@ function Row({ label, value }: { label: string; value: string }) {
 function Fieldset({ legend, children }: { legend: string; children: React.ReactNode }) {
   return (
     <fieldset className="flex flex-col gap-4">
-      <legend className="meta mb-1 text-marigold">{legend}</legend>
+      <legend className="meta mb-1 text-bone-dim">{legend}</legend>
       {children}
     </fieldset>
   );
