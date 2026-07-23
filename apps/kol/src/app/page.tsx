@@ -1,37 +1,40 @@
-import Link from "next/link";
-
 /**
- * App-chrome landing stub — KOL's own UI (fixed sunbaked identity, D15a).
- * The real discovery feed is Phase 5; this page exists so the scaffold has
- * a front door and points reviewers at /preview.
+ * DISCOVERY FEED — direction contract (see DESIGN.md for the durable system).
+ *
+ * THESIS: A living printed magazine of makers-on-film — "The Maker's Issue."
+ *   Refuses the uniform product grid (TikTok/Complex) AND the timid
+ *   cream+serif+terracotta craft-fair default in equal measure.
+ * OWN-WORLD: warm espresso ink ground + brave color-blocked spreads (plum,
+ *   clay, sky, bone) at region scale; Bricolage display, Young Serif editorial
+ *   accents, Hanken UI, Geist Mono colophon; marigold is the single signal.
+ * STORY: a first-time buyer sees these are shoppable humans on film, feels the
+ *   warmth, and wants to keep scrolling and tap a maker.
+ * FIRST VIEWPORT: full-bleed cover film (hands in clay) with a Kotn-scale
+ *   statement over an ink scrim, and a magnetic marigold "Meet the makers" CTA.
+ * FORM: brief-pinned direction (warm+human × modern+cinematic) — beats the
+ *   concept roll per new-work.md. Signature: liquid ink + warm-bloom hover.
  */
-export default function Home() {
+
+import { GooDefs, LiquidDivider } from "@/components/liquid";
+import { Masthead } from "@/components/masthead";
+import { HeroSpread } from "@/components/hero-spread";
+import { Feed } from "@/components/feed";
+import { SiteFooter } from "@/components/site-footer";
+
+export default function DiscoveryFeedPage() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-page flex-col justify-center gap-[var(--space-4)] px-[var(--space-2)] md:px-[var(--space-6)]">
-      <p className="font-text text-caption uppercase tracking-[0.08em] text-muted">
-        KOL · component-library shell
-      </p>
-      <h1 className="max-w-[16ch] font-display text-display-hero [text-wrap:balance]">
-        Every shop is a maker&rsquo;s world.
-      </h1>
-      <p className="max-w-measure text-body-lg text-muted">
-        The discovery feed lands in Phase 5. Until then, the coded block library, both theme
-        paths, and all four block states live behind the preview route.
-      </p>
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href="/preview"
-          className="inline-flex min-h-11 items-center rounded-pill bg-accent px-6 py-2.5 font-medium text-accent-ink transition-transform duration-tap ease-kol hover:bg-accent/90 active:scale-[0.98]"
-        >
-          Open /preview
-        </Link>
-        <Link
-          href="/preview?fixture=custom"
-          className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-6 py-2.5 text-ink transition-colors duration-state ease-kol hover:bg-ground active:scale-[0.98]"
-        >
-          Custom-brand world
-        </Link>
-      </div>
-    </main>
+    <>
+      <GooDefs />
+      <Masthead />
+      <main>
+        <HeroSpread />
+        {/* Signature liquid-ink seam: the cover film bleeds into the issue. */}
+        <div className="relative bg-ink py-4 sm:py-6">
+          <LiquidDivider className="mx-auto max-w-issue px-5 opacity-[0.62] sm:px-8" />
+        </div>
+        <Feed />
+      </main>
+      <SiteFooter />
+    </>
   );
 }

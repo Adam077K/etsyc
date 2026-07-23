@@ -2,407 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   KOL global design tokens — design-system v2 §1
-   (docs/03-system-design/KOL-design-system.md)
-
-   GLOBAL here: type scale, spacing, pill radius, shadow recipe,
-   motion tokens. PER-WORLD (set by apply-theme.ts at the world
-   root, curated + custom converge on identical names): --ground,
-   --surface, --ink, --muted, --line, --accent, --accent-2,
-   --accent-ink, --on-media, --block-a/-b/-c,
-   --on-block-a/-b/-c, --font-display/-text/-mono,
-   --radius-sm/-md/-lg, --space-section.
-   ============================================================ */
-
 :root {
-  /* --- §1.1 type scale (8 roles + cinematic hero tier) --- */
-  --fs-display-hero: clamp(3.5rem, 8vw, 7rem);
-  --fs-display: clamp(2.75rem, 5.5vw, 5.25rem);
-  --fs-h1: clamp(2rem, 3.8vw, 3.5rem);
-  --fs-h2: clamp(1.5rem, 2.4vw, 2.25rem);
-  --fs-h3: 1.375rem;
-  --fs-body-lg: 1.1875rem;
-  --fs-body: 1.0625rem;
-  --fs-caption: 0.8125rem;
-
-  /* --- §1.2 spacing (8px grid, editorial reach) --- */
-  --space-0-5: 4px; /* the only half-step */
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 40px;
-  --space-6: 48px;
-  --space-8: 64px;
-  --space-10: 80px;
-  --space-12: 96px;
-  --space-14: 112px; /* §1.6 M-OFF-L right inset (gate-2 slot-table fix) */
-  --space-16: 128px;
-  --space-20: 160px;
-
-  /* --- §1.3 radius: pill is global; sm/md/lg are per-world
-         identity (sharp/soft/round) — soft defaults so chrome
-         outside a world root still renders sanely --- */
-  --radius-pill: 999px;
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-
-  /* --- §1.4 shadows: tinted to the world ground, wide + soft.
-         Doc notation `color/N%` is realized as a nested
-         color-mix toward transparent. --- */
-  --shadow-subtle: 0 1px 2px -1px
-    color-mix(in oklab, color-mix(in oklab, var(--ground) 88%, black) 6%, transparent);
-  --shadow-card: 0 12px 28px -12px
-    color-mix(in oklab, color-mix(in oklab, var(--ground) 82%, black) 12%, transparent);
-  --shadow-raised: 0 24px 56px -20px
-    color-mix(in oklab, color-mix(in oklab, var(--ground) 78%, black) 16%, transparent);
-  --shadow-overlay: 0 40px 90px -28px
-    color-mix(in oklab, color-mix(in oklab, var(--ground) 70%, black) 22%, transparent);
-  --shadow-depth:
-    0 60px 120px -30px
-      color-mix(in oklab, color-mix(in oklab, var(--ground) 62%, black) 28%, transparent),
-    0 8px 24px -8px
-      color-mix(in oklab, color-mix(in oklab, var(--ground) 80%, black) 14%, transparent);
-
-  /* --- §1.5 motion tokens (cinematic + physical) --- */
-  --ease-kol: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-cinematic: cubic-bezier(0.62, 0.02, 0.1, 1);
-  --dur-tap: 120ms;
-  --dur-state: 200ms;
-  --dur-enter: 340ms;
-  --dur-reveal: 520ms;
-  --dur-unfold: 900ms;
-  --dur-cinema: 1200ms;
-  /* spring params are consumed by JS (video dock / liquid signature —
-     Phase 6); kept as data attributes of the token layer here */
-  --spring-video: 210 26 1;
-  --spring-liquid: 140 18 1.2;
-
-  /* --- Wave-3 buyer-state transition grammar (design-direction §5.1).
-         OWNED BY FILM-LAYER — B2–B5 consume these and never add here
-         (four parallel branches editing this block is a guaranteed
-         conflict; Amendment A). --- */
-  --dur-grow: var(--dur-reveal); /* 520ms — FEED → GROWN */
-  --dur-ungrow: 405ms; /* 0.78 × grow — GROWN → FEED */
-  --dur-dock: 440ms; /* WORLD_BROWSE ↔ NARRATE_SHRINK spring settle */
-  --dur-swap: 120ms; /* in-frame clip cross-fade — never a black frame */
-  --return-ratio: 0.78; /* every reverse edge runs at 0.78 × its forward edge */
-
-  /* --- film stacking contract (gate-1 P1 z-order). B3/B4/B5 layer against
-     this — change only with a DECISIONS.md entry. The app-root Film Layer
-     is a SIBLING of all page content, so film-vs-world paint order is
-     decided here, in root-level z bands:
-       --z-film-bed    (30)  the UNDOCKED film plane — above world flow
-                             content, below slot chrome.
-       --z-film-chrome (35)  slot overlay chrome. .kol-hero-stage lifts
-                             here, so the maker's headline, craft line and
-                             .kol-scrim read OVER the film (the shipped
-                             Wave-0 guarantee, and B3's statement AC). A
-                             claimed slot is a transparent window — its
-                             FilmSlotFrame hides poster + surface. Any
-                             future slot whose chrome must read over the
-                             film (B1b cards) lifts its chrome the same
-                             way, and must keep the chrome's ancestor
-                             chain free of intervening stacking contexts.
-       --z-film        (40)  the DOCKED film plane (the old
-                             .kol-hero-docked z) — the corner card floats
-                             over chrome. data-film-docked flips the layer
-                             between planes AT CLAIM TIME, so the whole
-                             dock/undock flight rides the docked plane.
-     App chrome above every film plane stays at z >= 50 (StageRail). --- */
-  --z-film-bed: 30;
-  --z-film-chrome: 35;
-  --z-film: 40;
-
-  /* --- app-chrome fallback palette (KOL's own UI = sunbaked light,
-         design-system §2.1) so pages outside a world root are never
-         unstyled. Worlds override every one of these at their root. --- */
-  --ground: #f6efe3;
-  --surface: #fffbf3;
-  --ink: #221c15;
-  --muted: #645648; /* must match tokens.ts sunbaked light (aa-audit.test.ts) */
-  --line: #e7dcc8;
-  --accent: #c64a2c;
-  --accent-2: #3e7e8c;
-  /* AA-measured CTA pair (sunbaked light: cream on 5%-darkened accent, 4.72:1) */
-  --accent-cta: color-mix(in srgb, var(--accent) 95%, black);
-  --accent-ink: #fbf3e8;
-  --on-media: #fbf3e8;
-  --block-a: #b8452a;
-  --block-b: #5f6b33;
-  --block-c: #4c93a8;
-  --on-block-a: #fbf3e8;
-  --on-block-b: #fbf3e8;
-  --on-block-c: #fbf3e8;
-  --scrim: linear-gradient(
-    to top,
-    color-mix(in oklab, var(--ground) 45%, black) 0%,
-    transparent 55%
-  );
-  /* solid text-backdrop scrim (gate-2 / I5) — must match the theme paths'
-     `color-mix(in oklab, ground 40%, black)`; sunbaked-light value here
-     (#F6EFE3 @ 40% → 9.07:1 vs --on-media, verified in scrim-strong.test.ts) */
-  --scrim-strong: #45423f;
-
-  /* nameplate register fallback (§2.1a / R1) — the app-chrome pairing is
-     statement-grotesk, a uniform-stroke face: display / 600 / -0.025em */
-  --nameplate-size: var(--fs-display);
-  --nameplate-weight: 600;
-  --nameplate-tracking: -0.025em;
-
-  /* pairing fallback until a world root sets its own */
-  --font-display: var(--font-clash-display, var(--font-fraunces)), serif;
-  --font-text: var(--font-general-sans, ui-sans-serif), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-
-  /* density (airy | standard) — section vertical rhythm §1.2 */
-  --space-section: var(--space-16);
+  color-scheme: dark;
 }
 
 @layer base {
-  body {
-    background-color: var(--ground);
-    color: var(--ink);
-    font-family: var(--font-text);
-    font-size: var(--fs-body);
-    line-height: 1.55;
+  html {
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-ink text-bone font-ui;
+    font-feature-settings: "ss01", "cv01";
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--accent) 24%, transparent);
+    background: #e4922c;
+    color: #1c1613;
   }
 
+  /* Keyboard focus is a first-class state, marigold on any ground. */
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: 2px solid #f2a93b;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Display type wants a tight tracking floor (craft-floor). */
+  .font-display {
+    letter-spacing: -0.03em;
   }
 }
 
 @layer components {
-  /* ---- scroll reveal (§4.2): once per element, --ease-kol,
-          translate+opacity only, media-leads-text handled by
-          stagger delays from the Reveal wrapper ---- */
-  .kol-reveal {
-    opacity: 0;
-    transform: translateY(16px);
-    transition:
-      opacity var(--dur-reveal) var(--ease-kol),
-      transform var(--dur-reveal) var(--ease-kol);
-    transition-delay: var(--reveal-delay, 0ms);
-    will-change: opacity, transform;
-  }
-  .kol-reveal.is-revealed {
-    opacity: 1;
-    transform: translateY(0);
+  /* Tracked mono colophon label — the magazine's data voice. */
+  .meta {
+    @apply font-mono uppercase tracking-meta text-[0.7rem] leading-none;
   }
 
-  /* ---- skeleton shimmer: opacity pulse only (no perpetual
-          translate), static under reduced motion ---- */
-  .kol-skeleton {
-    background-color: color-mix(in oklab, var(--ink) 8%, var(--surface));
-    animation: kol-skeleton-pulse 1.6s var(--ease-kol) infinite;
-  }
-  @keyframes kol-skeleton-pulse {
-    0%,
-    100% {
-      opacity: 0.55;
-    }
-    50% {
-      opacity: 1;
-    }
+  /* Cinematic still-in-motion: the "film" feel without a wired clip. A slow
+     Ken-Burns drift reads as living footage; the WATCH affordance carries the
+     promise that the real product autoplays the maker's clip here. */
+  .film-drift {
+    animation: drift 18s ease-in-out infinite alternate;
+    will-change: transform;
   }
 
-  /* ---- over-media type treatment (§1.1 rules) ---- */
-  .kol-scrim::after {
+  /* Loading shimmer sweep. */
+  .shimmer-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer-sweep::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: var(--scrim);
-    pointer-events: none;
-  }
-
-  /* ---- hero chrome band (gate-2 P1 / invariant I5, no waiver) ----
-     The band paints its OWN backdrop: solid --scrim-strong under the
-     content box, fading to transparent across the padding-top zone —
-     which reserves the fade for film, keeping every set line on FULL
-     scrim. Bottom-anchored inside the overflow-hidden frame, the band
-     grows downward-into-scrim WITH the text: coverage is guaranteed by
-     construction, so over-film contrast is contrast(--on-media,
-     --scrim-strong) — deterministic; real footage cannot take it lower.
-     The fade shortens in sub-page containers (matrix cells, docked). */
-  .kol-hero-chrome {
-    --hero-chrome-fade: min(128px, 12cqw);
-    padding-top: var(--hero-chrome-fade);
+    transform: translateX(-100%);
     background: linear-gradient(
-      to top,
-      var(--scrim-strong) 0%,
-      var(--scrim-strong) calc(100% - var(--hero-chrome-fade)),
-      transparent 100%
+      90deg,
+      transparent,
+      rgba(239, 230, 214, 0.14),
+      transparent
     );
-  }
-
-  /* ---- P4 world-stage choreography — the film always wins. The film
-          ELEMENT lives in the app-root Film Layer (Amendment A): the layer
-          FLIPs between the rects HeroStage publishes per stage (the old
-          0.55/0.82 scales and the .kol-hero-docked corner geometry moved
-          there), and the rules here only fold the world + the hero slot's
-          chrome. Opacity only. The global reduced-motion block below
-          collapses these; the layer snaps its rect and keeps playing. ---- */
-  .kol-hero-stage {
-    view-transition-name: hero-video;
-    /* slot chrome band: the hero's heading, craft line and scrim paint
-       over the undocked film per the stacking contract. Flex item of the
-       world root, so z-index applies and lifts this subtree whole; the
-       claimed slot inside is a transparent window for the film. */
-    z-index: var(--z-film-chrome);
-  }
-  .kol-hero-stage-inner {
-    transition: opacity var(--dur-state) var(--ease-kol);
-  }
-  /* feed/grown: the world (and the hero slot's headline chrome) is folded
-     away — the Film Layer at card/centre scale IS the surface */
-  [data-world-stage="feed"] .kol-hero-stage-inner,
-  [data-world-stage="grown"] .kol-hero-stage-inner {
-    opacity: 0;
-  }
-
-  /* ---- B3 world-unfold choreography (screen-specs §3.3 — 900ms HARD CAP
-          on --ease-cinematic, three bands; timings computed per block in
-          renderer/unfold.ts and carried as --unfold-* item props).
-
-          Band 1, 0–280: the ground wash. The world root paints its own
-          --ground (owned HERE, not by the bg-ground utility — a utility
-          would outrank the folded override below); folded stages leave it
-          transparent so whatever sits behind (the feed's neutral chrome)
-          shows through, and the unfold cross-fades it in over 280ms.  ---- */
-  .kol-world {
-    background-color: var(--ground);
-    transition: background-color 280ms var(--ease-cinematic);
-  }
-  .kol-world[data-world-stage="feed"],
-  .kol-world[data-world-stage="grown"] {
-    background-color: transparent;
-  }
-
-  /*      Bands 2+3, 140–900: blocks rise in staggered waves (translateY
-          var(--unfold-rise) → 0, nearest-to-film first, 70ms stagger,
-          parallax depth on the rise distance); atmosphere resolves last,
-          340–900 — the world "breathes out". These are the TARGET-state
-          transitions, so they run on the unfold; the folded rules below
-          override duration/delay for the fold-back.                     ---- */
-  .kol-unfold-item {
-    transition:
-      opacity var(--unfold-dur, var(--dur-enter)) var(--ease-cinematic),
-      transform var(--unfold-dur, var(--dur-enter)) var(--ease-cinematic);
-    transition-delay: var(--unfold-delay, 0ms);
-  }
-  /* the world body stays MOUNTED while folded (unfold = rise, not mount);
-     inert (StoreWorld) + pointer-events cover interaction, items carry the
-     visual fold so each can rise on its own §3.3 slot */
-  [data-world-stage="feed"] .kol-world-body,
-  [data-world-stage="grown"] .kol-world-body {
-    pointer-events: none;
-  }
-  [data-world-stage="feed"] .kol-unfold-item,
-  [data-world-stage="grown"] .kol-unfold-item {
-    opacity: 0;
-    transform: translateY(var(--unfold-rise, 18px));
-    /* fold-back (WORLD_OPEN → GROWN, preview back-walk) is the DERIVED
-       reverse: --dur-unfold × --return-ratio = 702ms, one motion, no
-       stagger — never a new edge (§5.1/§5.2) */
-    transition-duration: calc(var(--dur-unfold) * var(--return-ratio));
-    transition-delay: 0ms;
-  }
-
-  /* ---- the Film Layer (design-direction §6.2, Amendment A) — ONE film,
-          mounted once at app root, FLIPping between published rects.
-          Geometry (position/left/top/size + the FLIP transform) is
-          imperative in FilmLayer.tsx; these classes carry the paint.
-          bg surface means a decode gap can never read as a black frame. ---- */
-  .kol-film-layer {
-    position: fixed; /* pre-claim default; the layer flips absolute/fixed per slot */
-    top: 0;
-    left: 0;
-    /* undocked bed plane — slot chrome (--z-film-chrome) reads over the
-       film; see the stacking contract at the token block */
-    z-index: var(--z-film-bed);
-    overflow: hidden;
-    background-color: var(--surface);
-    transform-origin: 0 0;
-    will-change: transform;
-  }
-  /* parked (no slot claimed): hidden but never unmounted */
-  .kol-film-layer[data-film-parked] {
-    visibility: hidden;
-    pointer-events: none;
-  }
-  /* docked (viewport-fixed) slots read as the corner film card, floating
-     on the film plane above slot chrome for the whole dock flight */
-  .kol-film-layer[data-film-docked] {
-    z-index: var(--z-film);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-raised);
-  }
-  .kol-film-poster {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
-  /* A/B buffers — a clip swap cross-fades INSIDE the frame over --dur-swap;
-     same-source transitions never touch these (true element persistence) */
-  .kol-film-buffer {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: opacity var(--dur-swap) linear;
-  }
-  .kol-film-front {
-    opacity: 1;
+    animation: shimmer 1.8s infinite;
   }
 }
 
+/* Motion is never load-bearing — reduced-motion settles everything. */
 @media (prefers-reduced-motion: reduce) {
-  .kol-reveal {
-    transform: none;
-    transition: opacity var(--dur-state) linear;
-    transition-delay: 0ms;
-  }
-  .kol-skeleton {
-    animation: none;
-    opacity: 0.7;
-  }
   *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  /* §5.3 — the film is content, not decoration. Under reduced motion the
-     Film Layer SNAPS to its new rect (the FLIP's invert step is skipped in
-     JS, never run at 0.01ms) and the film keeps playing; the in-frame clip
-     swap remains a real opacity cross-fade at --dur-state. The class
-     outranks the * collapse above at equal importance. */
-  .kol-film-buffer {
-    transition-duration: var(--dur-state) !important;
-  }
-  /* B3 binding AC: the animated unfold becomes an INSTANT FADE — no
-     spatial motion, no parallax, no stagger (durations already collapse
-     via the * rule above); the film persists and keeps playing. */
-  [data-world-stage="feed"] .kol-unfold-item,
-  [data-world-stage="grown"] .kol-unfold-item {
+  .film-drift {
+    animation: none;
     transform: none;
-  }
-  .kol-unfold-item {
-    transition-delay: 0ms !important;
   }
 }

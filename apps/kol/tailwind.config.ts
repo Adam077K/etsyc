@@ -1,111 +1,66 @@
 import type { Config } from "tailwindcss";
 
 /**
- * token name → `rgb(from var(--name) r g b / <alpha-value>)` color entries.
- *
- * BROWSER FLOOR: CSS relative color (`rgb(from …)`) needs Chrome/Edge 119+,
- * Safari 16.4+, Firefox 128+. Acceptable for the desktop-first MVP (concept
- * lock D1); revisit with a channel-triplet fallback if analytics ever show
- * older engines.
- */
-function tokenColors(names: string[]): Record<string, string> {
-  return Object.fromEntries(
-    names.map((name) => [name, `rgb(from var(--${name}) r g b / <alpha-value>)`]),
-  );
-}
-
-/**
- * KOL Tailwind theme — every utility maps onto the design-system-v2 CSS custom
- * properties (docs/03-system-design/KOL-design-system.md). Per-world values
- * (palette, pairing, radius identity, density) are applied at the world root by
- * `applyTheme` (src/lib/theme/apply-theme.ts); global tokens live in globals.css.
- * Curated and custom themes converge on the SAME variable names, so utilities
- * never know which kind of world they are painting.
+ * "The Maker's Issue" tokens (see DESIGN.md). Warm ink + brave color-blocked
+ * grounds — deliberately not the cream/serif/terracotta AI default.
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        // palette contract (design-system §2 token contract).
-        // CSS relative color wraps every var so Tailwind slash-opacity
-        // (bg-surface/85, bg-surface/60, hover:bg-accent/90 …) composes
-        // with the runtime hex vars from BOTH theme paths — a bare var()
-        // silently drops every alpha modifier in Tailwind 3.4.
-        // BACKGROUND tokens only: alpha modifiers on ink tokens (text-ink/*,
-        // text-muted/*, text-on-media/*, …) are banned — they compound into
-        // un-audited sub-AA colors (no-ink-alpha.test.ts enforces).
-        ...tokenColors([
-          "ground",
-          "surface",
-          "ink",
-          "muted",
-          "line",
-          "accent",
-          "accent-2",
-          "accent-3",
-          "accent-cta",
-          "accent-ink",
-          "on-media",
-          // block-ground set (the Faire color-block move, §2 / P2-a)
-          "block-a",
-          "block-b",
-          "block-c",
-          "on-block-a",
-          "on-block-b",
-          "on-block-c",
-        ]),
+        ink: {
+          DEFAULT: "#1C1613",
+          soft: "#241B16",
+          raise: "#2E241E",
+        },
+        bone: {
+          DEFAULT: "#EFE6D6",
+          dim: "#CDBFA6",
+          deep: "#B7A98C",
+        },
+        plum: "#43223B",
+        olive: "#4E5A2A",
+        clay: "#B4462A",
+        sky: "#557E8F",
+        marigold: {
+          DEFAULT: "#E4922C",
+          bright: "#F2A93B",
+        },
+        line: "rgba(239,230,214,0.14)",
       },
       fontFamily: {
-        display: "var(--font-display)",
-        text: "var(--font-text)",
-        mono: "var(--font-mono)",
+        display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        ui: ["var(--font-ui)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
-      fontSize: {
-        // type scale §1.1 — fluid roles incl. the cinematic display-hero tier
-        "display-hero": [
-          "var(--fs-display-hero)",
-          { lineHeight: "0.92", letterSpacing: "-0.03em", fontWeight: "700" },
-        ],
-        display: [
-          "var(--fs-display)",
-          { lineHeight: "0.95", letterSpacing: "-0.02em", fontWeight: "700" },
-        ],
-        h1: ["var(--fs-h1)", { lineHeight: "1.0", letterSpacing: "-0.015em", fontWeight: "700" }],
-        h2: ["var(--fs-h2)", { lineHeight: "1.08", letterSpacing: "-0.01em", fontWeight: "600" }],
-        h3: ["var(--fs-h3)", { lineHeight: "1.22", letterSpacing: "-0.005em", fontWeight: "600" }],
-        "body-lg": ["var(--fs-body-lg)", { lineHeight: "1.6" }],
-        body: ["var(--fs-body)", { lineHeight: "1.55" }],
-        caption: ["var(--fs-caption)", { lineHeight: "1.4", letterSpacing: "0.04em" }],
-      },
-      borderRadius: {
-        sm: "var(--radius-sm)",
-        md: "var(--radius-md)",
-        lg: "var(--radius-lg)",
-        pill: "var(--radius-pill)",
-      },
-      boxShadow: {
-        subtle: "var(--shadow-subtle)",
-        card: "var(--shadow-card)",
-        raised: "var(--shadow-raised)",
-        overlay: "var(--shadow-overlay)",
-        depth: "var(--shadow-depth)",
-      },
-      transitionTimingFunction: {
-        kol: "var(--ease-kol)",
-        cinematic: "var(--ease-cinematic)",
-      },
-      transitionDuration: {
-        tap: "var(--dur-tap)",
-        state: "var(--dur-state)",
-        enter: "var(--dur-enter)",
-        reveal: "var(--dur-reveal)",
-        unfold: "var(--dur-unfold)",
-        cinema: "var(--dur-cinema)",
+      letterSpacing: {
+        meta: "0.16em",
       },
       maxWidth: {
-        measure: "68ch",
-        page: "1440px",
+        issue: "96rem",
+        measure: "38rem",
+      },
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
+      keyframes: {
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
+        drift: {
+          "0%,100%": { transform: "translate3d(0,0,0) scale(1)" },
+          "50%": { transform: "translate3d(0,-1.5%,0) scale(1.06)" },
+        },
+        float: {
+          "0%,100%": { transform: "translateY(0)", opacity: "0.5" },
+          "50%": { transform: "translateY(6px)", opacity: "0.9" },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.8s infinite",
+        float: "float 2.4s cubic-bezier(0.16,1,0.3,1) infinite",
       },
     },
   },

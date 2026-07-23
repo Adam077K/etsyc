@@ -1,62 +1,59 @@
 import type { Metadata } from "next";
 import {
   Bricolage_Grotesque,
-  Fraunces,
+  Young_Serif,
+  Hanken_Grotesk,
   Geist_Mono,
-  JetBrains_Mono,
-  Space_Mono,
 } from "next/font/google";
 import "./globals.css";
-import { FilmLayerProvider } from "@/components/film/FilmLayer";
 
-/**
- * Font loading for the 4 curated pairings (design-system §3 — no Inter,
- * anywhere). Google faces load via next/font (self-hosted at build);
- * Fontshare faces (Clash Display, General Sans, Satoshi, Cabinet Grotesk)
- * load via Fontshare's hosted CSS below — next/font/local needs the font
- * binaries vendored, which is a Phase-5 asset task.
- */
-const fraunces = Fraunces({
+// The loud voice — Kotn-scale statement display.
+const display = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-fraunces",
-  axes: ["opsz", "SOFT", "WONK"],
-});
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin"],
-  variable: "--font-bricolage",
-});
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-space-mono",
+  weight: ["400", "600", "700", "800"],
+  variable: "--font-display",
+  display: "swap",
 });
 
-const FONTSHARE_CSS =
-  "https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,700&f[]=cabinet-grotesk@500,700,800&display=swap";
+// Editorial warmth — wordmark, pull-quotes, issue framing.
+const serif = Young_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-serif",
+  display: "swap",
+});
+
+// The workhorse — UI, body, labels.
+const ui = Hanken_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ui",
+  display: "swap",
+});
+
+// The colophon voice — masthead data + meta.
+const mono = Geist_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "KOL — meet the maker",
+  title: "KOL — The Maker's Issue",
   description:
-    "A video-native marketplace where every shop is a maker's world — real people on film, not a product grid.",
+    "A magazine of real makers, on film. Meet the human, then buy from them — never a product grid.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${bricolage.variable} ${geistMono.variable} ${jetbrainsMono.variable} ${spaceMono.variable}`}
+      className={`${display.variable} ${serif.variable} ${ui.variable} ${mono.variable}`}
     >
-      <head>
-        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
-        <link rel="stylesheet" href={FONTSHARE_CSS} />
-      </head>
-      <body>
-        {/* the Film Layer mounts ONCE, at app root, for the life of the
-            session — every buyer surface claims the same film (Amendment A) */}
-        <FilmLayerProvider>{children}</FilmLayerProvider>
-      </body>
+      <body className="min-h-screen bg-ink text-bone">{children}</body>
     </html>
   );
 }

@@ -1,10 +1,11 @@
-import { defineConfig } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
+import next from "eslint-config-next/core-web-vitals";
 
-/** Minimal lint gate: Next core-web-vitals rules, TS handled by `tsc`. */
-export default defineConfig([
-  ...nextVitals,
+/** Flat config — eslint-config-next 16 ships a flat array natively. */
+const eslintConfig = [
+  ...next,
   {
-    ignores: [".next/**", "node_modules/**", "test-results/**", "playwright-report/**"],
+    ignores: [".next/**", "node_modules/**"],
   },
-]);
+];
+
+export default eslintConfig;

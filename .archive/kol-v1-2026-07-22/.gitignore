@@ -1,0 +1,18 @@
+# deps / build
+node_modules/
+.next/
+out/
+
+# playwright
+test-results/
+playwright-report/
+e2e/__screenshots__/
+
+# env
+.env
+.env.*
+!.env.example
+
+# misc
+*.tsbuildinfo
+.DS_Store
