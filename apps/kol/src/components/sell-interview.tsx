@@ -274,7 +274,10 @@ export function SellInterview() {
         </div>
 
         {/* ---- Capture / completion dock ---- */}
-        <div className="sticky bottom-0 mt-8 -mx-5 bg-gradient-to-t from-ink via-ink via-40% to-transparent px-5 pb-6 pt-10 sm:-mx-8 sm:px-8">
+        {/* Static in-flow on mobile so the conversation reads chronological
+            (history above, active input below); sticky only from lg where the
+            column is tall enough to keep the dock in view without overlap. */}
+        <div className="mt-8 -mx-5 bg-gradient-to-t from-ink via-ink via-40% to-transparent px-5 pb-6 pt-10 sm:-mx-8 sm:px-8 lg:sticky lg:bottom-0">
           {queueDone ? (
             <CompletionDock reduce={!!reduce} />
           ) : (
@@ -367,7 +370,7 @@ function TurnBubble({
               "rounded-2xl px-4 py-3 font-ui text-[0.95rem] leading-relaxed ring-1",
               isKol
                 ? "rounded-tl-md bg-ink-soft text-bone/90 ring-line"
-                : "rounded-tr-md bg-marigold/12 text-bone ring-marigold/20",
+                : "rounded-tr-md bg-marigold/[0.12] text-bone ring-marigold/20",
             )}
           >
             <p>{turn.text}</p>
