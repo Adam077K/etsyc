@@ -2,7 +2,7 @@
  * Mock data for the Discovery Feed. SCREENS-ONLY pass — every maker below is
  * SYNTHETIC demo material (names, studios, blurbs authored for the mock), paired
  * with real Unsplash/Pexels stock of real people making real things (see
- * public/media/CREDITS.md). Nothing here is a real business; prices, review
+ * apps/kol/CREDITS.md). Nothing here is a real business; prices, review
  * counts and sales figures are deliberately absent (never fabricated).
  */
 

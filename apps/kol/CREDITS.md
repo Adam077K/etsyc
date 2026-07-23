@@ -96,10 +96,16 @@ the screens-only stock pass, and the reuse above is a placeholder, not the shipp
 > PASS alone — Founder clearance is a separate, required gate.
 
 Curation: 182 Wix-export files → 61 deduped candidates (min-dim ≥ 600px, ≥ 40KB) →
-**8 images + 2 videos kept** (matches disk; quilt.jpg logged retroactively — it
-shipped in a prior wave to the Little Devil gallery without a CREDITS row;
-inspected faceless, now recorded). Skipped: 121 duplicates/thumbnails/sub-5KB,
-plus all face-forward costume portraits (governance — see below).
+**8 images + 2 videos kept** — of which **7 images + 2 videos deploy** from
+`public/media/`, and **workshop.jpg is held in `internal-assets/`** (out of the
+public bundle; see its row below). quilt.jpg logged retroactively — it shipped in
+a prior wave to the Little Devil gallery without a CREDITS row; inspected faceless,
+now recorded. Skipped: 121 duplicates/thumbnails/sub-5KB, plus all face-forward
+costume portraits (governance — see below).
+
+> **This file is internal governance, not a servable asset.** It lives at
+> `apps/kol/CREDITS.md` (moved out of `public/` so it is never fetchable at
+> `/media/CREDITS.md` on a deploy).
 
 ### Kept — no identifiable face (safe for hero/tile/process/product cards)
 
@@ -119,13 +125,13 @@ plus all face-forward costume portraits (governance — see below).
 
 | File | Depicts | Where used | Flag |
 |---|---|---|---|
-| twodots/workshop.jpg | Two people at sewing machines in the real studio; foreground back-turned, **background minor (~10–12yo) in ¾ profile** | **UNWIRED — fallback applied pre-deploy** (was: story + process 02 + Workshop gallery) | ⚠ identifiable minor (¾ profile). Swapped out of the deploy path → quilt.jpg (story), felt.jpg (process 02), [materials.jpg, felt.jpg] (Workshop gallery). File held internal, unwired; one-line revert if the Founder approves the original. |
+| ~~twodots/workshop.jpg~~ → **`internal-assets/twodots/workshop.jpg`** | Two people at sewing machines in the real studio; foreground back-turned, **background minor (~10–12yo) in ¾ profile** | **UNWIRED + MOVED OUT OF public/ — not in the deploy bundle** (was: story + process 02 + Workshop gallery) | ⚠ identifiable minor (¾ profile). Swapped out of the deploy path → quilt.jpg (story), felt.jpg (process 02), [materials.jpg, felt.jpg] (Workshop gallery). File moved to `internal-assets/` (no longer publicly fetchable); git history retains the revert path if the Founder approves the original. |
 
 ### Governance fallback plan — per image (so each Founder decision is one word)
 
 | Image | Current wiring | If Founder APPROVEs | If Founder DECLINEs / SWAPs |
 |---|---|---|---|
-| twodots/workshop.jpg | **SWAP APPLIED (pre-deploy)** — story → `quilt.jpg`; process 02 → `felt.jpg`; Workshop gallery → `[materials.jpg, felt.jpg]`. workshop.jpg now unwired. | revert the three swaps to `workshop.jpg` (one line each) | already swapped — no further action. NB: critic mapped process 02 → `materials.jpg`, but step 01 already uses `materials.jpg`, so held at `felt.jpg` to avoid an identical adjacent card; flip to `materials.jpg` if the repeat is confirmed intended. Gallery slot 2 is `felt.jpg` so the two-shot carousel stays distinct. |
+| twodots/workshop.jpg | **SWAP APPLIED (pre-deploy)** — story → `quilt.jpg`; process 02 → `felt.jpg`; Workshop gallery → `[materials.jpg, felt.jpg]`. workshop.jpg now unwired AND moved to `internal-assets/twodots/` (out of the deploy bundle). | move the file back to `public/media/twodots/` + revert the three swaps to `workshop.jpg` (one line each) | already swapped — no further action. NB: critic mapped process 02 → `materials.jpg`, but step 01 already uses `materials.jpg`, so held at `felt.jpg` to avoid an identical adjacent card; flip to `materials.jpg` if the repeat is confirmed intended. Gallery slot 2 is `felt.jpg` so the two-shot carousel stays distinct. |
 | twodots/devil-back.jpg | Little Devil product card + gallery (**faceless** head-cropped default) | *(upgrade path)* replace with uncropped #09 for fuller framing (head + felt horns; partial side profile) | no change — the faceless crop is already the conservative default |
 
 ### NOT shipped — held for Founder decision

@@ -1,7 +1,7 @@
 /**
  * Per-maker WORLD data for the maker-world route (/m/[slug]).
  * SCREENS-ONLY, all synthetic demo content paired with verified stock (see
- * public/media/CREDITS.md). Prices are demo figures for the mock storefront,
+ * apps/kol/CREDITS.md). Prices are demo figures for the mock storefront,
  * not real commercial claims.
  *
  * Per concept-lock D15 + DESIGN.md: KOL's own UI keeps the fixed system. Maker

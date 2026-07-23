@@ -2,7 +2,7 @@
  * Commerce fixtures for Arc 2 (product / checkout / thank-you). SCREENS-ONLY,
  * all synthetic demo content. Prices are demo store figures; the card form is a
  * visibly-fake mock (no real payment, no real brand). Stock imagery reused from
- * the maker worlds (see public/media/CREDITS.md).
+ * the maker worlds (see apps/kol/CREDITS.md).
  */
 
 import { WORLDS } from "./worlds";
