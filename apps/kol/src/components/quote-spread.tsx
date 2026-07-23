@@ -11,8 +11,9 @@ export function QuoteSpread() {
   const v = reduce ? calm : rise(30, 0.9);
 
   return (
-    <section className="col-span-2 md:col-span-6 lg:col-span-12">
-      <div className="grid overflow-hidden rounded-3xl bg-plum md:grid-cols-[1fr_1.15fr]">
+    <section className="col-span-2 -mx-5 md:col-span-6 lg:col-span-12 sm:-mx-8">
+      {/* Full-bleed plum spread — breaks the tile rhythm edge-to-edge, no card. */}
+      <div className="grid overflow-hidden bg-plum md:grid-cols-[1fr_1.15fr]">
         <div className="relative min-h-[280px]">
           <Image
             src={FEATURED_QUOTE.image}

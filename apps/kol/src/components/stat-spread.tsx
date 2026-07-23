@@ -36,13 +36,14 @@ export function StatSpread() {
   const v = reduce ? calm : rise(30, 0.9);
 
   return (
-    <section className="col-span-2 md:col-span-6 lg:col-span-12">
+    <section className="col-span-2 -mx-5 md:col-span-6 lg:col-span-12 sm:-mx-8">
+      {/* Full-bleed clay stat spread — edge-to-edge, no card. */}
       <motion.div
         variants={v}
         initial="hidden"
         whileInView="visible"
         viewport={inView}
-        className="relative overflow-hidden rounded-3xl bg-clay px-6 py-14 text-center sm:px-12 sm:py-20"
+        className="relative overflow-hidden bg-clay px-6 py-14 text-center sm:px-12 sm:py-20"
       >
         <LiquidDivider className="pointer-events-none absolute inset-x-0 top-0 opacity-[0.55]" />
 

@@ -101,7 +101,7 @@ export function HeroSpread() {
           <Magnetic>
             <a
               href="#feed"
-              className="group flex items-center gap-2.5 rounded-full bg-marigold px-7 py-3.5 font-ui text-base font-semibold text-ink transition-colors hover:bg-marigold-bright"
+              className="press group flex items-center gap-2.5 rounded-full bg-marigold px-7 py-3.5 font-ui text-base font-semibold text-ink hover:bg-marigold-bright"
             >
               Meet the makers
               <ArrowRight
@@ -113,7 +113,7 @@ export function HeroSpread() {
           </Magnetic>
           <a
             href="/how"
-            className="rounded-full border border-bone/30 px-7 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/70 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            className="press rounded-full border border-bone/30 px-7 py-3.5 font-ui text-base font-medium text-bone hover:border-bone/70 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             How KOL works
           </a>
@@ -164,7 +164,7 @@ export function HeroSpread() {
         aria-label="Scroll to the feed"
         className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 rounded-full p-1 text-bone/50 transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:block"
       >
-        <ArrowDown size={22} aria-hidden className={reduce ? "" : "animate-float"} />
+        <ArrowDown size={22} aria-hidden className="animate-float" />
       </a>
     </section>
   );

@@ -4,7 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  useMotionValue,
+  animate,
+  type PanInfo,
+} from "framer-motion";
 import {
   ArrowLeft,
   Handbag,
@@ -64,12 +71,12 @@ export function ProductPage({
   const [show3d, setShow3d] = useState(false);
   const [pipOpen, setPipOpen] = useState(true);
   const trustRef = useRef<HTMLDivElement>(null);
-  const hero = product.gallery[active] ?? product.gallery[0]!;
   const accentText = ACCENT_TEXT[world.accent];
 
   // The PiP must never trap the content beneath it. Start collapsed on small
   // screens (it would cover a gallery thumbnail), and auto-collapse once the
-  // trust badge — the D7 proof — scrolls into view on any width.
+  // trust badge — the D7 proof — scrolls into view on any width. (Track A owns
+  // the FilmStage-driven PiP mount/geometry; ProductPage only drives collapse.)
   useEffect(() => {
     // Defer the mobile check a frame so it isn't a synchronous setState.
     const raf = requestAnimationFrame(() => {
@@ -121,7 +128,6 @@ export function ProductPage({
             gallery={product.gallery}
             active={active}
             onActive={setActive}
-            hero={hero}
             name={product.name}
             note={product.note}
             reduce={!!reduce}
@@ -170,14 +176,14 @@ export function ProductPage({
               <button
                 onClick={() => setShow3d((v) => !v)}
                 aria-expanded={show3d}
-                className="flex items-center gap-2 rounded-full border border-bone/25 px-5 py-2.5 font-ui text-sm font-medium text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                className="press flex items-center gap-2 rounded-full border border-bone/25 px-5 py-2.5 font-ui text-sm font-medium text-bone hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
               >
                 <Cube size={18} weight="fill" className={accentText} />
                 View in 3D
               </button>
               <Link
                 href={`/m/${maker.id}`}
-                className="flex items-center gap-2 rounded-full border border-bone/25 px-5 py-2.5 font-ui text-sm font-medium text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                className="press flex items-center gap-2 rounded-full border border-bone/25 px-5 py-2.5 font-ui text-sm font-medium text-bone hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
               >
                 <ChatCircle size={18} weight="fill" className={accentText} />
                 Ask {maker.name.split(" ").at(0) ?? maker.name}
@@ -216,7 +222,7 @@ export function ProductPage({
                 <button
                   onClick={() => setAdded(true)}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-full px-7 py-3.5 font-ui text-base font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+                    "press flex items-center gap-2.5 rounded-full px-7 py-3.5 font-ui text-base font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
                     added
                       ? "bg-olive text-bone focus-visible:ring-olive"
                       : "bg-marigold text-ink hover:bg-marigold-bright focus-visible:ring-marigold-bright",
@@ -238,7 +244,7 @@ export function ProductPage({
               {added ? (
                 <Link
                   href="/checkout"
-                  className="group flex items-center gap-2 rounded-full border border-bone/30 px-6 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/70 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                  className="press group flex items-center gap-2 rounded-full border border-bone/30 px-6 py-3.5 font-ui text-base font-medium text-bone hover:border-bone/70 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                 >
                   Go to checkout
                   <ArrowRight size={18} weight="bold" className="transition-transform group-hover:translate-x-1" />
@@ -249,7 +255,7 @@ export function ProductPage({
                   aria-pressed={saved}
                   aria-label={saved ? `Saved ${product.name}` : `Save ${product.name}`}
                   className={cn(
-                    "grid h-12 w-12 place-items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+                    "press grid h-12 w-12 place-items-center rounded-full border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
                     saved
                       ? "border-marigold/60 bg-marigold/10 text-marigold"
                       : "border-bone/25 text-bone hover:border-bone/60 hover:bg-bone/5",
@@ -345,7 +351,7 @@ function ProductChrome({ maker }: { maker: Maker }) {
       <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
         <Link
           href={`/m/${maker.id}`}
-          className="group flex items-center gap-2 rounded-full bg-ink-soft px-4 py-2 font-ui text-sm text-bone transition-colors hover:bg-ink-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="press group flex items-center gap-2 rounded-full bg-ink-soft px-4 py-2 font-ui text-sm text-bone hover:bg-ink-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           <ArrowLeft size={17} weight="bold" className="transition-transform group-hover:-translate-x-0.5" />
           <span className="hidden sm:inline">Back to {maker.studio}</span>
@@ -357,7 +363,7 @@ function ProductChrome({ maker }: { maker: Maker }) {
         <Link
           href="/checkout"
           aria-label="Your bag"
-          className="flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="press flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           <Handbag size={18} weight="fill" />
           <span className="hidden sm:inline">Bag</span>
@@ -367,12 +373,14 @@ function ProductChrome({ maker }: { maker: Maker }) {
   );
 }
 
-/* Gallery — human-scale main image with a thumbnail strip. */
+/* Gallery — a drag-to-peek carousel: swipe the hero with momentum (velocity-aware
+   snap), or step it with the thumbnail strip / arrow keys. The whole track is one
+   physical object you can throw; keyboard and thumbnails drive the same motion so
+   nothing is drag-only. Reduced motion drops the drag + drift and jumps instantly. */
 function Gallery({
   gallery,
   active,
   onActive,
-  hero,
   name,
   note,
   reduce,
@@ -380,34 +388,141 @@ function Gallery({
   gallery: string[];
   active: number;
   onActive: (i: number) => void;
-  hero: string;
   name: string;
   note?: string;
   reduce: boolean;
 }) {
+  const n = gallery.length;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const x = useMotionValue(0);
+
+  // Measure the viewport so drag distance / snap targets are in real pixels.
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const set = () => setWidth(el.clientWidth);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Keep the track parked on the active slide — thumbnails, arrow keys and a
+  // settled drag all funnel through `active`, so this is the single source of
+  // truth for where the track sits.
+  useEffect(() => {
+    const target = -active * width;
+    if (reduce || width === 0) {
+      x.set(target);
+      return;
+    }
+    const controls = animate(x, target, {
+      type: "spring",
+      stiffness: 320,
+      damping: 40,
+    });
+    return () => controls.stop();
+  }, [active, width, reduce, x]);
+
+  function settle(info: PanInfo) {
+    const { offset, velocity } = info;
+    const threshold = width * 0.2;
+    let next = active;
+    // Velocity-aware: a fast flick advances even on a short drag (momentum).
+    if (offset.x < -threshold || velocity.x < -450) next = active + 1;
+    else if (offset.x > threshold || velocity.x > 450) next = active - 1;
+    onActive(Math.max(0, Math.min(n - 1, next)));
+  }
+
+  const multi = n > 1;
+
   return (
     <motion.div
       variants={reduce ? calm : rise(24, 0.8)}
       initial="hidden"
       animate="visible"
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-ink-soft ring-1 ring-line">
-        <Image
-          key={hero}
-          src={hero}
-          alt={name}
-          fill
-          priority
-          sizes="(max-width: 1024px) 100vw, 55vw"
-          className={cn("object-cover", reduce ? "" : "film-drift")}
-        />
+      <div
+        ref={viewportRef}
+        tabIndex={multi ? 0 : -1}
+        role={multi ? "group" : undefined}
+        aria-roledescription={multi ? "carousel" : undefined}
+        aria-label={
+          multi
+            ? `${name} — image ${active + 1} of ${n}. Use the left and right arrow keys or drag to browse.`
+            : undefined
+        }
+        onKeyDown={
+          multi
+            ? (e) => {
+                if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  onActive(Math.min(active + 1, n - 1));
+                } else if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  onActive(Math.max(active - 1, 0));
+                }
+              }
+            : undefined
+        }
+        className="relative aspect-[4/5] touch-pan-y overflow-hidden rounded-3xl bg-ink-soft ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+      >
+        <motion.div
+          className="flex h-full"
+          style={{ x, width: `${n * 100}%` }}
+          drag={multi && !reduce ? "x" : false}
+          dragConstraints={{ left: -width * (n - 1), right: 0 }}
+          dragElastic={0.12}
+          onDragEnd={(_, info) => settle(info)}
+        >
+          {gallery.map((src, i) => (
+            <div
+              key={src}
+              className="relative h-full shrink-0"
+              style={{ width: `${100 / n}%` }}
+            >
+              <Image
+                src={src}
+                alt={i === 0 ? name : `${name} — view ${i + 1}`}
+                fill
+                priority={i === 0}
+                draggable={false}
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                className={cn(
+                  "pointer-events-none select-none object-cover",
+                  // Drift only the active slide. Not gated on `reduce` in JSX —
+                  // that would hydration-mismatch (SSR renders reduce=false); the
+                  // globals.css reduced-motion media query disables the animation.
+                  i === active && "film-drift",
+                )}
+              />
+            </div>
+          ))}
+        </motion.div>
+
         {note && (
-          <span className="absolute left-4 top-4 rounded-full bg-ink/72 px-3 py-1 backdrop-blur-sm">
+          // Deeper ground: over near-white product photography backdrop-blur
+          // bleeds the bright image through a light pill, so the note needs a
+          // solid-enough ink ground to hold AA against text-bone.
+          <span className="pointer-events-none absolute left-4 top-4 rounded-full bg-ink/85 px-3 py-1 backdrop-blur-sm">
             <span className="meta text-bone">{note}</span>
           </span>
         )}
+        {multi && (
+          <span className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-ink/85 px-2.5 py-1 font-mono text-[0.65rem] tabular-nums text-bone backdrop-blur-sm">
+            {active + 1} / {n}
+          </span>
+        )}
       </div>
-      {gallery.length > 1 && (
+      {/* Screen-reader announcement of the active slide (the visible counter is
+          aria-hidden decoration; this polite live region is what's announced). */}
+      {multi && (
+        <span aria-live="polite" aria-atomic="true" className="sr-only">
+          Image {active + 1} of {n}
+        </span>
+      )}
+      {multi && (
         <div className="mt-4 grid grid-cols-3 gap-3 sm:gap-4">
           {gallery.map((src, i) => (
             <button
@@ -416,7 +531,7 @@ function Gallery({
               aria-label={`View image ${i + 1} of ${name}`}
               aria-current={i === active}
               className={cn(
-                "relative aspect-square overflow-hidden rounded-2xl ring-1 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+                "press relative aspect-square overflow-hidden rounded-2xl ring-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
                 i === active
                   ? "ring-2 ring-marigold"
                   : "ring-line opacity-70 hover:opacity-100",
@@ -516,7 +631,7 @@ function ContextualFilm({
 
   const liveDot = (
     <span
-      className={cn("h-1.5 w-1.5 rounded-full bg-marigold", reduce ? "" : "animate-float")}
+      className="h-1.5 w-1.5 rounded-full bg-marigold animate-float"
     />
   );
 

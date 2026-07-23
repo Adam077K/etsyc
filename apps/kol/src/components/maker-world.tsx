@@ -158,7 +158,7 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
             <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
               <button
                 className={cn(
-                  "flex items-center gap-2.5 rounded-full px-7 py-3.5 font-ui text-base font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  "press flex items-center gap-2.5 rounded-full px-7 py-3.5 font-ui text-base font-semibold hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                   world.accent === "bone"
                     ? "bg-ink text-bone focus-visible:ring-ink focus-visible:ring-offset-bone"
                     : "bg-bone text-ink focus-visible:ring-bone focus-visible:ring-offset-ink",
@@ -170,7 +170,7 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
               <Link
                 href="/#feed"
                 className={cn(
-                  "rounded-full border px-7 py-3.5 font-ui text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  "press rounded-full border px-7 py-3.5 font-ui text-base font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                   world.accent === "bone"
                     ? "border-ink/30 text-ink hover:bg-ink/5 focus-visible:ring-ink focus-visible:ring-offset-bone"
                     : "border-bone/40 text-bone hover:bg-bone/10 focus-visible:ring-bone focus-visible:ring-offset-ink",
@@ -220,7 +220,7 @@ function WorldChrome() {
       <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
         <Link
           href="/#feed"
-          className="group flex items-center gap-2 rounded-full bg-ink/60 px-4 py-2 font-ui text-sm text-bone backdrop-blur-sm transition-colors hover:bg-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="press group flex items-center gap-2 rounded-full bg-ink/60 px-4 py-2 font-ui text-sm text-bone backdrop-blur-sm hover:bg-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           <ArrowLeft size={17} weight="bold" className="transition-transform group-hover:-translate-x-0.5" />
           The issue
@@ -230,7 +230,7 @@ function WorldChrome() {
         </Link>
         <button
           aria-label="Your bag"
-          className="flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="press flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           <Handbag size={18} weight="fill" />
           <span className="hidden sm:inline">Bag</span>
@@ -533,7 +533,7 @@ function ProductsSection({
                   <Magnetic strength={0.2}>
                     <Link
                       href={`/m/${world.slug}/p/${product.id}`}
-                      className="flex items-center gap-2.5 rounded-full bg-marigold px-6 py-3 font-ui text-base font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                      className="press flex items-center gap-2.5 rounded-full bg-marigold px-6 py-3 font-ui text-base font-semibold text-ink hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                     >
                       View the piece
                       <ArrowUpRight size={18} weight="bold" />
@@ -541,7 +541,7 @@ function ProductsSection({
                   </Magnetic>
                   <button
                     aria-label={`Save ${product.name}`}
-                    className="grid h-12 w-12 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                    className="press grid h-12 w-12 place-items-center rounded-full border border-bone/25 text-bone hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   >
                     <Heart size={20} />
                   </button>

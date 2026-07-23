@@ -99,28 +99,28 @@ export function Masthead({
           <Link
             href="/browse?focus=1"
             aria-label="Search makers"
-            className="grid h-10 w-10 place-items-center rounded-full text-bone/85 transition-colors hover:bg-bone/10 hover:text-bone"
+            className="press grid h-10 w-10 place-items-center rounded-full text-bone/85 hover:bg-bone/10 hover:text-bone"
           >
             <MagnifyingGlass size={20} />
           </Link>
           <Link
             href="/account#saved"
             aria-label="Saved pieces"
-            className="hidden h-10 w-10 place-items-center rounded-full text-bone/85 transition-colors hover:bg-bone/10 hover:text-bone sm:grid"
+            className="press hidden h-10 w-10 place-items-center rounded-full text-bone/85 hover:bg-bone/10 hover:text-bone sm:grid"
           >
             <Heart size={20} />
           </Link>
           <Link
             href="/account"
             aria-label="Your account"
-            className="hidden h-10 w-10 place-items-center rounded-full text-bone/85 transition-colors hover:bg-bone/10 hover:text-bone sm:grid"
+            className="press hidden h-10 w-10 place-items-center rounded-full text-bone/85 hover:bg-bone/10 hover:text-bone sm:grid"
           >
             <User size={20} />
           </Link>
           <Link
             href="/checkout"
             aria-label="Your bag"
-            className="flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5"
+            className="press flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink hover:-translate-y-0.5"
           >
             <Handbag size={18} weight="fill" />
             <span className="hidden sm:inline">Bag</span>

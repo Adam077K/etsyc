@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ArrowClockwise } from "@phosphor-icons/react";
 import { MAKERS, CRAFTS, type Maker } from "@/lib/fixtures/makers";
@@ -8,14 +8,30 @@ import { CraftFilter, type Filter } from "./craft-filter";
 import { MakerTile } from "./maker-tile";
 import { QuoteSpread } from "./quote-spread";
 import { StatSpread } from "./stat-spread";
+import { ValuesSpread } from "./values-spread";
 import { FeedSkeleton } from "./feed-skeleton";
 import { FeedEmpty } from "./feed-empty";
 import { ExpandedVideo } from "./expanded-video";
 
-function shuffle<T>(arr: T[]): T[] {
+// Small deterministic PRNG so a shuffle is reproducible from a seed — the feed
+// reshuffle is HONEST: a returning visitor gets a genuinely different-but-stable
+// arrangement (seeded by an incrementing per-session visit count), not a coin
+// flip that might land the same deck twice.
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
   const a = [...arr];
+  const rnd = mulberry32(seed);
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rnd() * (i + 1));
     const tmp = a[i]!;
     a[i] = a[j]!;
     a[j] = tmp;
@@ -23,14 +39,31 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+// A stable numeric hash for the active filter so each craft/value pins a
+// distinct base arrangement within a single visit.
+function hashStr(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
 const craftLabel = (f: Filter) =>
   f === "all" ? "makers" : CRAFTS.find((c) => c.id === f)?.label ?? "makers";
 
 export function Feed() {
   const [active, setActive] = useState<Filter>("all");
+  const [valueFilter, setValueFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [display, setDisplay] = useState<Maker[]>([]);
   const [nonce, setNonce] = useState(0);
+  // Which visit this is (0 = first paint this session). Drives the honest
+  // reshuffle seed AND the "re-deal" revisit choreography. Resolved once per
+  // mount inside the load effect so SSR never touches sessionStorage.
+  const [visit, setVisit] = useState(0);
+  const visitRef = useRef<number | null>(null);
   // expanded-video overlay: openedId is fixed for the morph frame; browseIndex
   // pages through films while open.
   const [openedId, setOpenedId] = useState<string | null>(null);
@@ -45,20 +78,50 @@ export function Feed() {
   // Resolve the current filter after a beat. `loading` is already true on mount
   // and is flipped true by the handlers below on change, so the effect never
   // sets state synchronously — it only lands the (reshuffled) result. The feed
-  // reshuffles each visit so a visitor sees different people (buyer journey 1).
+  // reshuffles each visit so a visitor sees different people (buyer journey 1):
+  // the seed folds in the per-session visit count so back-nav genuinely changes
+  // the room instead of coin-flipping the same deck.
   useEffect(() => {
     const t = setTimeout(() => {
-      const pool = active === "all" ? MAKERS : MAKERS.filter((m) => m.craft === active);
-      setDisplay(shuffle(pool));
+      if (visitRef.current === null) {
+        let v = 0;
+        try {
+          v = parseInt(sessionStorage.getItem("kol-feed-visit") ?? "0", 10) || 0;
+          sessionStorage.setItem("kol-feed-visit", String(v + 1));
+        } catch {
+          /* private mode / SSR guard — fall back to a first-visit seed */
+        }
+        visitRef.current = v;
+        setVisit(v);
+      }
+      const pool = valueFilter
+        ? MAKERS.filter((m) => m.values.includes(valueFilter))
+        : active === "all"
+          ? MAKERS
+          : MAKERS.filter((m) => m.craft === active);
+      const seed =
+        (visitRef.current + 1) * 9301 +
+        nonce * 49297 +
+        hashStr(valueFilter ?? active);
+      setDisplay(seededShuffle(pool, seed));
       setLoading(false);
     }, 460);
     return () => clearTimeout(t);
-  }, [active, nonce]);
+  }, [active, valueFilter, nonce]);
 
   function selectFilter(f: Filter) {
-    if (f === active) return;
+    if (f === active && !valueFilter) return;
     setLoading(true);
+    setValueFilter(null);
     setActive(f);
+  }
+
+  // Toggle a value filter from the ValuesSpread. Selecting a value drops any
+  // craft filter (values cut across crafts); selecting the active value clears.
+  function selectValue(v: string) {
+    setLoading(true);
+    setValueFilter((prev) => (prev === v ? null : v));
+    setActive("all");
   }
 
   function reshuffle() {
@@ -73,19 +136,44 @@ export function Feed() {
     setOpenedId(m.id);
   }
 
-  const isAll = active === "all";
+  const isAll = active === "all" && !valueFilter;
+  const revisit = visit > 0;
 
   // Interleave the color-blocked spreads into the full issue (never a wall of
-  // tiles): pull-quote after the opening spread, impact stat deeper in.
+  // tiles): pull-quote after the opening spread, the values index mid-issue, the
+  // impact stat deeper in. The values spread also shows while filtering BY a
+  // value so the visitor can switch or clear without scrolling back.
+  const showValues = isAll || Boolean(valueFilter);
   const tiles = display.map((maker, i) => (
-    <MakerTile key={maker.id} maker={maker} index={i} onOpen={() => openAt(i)} />
+    <MakerTile
+      key={maker.id}
+      maker={maker}
+      index={i}
+      onOpen={() => openAt(i)}
+      revisit={revisit}
+    />
   ));
   const body: React.ReactNode[] = [];
   tiles.forEach((tile, i) => {
     body.push(tile);
     if (isAll && i === 3) body.push(<QuoteSpread key="quote-spread" />);
+    if (showValues && i === 6)
+      body.push(
+        <ValuesSpread key="values-spread" active={valueFilter} onSelect={selectValue} />,
+      );
     if (isAll && i === 9) body.push(<StatSpread key="stat-spread" />);
   });
+  // When a value filter yields a short list, still surface the spread so the
+  // control is reachable.
+  if (showValues && valueFilter && display.length > 0 && display.length <= 6) {
+    body.push(
+      <ValuesSpread
+        key="values-spread-tail"
+        active={valueFilter}
+        onSelect={selectValue}
+      />,
+    );
+  }
 
   return (
     <section id="feed" className="mx-auto max-w-issue px-5 pb-24 pt-20 sm:px-8">
@@ -127,7 +215,7 @@ export function Feed() {
           <div className="mt-14 flex justify-center">
             <button
               onClick={reshuffle}
-              className="group flex items-center gap-2.5 rounded-full border border-bone/25 px-7 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+              className="press group flex items-center gap-2.5 rounded-full border border-bone/25 px-7 py-3.5 font-ui text-base font-medium text-bone hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               <ArrowClockwise
                 size={19}

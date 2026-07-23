@@ -70,6 +70,40 @@
     );
     animation: shimmer 1.8s infinite;
   }
+
+  /* Press feedback — the physical tap. Every interactive surface gets one
+     designed press state (works on touch via :active, not just hover). Uses the
+     standalone `scale` property so it COMPOSES with hover `transform` translates
+     rather than fighting Tailwind's transform stack. Colours transition here too
+     so `.press` fully replaces `transition-colors` on the elements it lands on.
+     scale(0.97) is the craft-floor press value (emilkowal transform-scale-097). */
+  .press {
+    transition-property: transform, scale, filter, box-shadow, background-color,
+      border-color, color, opacity;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 200ms;
+  }
+  .press:active {
+    scale: 0.97;
+    transition-duration: 90ms; /* asymmetric: press lands faster than it releases */
+  }
+
+  /* Idle presence — a slow, near-imperceptible breath so still tiles read as
+     living footage, not a frozen deck. Transform-only; desync via a per-tile
+     inline animation-delay so the room breathes out of phase. */
+  .breathe {
+    animation: breathe 8s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+}
+
+@keyframes breathe {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.022);
+  }
 }
 
 /* Motion is never load-bearing — reduced-motion settles everything. */
@@ -82,8 +116,13 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .film-drift {
-    animation: none;
+  .film-drift,
+  .breathe,
+  .animate-float {
+    animation: none !important;
     transform: none;
+  }
+  .press:active {
+    scale: 1;
   }
 }

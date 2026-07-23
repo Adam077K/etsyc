@@ -11,8 +11,9 @@ import {
   WarningCircle,
   CircleNotch,
   Sparkle,
+  SealCheck,
 } from "@phosphor-icons/react";
-import { rise, calm } from "@/lib/motion";
+import { rise, calm, easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "sending" | "sent";
@@ -98,7 +99,7 @@ export function SignIn() {
             className="w-full max-w-md"
           >
             {status === "sent" ? (
-              <Sent email={email.trim()} onReset={reset} />
+              <Sent email={email.trim()} onReset={reset} reduce={!!reduce} />
             ) : (
               <>
                 <p className="meta text-marigold">Sign in · or make your first visit</p>
@@ -161,7 +162,7 @@ export function SignIn() {
                   <button
                     type="submit"
                     disabled={status === "sending"}
-                    className="group mt-6 flex w-full items-center justify-center gap-2.5 rounded-full bg-marigold px-7 py-4 font-ui text-base font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:cursor-not-allowed disabled:opacity-80"
+                    className="press group mt-6 flex w-full items-center justify-center gap-2.5 rounded-full bg-marigold px-7 py-4 font-ui text-base font-semibold text-ink hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:cursor-not-allowed disabled:opacity-80"
                   >
                     {status === "sending" ? (
                       <>
@@ -196,7 +197,10 @@ export function SignIn() {
 
         {/* Editorial image panel. */}
         <aside className="relative hidden overflow-hidden lg:block">
-          <div className={cn("absolute inset-0", reduce ? "" : "film-drift")}>
+          {/* film-drift is not gated on `reduce` in JSX (that hydration-mismatches
+              since SSR renders reduce=false); globals.css disables it under
+              prefers-reduced-motion via media query. */}
+          <div className="film-drift absolute inset-0">
             <Image
               src="/media/clay-wheel.jpg"
               alt="A maker at the wheel, hands in wet clay"
@@ -225,13 +229,37 @@ export function SignIn() {
   );
 }
 
-/** "Check your post" — the designed success state. */
-function Sent({ email, onReset }: { email: string; onReset: () => void }) {
+/** "Check your post" — the designed success state. The wax seal STAMPS in (the
+    signed-note ceremony beat): it presses down from an over-scale with a settling
+    rotate while an impact ring pulses out. Reduced motion shows the seal at rest. */
+function Sent({
+  email,
+  onReset,
+  reduce,
+}: {
+  email: string;
+  onReset: () => void;
+  reduce: boolean;
+}) {
   return (
     <div>
-      <span className="grid h-16 w-16 place-items-center rounded-full bg-marigold/12 text-marigold">
-        <EnvelopeSimple size={30} weight="fill" />
-      </span>
+      <div className="relative h-16 w-16">
+        <motion.span
+          aria-hidden
+          initial={reduce ? false : { scale: 0.65, opacity: 0.55 }}
+          animate={reduce ? undefined : { scale: 1.85, opacity: 0 }}
+          transition={{ duration: 0.75, ease: easeOut, delay: 0.12 }}
+          className="absolute inset-0 rounded-full border-2 border-marigold"
+        />
+        <motion.span
+          initial={reduce ? false : { scale: 1.7, rotate: -14, opacity: 0 }}
+          animate={reduce ? undefined : { scale: 1, rotate: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 420, damping: 15, mass: 0.7, delay: 0.04 }}
+          className="relative grid h-16 w-16 place-items-center rounded-full bg-marigold text-ink shadow-[0_10px_28px_-8px_rgba(228,146,44,0.7)]"
+        >
+          <SealCheck size={32} weight="fill" />
+        </motion.span>
+      </div>
       <p className="meta mt-8 text-marigold">Note on its way</p>
       <h1
         className="mt-5 font-display font-extrabold leading-[0.95] text-bone"
@@ -248,13 +276,13 @@ function Sent({ email, onReset }: { email: string; onReset: () => void }) {
       <div className="mt-10 flex flex-wrap items-center gap-3">
         <button
           onClick={onReset}
-          className="rounded-full border border-bone/25 px-6 py-3 font-ui text-sm font-medium text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="press rounded-full border border-bone/25 px-6 py-3 font-ui text-sm font-medium text-bone hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           Use a different email
         </button>
         <Link
           href="/account"
-          className="group flex items-center gap-2 rounded-full bg-marigold px-6 py-3 font-ui text-sm font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="press group flex items-center gap-2 rounded-full bg-marigold px-6 py-3 font-ui text-sm font-semibold text-ink hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           Preview the account
           <ArrowRight

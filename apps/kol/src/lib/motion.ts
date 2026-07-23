@@ -30,6 +30,19 @@ export const rise = (y = 28, duration = 0.9): Variants => ({
   },
 });
 
+/** The "re-deal" — a tighter, quicker entrance used on a REVISIT so a returning
+ *  visitor feels the issue being freshly dealt (distinct from the calm first
+ *  rise). Scale settles from just under 1 for the printed-card snap. */
+export const deal = (y = 16, duration = 0.5): Variants => ({
+  hidden: { opacity: 0, y, scale: 0.985 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration, ease: easeOut },
+  },
+});
+
 /** A masked wipe used for the marigold hover underline and kicker reveals. */
 export const wipe: Variants = {
   hidden: { scaleX: 0 },
