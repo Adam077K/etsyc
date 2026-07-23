@@ -37,6 +37,13 @@ export interface MakerWorld {
   slug: string;
   /** per-maker accent — one of the locked grounds, never a new colour */
   accent: Ground;
+  /**
+   * Optional override for the persistent hero film. Defaults to the maker's
+   * feed image; set only when a world should open on a different frame than its
+   * feed tile (e.g. Risograph Room leads on the ink-in-motion action register
+   * rather than a static finished-print wall, PRODUCT.md Principle 1/3).
+   */
+  heroFilm?: string;
   /** the world's opening line, in the maker's voice */
   tagline: string;
   /** 2-3 short paragraphs — the maker's own story */
@@ -191,7 +198,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         label: "02",
         title: "One clean joint",
         body: "Everything locks together with hand-cut joinery — no screws to work loose, no glue doing the real job. If it wobbles on my floor, it never sees yours.",
-        image: "/media/stool-blue.jpg",
+        image: "/media/wood-joint.jpg",
       },
     ],
     products: [
@@ -200,7 +207,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         name: "The Field Stool",
         price: "£145",
         blurb: "Three legs, wedged and tenoned by hand. Stand on it, stack it, hand it down.",
-        image: "/media/stool-blue.jpg",
+        image: "/media/wood-stool.jpg",
         note: "Made to order",
       },
       {
@@ -270,13 +277,16 @@ export const WORLDS: Record<string, MakerWorld> = {
   "risograph-room": {
     slug: "risograph-room",
     accent: "bone",
-    tagline: "Come in — mind the wet ink. Everything here is a hair out of register, and that's the good part.",
+    // Leads on the ink-in-motion action register, not the static finished-print
+    // wall (that stays the feed tile + studio shot). PRODUCT.md Principle 1/3.
+    heroFilm: "/media/riso-ink.jpg",
+    tagline: "Wet ink on the left drum, a clean sheet on the right — let's find out what today's overlap wants to be.",
     story: [
       "I fell for riso because it refuses to behave. You split a picture into two colours, print one over the other, and the machine shifts everything half a millimetre — so the overlap glows in a third colour you didn't ask for and couldn't mix if you tried.",
       "Every print goes through the drum by hand, one colour at a time. The ink sits on top of the paper instead of soaking in, so you can feel it with a fingertip — a little raised, a little imperfect, unmistakably printed by a person and not a laser.",
       "Two inks, cotton paper, a hand-cranked letterpress for the type. That's the whole studio. The limits are the fun — I've made more with two colours than I ever did with a full-colour printer.",
     ],
-    storyImage: "/media/riso-ink.jpg",
+    storyImage: "/media/riso-overprint.jpg",
     processSectionHeader: "Two inks. A hundred happy accidents.",
     process: [
       {
@@ -300,7 +310,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         name: "Overprint Study · No. 07",
         price: "£34",
         blurb: "Two inks, one happy collision — a fluoro pink and a blue that make a third colour where they cross.",
-        image: "/media/prints-wall.jpg",
+        image: "/media/riso-overprint.jpg",
         note: "Edition of 40",
       },
       {

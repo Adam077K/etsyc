@@ -240,7 +240,7 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     note: "Made to order",
     clipLabel: "Tomás on wedging the legs",
     clipDuration: "0:22",
-    gallery: ["/media/stool-blue.jpg", "/media/woodwork.jpg"],
+    gallery: ["/media/wood-stool.jpg", "/media/wood-joint.jpg"],
     description: [
       "The stool I make first when someone new comes to the shop, because it hides nothing. Three legs, each one wedged through the seat by hand — you can see the joint, and the joint is the whole guarantee.",
       "Reclaimed timber, so the grain already has a history before you ever sit down. It darkens where your hands land and lightens where the sun does. That is the stool doing its job.",
@@ -281,7 +281,7 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     note: "1 of a kind",
     clipLabel: "Tomás on the butterfly key",
     clipDuration: "0:18",
-    gallery: ["/media/woodwork.jpg", "/media/stool-blue.jpg"],
+    gallery: ["/media/woodwork.jpg", "/media/wood-joint.jpg"],
     description: [
       "A crack in a good board isn't a flaw to me — it's an invitation. I stitch it back together with a walnut butterfly key, so the repair becomes the most deliberate thing in the room.",
       "Each one is cut from a single offcut too stubborn to throw away. Oil it now and then and it will outlast every plastic board you were ever told to buy.",
@@ -404,7 +404,7 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     note: "Edition of 40",
     clipLabel: "Juno on the two-colour overlap",
     clipDuration: "0:19",
-    gallery: ["/media/prints-wall.jpg", "/media/riso-ink.jpg"],
+    gallery: ["/media/riso-overprint.jpg", "/media/riso-ink.jpg"],
     description: [
       "The seventh print in a series I keep swearing I'll finish. Fluoro pink laid down first, then a translucent blue on top — and where they cross, a third colour appears that I can't mix in the tin and can't quite predict.",
       "Printed two passes by hand on cotton paper, so every sheet in the edition is a fraction off from the last. That drift is signed into it. Hang it in daylight and the fluoro practically hums.",
@@ -445,7 +445,7 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     note: "Edition of 30",
     clipLabel: "Juno on a single-ink wash",
     clipDuration: "0:15",
-    gallery: ["/media/riso-ink.jpg", "/media/prints-wall.jpg"],
+    gallery: ["/media/riso-ink.jpg", "/media/riso-overprint.jpg"],
     description: [
       "Sometimes one ink is the whole idea. A single flood of riso blue, run through the drum until the roller texture and the paper grain start arguing — and that argument is the image.",
       "No second colour, no type, nowhere to hide. Just the ink doing what riso ink does: sitting proud on the cotton, catching the light, never quite flat. The quietest thing I make and my own favourite.",
@@ -571,6 +571,18 @@ export const THANK_YOU_NOTES: Record<
   "indigo-ash": {
     line: "Merci. Your wrap goes into the vat this week. I'll send word the moment the blue is deep enough to cut.",
     clip: "0:18",
+  },
+  "grain-groove": {
+    line: "Cheers. It's on the bench, first job Monday — I'll burn my mark in the underside and post it once the joint's had a day to settle. No screws, promise.",
+    clip: "0:19",
+  },
+  "ember-rue": {
+    line: "Thank you. This batch is resting on the still now; I'll bottle yours the hour it turns right and seal the date on the base before it ships.",
+    clip: "0:16",
+  },
+  "risograph-room": {
+    line: "Yes! Going on the drum this week — I'll pull your sheets by hand, sign the good ones, and slip a spare misprint in the tube because the mistakes are half the fun.",
+    clip: "0:17",
   },
 };
 
