@@ -11,7 +11,7 @@ import type {
   StoryBlock,
   Inline,
 } from "@/lib/fixtures/journal";
-import { rise, calm, inView } from "@/lib/motion";
+import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +58,7 @@ export function JournalStoryView({ story }: { story: JournalStory }) {
         <motion.div
           initial={reduce ? undefined : { opacity: 0, y: 30 }}
           animate={reduce ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+          transition={{ duration: 0.9, ease: easeOut, delay: 0.15 }}
           className="relative mx-auto w-full max-w-[52rem] px-5 pb-16 sm:px-8 sm:pb-24"
         >
           <p className="meta mb-5 text-marigold">{story.kicker}</p>
@@ -211,7 +211,7 @@ function Block({
       >
         <Image
           src={block.image}
-          alt={block.caption}
+          alt={block.alt}
           fill
           sizes={block.span === "full" ? "(max-width: 768px) 100vw, 64rem" : "(max-width: 768px) 100vw, 52rem"}
           className={cn(
@@ -237,7 +237,7 @@ function InlineNode({ node, worldSlug }: { node: Inline; worldSlug: string }) {
   return (
     <Link
       href={`/m/${worldSlug}/p/${node.productId}`}
-      className="font-medium text-bone underline decoration-marigold decoration-2 underline-offset-[3px] transition-colors hover:text-marigold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+      className="text-bone underline decoration-marigold decoration-2 underline-offset-[3px] transition-colors hover:text-marigold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
     >
       {node.label}
     </Link>

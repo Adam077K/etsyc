@@ -143,7 +143,7 @@ function LeadFeature({ entry, reduce }: { entry: JournalEntry; reduce: boolean }
           <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-12 lg:p-16">
             <div className="max-w-3xl">
               <p className="meta mb-5 flex items-center gap-2 text-marigold">
-                <Icon size={15} weight="fill" />
+                <Icon size={15} weight="fill" aria-hidden />
                 {entry.kicker}
               </p>
               <h2
@@ -232,7 +232,7 @@ function QuoteSpreadEntry({
             {/* Marigold rides the icon (a non-text accent); the label stays
                 bone so it clears AA on the olive ground as well as plum. */}
             <p className="meta flex items-center gap-2 text-bone">
-              <Icon size={14} weight="fill" className="text-marigold-bright" />
+              <Icon size={14} weight="fill" aria-hidden className="text-marigold-bright" />
               {entry.kicker}
             </p>
             <span className="meta text-bone/85">Nº 0{index}</span>
@@ -280,15 +280,20 @@ function FilmEntry({
       initial="hidden"
       whileInView="visible"
       viewport={inView}
-      className="group relative overflow-hidden rounded-3xl ring-1 ring-line"
     >
-      <div className="relative aspect-[4/5] w-full sm:aspect-[16/9] lg:aspect-[21/9]">
-        <div
-          className={cn(
-            "absolute inset-0 transition-transform duration-[1200ms] ease-out-expo group-hover:scale-[1.04]",
-            !reduce && "film-drift",
-          )}
-        >
+      {/* The whole card navigates to the maker's world — so the hover-scale
+          affordance is honest, and the surface never dead-ends. */}
+      <Link
+        href={`/m/${entry.makerId}`}
+        className="group relative block overflow-hidden rounded-3xl ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-4 focus-visible:ring-offset-ink"
+      >
+        <div className="relative aspect-[4/5] w-full sm:aspect-[16/9] lg:aspect-[21/9]">
+          <div
+            className={cn(
+              "absolute inset-0 transition-transform duration-[1200ms] ease-out-expo group-hover:scale-[1.04]",
+              !reduce && "film-drift",
+            )}
+          >
           <Image
             src={entry.image}
             alt={`${entry.makerName} — ${entry.studio}, ${entry.place}`}
@@ -303,7 +308,7 @@ function FilmEntry({
         <div className="absolute inset-0 flex flex-col justify-end gap-4 p-6 sm:p-12">
           <div className="flex items-center justify-between gap-4">
             <p className="meta flex items-center gap-2 text-marigold">
-              <Icon size={14} weight="fill" />
+              <Icon size={14} weight="fill" aria-hidden />
               {entry.kicker}
             </p>
             <span className="meta text-bone/60">Nº 0{index}</span>
@@ -319,11 +324,14 @@ function FilmEntry({
               “{entry.pullQuote}”
             </p>
             <div className="mt-5">
-              <NextIssueTag entry={entry} />
+              {/* The card itself is the link; render the CTA as static text so
+                  there is no invalid nested anchor. */}
+              <NextIssueTag entry={entry} linked={false} />
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </Link>
     </motion.article>
   );
 }
@@ -333,37 +341,58 @@ function FilmEntry({
 function NextIssueTag({
   entry,
   onGround = false,
+  linked = true,
 }: {
   entry: JournalEntry;
   onGround?: boolean;
+  /** When the surrounding card is itself a link (FilmEntry), render the CTA as
+      static text — the card navigates, and a nested anchor would be invalid. */
+  linked?: boolean;
 }) {
+  const cta = (
+    <>
+      Meet {entry.makerName} now
+      <ArrowUpRight
+        size={16}
+        weight="bold"
+        className={cn(
+          "transition-transform",
+          linked
+            ? "group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
+            : "group-hover:translate-x-0.5 group-hover:-translate-y-0.5",
+        )}
+      />
+    </>
+  );
+
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <span
         className={cn(
           "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 font-mono text-[0.68rem] uppercase tracking-meta",
           onGround
-            ? "bg-ink/25 text-bone"
+            ? "bg-ink/40 text-bone"
             : "bg-ink/50 text-bone backdrop-blur-sm",
         )}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-marigold" />
         In the next issue
       </span>
-      <Link
-        href={`/m/${entry.makerId}`}
-        className={cn(
-          "group/link inline-flex items-center gap-1.5 font-ui text-sm font-medium underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
-          onGround ? "text-bone hover:text-marigold-bright" : "text-bone hover:text-marigold",
-        )}
-      >
-        Meet {entry.makerName} now
-        <ArrowUpRight
-          size={16}
-          weight="bold"
-          className="transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
-        />
-      </Link>
+      {linked ? (
+        <Link
+          href={`/m/${entry.makerId}`}
+          className={cn(
+            "group/link inline-flex items-center gap-1.5 font-ui text-sm underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+            onGround ? "text-bone hover:text-marigold-bright" : "text-bone hover:text-marigold",
+          )}
+        >
+          {cta}
+        </Link>
+      ) : (
+        <span className="inline-flex items-center gap-1.5 font-ui text-sm text-bone transition-colors group-hover:text-marigold">
+          {cta}
+        </span>
+      )}
     </div>
   );
 }

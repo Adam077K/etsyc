@@ -188,7 +188,15 @@ export type StoryBlock =
   | { type: "para"; content: Inline[]; dropCap?: boolean }
   | { type: "subhead"; text: string }
   | { type: "pull"; text: string; feature?: boolean }
-  | { type: "figure"; image: string; caption: string; span: "wide" | "full" };
+  | {
+      type: "figure";
+      image: string;
+      /** describes the image itself — kept distinct from the editorial caption
+          so screen readers do not double-announce the same words */
+      alt: string;
+      caption: string;
+      span: "wide" | "full";
+    };
 
 export interface JournalStory {
   slug: string;
@@ -264,6 +272,7 @@ export const STORIES: Record<string, JournalStory> = {
       {
         type: "figure",
         image: "/media/clay-shape.jpg",
+        alt: "A potter's hands drawing up the wall of a vessel on a spinning wheel.",
         caption: "Raising the wall in three slow pulls, a little after six.",
         span: "wide",
       },
@@ -298,6 +307,7 @@ export const STORIES: Record<string, JournalStory> = {
       {
         type: "figure",
         image: "/media/clay-drying.jpg",
+        alt: "Rows of freshly fired stoneware pots cooling on a wooden studio shelf.",
         caption: "Just out of the salt kiln — the glaze still warm to the hand.",
         span: "full",
       },
