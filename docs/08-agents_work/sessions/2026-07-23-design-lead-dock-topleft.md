@@ -2,9 +2,24 @@
 role: design-lead
 task: kol-dock-topleft
 branch: feat/kol-dock-topleft
-commit: 1fac1bd
-qa_verdict: PENDING
+commit: bed8365
+qa_verdict: PASS
 tier: lite
+---
+
+## FREEZE BATCH — commit bed8365 (critic gate-7 PASS-with-notes + queued one-liner)
+
+1. Checkout corner on route entry: anchor bottom-right origin in an isomorphic LAYOUT
+   effect (before first paint) so a film arriving visibly top-left (expanded PiP / world)
+   never paints over the "Checkout" H1. Verified from the earliest arrival frame.
+2. TwoDots idea H2 cleared at xl (commit c1d81f0): xl top clearance moved to the whole
+   left column so kicker + H2 + prose shift down as one; headline no longer under the dock.
+3. Thank-you "Back to the feed" CTA: xl right-clearance on the card pulls it clear of the
+   bottom-right dock (dock floats over the empty right of the olive panel).
+4. Thank-you origin now reads dockAnchor("bottom-right") — film-geometry sole corner owner.
+Gates: build OK · typecheck · detect · e2e 4/4. Critic notes (top-left = editorial folio;
+product chip-over-breadcrumb = keep) acknowledged. Branch ready to freeze.
+
 ---
 
 ## RULING APPLIED (Option A) — commit 1fac1bd
