@@ -25,11 +25,25 @@
     color: #1c1613;
   }
 
-  /* Keyboard focus is a first-class state, Etsy Orange on any ground. */
+  /* Keyboard focus is a first-class, ground-aware state. A single ring colour
+     cannot clear the WCAG 3:1 non-text floor against BOTH near-black ink and
+     near-white bone (a lone marigold ring is 6.90:1 on ink but only 2.09:1 on a
+     bone ground/control). So the indicator is three concentric tones — ink,
+     marigold, ink — meaning whichever ground the ring's edge meets, an ink layer
+     (14.45:1 vs bone, invisible-but-harmless on ink) carries the contrast while
+     the marigold band stays the recognisable KOL focus colour (6.90:1 vs its ink
+     neighbours). Works on ink grounds, on bone spreads, and around bone-filled
+     controls alike. The transparent outline is the forced-colors-mode fallback
+     (high-contrast themes drop box-shadow but keep outline). Ratios are scripted
+     — see DECISIONS (ground-aware focus ring entry). */
   :focus-visible {
-    outline: 2px solid #ff7a3c;
-    outline-offset: 3px;
-    border-radius: 2px;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 2px #1c1613,
+      0 0 0 4px #ff7a3c,
+      0 0 0 6px #1c1613;
+    border-radius: 3px;
   }
 
   /* Display type wants a tight tracking floor (craft-floor). */
