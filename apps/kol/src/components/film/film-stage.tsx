@@ -37,9 +37,22 @@ export function FilmStage() {
   const transformOrigin = useMotionTemplate`${m.originX}% ${m.originY}%`;
   // Crop the top of the (uniformly-scaled, undistorted) film so the corner dock
   // reads as a landscape card instead of a viewport-aspect column on portrait
-  // phones. `round` keeps all four corners on the radius. Zero on hero/desktop.
-  const clipTop = useTransform(m.clip, (v) => v * 100);
-  const clipPath = useMotionTemplate`inset(${clipTop}% 0px 0px 0px round ${m.radius}px)`;
+  // phones. `round` keeps all four corners on the radius. CRITICAL: clip-path is
+  // "none" whenever clip===0, because even inset(0%) clips the element's
+  // box-shadow at the border box — so the hero/desktop dock keeps its shadow
+  // untouched, and only the cropped mobile card is clipped.
+  const clipPath = useTransform([m.clip, m.radius], ([clip, radius]: number[]) =>
+    (clip ?? 0) <= 0.0001
+      ? "none"
+      : `inset(${(clip ?? 0) * 100}% 0px 0px 0px round ${radius ?? 0}px)`,
+  );
+  // While clipped, the box-shadow is severed by the clip, so restore depth with a
+  // contract-allowed drop-shadow (follows the cropped card shape). "none" at
+  // clip===0 so the hero keeps its real box-shadow and descendant backdrop-blur
+  // (the chip) is never disabled by a filter context.
+  const dockShadow = useTransform(m.clip, (clip) =>
+    clip <= 0.0001 ? "none" : "drop-shadow(0 12px 22px rgba(0,0,0,0.72))",
+  );
   // The stage chip is anchored top-left for the full-bleed hero; fade it out as
   // the film docks so the landscape top-crop never severs it mid-word.
   const chipOpacity = useTransform(m.clip, [0, 0.12], [1, 0]);
@@ -68,6 +81,7 @@ export function FilmStage() {
             boxShadow,
             transformOrigin,
             clipPath,
+            filter: dockShadow,
           }}
           onClick={interaction?.onActivate}
           onKeyDown={
