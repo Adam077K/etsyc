@@ -467,7 +467,11 @@ function GalleryWall({ world, reduce }: { world: World; reduce: boolean }) {
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
       <Reveal reduce={reduce}>
-        <div className="mb-10 border-t border-clay/40 pt-8">
+        {/* Hairline uses the stable clay-bright tint, not the clay BASE token:
+            the base is remapped across theme waves (…→deep rust) and goes
+            invisible on ink at 40%; clay-bright keeps a warm, readable line that
+            carries her clay accent regardless of the base value. */}
+        <div className="mb-10 border-t border-clay-bright/30 pt-8">
           {world.wallSectionKicker && (
             <p className="meta mb-3 text-clay-bright">{world.wallSectionKicker}</p>
           )}
