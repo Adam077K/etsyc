@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function MessagesPage() {
   return (
     <>
-      <SellWorkspaceNav />
+      <SellWorkspaceNav active="messages" />
       <main className="min-h-screen bg-ink">
         <SellMessages />
       </main>

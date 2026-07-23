@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function ClipsPage() {
   return (
     <>
-      <SellWorkspaceNav />
+      <SellWorkspaceNav active="clips" />
       <main className="min-h-screen bg-ink">
         <SellClips />
       </main>
