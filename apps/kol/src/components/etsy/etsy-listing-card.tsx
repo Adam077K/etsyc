@@ -57,6 +57,11 @@ export function EtsyListingCard({ listing }: { listing: EtsyListing }) {
         <p className="mt-1 truncate text-xs text-neutral-500">
           {listing.shopName}
         </p>
+        {listing.place && (
+          <p className="truncate text-xs text-neutral-400">
+            From {listing.place}
+          </p>
+        )}
 
         <div className="mt-1 flex items-baseline gap-2">
           <span className="text-base font-semibold text-neutral-900">

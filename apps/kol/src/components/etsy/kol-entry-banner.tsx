@@ -64,7 +64,7 @@ export function KolEntryBanner() {
             they work. Step out of the grid and into the workshop.
           </p>
 
-          <span className="mt-1 inline-flex w-fit items-center gap-2.5 rounded-full bg-[#F1641E] px-6 py-3 text-base font-semibold text-[#1C1613] transition-transform duration-300 group-hover:translate-x-1">
+          <span className="mt-1 inline-flex w-fit items-center gap-2.5 rounded-full bg-[#F1641E] px-6 py-3 text-base font-semibold text-[#1C1613]">
             <Play size={18} weight="fill" />
             Enter KOL
             <ArrowRight size={18} weight="bold" className="transition-transform group-hover:translate-x-1" />
