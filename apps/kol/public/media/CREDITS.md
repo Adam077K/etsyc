@@ -40,3 +40,13 @@ Replace with KOL's own maker footage/photography before any public launch.
 | textile-fold.jpg | Folded lengths of cloth | Pexels photo 4614226 | Pexels |
 | textile-machine.jpg | Thread spools + sewing machine | Pexels photo 4614225 | Pexels |
 | textile-scarf.jpg | Worn scarf, moody light | Unsplash `photo-1520903920243-00d872a2d1c9` | Unsplash |
+
+## Imagery upgrade manifest — priority swaps for real photography
+
+Slots where the interim stock reads weaker than the surface deserves, ordered
+for the Founder's photography drop. Each is a *content* upgrade, not a layout
+change.
+
+| Surface | Slot | Interim | Proper shot |
+|---|---|---|---|
+| `/how` hero | Cinematic opener ground (`how-story.tsx`) | `indigo-dye.jpg` — an abstract dye swirl; reads impersonal in the least-scrimmed quadrant (interim fix: right scrim floored at `ink/30`) | A real maker's hands or face mid-process (throwing, dyeing, carving) — the thesis page's first human impression should be a person, not a texture |
