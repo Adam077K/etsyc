@@ -53,6 +53,19 @@ function hashStr(s: string): number {
 const craftLabel = (f: Filter) =>
   f === "all" ? "makers" : CRAFTS.find((c) => c.id === f)?.label ?? "makers";
 
+// The featured maker of this issue — pinned to the front of the UNFILTERED feed
+// so the demo reliably opens by meeting her (she still reshuffles among her peers
+// inside a craft/value filter, where a fixed pin would be dishonest). Editorial
+// pinning, not a broken shuffle: magazines lead with a featured spread.
+const FEATURED_ID = "two-dots";
+
+function pinFeatured(list: Maker[]): Maker[] {
+  const i = list.findIndex((m) => m.id === FEATURED_ID);
+  if (i <= 0) return list;
+  const featured = list[i]!;
+  return [featured, ...list.slice(0, i), ...list.slice(i + 1)];
+}
+
 export function Feed() {
   const [active, setActive] = useState<Filter>("all");
   const [valueFilter, setValueFilter] = useState<string | null>(null);
@@ -103,7 +116,11 @@ export function Feed() {
         (visitRef.current + 1) * 9301 +
         nonce * 49297 +
         hashStr(valueFilter ?? active);
-      setDisplay(seededShuffle(pool, seed));
+      const shuffled = seededShuffle(pool, seed);
+      // Unfiltered issue → lead with the featured maker; filtered views keep the
+      // honest reshuffle (no pin) so a craft/value filter is never gamed.
+      const unfiltered = active === "all" && !valueFilter;
+      setDisplay(unfiltered ? pinFeatured(shuffled) : shuffled);
       setLoading(false);
     }, 460);
     return () => clearTimeout(t);

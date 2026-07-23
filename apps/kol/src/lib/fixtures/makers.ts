@@ -337,7 +337,11 @@ export const MAKERS: Maker[] = [
     image: "/media/twodots/hero-poster.jpg",
     kind: "film",
     duration: "0:45",
-    span: "tall",
+    // Full-bleed hero footprint — she is the issue's FEATURED maker (pinned to
+    // the front of the feed in the unfiltered view; see Feed), so the demo opens
+    // the issue on a big film of her, not a small square. A hero span (col-span-12)
+    // also packs cleanly as a lead tile: no orphaned gutter beside a 7-col tile.
+    span: "hero",
     tone: "light",
     values: ["Hand-sewn", "Parent & child"],
     filmSrc: "/media/video/two-dots.mp4",
