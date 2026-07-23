@@ -61,6 +61,12 @@
 - **Style:** Y.-reference (cream+near-black+editorial serif+one warm accent) pushed HUMAN — clay-terracotta accent, workshop light, 35mm grain.
 - **Open (Founder):** the ask framing (partnership placeholder for now) · team names/roles · final KOL logo · Sharon's photos+brand colors (blocks all asset gen).
 
+## Day 10 (Jul 23) — MVP UI COMPLETE, 3 waves merged (`ceo-6`)
+- **Screens-only MVP rebuilt + shipped** (waves 0–3, all QA-gated, main @ 28f06ce): continuous film (ONE video element feed→thank-you, e2e-guarded), living interactions, 6 worlds/15 products, full seller workspace (/sell/home·orders·messages·clips), journal, /how. Locked design contract = `apps/kol/DESIGN.md`+`PRODUCT.md`.
+- **Deploy:** kol-demo.vercel.app = wave-2 baseline; complete 36-page wave-3 build staged as Vercel preview. **Founder must run** `cd .worktrees/kol-deploy/apps/kol && npx vercel --prod` to promote (agent-blocked, correctly).
+- **TwoDots (Sharon) real-footage world: COMPLETE, design-PASS, on origin/feat/kol-twodots — HELD from merge** pending Founder calls: workshop.jpg (background minor) approve/swap, Sharon surname/city+copy, written permission for public child-imagery use. Unblock: rebase-check→merge→redeploy. See memory `kol-twodots-held-branch`.
+- **Full handoff for next session:** `docs/08-agents_work/handoffs/2026-07-23-KOL-SESSION-HANDOFF.md` (state, rules, playbook, reading list).
+
 ## Live constraints
 - **Idea is chosen** (KOL v2, see above). Gating items are now the **validation gates** (Day-4 cold-DM maker probe ≥60%, capture-rig, forced-choice, lapsed-buyer) and Adam's **D7 written pivot pre-commit (due Day 3)**. Not build capacity.
 - Teams form by **vote on Day 4** — Adam does not control his team. Venture ambition vs. teammates optimizing for the pitch is an unresolved tension.
