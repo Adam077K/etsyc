@@ -49,6 +49,16 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
   system rather than its execution. Resolve with real per-maker footage/portraits
   when they arrive, or a from-scratch dual-frame ObjectTile variant — not by
   borrowing another maker's face.
+- **Feed media enrichment (more clips/images).** _[wave 5, 2026-07-23] Deferred by
+  ruling C._ Network egress is blocked (no stock downloads), every image in
+  `public/media/` is already referenced (no unused assets), and the v1 archive
+  seed videos have no license/provenance record so they cannot be CREDITS'd
+  honestly. The only clean local option was derived crops of already-used images
+  (cross-context déjà-vu risk the CREDITS ledger guards against) — judged not
+  worth it for marginal density. Resolve with the Founder's own footage drop
+  (per the "replace with KOL's own footage before launch" note in
+  `public/media/CREDITS.md`) or a Founder-supplied licensed stock batch with
+  source URLs → then a clean additive pass with full CREDITS rows.
 
 ## Motion / interaction
 - _(Hover blurb reveal reworked to clip-path/transform — see Applied.)_
