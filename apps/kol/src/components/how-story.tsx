@@ -15,6 +15,7 @@ import { rise, stagger, calm, inView } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { GooDefs, LiquidDivider } from "./liquid";
 import { TrustBadge } from "./trust-badge";
+import { MakerFilm } from "./maker-film";
 
 /**
  * HOW KOL WORKS (/how) — the buyer-facing trust/story page.
@@ -103,21 +104,19 @@ export function HowStory() {
         className="relative flex min-h-[100svh] w-full items-end overflow-hidden"
       >
         <div className="absolute inset-0">
-          <div className="film-drift absolute inset-0">
-            <Image
-              src="/media/indigo-dye.jpg"
-              alt="A swirl of deep indigo dye"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-center"
-            />
-          </div>
-          {/* Ink scrims: bottom-up for legibility, left-in for the statement.
-              Interim fix — the right edge floors at ink/30 (never fully clear)
-              so the least-scrimmed quadrant of the abstract still reads warm and
-              intentional; the proper fix is a real hands/face-in-process shot
-              (see imagery-upgrade manifest, hero slot). */}
+          {/* Human-presence hero: Lena at the wheel — the real clip autoplays
+              (odd-clay proof) and falls back to the hands-in-process still.
+              MakerFilm drifts the still; a live clip never Ken-Burns on itself. */}
+          <MakerFilm
+            videoSrc={COVER_MAKER.filmSrc}
+            poster="/media/clay-wheel.jpg"
+            alt="Lena Okafor throwing stoneware at Odd Clay Studio"
+            reduce={!!reduce}
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          {/* Ink scrims: bottom-up for legibility, left-in for the statement. */}
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/30" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/25 to-ink/30" />
         </div>
