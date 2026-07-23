@@ -164,7 +164,7 @@ export function HeroSpread() {
         aria-label="Scroll to the feed"
         className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 rounded-full p-1 text-bone/50 transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:block"
       >
-        <ArrowDown size={22} aria-hidden className={reduce ? "" : "animate-float"} />
+        <ArrowDown size={22} aria-hidden className="animate-float" />
       </a>
     </section>
   );

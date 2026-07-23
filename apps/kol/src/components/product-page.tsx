@@ -490,7 +490,10 @@ function Gallery({
                 sizes="(max-width: 1024px) 100vw, 55vw"
                 className={cn(
                   "pointer-events-none select-none object-cover",
-                  !reduce && i === active ? "film-drift" : "",
+                  // Drift only the active slide. Not gated on `reduce` in JSX —
+                  // that would hydration-mismatch (SSR renders reduce=false); the
+                  // globals.css reduced-motion media query disables the animation.
+                  i === active && "film-drift",
                 )}
               />
             </div>
@@ -617,7 +620,7 @@ function ContextualFilm({
 
   const liveDot = (
     <span
-      className={cn("h-1.5 w-1.5 rounded-full bg-marigold", reduce ? "" : "animate-float")}
+      className="h-1.5 w-1.5 rounded-full bg-marigold animate-float"
     />
   );
 

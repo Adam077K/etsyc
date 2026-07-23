@@ -197,7 +197,10 @@ export function SignIn() {
 
         {/* Editorial image panel. */}
         <aside className="relative hidden overflow-hidden lg:block">
-          <div className={cn("absolute inset-0", reduce ? "" : "film-drift")}>
+          {/* film-drift is not gated on `reduce` in JSX (that hydration-mismatches
+              since SSR renders reduce=false); globals.css disables it under
+              prefers-reduced-motion via media query. */}
+          <div className="film-drift absolute inset-0">
             <Image
               src="/media/clay-wheel.jpg"
               alt="A maker at the wheel, hands in wet clay"
