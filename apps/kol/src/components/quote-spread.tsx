@@ -16,7 +16,7 @@ export function QuoteSpread() {
         <div className="relative min-h-[280px]">
           <Image
             src={FEATURED_QUOTE.image}
-            alt={FEATURED_QUOTE.attribution}
+            alt={`Portrait of ${FEATURED_QUOTE.attribution}, ${FEATURED_QUOTE.studio}`}
             fill
             sizes="(max-width: 768px) 100vw, 40vw"
             className="object-cover grayscale"
@@ -31,22 +31,24 @@ export function QuoteSpread() {
           viewport={inView}
           className="flex flex-col justify-center p-8 sm:p-12 lg:p-16"
         >
-          <Quotes size={40} weight="fill" className="mb-6 text-marigold" />
-          <blockquote
-            className="font-serif leading-[1.15] text-bone"
-            style={{ fontSize: "clamp(1.6rem, 3vw, 2.9rem)" }}
-          >
-            {FEATURED_QUOTE.quote}
-          </blockquote>
-          <figcaption className="mt-8 flex items-center gap-3">
-            <span className="h-px w-8 bg-marigold" />
-            <span className="font-ui text-base font-semibold text-bone">
-              {FEATURED_QUOTE.attribution}
-            </span>
-            <span className="meta text-marigold-bright">
-              {FEATURED_QUOTE.studio}
-            </span>
-          </figcaption>
+          <figure className="m-0">
+            <Quotes size={40} weight="fill" className="mb-6 text-marigold" />
+            <blockquote
+              className="font-serif leading-[1.15] text-bone"
+              style={{ fontSize: "clamp(1.6rem, 3vw, 2.9rem)" }}
+            >
+              {FEATURED_QUOTE.quote}
+            </blockquote>
+            <figcaption className="mt-8 flex items-center gap-3">
+              <span className="h-px w-8 bg-marigold" />
+              <span className="font-ui text-base font-semibold text-bone">
+                {FEATURED_QUOTE.attribution}
+              </span>
+              <span className="meta text-marigold-bright">
+                {FEATURED_QUOTE.studio}
+              </span>
+            </figcaption>
+          </figure>
         </motion.div>
       </div>
     </section>

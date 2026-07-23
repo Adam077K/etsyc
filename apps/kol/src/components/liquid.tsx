@@ -31,10 +31,10 @@ export function GooDefs() {
 export function LiquidDivider({ className = "" }: { className?: string }) {
   const reduce = useReducedMotion();
   const blobs = [
-    { cx: 22, r: 30, fill: "#B4462A", dur: 9 },
-    { cx: 40, r: 38, fill: "#E4922C", dur: 11 },
-    { cx: 58, r: 30, fill: "#B4462A", dur: 8 },
-    { cx: 76, r: 40, fill: "#E4922C", dur: 12 },
+    { id: "clay-l", cx: 22, r: 30, fill: "#B4462A", dur: 9 },
+    { id: "gold-l", cx: 40, r: 38, fill: "#E4922C", dur: 11 },
+    { id: "clay-r", cx: 58, r: 30, fill: "#B4462A", dur: 8 },
+    { id: "gold-r", cx: 76, r: 40, fill: "#E4922C", dur: 12 },
   ];
   return (
     <div className={className} aria-hidden>
@@ -44,9 +44,9 @@ export function LiquidDivider({ className = "" }: { className?: string }) {
         className="h-16 w-full sm:h-24"
       >
         <g style={{ filter: "url(#kol-goo)" }}>
-          {blobs.map((b, i) => (
+          {blobs.map((b) => (
             <motion.circle
-              key={i}
+              key={b.id}
               cx={b.cx}
               cy={20}
               r={b.r / 1.8}

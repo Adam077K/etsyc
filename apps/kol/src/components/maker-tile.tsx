@@ -52,7 +52,10 @@ export function MakerTile({ maker, index }: { maker: Maker; index: number }) {
       transition={{ delay: (index % 6) * 0.05 }}
       className={cn("group", SPAN_CLASS[maker.span])}
     >
-      <a href="#feed" className="block focus-visible:outline-none">
+      <a
+        href="#feed"
+        className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+      >
         {isObject ? (
           <ObjectTile maker={maker} Icon={Icon} />
         ) : (
