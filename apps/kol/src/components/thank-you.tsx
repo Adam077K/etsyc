@@ -19,7 +19,7 @@ import {
   thankYouFor,
 } from "@/lib/fixtures/commerce";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
-import { cn } from "@/lib/utils";
+import { MakerFilm } from "./maker-film";
 
 /**
  * Thank-you — buyer journey step 8. The personal thank-you moment: a Ken-Burns
@@ -80,13 +80,14 @@ export function ThankYou() {
             className="relative mt-12 overflow-hidden rounded-[2rem] ring-1 ring-line"
           >
             <div className="relative aspect-[4/5] w-full sm:aspect-[16/10]">
-              <Image
-                src={primary.image}
+              <MakerFilm
+                videoSrc={primaryNote.filmSrc}
+                poster={primary.image}
                 alt={`${primary.name}, ${primary.studio}`}
-                fill
+                reduce={!!reduce}
                 priority
                 sizes="(max-width: 896px) 100vw, 896px"
-                className={cn("object-cover", reduce ? "" : "film-drift")}
+                className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/10" />
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
@@ -16,6 +15,7 @@ import type { Maker } from "@/lib/fixtures/makers";
 import { WORLDS } from "@/lib/fixtures/worlds";
 import { easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { MakerFilm } from "./maker-film";
 
 // Faint echo of the maker's world accent — ties the film (step 2) to the world
 // it opens into (step 3). Only for makers whose world is built.
@@ -162,13 +162,15 @@ export function ExpandedVideo({
               exit={{ opacity: 0 }}
               transition={{ duration: reduce ? 0.2 : 0.45, ease: easeOut }}
             >
-              <Image
-                src={maker.image}
+              <MakerFilm
+                videoSrc={maker.filmSrc}
+                poster={maker.image}
                 alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-                fill
+                reduce={!!reduce}
                 priority
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
+                drift={false}
               />
             </motion.div>
           </AnimatePresence>

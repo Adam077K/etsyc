@@ -49,6 +49,14 @@ export interface Maker {
   values: string[];
   /** Optional colored backing for product stills that sit on a field. */
   ground?: Ground;
+  /**
+   * Optional real clip at /media/video/<id>.mp4. Set this ONLY once the file
+   * exists in public/media/video/ — <MakerFilm> then autoplays it (muted, loop)
+   * and falls back to the Ken-Burns still when it's absent, reduced-motion, or
+   * errors. Presence is detected from this field, never a runtime fetch. See
+   * public/media/video/README.md for the filename → surface map.
+   */
+  filmSrc?: string;
 }
 
 export const CRAFTS: Craft[] = [
@@ -80,6 +88,10 @@ export const COVER_MAKER: Maker = {
   span: "hero",
   tone: "dark",
   values: ["Handmade", "Woman-owned"],
+  // LIVE — proof clip (a local Ken-Burns render of the still, stands in until
+  // Lena's real footage is dropped at the same path). Drives the cover hero,
+  // and the /m/odd-clay world hero + docked PiP.
+  filmSrc: "/media/video/odd-clay.mp4",
 };
 
 export const MAKERS: Maker[] = [

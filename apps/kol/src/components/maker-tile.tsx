@@ -8,6 +8,7 @@ import type { Maker, Span, Ground } from "@/lib/fixtures/makers";
 import { CRAFT_ICON } from "@/lib/icons";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { MakerFilm } from "./maker-film";
 
 const SPAN_CLASS: Record<Span, string> = {
   hero: "col-span-2 md:col-span-6 lg:col-span-12",
@@ -111,12 +112,14 @@ function EditorialTile({
           maker.kind === "film" && !reduce && "film-drift",
         )}
       >
-        <Image
-          src={maker.image}
+        <MakerFilm
+          videoSrc={maker.kind === "film" ? maker.filmSrc : undefined}
+          poster={maker.image}
           alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-          fill
+          reduce={!!reduce}
           sizes={SIZES}
           className="object-cover"
+          drift={false}
         />
       </div>
 

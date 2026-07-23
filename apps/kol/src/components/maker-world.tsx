@@ -25,6 +25,7 @@ import type { MakerWorld as World } from "@/lib/fixtures/worlds";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { cn } from "@/lib/utils";
+import { MakerFilm } from "./maker-film";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -270,10 +271,11 @@ function DockedFilm({
     return (
       <div className="pointer-events-none absolute inset-0 z-40">
         <div className="relative h-[100svh] w-full">
-          <Image
-            src={maker.image}
+          <MakerFilm
+            videoSrc={maker.filmSrc}
+            poster={maker.image}
             alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-            fill
+            reduce={reduce}
             priority
             sizes="100vw"
             className="object-cover"
@@ -315,13 +317,15 @@ function DockedFilm({
             "pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
         )}
       >
-        <Image
-          src={maker.image}
+        <MakerFilm
+          videoSrc={maker.filmSrc}
+          poster={maker.image}
           alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-          fill
+          reduce={reduce}
           priority
           sizes="100vw"
           className="object-cover"
+          drift={false}
         />
         <FilmChip maker={maker} />
       </motion.div>

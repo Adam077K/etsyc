@@ -35,6 +35,12 @@ export interface ProductDetail {
   /** the docked film's contextual narration clip for THIS product (journey 5) */
   clipLabel: string;
   clipDuration: string;
+  /**
+   * Optional real contextual clip at /media/video/product-<id>.mp4 for the
+   * docked PiP. Set once the file exists; falls back to the still otherwise.
+   * See public/media/video/README.md.
+   */
+  filmSrc?: string;
   gallery: string[];
   /** description in the maker's voice */
   description: string[];
@@ -303,8 +309,15 @@ export const MOCK_ORDER = {
   deliveryEstimate: "Arrives 6–10 August",
 };
 
-/** Personal thank-you note per maker, in their own voice (journey step 8). */
-export const THANK_YOU_NOTES: Record<string, { line: string; clip: string }> = {
+/**
+ * Personal thank-you note per maker, in their own voice (journey step 8).
+ * `filmSrc` (optional) points at /media/video/thankyou-<slug>.mp4 for the
+ * thank-you hero clip — set once the file exists; falls back to the still.
+ */
+export const THANK_YOU_NOTES: Record<
+  string,
+  { line: string; clip: string; filmSrc?: string }
+> = {
   "odd-clay": {
     line: "Thank you — truly. Your carafe is on the drying shelf now; I'll pack it the morning it's ready and slip a note in the box.",
     clip: "0:22",

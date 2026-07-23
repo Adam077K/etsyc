@@ -26,6 +26,7 @@ import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { TrustBadge } from "./trust-badge";
 import { ReviewStory } from "./review-story";
+import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 
 // AA-safe accent text/icon tints (small meta kickers need ≥4.5:1 on ink).
@@ -478,15 +479,13 @@ function ContextualFilm({
               className="group block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
             >
               <div className="relative aspect-[4/5] w-full overflow-hidden">
-                <Image
-                  src={maker.image}
+                <MakerFilm
+                  videoSrc={product.filmSrc}
+                  poster={maker.image}
                   alt=""
-                  fill
+                  reduce={reduce}
                   sizes="176px"
-                  className={cn(
-                    "object-cover transition-transform duration-700 group-hover:scale-105",
-                    reduce ? "" : "film-drift",
-                  )}
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-ink/20" />
                 <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-ink/75 px-2 py-1 backdrop-blur-sm">

@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Play, ArrowDown, ArrowRight } from "@phosphor-icons/react";
 import { COVER_MAKER } from "@/lib/fixtures/makers";
 import { rise, stagger, calm } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
+import { MakerFilm } from "./maker-film";
 
 export function HeroSpread() {
   const reduce = useReducedMotion();
@@ -16,13 +16,15 @@ export function HeroSpread() {
       {/* Cover film — a living still (Ken-Burns drift stands in for the clip). */}
       <div className="absolute inset-0">
         <div className="film-drift absolute inset-0">
-          <Image
-            src={COVER_MAKER.image}
+          <MakerFilm
+            videoSrc={COVER_MAKER.filmSrc}
+            poster={COVER_MAKER.image}
             alt={`${COVER_MAKER.name} throwing stoneware at ${COVER_MAKER.studio}`}
-            fill
+            reduce={!!reduce}
             priority
             sizes="100vw"
             className="object-cover object-center"
+            drift={false}
           />
         </div>
         {/* Ink scrims: bottom-up for the credit, left-in for the statement. */}
