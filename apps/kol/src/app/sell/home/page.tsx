@@ -11,13 +11,13 @@
  *   a fresh maker with no week yet) · error (?state=error).
  */
 
-import { SellMasthead } from "@/components/sell-masthead";
+import { SellWorkspaceNav } from "@/components/sell-workspace-nav";
 import { SellHome } from "@/components/sell-home";
 
 export default function SellHomePage() {
   return (
     <>
-      <SellMasthead nav="home" />
+      <SellWorkspaceNav active="home" />
       <main className="min-h-screen bg-ink">
         <SellHome />
       </main>

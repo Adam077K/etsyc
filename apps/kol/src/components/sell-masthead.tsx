@@ -2,43 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Check, FloppyDisk } from "@phosphor-icons/react";
+import { ArrowLeft, Check, FloppyDisk } from "@phosphor-icons/react";
 import { SELL_STOPS, type SellStopId } from "@/lib/fixtures/sell";
 import { cn } from "@/lib/utils";
-
-/**
- * The live-maker nav (post-publish HQ chrome). Distinct from the journey
- * stepper: a published maker has a home to move around, not a linear path.
- * Messages & Clips resolve after their sibling routes merge; pre-merge they
- * hit the designed 404, which is acceptable for this screens-only pass.
- */
-export type SellNavId = "home" | "orders" | "messages" | "studio";
-
-const SELL_NAV: { id: SellNavId; label: string; href: string }[] = [
-  { id: "home", label: "Home", href: "/sell/home" },
-  { id: "orders", label: "Orders", href: "/sell/orders" },
-  { id: "messages", label: "Messages", href: "/sell/messages" },
-  { id: "studio", label: "Studio", href: "/sell/studio" },
-];
-
-const HQ_WORLD_HREF = "/m/odd-clay";
 
 /**
  * SELLER-JOURNEY chrome — KOL's own fixed system (not the buyer masthead, which
  * a sibling owns). The maker's brand never appears here; it only lives inside the
  * studio preview pane. On the three tool stops it carries a progress stepper and
- * a save-&-exit; on the explainer it's a slim wordmark bar; for a LIVE maker
- * (`nav` set) it becomes a compact seller nav — Home · Orders · Messages · Studio.
+ * a save-&-exit; on the explainer it's a slim wordmark bar.
  */
 export function SellMasthead({
   current,
-  nav,
   exitHref = "/sell",
   exitLabel = "Save & exit",
 }: {
   current?: SellStopId;
-  /** live-maker mode — renders the seller nav instead of the journey stepper */
-  nav?: SellNavId;
   exitHref?: string;
   exitLabel?: string;
 }) {
@@ -58,17 +37,12 @@ export function SellMasthead({
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-colors duration-500",
-        scrolled || current || nav
+        scrolled || current
           ? "border-b border-line bg-ink/85 backdrop-blur-md"
           : "bg-gradient-to-b from-ink/70 to-transparent",
       )}
     >
-      <div
-        className={cn(
-          "mx-auto flex max-w-issue items-center justify-between px-5 py-4 sm:px-8",
-          nav ? "gap-2 sm:gap-4" : "gap-4",
-        )}
-      >
+      <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
         <div className="flex items-baseline gap-3">
           <Link
             href="/"
@@ -79,9 +53,7 @@ export function SellMasthead({
           <span className="meta hidden text-bone-dim sm:inline">For&nbsp;Makers</span>
         </div>
 
-        {nav ? (
-          <SellerNav active={nav} />
-        ) : current ? (
+        {current ? (
           <>
             <Stepper currentIndex={currentIndex} />
             {/* Condensed orientation below md, where the full rail is hidden. */}
@@ -97,16 +69,7 @@ export function SellMasthead({
         )}
 
         <div className="flex items-center gap-1.5 sm:gap-3">
-          {nav ? (
-            <Link
-              href={HQ_WORLD_HREF}
-              aria-label="View your world"
-              className="flex shrink-0 items-center gap-2 rounded-full border border-bone/25 px-2.5 py-2 font-ui text-sm text-bone/85 transition-colors hover:border-bone/60 hover:text-bone sm:px-4"
-            >
-              <ArrowUpRight size={16} weight="bold" />
-              <span className="hidden sm:inline">View your world</span>
-            </Link>
-          ) : current ? (
+          {current ? (
             <Link
               href={exitHref}
               className="flex items-center gap-2 rounded-full border border-bone/25 px-4 py-2 font-ui text-sm text-bone/85 transition-colors hover:border-bone/60 hover:text-bone"
@@ -136,43 +99,6 @@ export function SellMasthead({
         </div>
       </div>
     </header>
-  );
-}
-
-/* The live-maker seller nav — a flat set of destinations, not a linear path.
-   The active item carries a marigold underline; the rest ink in on hover. */
-function SellerNav({ active }: { active: SellNavId }) {
-  return (
-    <nav aria-label="Seller sections" className="min-w-0">
-      <ul className="flex items-center gap-0.5 sm:gap-2">
-        {SELL_NAV.map((item) => {
-          const isActive = item.id === active;
-          return (
-            <li key={item.id}>
-              <Link
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "relative block rounded-full px-2 py-1.5 font-ui text-[0.75rem] transition-colors sm:px-3.5 sm:text-sm",
-                  isActive
-                    ? "text-bone"
-                    : "text-bone/55 hover:text-bone",
-                )}
-              >
-                {item.label}
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute inset-x-2 -bottom-0.5 h-px origin-left bg-marigold transition-transform duration-300 sm:inset-x-3.5",
-                    isActive ? "scale-x-100" : "scale-x-0",
-                  )}
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
   );
 }
 

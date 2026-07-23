@@ -11,13 +11,13 @@
  *   "The kiln rests today.") · loading · error (?state=error).
  */
 
-import { SellMasthead } from "@/components/sell-masthead";
+import { SellWorkspaceNav } from "@/components/sell-workspace-nav";
 import { SellOrders } from "@/components/sell-orders";
 
 export default function SellOrdersPage() {
   return (
     <>
-      <SellMasthead nav="orders" />
+      <SellWorkspaceNav active="orders" />
       <main className="min-h-screen bg-ink">
         <SellOrders />
       </main>
