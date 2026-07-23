@@ -12,13 +12,14 @@ import {
   ShieldCheck,
   ArrowRight,
   WarningCircle,
+  CaretDown,
 } from "@phosphor-icons/react";
 import { resolveBag, bagTotals, gbp } from "@/lib/fixtures/commerce";
 import { rise, calm } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-const ERR = "text-[#F0876B]";
-const ERR_RING = "border-[#F0876B] focus-within:border-[#F0876B]";
+const ERR = "text-error";
+const NUM = ["", "One", "Two", "Three", "Four", "Five"];
 
 type Fields =
   | "email"
@@ -87,7 +88,7 @@ export function Checkout() {
     if (!v.cardName.trim()) e.cardName = "Add the name on the card.";
     const digits = v.cardNumber.replace(/\s/g, "");
     if (!digits) e.cardNumber = "Add a card number.";
-    else if (!/^\d{15,16}$/.test(digits)) e.cardNumber = "Enter a 16-digit card number.";
+    else if (!/^\d{15,16}$/.test(digits)) e.cardNumber = "Enter a 15- or 16-digit card number.";
     if (!v.expiry.trim()) e.expiry = "Add an expiry date.";
     else if (!/^\d{2}\s?\/\s?\d{2}$/.test(v.expiry.trim())) e.expiry = "Use MM / YY.";
     const cvc = v.cvc.trim();
@@ -124,7 +125,7 @@ export function Checkout() {
             KOL
           </Link>
           <span className="flex items-center gap-1.5 font-ui text-sm text-bone-dim">
-            <Lock size={15} weight="fill" className="text-olive" />
+            <Lock size={15} weight="fill" className="text-bone-dim" />
             Secure checkout
           </span>
         </div>
@@ -143,7 +144,10 @@ export function Checkout() {
           Checkout
         </h1>
         <p className="mt-3 max-w-md font-serif text-lg italic text-bone/70">
-          Two makers are getting your order ready. Here&rsquo;s where it goes.
+          {makers.length === 1
+            ? "One maker is"
+            : `${NUM[makers.length] ?? makers.length} makers are`}{" "}
+          getting your order ready. Here&rsquo;s where it goes.
         </p>
 
         <form
@@ -261,7 +265,7 @@ export function Checkout() {
             </Fieldset>
 
             {Object.keys(errors).length > 0 && (
-              <p className={cn("flex items-center gap-2 font-ui text-sm", ERR)}>
+              <p role="alert" className={cn("flex items-center gap-2 font-ui text-sm", ERR)}>
                 <WarningCircle size={16} weight="fill" />
                 Please fix the highlighted fields to place your order.
               </p>
@@ -310,7 +314,8 @@ export function Checkout() {
                         </span>
                       </div>
                       <p className="mt-1 font-ui text-xs text-bone-dim">
-                        Made by {line.maker.name.split(" ")[0]} · {line.maker.place.split(" → ").pop()}
+                        Made by {line.maker.name.split(" ").at(0) ?? line.maker.name} ·{" "}
+                        {line.maker.place.split(" → ").at(-1) ?? line.maker.place}
                       </p>
                       <p className="mt-auto pt-2 font-ui text-xs text-bone/50">
                         Qty {line.qty}
@@ -321,7 +326,10 @@ export function Checkout() {
               </ul>
               <dl className="space-y-2.5 border-t border-line px-6 py-5">
                 <Row label="Subtotal" value={gbp(totals.subtotal)} />
-                <Row label="Shipping" value={gbp(totals.shipping)} />
+                <Row
+                  label="Shipping"
+                  value={totals.shipping === 0 ? "Free · UK" : gbp(totals.shipping)}
+                />
                 <div className="flex items-baseline justify-between border-t border-line pt-3">
                   <dt className="font-ui text-base font-semibold text-bone">Total</dt>
                   <dd className="font-display text-2xl font-bold text-marigold">
@@ -344,13 +352,13 @@ export function Checkout() {
                 ))}
               </div>
               <p className="font-serif text-sm italic leading-snug text-bone/80">
-                {makers.map((m) => m.name.split(" ")[0]).join(" and ")} are readying
-                your order by hand.
+                {makers.map((m) => m.name.split(" ").at(0) ?? m.name).join(" and ")} are
+                readying your order by hand.
               </p>
             </div>
 
             <p className="mt-4 flex items-center justify-center gap-2 font-ui text-xs text-bone-dim">
-              <ShieldCheck size={15} weight="fill" className="text-olive" />
+              <ShieldCheck size={15} weight="fill" className="text-bone-dim" />
               30-day returns · repairs offered for life
             </p>
           </aside>
@@ -407,8 +415,8 @@ function Field({
       </label>
       <div
         className={cn(
-          "flex items-center gap-2 rounded-xl border bg-ink px-4 py-3 transition-colors focus-within:border-bone/60",
-          error ? ERR_RING : "border-bone/20",
+          "flex items-center gap-2 rounded-xl border bg-ink px-4 py-3 transition-colors focus-within:ring-2 focus-within:ring-marigold/45",
+          error ? "border-error" : "border-bone/20 focus-within:border-marigold/70",
         )}
       >
         <input
@@ -459,8 +467,8 @@ function SelectField({
       </label>
       <div
         className={cn(
-          "rounded-xl border bg-ink px-2 transition-colors focus-within:border-bone/60",
-          error ? ERR_RING : "border-bone/20",
+          "relative rounded-xl border bg-ink transition-colors focus-within:ring-2 focus-within:ring-marigold/45",
+          error ? "border-error" : "border-bone/20 focus-within:border-marigold/70",
         )}
       >
         <select
@@ -470,7 +478,7 @@ function SelectField({
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={!!error}
           aria-describedby={error ? errId : undefined}
-          className="w-full bg-transparent px-2 py-3 font-ui text-base text-bone focus:outline-none [&>option]:bg-ink"
+          className="w-full appearance-none bg-transparent px-4 py-3 pr-11 font-ui text-base text-bone focus:outline-none [&>option]:bg-ink"
         >
           <option value="">Select a country</option>
           {options.map((o) => (
@@ -479,6 +487,12 @@ function SelectField({
             </option>
           ))}
         </select>
+        <CaretDown
+          size={16}
+          weight="bold"
+          aria-hidden
+          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-bone-dim"
+        />
       </div>
       {error && (
         <p id={errId} className={cn("mt-1.5 flex items-center gap-1.5 font-ui text-xs", ERR)}>

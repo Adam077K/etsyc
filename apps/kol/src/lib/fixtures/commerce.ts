@@ -285,7 +285,9 @@ export function resolveBag(bag: BagLine[] = MOCK_BAG): ResolvedLine[] {
   return lines;
 }
 
-export const SHIPPING = 6;
+// Free UK shipping — matches the product-page promise (a mocked UI must not
+// contradict itself). Rendered as "Free · UK" in the summary.
+export const SHIPPING = 0;
 
 export function bagTotals(lines: ResolvedLine[]) {
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
