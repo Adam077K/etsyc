@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -98,9 +98,12 @@ export function SellClips() {
         <FilterBar filter={filter} onChange={setFilter} counts={counts} />
         <button
           type="button"
-          className="flex items-center gap-2 rounded-full border border-bone/25 px-4 py-2 font-ui text-sm font-medium text-bone transition-colors hover:border-bone/55 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          disabled
+          aria-disabled="true"
+          title="Uploads open once your shop is live"
+          className="flex items-center gap-2 rounded-full border border-bone/20 px-4 py-2 font-ui text-sm font-medium text-bone/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
-          <UploadSimple size={17} weight="bold" className="text-marigold" />
+          <UploadSimple size={17} weight="bold" className="text-marigold/60" />
           Add a film
         </button>
       </div>
@@ -121,7 +124,7 @@ export function SellClips() {
                   {group.note}
                 </p>
               </div>
-              <div className={groupGridClass(group.id)}>
+              <div className={groupGridClass(group.id, group.clips.length)}>
                 {group.clips.map((clip, i) => (
                   <ClipCard
                     key={clip.id}
@@ -141,8 +144,14 @@ export function SellClips() {
   );
 }
 
-/* Each surface gets its own footprint — never one uniform grid across the page. */
-function groupGridClass(surface: ClipSurface): string {
+/* Each surface gets its own footprint — never one uniform grid across the page.
+   A lone clip fills a right-sized single column instead of orphaning an empty one. */
+function groupGridClass(surface: ClipSurface, count: number): string {
+  if (count === 1) {
+    return surface === "cover"
+      ? "mt-5 grid grid-cols-1 max-w-2xl"
+      : "mt-5 grid grid-cols-1 max-w-sm";
+  }
   switch (surface) {
     case "cover":
       return "mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr]";
@@ -194,14 +203,13 @@ function FilterBar({
   counts: Record<Filter, number>;
 }) {
   return (
-    <div role="tablist" aria-label="Filter films" className="flex flex-wrap items-center gap-1.5">
+    <div role="group" aria-label="Filter films" className="flex flex-wrap items-center gap-1.5">
       {FILTERS.map((f) => {
         const on = filter === f.id;
         return (
           <button
             key={f.id}
-            role="tab"
-            aria-selected={on}
+            aria-pressed={on}
             onClick={() => onChange(f.id)}
             className={cn(
               "flex items-center gap-2 rounded-full px-3.5 py-1.5 font-ui text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
@@ -246,12 +254,21 @@ function ClipCard({
 }) {
   const [cap, setCap] = useState<CardCapture>({ kind: "idle" });
   const [seconds, setSeconds] = useState(0);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (cap.kind !== "recording") return;
     const t = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
   }, [cap.kind]);
+
+  // Cancel a pending save if the card unmounts mid-save (e.g. filter change).
+  useEffect(
+    () => () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    },
+    [],
+  );
 
   function start(mode: "film" | "voice", re: boolean) {
     setSeconds(0);
@@ -262,7 +279,7 @@ function ClipCard({
     if (cap.kind !== "recording") return;
     const wasRe = cap.re;
     setCap({ kind: "saving", re: wasRe });
-    setTimeout(
+    saveTimer.current = setTimeout(
       () => {
         const dur = fmt(Math.max(seconds, 4));
         if (wasRe) onReRecorded(clip.id, dur);
@@ -413,7 +430,10 @@ function SlotCard({
           </button>
           <button
             type="button"
-            className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-ui text-xs font-medium text-bone/70 transition-colors hover:bg-ink-raise hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            disabled
+            aria-disabled="true"
+            title="Uploads open once your shop is live"
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-ui text-xs font-medium text-bone/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             <UploadSimple size={14} weight="bold" />
             Upload

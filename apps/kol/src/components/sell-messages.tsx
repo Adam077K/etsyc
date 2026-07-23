@@ -17,12 +17,12 @@ import {
 } from "@phosphor-icons/react";
 import {
   LETTERS,
-  MAKER_AVATAR,
   type Letter,
   type LetterEntry,
   type LetterStatus,
   type ReplyMode,
 } from "@/lib/fixtures/inbox";
+import { MAKER_AVATAR } from "@/lib/seller-identity";
 import { CaptureStage, CaptureSaving, fmt } from "@/components/sell-capture";
 import { easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -179,7 +179,7 @@ function FilterBar({
 }) {
   return (
     <div
-      role="tablist"
+      role="group"
       aria-label="Filter letters"
       className="flex flex-wrap items-center gap-1.5"
     >
@@ -188,8 +188,7 @@ function FilterBar({
         return (
           <button
             key={f.id}
-            role="tab"
-            aria-selected={on}
+            aria-pressed={on}
             onClick={() => onChange(f.id)}
             className={cn(
               "flex items-center gap-2 rounded-full px-3.5 py-1.5 font-ui text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
@@ -252,9 +251,9 @@ function LetterRow({
           <span className="flex items-center justify-between gap-2">
             <span className="truncate font-ui text-[0.95rem] font-semibold text-bone">
               {letter.buyerFirst}
-              <span className="font-normal text-bone/45"> · {letter.buyerPlace}</span>
+              <span className="font-normal text-bone/60"> · {letter.buyerPlace}</span>
             </span>
-            <span className="shrink-0 font-mono text-[0.65rem] text-bone/40">
+            <span className="shrink-0 font-mono text-[0.65rem] text-bone-dim">
               {letter.at}
             </span>
           </span>
@@ -300,6 +299,7 @@ function OpenLetter({
   // letter opens straight into the composer; "Write again" re-opens it on an
   // answered one. Deriving avoids resetting state inside an effect.
   const [reopened, setReopened] = useState(false);
+  const [sentAnnounce, setSentAnnounce] = useState("");
   const composing = letter.status === "needs-reply" || reopened;
   const anchor = useRef<HTMLDivElement>(null);
 
@@ -323,13 +323,17 @@ function OpenLetter({
         <div className="min-w-0 flex-1">
           <p className="font-display text-lg font-bold leading-tight text-bone">
             {letter.buyerFirst}
-            <span className="font-ui text-sm font-normal text-bone/45">
+            <span className="font-ui text-sm font-normal text-bone/60">
               {" "}
               from {letter.buyerPlace}
             </span>
           </p>
-          <p className="mt-0.5 font-ui text-xs text-bone/55">
+          <p className="mt-0.5 font-ui text-xs text-bone/60">
             {answered ? "You've answered" : "Waiting on you"}
+          </p>
+          {/* On mobile the About chip is hidden, so name the piece here. */}
+          <p className="mt-1 font-ui text-xs text-marigold sm:hidden">
+            About · {letter.subject}
           </p>
         </div>
         <AboutChip letter={letter} />
@@ -345,12 +349,20 @@ function OpenLetter({
 
       {/* Composer / answered footer */}
       <div className="border-t border-line p-4 sm:p-5">
+        <p role="status" aria-live="polite" className="sr-only">
+          {sentAnnounce}
+        </p>
         {composing ? (
           <Composer
             letter={letter}
             reduce={reduce}
             onSend={(entry) => {
               setReopened(false);
+              setSentAnnounce(
+                entry.mode === "text"
+                  ? "Reply sent"
+                  : `Reply sent on ${entry.mode === "film" ? "film" : "voice"}`,
+              );
               onSend(entry);
             }}
           />
@@ -511,6 +523,8 @@ function Composer({
   const [text, setText] = useState(letter.draftReply ?? "");
   const [capture, setCapture] = useState<CaptureState>("idle");
   const [seconds, setSeconds] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Recording timer.
   useEffect(() => {
@@ -518,6 +532,23 @@ function Composer({
     const t = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
   }, [capture]);
+
+  // Grow the textarea with its content so the drafted reply is fully reviewable
+  // (capped, then it scrolls). Pure DOM write, so no state churn.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 192)}px`;
+  }, [text, mode]);
+
+  // Cancel a pending save if the composer unmounts mid-send.
+  useEffect(
+    () => () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    },
+    [],
+  );
 
   function startCapture(m: "film" | "voice") {
     setMode(m);
@@ -528,7 +559,7 @@ function Composer({
   function stopCapture() {
     const replyMode: ReplyMode = mode === "voice" ? "voice" : "film";
     setCapture("saving");
-    setTimeout(
+    saveTimer.current = setTimeout(
       () => {
         onSend({
           id: `${letter.id}-r-${Date.now()}`,
@@ -624,11 +655,12 @@ function Composer({
         </label>
         <textarea
           id="reply"
+          ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          rows={4}
+          rows={5}
           placeholder={`Write back to ${letter.buyerFirst}…`}
-          className="block w-full resize-none bg-transparent px-4 py-3 font-serif text-[0.98rem] leading-relaxed text-bone placeholder:text-bone/35 focus:outline-none"
+          className="block max-h-48 w-full resize-none overflow-y-auto bg-transparent px-4 py-3 font-serif text-[0.98rem] leading-relaxed text-bone placeholder:text-bone/35 focus:outline-none"
         />
         <div className="flex items-center justify-end px-3 pb-3">
           <button

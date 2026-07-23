@@ -110,6 +110,9 @@ export function TypingDots() {
 
 function LevelMeter() {
   const reduce = useReducedMotion();
+  // Resting height of each bar as a fraction of full (0–1); the base height is
+  // `h * 60%` and each bar breathes around `h` on its own delay, so the row
+  // reads as an uneven, live audio meter rather than a synced equaliser.
   const bars = [0.4, 0.7, 1, 0.6, 0.85, 0.5, 0.9, 0.65, 0.45, 0.8, 0.55, 0.7];
   return (
     <div className="flex h-full items-center gap-1.5" aria-hidden>

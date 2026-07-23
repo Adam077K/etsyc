@@ -56,8 +56,8 @@ export interface Letter {
   draftReply?: string;
 }
 
-export const MAKER_AVATAR = "/media/clay-shape.jpg";
-export const MAKER_FIRST = "Lena";
+// Re-exported for existing importers; canonical source is lib/seller-identity.
+export { MAKER_AVATAR, MAKER_FIRST } from "@/lib/seller-identity";
 
 export const LETTERS: Letter[] = [
   {
