@@ -4,6 +4,9 @@
 
 :root {
   color-scheme: dark;
+  /* Fixed masthead height (py-4 = 32px + the 40px icon-button row). Sticky
+     sub-bars offset by it; full-height panes subtract it. One source of truth. */
+  --header-h: 72px;
 }
 
 @layer base {
