@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
@@ -16,6 +15,7 @@ import type { Maker } from "@/lib/fixtures/makers";
 import { WORLDS } from "@/lib/fixtures/worlds";
 import { easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { MakerFilm } from "./maker-film";
 
 // Faint echo of the maker's world accent — ties the film (step 2) to the world
 // it opens into (step 3). Only for makers whose world is built.
@@ -156,16 +156,18 @@ export function ExpandedVideo({
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={maker.id}
-              className={reduce ? "absolute inset-0" : "film-drift absolute inset-0"}
+              className="absolute inset-0"
               initial={{ opacity: 0, scale: reduce ? 1 : 1.04 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: reduce ? 0.2 : 0.45, ease: easeOut }}
             >
-              <Image
-                src={maker.image}
+              {/* MakerFilm drifts the still; a real clip never drifts on itself. */}
+              <MakerFilm
+                videoSrc={maker.filmSrc}
+                poster={maker.image}
                 alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-                fill
+                reduce={!!reduce}
                 priority
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"

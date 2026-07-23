@@ -8,6 +8,7 @@ import type { Maker, Span, Ground } from "@/lib/fixtures/makers";
 import { CRAFT_ICON } from "@/lib/icons";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { MakerFilm } from "./maker-film";
 
 const SPAN_CLASS: Record<Span, string> = {
   hero: "col-span-2 md:col-span-6 lg:col-span-12",
@@ -108,15 +109,18 @@ function EditorialTile({
         className={cn(
           "absolute inset-0 transition-[transform,filter] duration-[900ms] ease-out-expo",
           "saturate-[0.92] brightness-[0.94] group-hover:scale-[1.05] group-hover:saturate-100 group-hover:brightness-100 group-focus-within:scale-[1.05]",
-          maker.kind === "film" && !reduce && "film-drift",
         )}
       >
-        <Image
-          src={maker.image}
+        {/* Drift lives on the still (film makers only) — a real clip carries its
+            own motion, so MakerFilm never drifts the video. */}
+        <MakerFilm
+          videoSrc={maker.kind === "film" ? maker.filmSrc : undefined}
+          poster={maker.image}
           alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-          fill
+          reduce={!!reduce}
           sizes={SIZES}
           className="object-cover"
+          drift={maker.kind === "film"}
         />
       </div>
 
