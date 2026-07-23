@@ -1,8 +1,13 @@
-# KOL — Next-pass backlog (Discovery Feed)
+# KOL — Next-pass backlog
 
-Deferred from the 2026-07-22 QA gate (design-critic + impeccable-finish-reviewer).
-Not done in the fix loop by design — logged here, not left as UI cruft. Pick up
-before or alongside the next pages.
+Deferred polish, logged rather than left as UI cruft. Pick up before/alongside
+the next pages. Items below are the Discovery Feed backlog from the 2026-07-22 QA
+gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
+
+## Applied
+- **[2026-07-22, arc 1] Liquid divider phase.** Gold blobs now run the inverted
+  cy phase `[20, 27, 14, 20]` so the goo seam pinches/billows from frame one
+  (design-critic polish) — done in `liquid.tsx`.
 
 ## Design / content
 - **Olive values spread + surface the dead `values` data.** Every `Maker` carries
