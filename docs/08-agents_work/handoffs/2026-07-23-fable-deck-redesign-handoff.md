@@ -47,10 +47,18 @@ I read every page. Current visual language: **light kraft/paper-texture ground, 
 
 ---
 
+## ⭐ REQUIRED: two orientation slides BEFORE the journeys (Founder, 2026-07-23)
+Before we show the maker journey and the buyer/product journey, the audience must plainly understand **what KOL is** — otherwise the journeys land on people who don't yet have the concept. Add **two new slides**, in this order, right after the intro and before Sharon's journey:
+
+1. **One-sentence explanation slide.** A single, complete sentence that says what the product is — the elevator pitch made whole (ties to feedback #1, "new way to shop"). Big, clean, one line, nothing else competing. A judge should be able to repeat it back.
+2. **The "1 · 2 · 3" of the product slide.** Three short, concrete points that make it unmistakable what the product actually *does* — e.g. (1) meet the real maker on film, (2) step into their story/world, (3) buy from someone you trust. Keep it to three; this is the "so people understand what it does" checkpoint.
+
+Only **after** these two orientation slides do we go deep into the journeys (Sharon → Shyla). Think: *tell them what it is → tell them the three things it does → now show them living through it.*
+
 ## THE STORY / FLOW the deck should follow (from the HLV mentor — this is the spine)
 Full breakdown: `docs/05-marketing/HLV-mentor-feedback-structure.md`. The mentor's #1 shift: **STORY is the spine, not trust/verification.** "E-commerce for the age of storytelling." Order he wants:
 
-1. **Intro / complete elevator pitch** — "a new way to shop": e-commerce rebuilt around the *story* behind each object (the maker, the why, the materials). *Foundation = the story, not the products.*
+1. **Intro → then the two orientation slides above** — "a new way to shop": e-commerce rebuilt around the *story* behind each object (the maker, the why, the materials). *Foundation = the story, not the products.* This is where the **one-sentence explanation** and the **1·2·3 of the product** slides live (see the ⭐ section above) — the audience must understand what KOL is before step 2.
 2. **The maker first** — **Sharon**, a real Etsy seller (store **Two Dots**, hand-sewn children's costumes, Israel). She signs in and tells the story behind her work. Walk her seller journey.
 3. **Then the named buyer** — **Shyla, a mother** (the deck already names her this — keep "Shyla," NOT "Maya"/"Noy" from older drafts). She's looking for something **handmade and values-aligned for her little girl's school event**. She comes across Two Dots, feels the story, buys — gets it home, quality is high, and **she can tell the story forward** → lifetime value.
 4. **How it works** — Discovery → click a video → dive into the store → product → shop. Basic, no fluff. Then connection & trust as the *result*.
