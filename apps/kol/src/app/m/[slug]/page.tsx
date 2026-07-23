@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getMaker } from "@/lib/fixtures/makers";
 import { getWorld, WORLD_SLUGS } from "@/lib/fixtures/worlds";
 import { MakerWorld } from "@/components/maker-world";
+import { TwoDotsWorld } from "@/components/twodots-world";
 
 type Params = { slug: string };
 
@@ -33,5 +34,8 @@ export default async function MakerWorldPage({
   const maker = getMaker(slug);
   const world = getWorld(slug);
   if (!maker || !world) notFound();
+  // Two Dots gets a bespoke, section-authored world (Founder directive); the other
+  // five keep the shared MakerWorld template.
+  if (slug === "two-dots") return <TwoDotsWorld maker={maker} world={world} />;
   return <MakerWorld maker={maker} world={world} />;
 }
