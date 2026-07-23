@@ -111,7 +111,7 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
             {maker.place}
           </p>
         </motion.div>
-        <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-bone/50 md:block">
+        <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-bone/50">
           <ArrowDown size={22} className={reduce ? "" : "animate-float"} />
         </div>
       </section>
