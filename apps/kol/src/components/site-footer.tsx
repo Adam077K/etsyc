@@ -1,14 +1,42 @@
 "use client";
 
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, InstagramLogo, YoutubeLogo, EnvelopeSimple } from "@phosphor-icons/react";
 import { rise, calm, inView } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 
+// Every link resolves to a real surface so nothing in the demo dead-ends.
+// Seller-intent links point to /sell (owned by the seller arc; live once merged).
 const COLUMNS = [
-  { title: "Shop", links: ["The issue", "By craft", "New makers", "Gift guide"] },
-  { title: "Makers", links: ["Sell on KOL", "How it works", "Maker stories", "Apply"] },
-  { title: "KOL", links: ["About", "The Journal", "Trust & proof", "Careers"] },
+  {
+    title: "Shop",
+    links: [
+      { label: "The issue", href: "/#feed" },
+      { label: "By craft", href: "/browse" },
+      { label: "New makers", href: "/browse" },
+      { label: "Gift guide", href: "/#feed" },
+    ],
+  },
+  {
+    title: "Makers",
+    links: [
+      { label: "Sell on KOL", href: "/sell" },
+      { label: "How it works", href: "/sell" },
+      { label: "Maker stories", href: "/browse" },
+      { label: "Apply", href: "/sell" },
+    ],
+  },
+  {
+    title: "KOL",
+    links: [
+      { label: "About", href: "/journal" },
+      { label: "The Journal", href: "/journal" },
+      { label: "Trust & proof", href: "/#feed" },
+      // No careers content this pass — the designed not-found is the honest answer.
+      { label: "Careers", href: "/careers" },
+    ],
+  },
 ];
 
 const SOCIAL = [
@@ -98,17 +126,17 @@ export function SiteFooter() {
           </div>
 
           {COLUMNS.map((col) => (
-            <nav key={col.title}>
+            <nav key={col.title} aria-label={col.title}>
               <p className="meta text-bone-dim">{col.title}</p>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#top"
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
                       className="font-ui text-sm text-bone/70 transition-colors hover:text-bone"
                     >
-                      {link}
-                    </a>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
