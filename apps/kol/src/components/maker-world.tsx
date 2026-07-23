@@ -44,14 +44,32 @@ const ACCENT_BG: Record<Ground, string> = {
  * copy voice — never in a broken palette or type (DESIGN.md is the contract).
  */
 export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
-  const reduce = useReducedMotion();
+  // `useReducedMotion` resolves to the client's true preference immediately, but
+  // the server always renders as `false` — so reduce-conditional DOM (the docked
+  // film swaps to a whole different static tree) would hydration-mismatch. Gate
+  // on mount: first client paint matches the server, then reduced motion applies.
+  const reduceRaw = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  // Intentional mount flag: flip once after hydration so the first client paint
+  // matches the server (reduce=false) and reduced motion only applies afterward.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
+  const reduce = mounted ? reduceRaw : false;
   const heroRef = useRef<HTMLDivElement>(null);
   const textOnAccent = world.accent === "bone" ? "text-ink" : "text-bone";
 
   return (
     <div className="relative bg-ink">
       <WorldChrome />
-      <DockedFilm maker={maker} heroRef={heroRef} reduce={!!reduce} />
+      {/* Hero film: a world may override the persistent film with its own
+          `heroFilm` (the feed tile stays `maker.image`; the feed↔expanded morph
+          is untouched since entering the world is a route change, not a morph). */}
+      <DockedFilm
+        maker={maker}
+        heroSrc={world.heroFilm ?? maker.image}
+        heroRef={heroRef}
+        reduce={!!reduce}
+      />
 
       {/* Hero — the film plays full-bleed behind (fixed, z-40); the scrim + text
           sit above it (z-45) and scroll away, letting the film dock. */}
@@ -67,9 +85,14 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
           )}
         />
         <motion.div
-          initial={reduce ? undefined : { opacity: 0, y: 30 }}
-          animate={reduce ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: easeOut, delay: 0.15 }}
+          // Reduced-motion + hydration safe: `initial` is CONSTANT (never
+          // reduce-dependent) so SSR and client render the same first paint (no
+          // hydration mismatch), and `animate` always resolves to opacity:1 so
+          // the hero text is never stranded invisible. Reduced motion only drops
+          // the transition to an instant settle (no movement, no fade).
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={reduce ? { duration: 0 } : { duration: 0.9, ease: easeOut, delay: 0.15 }}
           className="relative mx-auto w-full max-w-issue px-5 pb-16 sm:px-8 sm:pb-20"
         >
           <p className="meta mb-4 text-marigold">{maker.discipline}</p>
@@ -221,10 +244,12 @@ function WorldChrome() {
 /* The persistent film — full-bleed hero that docks to a corner on scroll. */
 function DockedFilm({
   maker,
+  heroSrc,
   heroRef,
   reduce,
 }: {
   maker: Maker;
+  heroSrc: string;
   heroRef: React.RefObject<HTMLDivElement | null>;
   reduce: boolean;
 }) {
@@ -273,7 +298,7 @@ function DockedFilm({
         <div className="relative h-[100svh] w-full">
           <MakerFilm
             videoSrc={maker.filmSrc}
-            poster={maker.image}
+            poster={heroSrc}
             alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
             reduce={reduce}
             priority
@@ -320,7 +345,7 @@ function DockedFilm({
         {/* MakerFilm drifts the still; a real clip never Ken-Burns on itself. */}
         <MakerFilm
           videoSrc={maker.filmSrc}
-          poster={maker.image}
+          poster={heroSrc}
           alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
           reduce={reduce}
           priority

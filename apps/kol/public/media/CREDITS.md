@@ -50,3 +50,37 @@ change.
 | Surface | Slot | Interim | Proper shot |
 |---|---|---|---|
 | `/how` hero | Cinematic opener ground (`how-story.tsx`) | `indigo-dye.jpg` — an abstract dye swirl; reads impersonal in the least-scrimmed quadrant (interim fix: right scrim floored at `ink/30`) | A real maker's hands or face mid-process (throwing, dyeing, carving) — the thesis page's first human impression should be a person, not a texture |
+
+## Worlds expansion — Grain & Groove + Ember & Rue + Risograph Room
+
+These three worlds reuse **existing** local media, so every image is honest stock
+that already renders. Four **derived** files were added (reworked crops of existing
+sources — see below — never new downloads). Where an image is reused across maker
+contexts, the content genuinely fits the new craft — the same practice the build
+already uses (e.g. `salt-ceramics.jpg` is both Salt Kiln's feed tile and Odd Clay's
+carafe gallery). No portrait is ever reused as a different named maker.
+
+| File | Used as | In |
+|---|---|---|
+| woodwork.jpg | Bench / drilling timber (own feed tile) | Grain & Groove — hero, process 01, studio, Butterfly Board |
+| maker-soren.jpg | Tomás Reyes' portrait (previously unused reserve) | Grain & Groove — story |
+| apothecary.jpg | Dropper + oil bottles (own feed tile) | Ember & Rue — hero, process, studio, Neroli & Cedar Oil |
+| salt-ceramics.jpg | Glazed stoneware vessels Noor decants into (ceramic bottle-vases) | Ember & Rue — story, process, Sealed Vessel |
+| prints-wall.jpg | Wall of finished riso prints (own feed tile) | Risograph Room — feed tile, process 01, studio |
+
+### Derived assets (reworked locally with ffmpeg; source credited, distinct from source use)
+
+| File | Derived from | Treatment & why | In |
+|---|---|---|---|
+| wood-stool.jpg | stool-blue.jpg (Søren Bast's feed tile) | Tight crop + warm-timber grade (blue ground → sage) so it reads as Tomás's reclaimed piece, NOT the same cool studio stool that is Søren's tile. | Grain & Groove — Field Stool |
+| wood-joint.jpg | stool-blue.jpg | Tight crop on the stretcher/leg joinery + warm grade — a joint detail, distinct framing from Søren's whole-stool tile. | Grain & Groove — process 02, Field Stool + Butterfly Board galleries |
+| riso-ink.jpg | indigo-dye.jpg (Indigo & Ash's dye vat) | Tight lower-left detail crop + riso-language treatment (high contrast, hue toward riso blue, warm-paper split-tone). Distinct framing + colour from Sabine's wide vat — no cross-world déjà-vu. | Risograph Room — hero (heroFilm), process 02, Ink Field |
+| riso-overprint.jpg | prints-wall.jpg (own feed tile, monstera frame) | Two-colour riso duotone (fluoro pink + blue) with RGB channel-shift misregistration — the pink/blue overprint collision the copy describes. | Risograph Room — story, Overprint Study |
+
+`indigo-dye.jpg` stays exclusive to Indigo & Ash; `stool-blue.jpg` (raw) stays
+Søren Bast's tile only — Grain & Groove shows the reworked wood-* crops instead.
+Risograph Room's world **hero** leads on the riso-ink action register (`heroFilm`),
+while the feed tile stays `prints-wall.jpg` (the feed is not disturbed).
+
+Replace with KOL's own maker footage/photography before any public launch — this is
+the screens-only stock pass, and the reuse above is a placeholder, not the shipped look.
