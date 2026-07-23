@@ -18,9 +18,15 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
 - **[wave 3, `4e176d2`] Olive values spread + surface the dead `values` data.**
   Shipped as `values-spread.tsx` (olive "Shop by your values" spread wired into
   the feed at index 6, drives a real value filter); object tiles also carry a
-  value chip.
+  value chip. _Runtime-verified wave 4:_ mounted and rendered — `.bg-olive`
+  measures `width 1440, left 0` on the live feed (full-bleed). A prior "not
+  visible" audit was a false negative from a non-scrolled capture where the
+  tiles/spreads `whileInView` (opacity-0) never animated in; scroll-through
+  screenshot confirms it.
 - **[wave 3, `4e176d2`] Full-bleed spreads.** QuoteSpread + StatSpread now break
   edge-to-edge (`-mx-5 sm:-mx-8`, no card) for the magazine "spread" feel.
+  _Runtime-verified wave 4:_ `.bg-plum` and `.bg-clay` both measure `width 1440,
+  left 0` on the live feed — genuinely edge-to-edge, not rounded cards.
 - **[wave 3, `4e176d2`] Hover blurb reveal → transform/clip.** EditorialTile now
   reveals the blurb via `clip-path` + `transform` + opacity (absolutely
   positioned, off the layout thread); the serif ink-in + marigold underline wipe
