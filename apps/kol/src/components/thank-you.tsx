@@ -98,12 +98,12 @@ export function ThankYou() {
               </div>
 
               <figcaption className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
-                <Quotes size={30} weight="fill" className="mb-3 text-marigold/80" />
+                <Quotes size={24} weight="fill" aria-hidden className="mb-3 text-marigold/70" />
                 <blockquote
                   className="max-w-xl font-serif leading-[1.2] text-bone"
                   style={{ fontSize: "clamp(1.4rem, 3.2vw, 2.35rem)" }}
                 >
-                  {primaryNote.line}
+                  &ldquo;{primaryNote.line}&rdquo;
                 </blockquote>
                 <p className="mt-5 font-ui text-sm text-bone/80">
                   <span className="font-semibold text-bone">{primary.name}</span>
@@ -170,7 +170,8 @@ export function ThankYou() {
                       </span>
                     </div>
                     <p className="mt-1 font-ui text-xs text-bone-dim">
-                      Made by {line.maker.name.split(" ")[0]} · {line.maker.place.split(" → ").pop()}
+                      Made by {line.maker.name.split(" ").at(0) ?? line.maker.name} ·{" "}
+                      {line.maker.place.split(" → ").at(-1) ?? line.maker.place}
                     </p>
                   </div>
                 </li>
