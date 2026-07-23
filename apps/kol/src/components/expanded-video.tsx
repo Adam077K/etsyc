@@ -117,6 +117,8 @@ export function ExpandedVideo({
     // playhead, then settle it in as the route changes — so the film is already
     // playing on the world route and never re-mounts from black.
     const seedTime = filmVideoRef.current?.currentTime;
+    // Claim the entrance so the world route doesn't restart it on mount.
+    film.beginHandoff();
     film.present({
       makerId: maker.id,
       videoSrc: maker.filmSrc,

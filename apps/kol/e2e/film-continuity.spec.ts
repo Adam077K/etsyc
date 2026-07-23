@@ -131,3 +131,25 @@ test("the live clip keeps its playhead across world→product", async ({
   // The playhead advanced (or held) — it did NOT reset to 0 at the route seam.
   expect(t2).toBeGreaterThanOrEqual(t1 - 0.15);
 });
+
+test("product→back-to-world restores the full-bleed hero (not frozen in corner)", async ({
+  page,
+}) => {
+  await page.goto("/m/odd-clay");
+  await expect(stage(page)).toBeVisible();
+  // Into the product (PiP opens, film docks to the corner)...
+  await page.locator('a[href="/m/odd-clay/p/carafe"]').first().click();
+  await page.waitForURL("**/p/carafe");
+  await page.waitForTimeout(700);
+  // ...then straight back via the product header while the PiP is still open.
+  await page.getByRole("link", { name: /Back to Odd Clay Studio/i }).click();
+  await page.waitForURL("**/m/odd-clay");
+  await page.waitForTimeout(900); // let the drive-to-hero settle
+
+  const vw = page.viewportSize()!.width;
+  const box = await stage(page).boundingBox();
+  expect(box, "stage has a box").not.toBeNull();
+  // Full-bleed again — the film was NOT left frozen in the corner.
+  expect(box!.width).toBeGreaterThan(vw * 0.9);
+  await page.screenshot({ path: `${SHOTS}/7-back-nav-hero.png` });
+});

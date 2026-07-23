@@ -4,8 +4,14 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useFilm } from "./film-context";
 
-/** Buyer surfaces that carry the continuous film. Everything else clears it. */
-const FILM_ROUTE = /^\/(m\/|checkout|thank-you)/;
+/**
+ * Buyer surfaces that carry the continuous film. Everything else clears it.
+ * Anchored so it can't prefix-match unrelated routes: `m/[^/]` needs a real
+ * slug (so a future /marketplace won't match), and checkout/thank-you are
+ * end-anchored (so /checkout-help won't match).
+ * MUST UPDATE when a new film-bearing route is added.
+ */
+const FILM_ROUTE = /^\/(m\/[^/]|checkout$|thank-you$)/;
 
 /**
  * FilmRouteSync — mounted once in the app shell. When the pathname leaves the

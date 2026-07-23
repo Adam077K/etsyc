@@ -26,6 +26,8 @@ export function HeroSpread() {
   function enterCoverWorld() {
     if (!hasWorld) return;
     const seedTime = coverVideoRef.current?.currentTime;
+    // Claim the entrance so the world route doesn't restart it on mount.
+    film.beginHandoff();
     film.present({
       makerId: COVER_MAKER.id,
       videoSrc: COVER_MAKER.filmSrc,

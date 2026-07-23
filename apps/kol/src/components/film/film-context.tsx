@@ -100,6 +100,11 @@ interface FilmController {
   driveTo: (target: FilmTarget, opts?: { duration?: number; reduce?: boolean }) => void;
   /** Snap immediately (no animation) — used to seed the handoff rect. */
   snapTo: (target: FilmTarget) => void;
+  /** Mark that a caller (feed/cover) is animating the entrance into the world,
+      so the world route doesn't restart it. Consumed once by the world. */
+  beginHandoff: () => void;
+  /** Read-and-reset the handoff flag. True => a caller owns the entrance. */
+  consumeHandoff: () => boolean;
 }
 
 const FilmCtx = createContext<FilmController | null>(null);
@@ -131,6 +136,9 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
 
   // Track running animations so a new drive cancels the previous one per value.
   const runningRef = useRef<AnimationPlaybackControls[]>([]);
+  // Set by the feed/cover on 'enter the world'; consumed once by the world route
+  // so it doesn't restart an entrance the caller is already animating.
+  const handoffRef = useRef(false);
 
   const present = useCallback((next: FilmIntent) => {
     setIntent((prev) => {
@@ -151,8 +159,23 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clear = useCallback(() => {
+    // Cancel in-flight transforms so a retired film doesn't keep animating (and
+    // so a later present() starts from a settled, known state).
+    runningRef.current.forEach((c) => c.stop());
+    runningRef.current = [];
+    handoffRef.current = false;
     setIntent(null);
     setInteraction(null);
+  }, []);
+
+  const beginHandoff = useCallback(() => {
+    handoffRef.current = true;
+  }, []);
+
+  const consumeHandoff = useCallback(() => {
+    const v = handoffRef.current;
+    handoffRef.current = false;
+    return v;
   }, []);
 
   const snapTo = useCallback(
@@ -210,8 +233,10 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
       setInteraction,
       driveTo,
       snapTo,
+      beginHandoff,
+      consumeHandoff,
     }),
-    [intent, m, interaction, present, clear, driveTo, snapTo],
+    [intent, m, interaction, present, clear, driveTo, snapTo, beginHandoff, consumeHandoff],
   );
 
   return <FilmCtx.Provider value={value}>{children}</FilmCtx.Provider>;

@@ -9,7 +9,6 @@ import {
   useTransform,
   useMotionValueEvent,
   useReducedMotion,
-  cubicBezier,
 } from "framer-motion";
 import {
   ArrowLeft,
@@ -25,7 +24,7 @@ import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -262,18 +261,22 @@ function WorldFilm({
   reduce: boolean;
 }) {
   const film = useFilm();
-  const { present, driveTo, snapTo, setInteraction, m } = film;
+  const { present, driveTo, snapTo, setInteraction, consumeHandoff, m } = film;
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const ease = cubicBezier(0.16, 1, 0.3, 1);
 
   const clipLabel =
     maker.kind === "film" ? `Now playing · ${maker.duration}` : "On film";
 
-  // Present the film + run the entrance. If the feed→world handoff already made
-  // the stage visible, keep it (no re-mount); on direct entry, grow it in.
+  // Present the film + settle the entrance. Three arrival paths, disambiguated
+  // by an explicit handoff flag (not an opacity heuristic):
+  //   • feed/cover handoff  → the caller is already animating it in; just lock
+  //     the hero origin so we don't restart/cancel that animation.
+  //   • direct nav          → grow it in from a touch oversized.
+  //   • back-nav from a product (film docked in the corner, PiP open) → drive it
+  //     back to the full-bleed hero so it isn't left frozen in the corner.
   // Runs once per maker; the film controls (present/drive/…) are stable.
   useEffect(() => {
     present({
@@ -287,13 +290,13 @@ function WorldFilm({
     const prefersReduced =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const arrivedDark = m.opacity.get() < 0.5;
-    if (arrivedDark) {
-      snapTo({ ...HERO_TARGET, opacity: 0, scale: prefersReduced ? 1 : 1.04 });
-      driveTo({ opacity: 1, scale: 1 }, { reduce: prefersReduced, duration: 0.7 });
-    } else {
-      // Handoff already settling the film in — just lock the hero geometry.
+    if (consumeHandoff()) {
+      // The feed/cover is animating the entrance — just lock the hero origin.
       snapTo({ originX: 100, originY: 100 });
+    } else {
+      // Direct nav or back-nav from a product: settle to the full-bleed hero.
+      snapTo({ originX: 100, originY: 100 });
+      driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.55 });
     }
     return () => setInteraction(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -343,15 +346,8 @@ function WorldFilm({
       return;
     }
     if (!enteredRef.current) return;
-    // The dock LANDS by 72% of the hero scroll (settle in the last 28%).
-    const p = ease(Math.min(v / 0.72, 1));
-    m.scale.set(1 + (docked - 1) * p);
-    // Inset 24px to match cornerTarget's margin — no seam into the product PiP.
-    m.x.set(-24 * p);
-    m.y.set(-24 * p);
-    m.radius.set(64 * ease(Math.min(v / 0.55, 1)));
-    // Shadow ramps linearly over [0.5, 0.9] — byte-parity with main.
-    m.shadow.set(v <= 0.5 ? 0 : Math.min((v - 0.5) / 0.4, 1));
+    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow).
+    applyDockFrame(m, v, docked);
   });
 
   return null;

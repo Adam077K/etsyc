@@ -8,7 +8,6 @@ import {
   useReducedMotion,
   useScroll,
   useMotionValueEvent,
-  cubicBezier,
 } from "framer-motion";
 import {
   Check,
@@ -27,7 +26,7 @@ import {
 import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
 
 /**
  * Thank-you — buyer journey step 8, and the payoff of the continuous film. The
@@ -244,7 +243,6 @@ function ThankYouFilm({
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const ease = cubicBezier(0.16, 1, 0.3, 1);
   const isMobileRef = useRef(false);
   const enteredRef = useRef(false);
 
@@ -275,14 +273,8 @@ function ThankYouFilm({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced || !enteredRef.current) return;
-    // Dock to the corner as the receipt scrolls up — same settle as the world.
-    const p = ease(Math.min(v / 0.72, 1));
-    const target = isMobileRef.current ? 0.22 : 0.28;
-    m.scale.set(1 + (target - 1) * p);
-    m.x.set(-20 * p);
-    m.y.set(-20 * p);
-    m.radius.set(64 * ease(Math.min(v / 0.55, 1)));
-    m.shadow.set(v <= 0.5 ? 0 : ease(Math.min((v - 0.5) / 0.4, 1)));
+    // Dock to the corner as the receipt scrolls up — shared settle with the world.
+    applyDockFrame(m, v, isMobileRef.current ? 0.22 : 0.28);
   });
 
   return null;
