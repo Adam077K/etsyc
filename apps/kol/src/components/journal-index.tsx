@@ -38,7 +38,7 @@ export function JournalIndex() {
       <section className="mx-auto max-w-issue px-5 pb-4 pt-28 sm:px-8 sm:pt-32">
         {/* Running head — the spine of the issue, in the colophon voice. */}
         <div className="flex flex-col gap-2 border-b border-line pb-4 font-mono text-[0.7rem] uppercase tracking-meta text-bone-dim sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-marigold">{ISSUE.dateline}</span>
+          <span className="text-bone-dim">{ISSUE.dateline}</span>
           <span className="hidden sm:block">{ISSUE.runningHead}</span>
           <span>{ISSUE.colophon}</span>
         </div>

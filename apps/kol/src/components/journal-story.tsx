@@ -76,7 +76,7 @@ export function JournalStoryView({ story }: { story: JournalStory }) {
             <span aria-hidden>·</span>
             <span>{story.dateline}</span>
             <span aria-hidden>·</span>
-            <span className="text-marigold">{story.readTime}</span>
+            <span className="text-bone-dim">{story.readTime}</span>
           </div>
         </motion.div>
       </header>
