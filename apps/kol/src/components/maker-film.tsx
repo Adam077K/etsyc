@@ -28,6 +28,11 @@ export function MakerFilm({
   className,
   /** Ken-Burns drift on the STILL. Set false when an ancestor already drifts. */
   drift = true,
+  /** Optional external handle on the <video> — the continuous film layer uses
+      it to seed currentTime for a seamless feed→world handoff. */
+  videoRef: externalRef,
+  /** Seed the clip's playhead on mount (currentTime continuity across a seam). */
+  initialTime,
 }: {
   videoSrc?: string;
   poster: string;
@@ -37,10 +42,50 @@ export function MakerFilm({
   priority?: boolean;
   className?: string;
   drift?: boolean;
+  videoRef?: React.MutableRefObject<HTMLVideoElement | null>;
+  initialTime?: number;
 }) {
   const [failed, setFailed] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const useVideo = Boolean(videoSrc) && !reduce && !failed;
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // `useReducedMotion()` is false on the server and true on the reduced-motion
+  // client, so choosing video-vs-still from `reduce` at first paint would swap
+  // element types at hydration (React #418). Gate on mount: the server and the
+  // first client paint render identically (reduce ignored), then reduced motion
+  // applies. globals.css disables .film-drift under the media query meanwhile.
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
+  const effectiveReduce = mounted ? reduce : false;
+  const useVideo = Boolean(videoSrc) && !effectiveReduce && !failed;
+
+  // Bridge the internal ref to the optional external handle, and seed the
+  // playhead when a starting time is supplied (feed→world currentTime carry).
+  // preload="none" means metadata isn't ready at ref-attach, so a seek there is
+  // swallowed — apply the seed on `loadedmetadata` (or now if already ready).
+  const seededRef = useRef(false);
+  const setVideoNode = (el: HTMLVideoElement | null) => {
+    videoRef.current = el;
+    if (externalRef) externalRef.current = el;
+    if (
+      !el ||
+      initialTime === undefined ||
+      !Number.isFinite(initialTime) ||
+      seededRef.current
+    ) {
+      return;
+    }
+    const seek = () => {
+      if (seededRef.current || !videoRef.current) return;
+      try {
+        videoRef.current.currentTime = initialTime;
+        seededRef.current = true;
+      } catch {
+        /* clamped/blocked seek — the muted loop keeps the seam seamless anyway. */
+      }
+    };
+    if (el.readyState >= 1 /* HAVE_METADATA */) seek();
+    else el.addEventListener("loadedmetadata", seek, { once: true });
+  };
 
   useEffect(() => {
     if (!useVideo) return;
@@ -61,7 +106,7 @@ export function MakerFilm({
   if (useVideo) {
     return (
       <video
-        ref={videoRef}
+        ref={setVideoNode}
         src={videoSrc}
         poster={poster}
         muted
@@ -82,7 +127,11 @@ export function MakerFilm({
       fill
       priority={priority}
       sizes={sizes}
-      className={cn(className, drift && !reduce && "film-drift")}
+      // No `!reduce` gate: `useReducedMotion()` is false on the server and true
+      // on the reduced-motion client, so gating the class here mismatches at
+      // hydration (React #418). globals.css already disables `.film-drift` under
+      // the prefers-reduced-motion media query, so the class is safe to keep.
+      className={cn(className, drift && "film-drift")}
     />
   );
 }

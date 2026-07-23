@@ -1,15 +1,45 @@
 "use client";
 
+import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Play, ArrowDown, ArrowRight } from "@phosphor-icons/react";
 import { COVER_MAKER } from "@/lib/fixtures/makers";
+import { WORLDS } from "@/lib/fixtures/worlds";
 import { rise, stagger, calm } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
+import { useFilm } from "./film/film-context";
+import { HERO_TARGET } from "./film/film-geometry";
 
 export function HeroSpread() {
   const reduce = useReducedMotion();
+  const router = useRouter();
+  const film = useFilm();
   const item = reduce ? calm : rise(34, 1);
+  const coverVideoRef = useRef<HTMLVideoElement | null>(null);
+  const hasWorld = COVER_MAKER.id in WORLDS;
+
+  // Tap the cover to enter Lena's world — hand the film to the persistent stage
+  // (seeded to the cover clip's playhead) before navigating, so it plays right
+  // through the route change instead of re-mounting from black.
+  function enterCoverWorld() {
+    if (!hasWorld) return;
+    const seedTime = coverVideoRef.current?.currentTime;
+    // Claim the entrance so the world route doesn't restart it on mount.
+    film.beginHandoff();
+    film.present({
+      makerId: COVER_MAKER.id,
+      videoSrc: COVER_MAKER.filmSrc,
+      poster: COVER_MAKER.image,
+      alt: `${COVER_MAKER.name} — ${COVER_MAKER.discipline}, ${COVER_MAKER.studio}`,
+      chip: "now-playing",
+      seedTime: seedTime && Number.isFinite(seedTime) ? seedTime : undefined,
+    });
+    film.snapTo({ ...HERO_TARGET, opacity: 0, scale: reduce ? 1 : 1.06 });
+    film.driveTo({ opacity: 1, scale: 1 }, { reduce: !!reduce, duration: 0.6 });
+    router.push(`/m/${COVER_MAKER.id}`);
+  }
 
   return (
     <section id="top" className="relative min-h-[100svh] w-full overflow-hidden">
@@ -26,6 +56,7 @@ export function HeroSpread() {
             priority
             sizes="100vw"
             className="object-cover object-center"
+            videoRef={coverVideoRef}
           />
         </div>
         {/* Ink scrims: bottom-up for the credit, left-in for the statement. */}
@@ -88,13 +119,19 @@ export function HeroSpread() {
           </a>
         </motion.div>
 
-        {/* Cover credit + film affordance. */}
+        {/* Cover credit + film affordance — tap to enter Lena's world on film. */}
         <motion.div
           variants={item}
           className="mt-14 flex flex-wrap items-end justify-between gap-6 border-t border-line pt-5"
         >
-          <div className="flex items-center gap-4">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-bone/40 text-bone">
+          <button
+            type="button"
+            onClick={enterCoverWorld}
+            disabled={!hasWorld}
+            aria-label={`Enter ${COVER_MAKER.studio} — ${COVER_MAKER.name} on film`}
+            className="group flex items-center gap-4 rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:cursor-default"
+          >
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-bone/40 text-bone transition-colors group-hover:border-marigold group-hover:bg-marigold group-hover:text-ink">
               <Play size={18} weight="fill" />
             </span>
             <div>
@@ -107,9 +144,16 @@ export function HeroSpread() {
                 </span>
               </p>
             </div>
-          </div>
-          <span className="meta hidden items-center gap-2 text-bone-dim sm:flex">
-            Watch {COVER_MAKER.duration}
+          </button>
+          <span className="meta flex items-center gap-2 text-bone-dim">
+            {hasWorld ? (
+              <span className="flex items-center gap-2 text-bone">
+                Enter the world
+                <ArrowRight size={14} weight="bold" />
+              </span>
+            ) : (
+              <>Watch {COVER_MAKER.duration}</>
+            )}
           </span>
         </motion.div>
       </motion.div>

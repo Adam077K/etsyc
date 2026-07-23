@@ -1,10 +1,15 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import {
-  Play,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useMotionValueEvent,
+} from "framer-motion";
+import {
   Check,
   CheckCircle,
   Package,
@@ -18,14 +23,18 @@ import {
   MOCK_ORDER,
   thankYouFor,
 } from "@/lib/fixtures/commerce";
+import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
-import { MakerFilm } from "./maker-film";
+import { useFilm } from "./film/film-context";
+import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
 
 /**
- * Thank-you — buyer journey step 8. The personal thank-you moment: a Ken-Burns
- * stand-in for the maker's own thank-you clip, carrying her voice in copy, then
- * the order summary and the "saved to your account" affordance. Warm and human
- * without tipping into saccharine — the makers speak, the receipt is quiet.
+ * Thank-you — buyer journey step 8, and the payoff of the continuous film. The
+ * maker's personal thank-you clip is the SAME persistent film that carried the
+ * buyer from the feed: it grows from the checkout corner into a full-bleed
+ * payoff (never re-mounted from black), carries her words over it, then docks to
+ * a quiet corner as the receipt scrolls up. Warm and human without tipping into
+ * saccharine — the maker speaks, the receipt stays quiet.
  */
 export function ThankYou() {
   const reduce = useReducedMotion();
@@ -35,10 +44,11 @@ export function ThankYou() {
   const primary = makers[0];
   const others = makers.slice(1);
   const primaryNote = primary ? thankYouFor(primary.id) : undefined;
+  const heroRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="min-h-screen bg-ink">
-      <header className="border-b border-line">
+    <div className="relative min-h-screen bg-ink">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-ink/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-issue items-center justify-center px-5 py-4 sm:px-8">
           <Link href="/" className="font-serif text-2xl leading-none text-bone">
             KOL
@@ -46,76 +56,68 @@ export function ThankYou() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-5 py-12 sm:px-8 sm:py-16">
-        {/* Confirmation line. */}
-        <motion.div
-          variants={reduce ? calm : rise(24, 0.7)}
-          initial="hidden"
-          animate="visible"
-          className="text-center"
-        >
-          <p className="meta mb-4 flex items-center justify-center gap-2 text-marigold">
-            <Check size={15} weight="bold" />
-            Order {MOCK_ORDER.number}
-          </p>
-          <h1
-            className="mx-auto max-w-2xl font-display font-extrabold leading-[0.95] text-bone"
-            style={{ fontSize: "clamp(2.25rem, 5.5vw, 4rem)" }}
+      {/* The payoff — the maker's thank-you film, full-bleed, her words over it. */}
+      {primary && primaryNote && (
+        <ThankYouFilm primary={primary} clip={primaryNote.clip} filmSrc={primaryNote.filmSrc} heroRef={heroRef} />
+      )}
+      <section
+        ref={heroRef}
+        className="relative z-[45] flex h-[92svh] items-end justify-center overflow-hidden"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/20" />
+        {primary && primaryNote ? (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reduce ? { duration: 0 } : { duration: 0.9, ease: easeOut, delay: 0.2 }}
+            className="relative mx-auto w-full max-w-3xl px-5 pb-14 text-center sm:px-8 sm:pb-20"
           >
-            It&rsquo;s being made for you.
-          </h1>
-          <p className="mx-auto mt-5 max-w-md font-serif text-lg italic leading-snug text-bone/75">
-            Confirmation is on its way to {MOCK_ORDER.email}. Now the best part —
-            a word from the bench.
-          </p>
-        </motion.div>
-
-        {/* The personal thank-you video moment. */}
-        {primary && primaryNote && (
-          <motion.figure
-            variants={reduce ? calm : rise(28, 0.9)}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.1 }}
-            className="relative mt-12 overflow-hidden rounded-[2rem] ring-1 ring-line"
-          >
-            <div className="relative aspect-[4/5] w-full sm:aspect-[16/10]">
-              <MakerFilm
-                videoSrc={primaryNote.filmSrc}
-                poster={primary.image}
-                alt={`${primary.name}, ${primary.studio}`}
-                reduce={!!reduce}
-                priority
-                sizes="(max-width: 896px) 100vw, 896px"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/10" />
-
-              <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm sm:left-7 sm:top-7">
-                <Play size={13} weight="fill" className="text-marigold" />
-                <span className="meta text-bone">
-                  Personal thank-you · {primaryNote.clip}
-                </span>
-              </div>
-
-              <figcaption className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
-                <Quotes size={24} weight="fill" aria-hidden className="mb-3 text-marigold/70" />
-                <blockquote
-                  className="max-w-xl font-serif leading-[1.2] text-bone"
-                  style={{ fontSize: "clamp(1.4rem, 3.2vw, 2.35rem)" }}
-                >
-                  &ldquo;{primaryNote.line}&rdquo;
-                </blockquote>
-                <p className="mt-5 font-ui text-sm text-bone/80">
-                  <span className="font-semibold text-bone">{primary.name}</span>
-                  {" · "}
-                  {primary.studio}
-                </p>
+            <p className="meta mb-4 flex items-center justify-center gap-2 text-marigold">
+              <Check size={15} weight="bold" />
+              Order {MOCK_ORDER.number}
+            </p>
+            <h1
+              className="mx-auto max-w-2xl font-display font-extrabold leading-[0.95] text-bone"
+              style={{ fontSize: "clamp(2.25rem, 5.5vw, 4rem)" }}
+            >
+              It&rsquo;s being made for you.
+            </h1>
+            <figure className="mx-auto mt-8 max-w-2xl">
+              {/* The Quotes glyph is the quotation mark — no doubled entity quotes. */}
+              <Quotes size={24} weight="fill" aria-hidden className="mx-auto mb-3 text-marigold/70" />
+              <blockquote
+                className="font-serif leading-[1.2] text-bone"
+                style={{ fontSize: "clamp(1.3rem, 3vw, 2.2rem)" }}
+              >
+                {primaryNote.line}
+              </blockquote>
+              <figcaption className="mt-5 font-ui text-sm text-bone/80">
+                <span className="font-semibold text-bone">{primary.name}</span>
+                {" · "}
+                {primary.studio}
               </figcaption>
-            </div>
-          </motion.figure>
+            </figure>
+            <p className="mx-auto mt-6 max-w-md font-ui text-sm text-bone/60">
+              Confirmation is on its way to {MOCK_ORDER.email}.
+            </p>
+          </motion.div>
+        ) : (
+          <div className="relative mx-auto w-full max-w-2xl px-5 pb-20 text-center">
+            <p className="meta mb-4 flex items-center justify-center gap-2 text-marigold">
+              <Check size={15} weight="bold" />
+              Order {MOCK_ORDER.number}
+            </p>
+            <h1
+              className="font-display font-extrabold leading-[0.95] text-bone"
+              style={{ fontSize: "clamp(2.25rem, 5.5vw, 4rem)" }}
+            >
+              It&rsquo;s being made for you.
+            </h1>
+          </div>
         )}
+      </section>
 
+      <main className="relative z-10 mx-auto max-w-4xl bg-ink px-5 pb-16 pt-12 sm:px-8 sm:pb-24">
         {/* A shorter note from any other maker in the order. */}
         {others.map((m) => {
           const note = thankYouFor(m.id);
@@ -217,6 +219,65 @@ export function ThankYou() {
       </main>
     </div>
   );
+}
+
+/**
+ * ThankYouFilm — drives the persistent FilmStage for the payoff. The film grows
+ * from wherever it arrived (the checkout corner) into a full-bleed thank-you
+ * hero, then docks to the corner on scroll so it stays present through the
+ * receipt. Renders nothing itself — the film is the app-shell stage.
+ */
+function ThankYouFilm({
+  primary,
+  clip,
+  filmSrc,
+  heroRef,
+}: {
+  primary: Maker;
+  clip: string;
+  filmSrc?: string;
+  heroRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const { present, driveTo, snapTo, m } = useFilm();
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const isMobileRef = useRef(false);
+  const enteredRef = useRef(false);
+
+  // Runs once per maker; the film controls are stable.
+  useEffect(() => {
+    present({
+      makerId: primary.id,
+      videoSrc: filmSrc ?? primary.filmSrc,
+      poster: primary.image,
+      alt: `${primary.name}, ${primary.studio}`,
+      clipLabel: `Personal thank-you · ${clip}`,
+      chip: "personal",
+    });
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    isMobileRef.current = window.matchMedia("(max-width: 767px)").matches;
+    // Grow from the arriving corner into the full-bleed payoff.
+    snapTo({ originX: 100, originY: 100 });
+    driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.8 });
+    const t = setTimeout(() => (enteredRef.current = true), prefersReduced ? 0 : 820);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [primary.id]);
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced || !enteredRef.current) return;
+    // Dock to the corner as the receipt scrolls up — shared settle with the world.
+    applyDockFrame(m, v, isMobileRef.current ? 0.22 : 0.28);
+  });
+
+  return null;
 }
 
 function Reveal({

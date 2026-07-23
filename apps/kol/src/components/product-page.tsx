@@ -26,7 +26,8 @@ import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { TrustBadge } from "./trust-badge";
 import { ReviewStory } from "./review-story";
-import { MakerFilm } from "./maker-film";
+import { useFilm } from "./film/film-context";
+import { cornerTarget } from "./film/film-geometry";
 import { cn } from "@/lib/utils";
 
 // AA-safe accent text/icon tints (small meta kickers need ≥4.5:1 on ink).
@@ -436,8 +437,12 @@ function Gallery({
   );
 }
 
-/* The leading film, shrunk to a persistent corner PiP playing the RIGHT clip
-   for this product (journey step 5). Collapsible so it never traps the content
+/* The leading film, shrunk to a persistent corner PiP that keeps "playing" the
+   RIGHT clip for this product (journey step 5). The film itself is the app-shell
+   FilmStage — it arrives already playing from the maker's world (never re-mounted
+   from black) and docks into this corner; this component drives its geometry and
+   renders the contextual chrome. The label slides in as the clip swaps (the
+   mocked contextual narration). Collapsible so it never traps the content
    beneath it; tap the frame to return to the maker's world. */
 function ContextualFilm({
   maker,
@@ -453,6 +458,61 @@ function ContextualFilm({
   onOpenChange: (v: boolean) => void;
 }) {
   const router = useRouter();
+  const { present, driveTo, setInteraction } = useFilm();
+  // The card footprint — matches the stage's uniform-scaled corner film so the
+  // chrome overlays it exactly. Recomputed on mount + resize.
+  const [card, setCard] = useState({ width: 200, margin: 24, ratio: 16 / 10 });
+
+  // Present the product's contextual clip. videoSrc falls back to the maker's
+  // clip so the SAME video node keeps playing across the world→product seam.
+  // Runs once per product; `present` is stable.
+  useEffect(() => {
+    present({
+      makerId: maker.id,
+      videoSrc: product.filmSrc ?? maker.filmSrc,
+      poster: maker.image,
+      alt: `${maker.name} — ${maker.studio}`,
+      clipLabel: product.clipLabel,
+      chip: "now-playing",
+      stageChip: false,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maker.id, product.id]);
+
+  // Drive the corner geometry on open/collapse, and keep it on resize. Collapse
+  // fades the film out (presence remains — the frame never vanishes abruptly).
+  useEffect(() => {
+    const apply = () => {
+      const mobile = window.matchMedia("(max-width: 639px)").matches;
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const width = mobile ? 148 : 208;
+      const margin = mobile ? 16 : 24;
+      setCard({ width, margin, ratio: vw / vh });
+      if (open) {
+        driveTo(cornerTarget(vw, vh, { width, margin, radius: 18 }), {
+          reduce: prefersReduced,
+          duration: 0.55,
+        });
+        setInteraction({
+          onActivate: () => router.push(`/m/${maker.id}`),
+          label: `Return to ${maker.studio}'s world`,
+        });
+      } else {
+        driveTo({ opacity: 0 }, { reduce: prefersReduced, duration: 0.3 });
+        setInteraction(null);
+      }
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    return () => {
+      window.removeEventListener("resize", apply);
+      setInteraction(null);
+    };
+  }, [open, driveTo, setInteraction, router, maker.id, maker.studio]);
 
   const liveDot = (
     <span
@@ -461,70 +521,68 @@ function ContextualFilm({
   );
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 sm:bottom-6 sm:right-6">
-      <AnimatePresence mode="wait" initial={false}>
-        {open ? (
-          <motion.div
-            key="expanded"
-            initial={reduce ? false : { opacity: 0, scale: 0.7, y: 16 }}
-            animate={reduce ? undefined : { opacity: 1, scale: 1, y: 0 }}
-            exit={reduce ? undefined : { opacity: 0, scale: 0.85 }}
-            transition={{ duration: 0.5, ease: easeOut }}
-            className="w-32 overflow-hidden rounded-2xl bg-ink-soft ring-1 ring-line shadow-[0_30px_60px_-20px_rgba(0,0,0,0.8)] sm:w-44"
-          >
-            <button
-              type="button"
-              onClick={() => router.push(`/m/${maker.id}`)}
-              aria-label={`Now playing: ${product.clipLabel}. Return to ${maker.studio}'s world.`}
-              className="group block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
-            >
-              <div className="relative aspect-[4/5] w-full overflow-hidden">
-                <MakerFilm
-                  videoSrc={product.filmSrc}
-                  poster={maker.image}
-                  alt=""
-                  reduce={reduce}
-                  sizes="176px"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-ink/20" />
-                <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-ink/75 px-2 py-1 backdrop-blur-sm">
+    <>
+      {/* Chrome overlaying the stage's corner film (pointer-events fall through
+          to the film for tap-to-return; only the buttons capture clicks). */}
+      {open && (
+        <div
+          className="pointer-events-none fixed z-[41]"
+          style={{
+            right: card.margin,
+            bottom: card.margin,
+            width: card.width,
+            aspectRatio: String(card.ratio),
+          }}
+        >
+          <div className="relative h-full w-full">
+            {/* Contextual label — slides in as the clip swaps (step 5). */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={product.clipLabel}
+                initial={reduce ? false : { opacity: 0, x: 18 }}
+                animate={reduce ? undefined : { opacity: 1, x: 0 }}
+                exit={reduce ? undefined : { opacity: 0, x: -18 }}
+                transition={{ duration: 0.4, ease: easeOut }}
+                className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent px-2.5 pb-2.5 pt-6"
+              >
+                <p className="flex items-center gap-1.5">
                   {liveDot}
-                  <span className="meta text-[0.6rem] text-bone">Now playing</span>
-                </div>
-                <span className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-bone/90 text-ink">
-                  <Play size={11} weight="fill" />
-                </span>
-                <div className="absolute inset-x-0 bottom-0 p-2.5">
-                  <p className="font-ui text-[0.72rem] font-semibold leading-tight text-bone">
-                    {product.clipLabel}
-                  </p>
-                  <p className="meta mt-1 text-[0.6rem] text-bone-dim">
-                    {maker.studio} · {product.clipDuration}
-                  </p>
-                </div>
-              </div>
-            </button>
+                  <span className="meta text-[0.58rem] text-bone">Now playing</span>
+                </p>
+                <p className="mt-1 font-ui text-[0.72rem] font-semibold leading-tight text-bone">
+                  {product.clipLabel}
+                </p>
+                <p className="meta mt-1 text-[0.55rem] text-bone-dim">
+                  {maker.studio} · {product.clipDuration}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+            <span className="pointer-events-none absolute left-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-bone/90 text-ink">
+              <Play size={11} weight="fill" />
+            </span>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
               aria-label="Minimise the film"
-              className="group/min absolute right-0 top-0 grid h-11 w-11 place-items-center focus-visible:outline-none"
+              className="group/min pointer-events-auto absolute right-0 top-0 grid h-11 w-11 place-items-center focus-visible:outline-none"
             >
               <span className="grid h-7 w-7 place-items-center rounded-full bg-ink/75 text-bone backdrop-blur-sm transition-colors group-hover/min:bg-ink group-focus-visible/min:ring-2 group-focus-visible/min:ring-marigold">
                 <Minus size={13} weight="bold" />
               </span>
             </button>
-          </motion.div>
-        ) : (
+          </div>
+        </div>
+      )}
+
+      {/* Collapsed cue — the film fades to a pill but keeps playing underneath. */}
+      {!open && (
+        <div className="fixed bottom-4 right-4 z-[41] sm:bottom-6 sm:right-6">
           <motion.button
-            key="collapsed"
             type="button"
             onClick={() => onOpenChange(true)}
             aria-label={`Expand the film — now playing ${product.clipLabel}`}
             initial={reduce ? false : { opacity: 0, scale: 0.85 }}
             animate={reduce ? undefined : { opacity: 1, scale: 1 }}
-            exit={reduce ? undefined : { opacity: 0, scale: 0.85 }}
             transition={{ duration: 0.35, ease: easeOut }}
             className="flex items-center gap-2 rounded-full bg-ink-soft py-2 pl-3 pr-2.5 ring-1 ring-line shadow-[0_20px_40px_-16px_rgba(0,0,0,0.8)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
           >
@@ -532,8 +590,8 @@ function ContextualFilm({
             <span className="meta text-[0.6rem] text-bone">Now playing</span>
             <CaretUp size={13} weight="bold" className="text-bone-dim" />
           </motion.button>
-        )}
-      </AnimatePresence>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

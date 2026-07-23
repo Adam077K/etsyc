@@ -16,6 +16,8 @@ import { WORLDS } from "@/lib/fixtures/worlds";
 import { easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { MakerFilm } from "./maker-film";
+import { useFilm } from "./film/film-context";
+import { HERO_TARGET } from "./film/film-geometry";
 
 // Faint echo of the maker's world accent — ties the film (step 2) to the world
 // it opens into (step 3). Only for makers whose world is built.
@@ -52,12 +54,16 @@ export function ExpandedVideo({
 }) {
   const reduce = useReducedMotion();
   const router = useRouter();
+  const film = useFilm();
   const maker = list[index];
   const hasWorld = maker ? maker.id in WORLDS : false;
   const accent = maker ? WORLDS[maker.id]?.accent : undefined;
 
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  // The expanded <video> — read its playhead to seed the persistent film so the
+  // clip carries across the feed→world route seam without restarting.
+  const filmVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const next = () => onIndex((index + 1) % list.length);
   const prev = () => onIndex((index - 1 + list.length) % list.length);
@@ -105,7 +111,28 @@ export function ExpandedVideo({
   if (!maker) return null;
 
   function enterWorld() {
-    if (maker && hasWorld) router.push(`/m/${maker.id}`);
+    if (!maker || !hasWorld) return;
+    // Hand the film off to the persistent stage BEFORE navigating: present it
+    // full-bleed (opacity 0, a touch oversized) seeded to the expanded clip's
+    // playhead, then settle it in as the route changes — so the film is already
+    // playing on the world route and never re-mounts from black.
+    const seedTime = filmVideoRef.current?.currentTime;
+    // Claim the entrance so the world route doesn't restart it on mount.
+    film.beginHandoff();
+    film.present({
+      makerId: maker.id,
+      videoSrc: maker.filmSrc,
+      poster: maker.image,
+      alt: `${maker.name} — ${maker.discipline}, ${maker.studio}`,
+      chip: "now-playing",
+      seedTime: seedTime && Number.isFinite(seedTime) ? seedTime : undefined,
+    });
+    film.snapTo({ ...HERO_TARGET, opacity: 0, scale: reduce ? 1 : 1.06 });
+    film.driveTo(
+      { opacity: 1, scale: 1 },
+      { reduce: !!reduce, duration: 0.6 },
+    );
+    router.push(`/m/${maker.id}`);
   }
 
   return (
@@ -171,6 +198,7 @@ export function ExpandedVideo({
                 priority
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
+                videoRef={filmVideoRef}
               />
             </motion.div>
           </AnimatePresence>

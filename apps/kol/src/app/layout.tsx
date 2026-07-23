@@ -6,6 +6,9 @@ import {
   Geist_Mono,
 } from "next/font/google";
 import "./globals.css";
+import { FilmProvider } from "@/components/film/film-context";
+import { FilmStage } from "@/components/film/film-stage";
+import { FilmRouteSync } from "@/components/film/film-route-sync";
 
 // The loud voice — Kotn-scale statement display.
 const display = Bricolage_Grotesque({
@@ -53,7 +56,15 @@ export default function RootLayout({
       lang="en"
       className={`${display.variable} ${serif.variable} ${ui.variable} ${mono.variable}`}
     >
-      <body className="min-h-screen bg-ink text-bone">{children}</body>
+      <body className="min-h-screen bg-ink text-bone">
+        {/* The continuous film layer lives in the app shell so the maker's film
+            is never re-mounted from black across the buyer routes. */}
+        <FilmProvider>
+          <FilmRouteSync />
+          <FilmStage />
+          {children}
+        </FilmProvider>
+      </body>
     </html>
   );
 }

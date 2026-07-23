@@ -9,11 +9,9 @@ import {
   useTransform,
   useMotionValueEvent,
   useReducedMotion,
-  cubicBezier,
 } from "framer-motion";
 import {
   ArrowLeft,
-  Play,
   MapPin,
   ArrowDown,
   Handbag,
@@ -25,7 +23,8 @@ import type { MakerWorld as World } from "@/lib/fixtures/worlds";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { cn } from "@/lib/utils";
-import { MakerFilm } from "./maker-film";
+import { useFilm } from "./film/film-context";
+import { HERO_TARGET, applyDockFrame } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -61,10 +60,10 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
   return (
     <div className="relative bg-ink">
       <WorldChrome />
-      {/* Hero film: a world may override the persistent film with its own
-          `heroFilm` (the feed tile stays `maker.image`; the feed↔expanded morph
-          is untouched since entering the world is a route change, not a morph). */}
-      <DockedFilm
+      {/* Hero film: driven by the persistent app-shell FilmStage (never
+          re-mounted from black on entry). A world may open on a different frame
+          via `heroFilm`; the feed tile + feed↔expanded morph stay untouched. */}
+      <WorldFilm
         maker={maker}
         heroSrc={world.heroFilm ?? maker.image}
         heroRef={heroRef}
@@ -241,8 +240,16 @@ function WorldChrome() {
   );
 }
 
-/* The persistent film — full-bleed hero that docks to a corner on scroll. */
-function DockedFilm({
+/**
+ * WorldFilm — drives the persistent app-shell FilmStage for the maker world.
+ * It renders nothing itself; the film lives in <FilmStage> (app shell) and never
+ * re-mounts on entry. This component (a) presents the maker's film intent, (b)
+ * plays the "grow into the world" entrance when arriving directly, and (c) binds
+ * the hero's scroll progress to the stage's shared transform so the film docks
+ * to the bottom-right corner exactly as before — now backed by a continuous
+ * element. When docked it grants the stage a tap-to-top interaction.
+ */
+function WorldFilm({
   maker,
   heroSrc,
   heroRef,
@@ -253,14 +260,49 @@ function DockedFilm({
   heroRef: React.RefObject<HTMLDivElement | null>;
   reduce: boolean;
 }) {
+  const film = useFilm();
+  const { present, driveTo, snapTo, setInteraction, consumeHandoff, m } = film;
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const ease = cubicBezier(0.16, 1, 0.3, 1);
-  // The dock LANDS: it reaches docked size by 72% of the hero scroll (settle in
-  // the last 28%) on the locked ease curve. Mobile caps smaller so it never
-  // occludes the Add-to-bag corner (read via ref so scroll frames see current).
+
+  const clipLabel =
+    maker.kind === "film" ? `Now playing · ${maker.duration}` : "On film";
+
+  // Present the film + settle the entrance. Three arrival paths, disambiguated
+  // by an explicit handoff flag (not an opacity heuristic):
+  //   • feed/cover handoff  → the caller is already animating it in; just lock
+  //     the hero origin so we don't restart/cancel that animation.
+  //   • direct nav          → grow it in from a touch oversized.
+  //   • back-nav from a product (film docked in the corner, PiP open) → drive it
+  //     back to the full-bleed hero so it isn't left frozen in the corner.
+  // Runs once per maker; the film controls (present/drive/…) are stable.
+  useEffect(() => {
+    present({
+      makerId: maker.id,
+      videoSrc: maker.filmSrc,
+      poster: heroSrc,
+      alt: `${maker.name} — ${maker.discipline}, ${maker.studio}`,
+      clipLabel,
+      chip: "now-playing",
+    });
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (consumeHandoff()) {
+      // The feed/cover is animating the entrance — just lock the hero origin.
+      snapTo({ originX: 100, originY: 100 });
+    } else {
+      // Direct nav or back-nav from a product: settle to the full-bleed hero.
+      snapTo({ originX: 100, originY: 100 });
+      driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.55 });
+    }
+    return () => setInteraction(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maker.id]);
+
+  // Mobile caps the dock smaller so it never occludes the Add-to-bag corner.
   const isMobileRef = useRef(false);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -271,102 +313,44 @@ function DockedFilm({
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  const scale = useTransform(scrollYProgress, (v) => {
-    const p = ease(Math.min(v / 0.72, 1));
-    const target = isMobileRef.current ? 0.2 : 0.26;
-    return 1 + (target - 1) * p;
+
+  // Bind the hero scroll to the stage transform — the dock settle, unchanged.
+  // Gated by `entered` so the entrance grow isn't overridden on the first paint.
+  const enteredRef = useRef(false);
+  useEffect(() => {
+    const t = setTimeout(() => (enteredRef.current = true), reduce ? 0 : 720);
+    return () => clearTimeout(t);
+  }, [reduce]);
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    // Docked state → grant / retire the tap-to-top interaction.
+    if (v > 0.88) {
+      setInteraction({
+        onActivate: () =>
+          window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }),
+        label: "Back to top of the world",
+      });
+    } else {
+      setInteraction(null);
+    }
+    const docked = isMobileRef.current ? 0.2 : 0.26;
+    if (reduce) {
+      // Reduced motion: presence WITHOUT motion. Hold the film full-bleed over
+      // the hero, then SNAP it to the docked corner past the hero so it never
+      // covers the world content the buyer needs to read (no per-frame move).
+      if (v > 0.6) {
+        snapTo({ scale: docked, x: -24, y: -24, radius: 64, opacity: 1, originX: 100, originY: 100, shadow: 1 });
+      } else {
+        snapTo({ ...HERO_TARGET });
+      }
+      return;
+    }
+    if (!enteredRef.current) return;
+    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow).
+    applyDockFrame(m, v, docked);
   });
-  const x = useTransform(scrollYProgress, [0, 0.72], [0, -20], { ease });
-  const y = useTransform(scrollYProgress, [0, 0.72], [0, -20], { ease });
-  const radius = useTransform(scrollYProgress, [0, 0.55], [0, 64], { ease });
-  const shadow = useTransform(
-    scrollYProgress,
-    [0, 0.5, 0.9],
-    ["0 0 0 rgba(0,0,0,0)", "0 0 0 rgba(0,0,0,0)", "0 30px 60px -20px rgba(0,0,0,0.8)"],
-  );
 
-  // When docked, the film becomes a tap-to-top control (pays off persistence).
-  const [docked, setDocked] = useState(false);
-  useMotionValueEvent(scrollYProgress, "change", (v) => setDocked(v > 0.88));
-  const toTop = () =>
-    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
-
-  // Reduced motion: a static in-flow hero film, no docking.
-  if (reduce) {
-    return (
-      <div className="pointer-events-none absolute inset-0 z-40">
-        <div className="relative h-[100svh] w-full">
-          <MakerFilm
-            videoSrc={maker.filmSrc}
-            poster={heroSrc}
-            alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-            reduce={reduce}
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-          <FilmChip maker={maker} />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="pointer-events-none fixed inset-0 z-40">
-      <motion.div
-        style={{
-          scale,
-          x,
-          y,
-          borderRadius: radius,
-          boxShadow: shadow,
-          transformOrigin: "100% 100%",
-        }}
-        onClick={docked ? toTop : undefined}
-        onKeyDown={
-          docked
-            ? (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  toTop();
-                }
-              }
-            : undefined
-        }
-        role={docked ? "button" : undefined}
-        tabIndex={docked ? 0 : -1}
-        aria-label={docked ? "Back to top of the world" : undefined}
-        className={cn(
-          "relative h-full w-full overflow-hidden",
-          docked &&
-            "pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
-        )}
-      >
-        {/* MakerFilm drifts the still; a real clip never Ken-Burns on itself. */}
-        <MakerFilm
-          videoSrc={maker.filmSrc}
-          poster={heroSrc}
-          alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-          reduce={reduce}
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <FilmChip maker={maker} />
-      </motion.div>
-    </div>
-  );
-}
-
-function FilmChip({ maker }: { maker: Maker }) {
-  return (
-    <div className="absolute left-5 top-20 flex items-center gap-2 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm sm:left-8">
-      <Play size={13} weight="fill" className="text-marigold" />
-      <span className="meta text-bone">
-        {maker.kind === "film" ? `Now playing · ${maker.duration}` : "On film"}
-      </span>
-    </div>
-  );
+  return null;
 }
 
 /* Reveal wrapper — scroll-in, reduced-motion safe. */

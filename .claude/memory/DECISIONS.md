@@ -384,3 +384,31 @@ Geist Mono), whileInView motion language, editorial masonry. Do not diverge with
 **Affects:** design-lead, frontend-engineer, product-designer — every future KOL screen builds on
 this scaffold and contract
 **Status:** Merged to main (`ee308da`); next pages queued (expanded-video, maker-world, product, checkout).
+
+## 2026-07-23 — KOL continuous film: persistent app-shell FilmStage (Wave 3 Track A)
+
+**Decision:** Introduce a single persistent film host in the app shell that survives buyer route
+changes. `FilmProvider` + `FilmStage` mount once in `apps/kol/src/app/layout.tsx`; the ONE real
+`<video>`/poster (`MakerFilm`) lives in `FilmStage` at `position:fixed z-40` and is NEVER unmounted
+across `/m/[slug] → …/p/[product] → /checkout → /thank-you`, so playback + `currentTime` are
+literally continuous (same DOM node). Buyer surfaces register a `FilmIntent` (maker, videoSrc,
+poster, clip label) and drive the stage's shared Framer `MotionValue`s (scale/x/y/radius/opacity/
+origin/shadow) — transform+opacity only, no layout props. `FilmRouteSync` (reads `usePathname`)
+clears the stage on non-film routes (feed/browse/etc). The feed's in-page `layoutId` morph
+(feed→expanded) is UNTOUCHED; the handoff into the stage happens on "Enter the world" — the stage is
+presented over the expanded film's exact rect (seeded with its `currentTime`) before `router.push`,
+so there is no black frame.
+
+**Why:** the founder verdict — the product read as "a shop with videos" because the film re-mounted
+from black at every route boundary. A layout-level persistent element is the only way to guarantee
+"never re-mounted from black" across Next App-Router route changes without fighting the framework.
+**Choreography preserved (zero regression):** feed→expanded layoutId morph, world hero→dock settle
+(reuses the exact scale 0.26 / origin bottom-right transform), product PiP auto-collapse near the
+trust badge. All now backed by the continuous element.
+**Reduced motion:** stage still persists (presence continuity); poster shown, transitions settle
+instantly (opacity), frame never vanishes abruptly.
+**Contextual clip swap (journey step 5):** mocked per-product `clipLabel`; the swap MOTION is a real
+crossfade of the label chrome, and the effective `videoSrc` falls back to the maker's clip so the
+same video node keeps playing world→product.
+**Reversibility:** reversible (additive module under src/components/film/; routes rewired to slots).
+**Owner:** design-lead (Track A) · **Affects:** every buyer route + app shell · **Risk:** full.
