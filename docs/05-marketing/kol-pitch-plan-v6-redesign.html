@@ -1,0 +1,493 @@
+<title>KOL — Final Pitch Build Plan v6 (Redesign)</title>
+<style>
+  :root{
+    --paper:#ECE8E1; --paper-2:#E3DED5; --card:#F4F1EA; --ink:#17130F; --ink-2:#4A423A;
+    --meta:#877E71; --line:#D6CFC2; --terra:#BF5630; --rust:#7C2D12; --gold:#B98A34;
+    --new:#3F7A5B; --redesign:#BF5630; --keep:#6B7280; --cut:#B23B3B;
+    --shadow:0 1px 2px rgba(23,19,15,.06),0 8px 30px rgba(23,19,15,.05);
+    --grotesk:"Helvetica Neue",Helvetica,Arial,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#1A1613; --paper-2:#221D19; --card:#241F1A; --ink:#EDE6DB; --ink-2:#B7AC9E;
+      --meta:#8E8577; --line:#3A322A; --terra:#D9723F; --rust:#E08A5A; --gold:#D8A94E;
+      --new:#5CB088; --redesign:#D9723F; --keep:#9AA1AC; --cut:#E06A6A;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 34px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#ECE8E1; --paper-2:#E3DED5; --card:#F4F1EA; --ink:#17130F; --ink-2:#4A423A;
+    --meta:#877E71; --line:#D6CFC2; --terra:#BF5630; --rust:#7C2D12; --gold:#B98A34;
+    --new:#3F7A5B; --redesign:#BF5630; --keep:#6B7280; --cut:#B23B3B;
+    --shadow:0 1px 2px rgba(23,19,15,.06),0 8px 30px rgba(23,19,15,.05);
+  }
+  :root[data-theme="dark"]{
+    --paper:#1A1613; --paper-2:#221D19; --card:#241F1A; --ink:#EDE6DB; --ink-2:#B7AC9E;
+    --meta:#8E8577; --line:#3A322A; --terra:#D9723F; --rust:#E08A5A; --gold:#D8A94E;
+    --new:#5CB088; --redesign:#D9723F; --keep:#9AA1AC; --cut:#E06A6A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 34px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);font-family:var(--grotesk);
+    line-height:1.5;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(rgba(120,110,95,.05) 1px,transparent 1px);background-size:4px 4px;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px 120px}
+  a{color:var(--terra)}
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--meta);font-weight:700}
+
+  /* HERO */
+  header.hero{padding:64px 0 34px;border-bottom:2px solid var(--ink)}
+  .hero .kol{font-size:clamp(52px,11vw,104px);font-weight:800;letter-spacing:-.03em;line-height:.9;margin:14px 0 0}
+  .hero .kol span{color:var(--terra)}
+  .hero h1{font-size:clamp(20px,3.4vw,30px);font-weight:600;letter-spacing:-.01em;margin:16px 0 0;max-width:24ch;text-wrap:balance}
+  .hero .sub{color:var(--ink-2);margin-top:14px;max-width:66ch;font-size:16.5px}
+  .metarow{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:22px}
+  .chip{font-size:12.5px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink-2)}
+  .chip b{color:var(--ink)}
+
+  /* LEGEND */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:26px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--paper-2)}
+  .legend .li{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2)}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+  /* CHANGE SUMMARY */
+  .summary{margin-top:30px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+  .summary h2{margin:0;padding:18px 22px;font-size:15px;letter-spacing:.02em;border-bottom:1px solid var(--line);background:var(--paper-2)}
+  .summary ol{margin:0;padding:16px 22px 20px 40px}
+  .summary li{margin:9px 0;color:var(--ink-2)}
+  .summary li b{color:var(--ink)}
+  .tick{color:var(--new);font-weight:800}
+
+  /* ACT */
+  .act{margin:52px 0 8px;padding:16px 20px;border-radius:14px;background:var(--ink);color:var(--paper);display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+  .act .n{font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;font-weight:700}
+  .act .t{font-size:clamp(19px,2.6vw,24px);font-weight:800;letter-spacing:-.01em}
+  .act .g{color:var(--terra);opacity:.95}
+  .act .d{font-size:13.5px;opacity:.7;flex-basis:100%;margin-top:2px}
+
+  /* SLIDE CARD */
+  .slide{position:relative;margin:16px 0;border:1px solid var(--line);border-left:5px solid var(--rail,var(--keep));border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+  .slide[data-tag="NEW"]{--rail:var(--new)}
+  .slide[data-tag="REDESIGN"]{--rail:var(--redesign)}
+  .slide[data-tag="KEEP"]{--rail:var(--keep)}
+  .slide[data-tag="CUT"]{--rail:var(--cut);opacity:.72}
+  .shead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px 0}
+  .snum{font-family:var(--mono);font-size:12.5px;color:var(--meta);font-weight:700}
+  .tag{font-size:10.5px;font-weight:800;letter-spacing:.1em;padding:3px 8px;border-radius:6px;text-transform:uppercase;color:#fff}
+  .tag.NEW{background:var(--new)} .tag.REDESIGN{background:var(--redesign)} .tag.KEEP{background:var(--keep)} .tag.CUT{background:var(--cut)}
+  .shead h3{margin:8px 0 0;padding:0 18px;font-size:clamp(19px,2.7vw,25px);font-weight:800;letter-spacing:-.015em;line-height:1.15;flex-basis:100%;text-wrap:balance}
+  .sbody{padding:6px 18px 18px}
+  .row{display:grid;grid-template-columns:120px 1fr;gap:6px 16px;padding:11px 0;border-top:1px solid var(--line)}
+  .row:first-child{border-top:none}
+  .row .k{font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--meta);font-weight:700;padding-top:2px}
+  .row .v{color:var(--ink-2);font-size:15px}
+  .row .v b{color:var(--ink)}
+  .says{font-style:italic;color:var(--ink);border-left:2px solid var(--terra);padding-left:12px}
+  .mock{background:var(--paper-2);border:1px dashed var(--terra);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--ink-2)}
+  .mock b{color:var(--terra)}
+  .flag{background:color-mix(in srgb,var(--cut) 12%,transparent);border-radius:8px;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+  .flag b{color:var(--cut)}
+  @media (max-width:560px){.row{grid-template-columns:1fr;gap:2px}.row .k{padding-top:6px}}
+
+  /* MOCKUP SHOTLIST */
+  .shotlist{margin-top:20px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+  .shotlist h2{margin:0;padding:18px 22px;font-size:16px;border-bottom:1px solid var(--line);background:var(--paper-2)}
+  .shot{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:14px 22px;border-top:1px solid var(--line)}
+  .shot:first-of-type{border-top:none}
+  .shot .id{font-family:var(--mono);font-weight:800;color:var(--terra);font-size:15px}
+  .shot .st b{color:var(--ink)}
+  .shot .st{color:var(--ink-2);font-size:14.5px}
+  .shot .st .u{font-family:var(--mono);font-size:12px;color:var(--meta)}
+
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--meta);font-size:13px}
+  .foot-rails{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .foot-rails .chip{font-size:11.5px}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Final pitch · build plan v6 · redesign brief for the Fable team</div>
+    <div class="kol">K<span>O</span>L</div>
+    <h1>Every maker, finally heard.</h1>
+    <div class="sub">A slide-by-slide rebuild of the real Canva deck (<span style="font-family:var(--mono);font-size:13px">KOL (2).pdf</span>, 35pp) into a tighter, accurate, story-first 24-slide deck. Story is the spine. Every number is sourced. We never criticize Etsy — we pitch <em>to</em> them.</div>
+    <div class="metarow">
+      <span class="chip"><b>7 min</b> on stage</span>
+      <span class="chip"><b>Fri Jul 24 2026</b> · Columbia</span>
+      <span class="chip">HLV × Etsy · <b>Buyer Experience</b> panel</span>
+      <span class="chip">Hero maker: <b>Sharon / Two Dots</b></span>
+      <span class="chip">Buyer: <b>Shyla, a mother</b></span>
+    </div>
+    <div class="legend" aria-label="tag legend">
+      <span class="li"><span class="dot" style="background:var(--new)"></span> <b>NEW</b>&nbsp;— didn't exist</span>
+      <span class="li"><span class="dot" style="background:var(--redesign)"></span> <b>REDESIGN</b>&nbsp;— exists, rebuild it</span>
+      <span class="li"><span class="dot" style="background:var(--keep)"></span> <b>KEEP</b>&nbsp;— strong, minor polish</span>
+      <span class="li"><span class="dot" style="background:var(--cut)"></span> <b>CUT</b>&nbsp;— remove</span>
+    </div>
+  </header>
+
+  <section class="summary">
+    <h2>What this version fixes (every founder note → action)</h2>
+    <ol>
+      <li><span class="tick">✓</span> <b>"New way to shop" elevator pitch is now complete</b> — a full one-sentence definition (S3), plus a "1·2·3 of the product" slide (S4) so the room understands KOL <em>before</em> the journeys.</li>
+      <li><span class="tick">✓</span> <b>Slow the scroll video</b> — the discovery feed (S9) gets its own beat, held long enough to read the "magazine of makers on film."</li>
+      <li><span class="tick">✓</span> <b>"Click anything" — shown, not told</b> (S11): a real mockup of a product click swapping the video to Sharon narrating <em>that</em> piece.</li>
+      <li><span class="tick">✓</span> <b>Feedback showcased strongly</b> — the 5 interviews (S15) lead with the sharpest quotes as designed evidence; the public survey (S16) is rebuilt so 69.4% lands.</li>
+      <li><span class="tick">✓</span> <b>"Community connection" axis fixed</b> — the perceptual map (S17) now reads <b>Story depth × Human-made trust</b>.</li>
+      <li><span class="tick">✓</span> <b>Price-loss reasons collected</b> into one coherent, labeled slide (S18) — no story ⇒ makers compete on price.</li>
+      <li><span class="tick">✓</span> <b>Target Opportunity ($600M) cut</b> — folded into the market/story slides (S17–S18).</li>
+      <li><span class="tick">✓</span> <b>Ugly slides redesigned</b> — the black revenue-leak/target slides, the grey-box + blue-orb money/seller slides, and the empty white mockup frames are all rebuilt in the paper + terracotta language.</li>
+      <li><span class="tick">✓</span> <b>Accuracy repaired</b> — lorem-ipsum timeline replaced; market anchored on <b>sourced $11.9B GMS</b> (not $10.5B); the "forced ad fees / inefficiency" line that criticized Etsy is neutralized; "So the humans <em>disappear</em>" typo fixed; every mockup URL is <span style="font-family:var(--mono);font-size:12.5px">kol.com</span> (no more "creatable.co.nz", no mirrored chrome).</li>
+    </ol>
+  </section>
+
+  <!-- ACT 0 -->
+  <div class="act"><span class="n">Act 0</span><span class="t">Cold open — <span class="g">the human disappears</span></span><span class="d">Two beats. Land the ache before you sell anything.</span></div>
+
+  <article class="slide" data-tag="KEEP">
+    <div class="shead"><span class="snum">S1</span><span class="tag KEEP">Keep</span></div>
+    <h3>Behind everything you love is a person you never meet.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Title moment. The KOL wordmark, one line, nothing else. Full-bleed workshop light behind it (hands, material — Sharon's real texture, softly out of focus).</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Paper ground, near-black type, terracotta on the "O" of KOL. 35mm grain. Let it breathe — this is the quietest slide.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Everything on this table was made by a real person. You'll probably never know who."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S2</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>So the humans disappear.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The object arrives — the maker is gone. A grid of identical listing thumbnails, faces cropped out. The old listing <em>format</em> is the villain here, never Etsy.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag"><b>Typo:</b> "disappears" → <b>"disappear."</b> Replace the generic stock photos with the flattened-grid visual so the point is structural, not a mood shot.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Grid desaturated to grey; one thumbnail keeps its warmth to foreshadow KOL. Paper ground.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"The way we shop online flattens them into a thumbnail and a price. The story — the person — disappears."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 1 -->
+  <div class="act"><span class="n">Act 1</span><span class="t">What KOL is — <span class="g">say it plainly</span></span><span class="d">⭐ The two new orientation slides. Tell them what it is → the three things it does → then show them.</span></div>
+
+  <article class="slide" data-tag="NEW">
+    <div class="shead"><span class="snum">S3</span><span class="tag NEW">New</span></div>
+    <h3>KOL is a new way to shop handmade: you meet the maker on film before you ever see the product.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v"><b>The complete elevator pitch — one sentence, huge, alone.</b> A judge should repeat it back after one hearing. Sub-line underneath: <em>"E-commerce, rebuilt around the story — the maker, the why, the materials — not the product grid."</em></div></div>
+      <div class="row"><div class="k">Why</div><div class="v">Founder note #1: the pitch was implied, never stated. This is the anchor the whole deck hangs on.</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Terracotta highlight on "meet the maker on film." Nothing competing — no chrome, no chart.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Here's the whole idea in one line: KOL is a new way to shop handmade — you meet the maker, on film, before you ever see the product."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="NEW">
+    <div class="shead"><span class="snum">S4</span><span class="tag NEW">New</span></div>
+    <h3>Three things KOL does.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Three numbered cards, equal weight — the "so they get it" checkpoint:<br><b>1 · Meet</b> the real maker, on film.<br><b>2 · Step in</b> — her world unfolds around the video, in her voice.<br><b>3 · Buy</b> from someone you now trust — and come back.</div></div>
+      <div class="row"><div class="k">Why</div><div class="v">Founder ask: before the journeys, make it unmistakable what the product actually <em>does</em>. Keep to three.</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Big terracotta numerals, one plain-language verb each, a tiny UI thumbnail on each card. Consistent card system reused later.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"It does three things. You meet the maker. You step into her world. You buy from someone you trust — and you come back. Let me show you."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 2 -->
+  <div class="act"><span class="n">Act 2</span><span class="t">The maker, first — <span class="g">Sharon</span></span><span class="d">Story is the spine (mentor). Start with the person, not the platform.</span></div>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S5</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>Meet Sharon. She makes hand-sewn costumes for kids — Two Dots.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Sharon's real hands at work (from her clips) + one finished piece. A real Etsy seller who said yes to being our first maker — the traction anchor no other team has.</div></div>
+      <div class="row"><div class="k">Mockup</div><div class="v"><span class="mock">Uses <b>Sharon's real footage</b> — the hands-making clip + product photos (see shot-list M0). No AI needed here; this is the authentic open.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Warm, full-bleed, 35mm grain. Her name and "Two Dots" set like a maker's mark.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"This is Sharon. She hand-sews costumes for kids, in her home, and sells them on Etsy under the name Two Dots. She's real, and she's our first maker."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S6</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>Sharon never opened a design tool. She just talked.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The set-up moment: Sharon answers a short interview, in her own words. Tease only — the <em>how</em> (the tools) is fully introduced in Act 8. She stays the author.</div></div>
+      <div class="row"><div class="k">Mockup</div><div class="v"><span class="mock"><b>M1 — sign-in → interview UI</b> on <span style="font-family:var(--mono)">kol.com</span>: a friendly prompt, her spoken answer transcribing into her page. Show it building, not a blank frame.</span></div></div>
+      <div class="row"><div class="k">Build honesty</div><div class="v"><span class="flag">The interview engine is <b>being built</b>, not "already running." Show it as the designed product experience, not a live demo.</span></div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"She didn't touch a design tool. She answered a few questions out loud — and KOL turned her answers into her storefront."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S7</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>Her world unfolds around her voice.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The payoff of Act 2: Sharon's finished KOL world — her video playing, her story, materials, and "why" laid out around it. This replaces the current <b>empty white frame</b>.</div></div>
+      <div class="row"><div class="k">Mockup</div><div class="v"><span class="mock"><b>M2 — the maker world (hero).</b> Full desktop mockup: still-playing video panel + branded world around it. The single most important mockup in the deck.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Show the real UI large, letterboxed on paper. Terracotta accents inside the product UI to tie brand together.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"And this is what she gets — not a listing. A world that opens around her, in her own voice."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 3 -->
+  <div class="act"><span class="n">Act 3</span><span class="t">The buyer — <span class="g">Shyla, a mother</span></span><span class="d">Named persona carried through the whole demo (the Ensemble winning pattern).</span></div>
+
+  <article class="slide" data-tag="NEW">
+    <div class="shead"><span class="snum">S8</span><span class="tag NEW">New</span></div>
+    <h3>Now meet Shyla.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Shyla, a mother, wants something <b>handmade and values-aligned for her daughter's school event</b> — not fast fashion, not a mass-market costume. She doesn't know where to look.</div></div>
+      <div class="row"><div class="k">Why</div><div class="v">Introduce the buyer as a person before the product journey. Keep the name <b>Shyla</b> (consistent with the built deck).</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Same maker's-mark treatment as Sharon's intro, so the two humans rhyme visually.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Shyla's a mom. Her daughter has a school event, and she wants something handmade — something with a story — not another mass-produced costume."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S9</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>She scrolls a magazine of makers — on film.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The discovery feed: not a grid — an editorial feed of makers on film. <b>This is the "slow the scroll" beat.</b></div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag"><b>Founder note #2:</b> the scroll was too fast to read. Give it its own slide and <b>hold it</b> — slow, deliberate scroll so the "makers on film" idea registers before we click in.</span></div></div>
+      <div class="row"><div class="k">Mockup</div><div class="v"><span class="mock"><b>M3 — discovery feed</b> (desktop), slow vertical scroll of maker video cards. <span style="font-family:var(--mono)">kol.com</span> in the chrome, rendered clean (no mirroring).</span></div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"This is how she finds them. Not a wall of thumbnails — a feed of real people, on film. Watch it move… slowly. Every card is a maker."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S10</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>She lands on Two Dots — and feels the story.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Shyla clicks Sharon's card and enters the Two Dots world — video still playing, the story wrapping around it. The buyer side of the S7 world.</div></div>
+      <div class="row"><div class="k">Mockup</div><div class="v"><span class="mock"><b>M2 (store view)</b> — the Two Dots world from the buyer's side, product shelf visible below the video.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Verification present but quiet: <b>Real-Maker</b> badge + verified reviews. Never claim we inspect the goods.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"She clicks in — and Sharon's still talking. The whole shop is built around her story. This is a verified, real maker — Shyla can feel it."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S11</span><span class="tag REDESIGN">Redesign — show it!</span></div>
+    <h3>Click anything — and she turns to tell you about it.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The signature interaction. Shyla clicks a product — the video <b>swaps</b> to Sharon narrating <em>that exact piece</em>: the fabric, why she made it, who it's for.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag"><b>Founder note #3:</b> this was text on a blank page. <b>SHOW IT.</b> A two-state mockup (before click → after click) or a short motion loop of the swap.</span></div></div>
+      <div class="row"><div class="k">Mockup</div><div class="v"><span class="mock"><b>M4 — the click-to-narrate swap.</b> State A: product page, general video. State B: same page, video now shows Sharon talking about that product. Pre-recorded UI, not a clip-swap ad.</span></div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Here's the part I love. She clicks the costume — and Sharon turns and tells her about <em>that one</em>. The product doesn't just sit there. It talks back."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="KEEP">
+    <div class="shead"><span class="snum">S12</span><span class="tag KEEP">Keep</span></div>
+    <h3>You didn't shop. You met someone.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The emotional turn. Shyla buys — checkout is a footnote, the relationship is the point. One line, paper ground.</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Keep it as the single-line beat it already is — it works. Add a whisper-small checkout confirmation in the corner so "she bought" is unambiguous.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"She buys two. But notice what actually happened — she didn't shop. She met someone."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="NEW">
+    <div class="shead"><span class="snum">S13</span><span class="tag NEW">New</span></div>
+    <h3>It arrives. She tells the story forward.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The LTV beat (mentor's close of the buyer journey): quality is high, it feels personal, and Shyla <b>retells Sharon's story</b> to whoever asks. That's repeat purchase + word of mouth.</div></div>
+      <div class="row"><div class="k">Why</div><div class="v">Answers the panel's "do buyers come back?" question with the mechanism: a story you can pass on → lifetime value for Sharon.</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Warm real photo of the piece in use; a short quote bubble of Shyla retelling it. Small label: "lifetime value = a story worth repeating."</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"It arrives, it's beautiful — and when someone asks, Shyla tells Sharon's story. That's the loop: she comes back, and she brings others."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 4 -->
+  <div class="act"><span class="n">Act 4</span><span class="t">How it works — <span class="g">simple, no fluff</span></span><span class="d">The mentor: keep it basic. Then connection & trust as the result.</span></div>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S14</span><span class="tag REDESIGN">Redesign — kill lorem ipsum</span></div>
+    <h3>How it works.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">A clean 5-step rail: <b>Discovery → Video → Store → Product → Shop.</b> Then one line: connection and trust are what you're left with.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag"><b>Delete the lorem-ipsum "2018 / 2022 / 2025 / Present" timeline entirely.</b> It's placeholder text and a fake history. Replace with the real flow rail.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Horizontal 5-node rail, terracotta connectors, a tiny thumbnail per step from the mockups we already built.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Under the hood it's simple. Discover, watch, step into the store, click the product, buy. And what you're left with is connection and trust."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 5 -->
+  <div class="act"><span class="n">Act 5</span><span class="t">Why it works — <span class="g">we listened</span></span><span class="d">Founder note #4: showcase the feedback strongly. This is your evidence act.</span></div>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S15</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>We didn't guess. We listened — 5 interviews.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Lead with the two sharpest quotes, set large as evidence (not a text wall):<br>▸ <em>"My biggest concern buying from small sellers is the failure to provide what they advertise."</em><br>▸ <em>"Verified photos and videos make me trust a product more."</em><br>Third quote smaller as support: <em>"I'd want better design, easier navigation, and videos of how the product is used."</em></div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag">Say <b>"5 interviews"</b> — never "7 recordings." Design the quotes as pull-quotes with attribution, not a paragraph.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Big terracotta quotation marks; each quote on its own card; the maker-trust one gets top billing — it's KOL's whole thesis in a buyer's words.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"We didn't guess this. We ran five interviews. Their words: they don't trust small sellers to deliver what's advertised — and video is what earns that trust back."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S16</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>69.4% said KOL sounds better than how they shop now.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The public survey result, made to <b>land</b>: one giant <b>69.4%</b> of <b>83 people</b> preferred KOL over marketplaces like Amazon. The breakdown (much better / a bit better / same / different) as a secondary, clean bar — not the muddy brown pie.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag"><b>Founder note #4:</b> the pie was muddy and buried the number. Lead with the headline stat, huge; supporting split beneath. Label clearly: "n = 83, public survey."</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Terracotta 69.4% at display size; horizontal stacked bar in tonal terracotta→taupe (drop the brown clash). Honest sample-size label.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Then we asked the public. Eighty-three people — nearly seventy percent said this sounds better than how they shop today. Before we've spent a dollar on marketing."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 6 -->
+  <div class="act"><span class="n">Act 6</span><span class="t">The market — <span class="g">the top-right corner</span></span><span class="d">Fix the axes (#5). Collect the price-loss reasons (#6). Fold in Target Opportunity (#7).</span></div>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S17</span><span class="tag REDESIGN">Redesign — fix the axes</span></div>
+    <h3>Storytelling and shopping have never lived in the same place.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The perceptual map. Social platforms have story but not commerce trust; marketplaces have commerce but no story. KOL sits alone in the <b>top-right</b>. Fold in the "target opportunity" point here: this empty corner <em>is</em> the opportunity — no separate $600M slide.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag"><b>Founder note #5:</b> axes were "Community connection × Video verification" — not right. New axes: <b>Story depth</b> (x) × <b>Human-made trust</b> (y). Place TikTok Shop / Instagram Shop / Bambuser / Firework honestly; KOL top-right.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Clean 2×2 on paper, terracotta KOL dot enlarged, competitor logos in mono. No black background.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Storytelling lives on TikTok and Instagram. Shopping lives on marketplaces. Nobody owns the corner where a human-made story <em>is</em> the store. That corner is the opportunity."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S18</span><span class="tag REDESIGN">Redesign — collect the reasons</span></div>
+    <h3>Without a story, makers compete on price. That's the leak.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">One coherent, <b>labeled</b> argument (replaces the black funnel + the muddy $10.5B slide). Three collected reasons a handmade maker loses margin when there's no story:<br>▸ <b>20–40% price gap</b> vs. what a told story can command <span style="color:var(--meta)">(our estimate)</span><br>▸ <b>~3× fewer sales</b> for shops without short-form video <span style="color:var(--meta)">(our estimate)</span><br>▸ heavy dependence on paid promotion to get seen<br>Anchored on the real market: <b>Etsy GMS $11.9B (FY2025)</b>, 86.6M buyers, 5.6M sellers.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag"><b>#6</b> collect the price reasons into one slide. <b>Accuracy:</b> use <b>$11.9B</b> (sourced), not $10.5B. Every derived figure printed as <b>"our estimate."</b> <b>#4 rail:</b> remove "forced ad fees / inefficiency" — frame as a maker/market dynamic, <em>never</em> an Etsy indictment.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Paper ground, three stacked reason-rows with terracotta magnitude bars. Sourced footnote line at the bottom.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Here's what's at stake for makers. Without a story to justify their price, they discount 20–40%, they sell a fraction of what video shops sell, and they lean on paid promotion. In an $11.9-billion market, that's a lot of value left on the table."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 7 -->
+  <div class="act"><span class="n">Act 7</span><span class="t">Business model — <span class="g">three ways</span></span><span class="d">Redesign the grey-box + blue-orb slides into one clean money story.</span></div>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S19</span><span class="tag REDESIGN">Redesign</span></div>
+    <h3>How KOL makes money — three ways, aligned with the maker.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Three elements (mentor): <b>1 · Platform fee</b> (subscription for the tools) · <b>2 · Transaction fee</b> on each sale · <b>3 · The tools</b> (premium AI features). Every line makes money only when the maker sells — aligned incentive.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag">Kill the grey rectangles + fuzzy blue-green orbs. Rebuild as three clean terracotta-accented cards on paper, consistent with the S4 card system.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Three equal cards, one number each; a one-line "we win when Sharon wins" strap beneath.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"We make money three ways — a platform fee, a small transaction fee, and premium tools. All of it only works when Sharon sells. We win when she wins."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="REDESIGN">
+    <div class="shead"><span class="snum">S20</span><span class="tag REDESIGN">Redesign — merge 4 slides → 1</span></div>
+    <h3>Built so a new maker can start for free.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Consolidate the two "Helping Sellers" slides (four grey-orb cards) into one clean pricing story: <b>free basic AI tools</b> to start · <b>$13.99/mo</b> premium · sensible guardrails (min order, break-even logic) as fine print, not hero cards.</div></div>
+      <div class="row"><div class="k">Fix</div><div class="v"><span class="flag">Four ugly grey-orb cards → one designed slide. Lead with "free to start" (the maker-friendly headline); demote the operational numbers to a supporting row.</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Two-tier pricing block on paper, terracotta on the "free" tier. Fine print in --meta.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"A new maker starts free — no cost to get their world online. Premium is $13.99 a month. The model's designed so we grow only as they do."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 8 -->
+  <div class="act"><span class="n">Act 8</span><span class="t">How it's possible — <span class="g">the tools</span></span><span class="d">Mentor: introduce the co-creation interview HERE, first full mention. The moat.</span></div>
+
+  <article class="slide" data-tag="NEW">
+    <div class="shead"><span class="snum">S21</span><span class="tag NEW">New</span></div>
+    <h3>The magic is a conversation — not a design tool.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The co-creation interview, explained: a short AI-guided conversation in setup walks the maker through her creativity, ideas, and values — and builds her world from it. <b>She stays the author</b> (anti-slop is structural). This is why KOL is defensible.</div></div>
+      <div class="row"><div class="k">Why</div><div class="v">Mentor sequenced the tools late — after the audience wants to know "how is this possible?" It answers S6's tease and names the moat.</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Simple left-to-right diagram: <em>conversation → her words → her living world.</em> Small AI-transparency label (we disclose AI assistance).</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"How is this possible without every maker being a filmmaker? A conversation. Our AI interviews her and builds the world from her own words — she's always the author. That's the hard part, and it's ours."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 9 -->
+  <div class="act"><span class="n">Act 9</span><span class="t">The ask — <span class="g">a side venture, not an A/B test</span></span><span class="d">For Etsy. Story-rich niche. Measure conversion + add-to-basket. LTV is the hypothesis.</span></div>
+
+  <article class="slide" data-tag="KEEP">
+    <div class="shead"><span class="snum">S22</span><span class="tag KEEP">Keep + build</span></div>
+    <h3>Etsy has the makers. We have the how.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The partnership framing: run KOL as a <b>side venture</b> in a story-rich Etsy niche (sewing, pottery, glass) — <b>not an A/B test</b>, a real test of a fundamental shift. Measure conversion & add-to-basket vs. a normal seller page; LTV is the hypothesis we can't fully prove in 100 days.</div></div>
+      <div class="row"><div class="k">Rail</div><div class="v"><span class="flag">Pitched <b>FOR Etsy</b> — a pilot they could run. Never "already inside Etsy." Etsy = partner. Align with Etsy's "Amplify human connection" (Kruti Patel Goyal, Q1 2026).</span></div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Keep the strong one-liner; add a compact "what we'd measure" strip (conversion ↑, add-to-basket ↑, LTV = hypothesis).</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"Etsy has the makers. We have the how. Run us as a side venture in one story-rich category — measure conversion, add-to-basket, and whether buyers come back. Not an A/B test. A test of what commerce could be."</div></div>
+    </div>
+  </article>
+
+  <!-- ACT 10 -->
+  <div class="act"><span class="n">Act 10</span><span class="t">Vision &amp; close</span><span class="d">Vision at the very end (mentor). Then the mic-drop.</span></div>
+
+  <article class="slide" data-tag="KEEP">
+    <div class="shead"><span class="snum">S23</span><span class="tag KEEP">Keep</span></div>
+    <h3>For anything a human stands behind, the story should come first.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">The vision, placed last (not mid-deck): maybe not all of e-commerce — but for handmade goods and everything a human stands behind, story is what differentiates now, so story should be front and center in what's sold next.</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Single line, paper, generous space. The deck's widest breath before the close.</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"This may not be the future of all shopping. But for anything a person made with their hands — the story is the difference. It should come first."</div></div>
+    </div>
+  </article>
+
+  <article class="slide" data-tag="KEEP">
+    <div class="shead"><span class="snum">S24</span><span class="tag KEEP">Keep</span></div>
+    <h3>KOL. Every maker, finally heard.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">On the slide</div><div class="v">Close: <em>"Because everyone behind everything you love has a voice, a story, a world worth stepping into. Let's make sure they're heard."</em> Wordmark + thank you.</div></div>
+      <div class="row"><div class="k">Design</div><div class="v">Mirror of S1 — same workshop light, brings the arc full circle. Terracotta "O".</div></div>
+      <div class="row"><div class="k">Says</div><div class="v says">"KOL. Every maker, finally heard. Because everyone behind everything you love has a story worth stepping into. Thank you."</div></div>
+    </div>
+  </article>
+
+  <!-- CUTS -->
+  <div class="act"><span class="n">Cut list</span><span class="t"><span class="g">Removed</span> from the 35-page deck</span><span class="d">Say what's gone and why, so nothing resurfaces by accident.</span></div>
+
+  <article class="slide" data-tag="CUT">
+    <div class="shead"><span class="snum">✕</span><span class="tag CUT">Cut</span></div>
+    <h3>Cut, with reasons.</h3>
+    <div class="sbody">
+      <div class="row"><div class="k">Removed</div><div class="v">
+        ▸ <b>Initial Target Opportunity / $600M</b> (black serif slide) — folded into S17–S18 per founder note #7.<br>
+        ▸ <b>Lorem-ipsum "2018→Present" timeline</b> — placeholder + fake history; replaced by the real "How it works" rail (S14).<br>
+        ▸ <b>The blank paper slide</b> near the end — empty, no purpose.<br>
+        ▸ <b>Redundant single-line beats</b> — kept the strong ones ("You didn't shop…", "Etsy has the makers…"); dropped the duplicative ones so beats don't stack.<br>
+        ▸ <b>Both black-background slides</b> as a look — the $3B funnel is rebuilt on paper (S18); nothing stays on black.
+      </div></div>
+    </div>
+  </article>
+
+  <!-- SHOTLIST -->
+  <section class="shotlist">
+    <h2>Mockup shot-list — what to produce in Canva</h2>
+    <div class="shot"><div class="id">M0</div><div class="st"><b>Sharon, real footage</b> — hands-making clip + product photos from her actual shots (see <span class="u">sharon-clip-shotlist.md</span>). Authentic, no AI. Used S5.</div></div>
+    <div class="shot"><div class="id">M1</div><div class="st"><b>Sign-in → interview UI</b> — friendly prompt, Sharon's spoken answer transcribing into her page as it builds. <span class="u">kol.com</span>. Used S6.</div></div>
+    <div class="shot"><div class="id">M2</div><div class="st"><b>The maker world (hero mockup)</b> — desktop: still-playing video panel + branded world (story, materials, why) around it. Maker view (S7) + buyer/store view with product shelf (S10). The most important asset.</div></div>
+    <div class="shot"><div class="id">M3</div><div class="st"><b>Discovery feed</b> — desktop editorial feed of maker video cards, built for a <b>slow</b> vertical scroll. Clean <span class="u">kol.com</span> chrome (no mirroring). Used S9 + thumbnail in S14.</div></div>
+    <div class="shot"><div class="id">M4</div><div class="st"><b>Click-to-narrate swap</b> — two states: (A) product page w/ general video → (B) same page, video now Sharon narrating <em>that</em> product. Still frames or a short motion loop. Pre-recorded UI. Used S11.</div></div>
+    <div class="shot"><div class="id">M5</div><div class="st"><b>Checkout confirmation</b> — tiny "order placed" corner state so "she bought" is unambiguous. Used S12.</div></div>
+    <div class="shot"><div class="id">M6</div><div class="st"><b>Product-in-use photo</b> — Shyla's daughter wearing the costume (or a warm staged stand-in from Sharon's photos) + a retell quote bubble. Used S13.</div></div>
+    <div class="shot"><div class="id">M7</div><div class="st"><b>Co-creation diagram</b> — conversation → her words → her living world, with an AI-transparency label. Used S21.</div></div>
+  </section>
+
+  <footer>
+    <div>Build plan v6 · ceo-5 · 2026-07-23 · supersedes the 35-page <span style="font-family:var(--mono)">KOL (2).pdf</span> structure. 24 slides / 10 acts, ~7 min. Story is the spine; every number sourced; we pitch <em>to</em> Etsy.</div>
+    <div class="foot-rails">
+      <span class="chip">Verification is real, never physical inspection</span>
+      <span class="chip">Standalone, built FOR Etsy — never "inside Etsy"</span>
+      <span class="chip">Interview engine = being built</span>
+      <span class="chip">$11.9B sourced · derived figures labeled "our estimate"</span>
+      <span class="chip">Never criticize Etsy</span>
+      <span class="chip">Product pages = pre-recorded UI</span>
+    </div>
+  </footer>
+
+</div>
+<script>
+  (function(){
+    var r=document.documentElement;
+    try{
+      var mq=window.matchMedia('(prefers-color-scheme:dark)');
+      // respect host-injected data-theme if present; otherwise follow OS
+      if(!r.getAttribute('data-theme')){ r.setAttribute('data-theme', mq.matches?'dark':'light'); }
+      mq.addEventListener&&mq.addEventListener('change',function(e){ r.setAttribute('data-theme', e.matches?'dark':'light'); });
+    }catch(e){}
+  })();
+</script>
