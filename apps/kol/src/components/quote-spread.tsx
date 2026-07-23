@@ -45,7 +45,7 @@ export function QuoteSpread() {
               <span className="font-ui text-base font-semibold text-bone">
                 {FEATURED_QUOTE.attribution}
               </span>
-              <span className="meta text-marigold-bright">
+              <span className="meta text-bone-dim">
                 {FEATURED_QUOTE.studio}
               </span>
             </figcaption>

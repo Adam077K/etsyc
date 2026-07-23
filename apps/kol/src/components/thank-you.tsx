@@ -182,7 +182,7 @@ export function ThankYou() {
             </ul>
             <div className="flex items-baseline justify-between border-t border-line px-6 py-4">
               <span className="font-ui text-base font-semibold text-bone">Total paid</span>
-              <span className="font-display text-2xl font-bold text-marigold">
+              <span className="font-display text-2xl font-bold text-bone">
                 {gbp(totals.total)}
               </span>
             </div>

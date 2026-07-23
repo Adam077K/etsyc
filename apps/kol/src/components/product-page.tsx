@@ -149,7 +149,7 @@ export function ProductPage({
             </h1>
 
             <div className="mt-5 flex items-baseline gap-4">
-              <span className="font-display text-3xl font-bold text-marigold">
+              <span className="font-display text-3xl font-bold text-bone">
                 {product.price}
               </span>
               <span className="font-ui text-sm text-bone-dim">

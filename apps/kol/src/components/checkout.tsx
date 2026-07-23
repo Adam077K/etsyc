@@ -338,7 +338,7 @@ export function Checkout() {
                 />
                 <div className="flex items-baseline justify-between border-t border-line pt-3">
                   <dt className="font-ui text-base font-semibold text-bone">Total</dt>
-                  <dd className="font-display text-2xl font-bold text-marigold">
+                  <dd className="font-display text-2xl font-bold text-bone">
                     {gbp(totals.total)}
                   </dd>
                 </div>

@@ -163,7 +163,7 @@ export function SellOnboarding() {
                   className="group grid gap-6 rounded-3xl border border-line bg-ink-soft p-7 transition-colors hover:border-bone/25 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-10 sm:p-9"
                 >
                   <div className="flex items-center gap-5">
-                    <span className="font-mono text-sm text-marigold">
+                    <span className="font-mono text-sm text-bone-dim">
                       {step.index}
                     </span>
                     <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-ink-raise text-marigold transition-colors group-hover:bg-marigold group-hover:text-ink">

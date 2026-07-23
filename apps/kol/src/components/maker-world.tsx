@@ -521,7 +521,7 @@ function ProductsSection({
                         {product.name}
                       </Link>
                     </h3>
-                    <span className="font-display text-2xl font-bold text-marigold">
+                    <span className="font-display text-2xl font-bold text-bone">
                       {product.price}
                     </span>
                   </div>

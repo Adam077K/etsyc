@@ -138,7 +138,7 @@ export function HowStory() {
           >
             Shopping became a transaction.
             <br />
-            <span className="font-serif font-normal italic text-marigold-bright">
+            <span className="font-serif font-normal italic text-bone">
               We made it a relationship again.
             </span>
           </motion.h1>
@@ -262,7 +262,7 @@ export function HowStory() {
             viewport={inView}
             className="max-w-3xl"
           >
-            <p className="meta mb-4 text-marigold-bright">
+            <p className="meta mb-4 text-bone-dim">
               What you won&#39;t find here
             </p>
             <h2
@@ -315,7 +315,7 @@ export function HowStory() {
               variants={reduce ? calm : rise(22, 0.7)}
               className="rounded-3xl border border-marigold/40 bg-ink/25 p-7 sm:p-8"
             >
-              <p className="meta mb-6 text-marigold-bright">The KOL way</p>
+              <p className="meta mb-6 text-bone-dim">The KOL way</p>
               <ul>
                 {INSTEAD.map((line) => (
                   <li
@@ -441,7 +441,7 @@ function Beat({
 
       <motion.div variants={reduce ? calm : rise(28, 0.9)}>
         <div className="flex items-center gap-4">
-          <span className="font-mono text-sm text-marigold">{act.index}</span>
+          <span className="font-mono text-sm text-bone-dim">{act.index}</span>
           <span className="h-px w-10 bg-line" />
           <span className="meta text-bone-dim">{act.kicker}</span>
         </div>
