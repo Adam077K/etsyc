@@ -179,28 +179,29 @@ Directional — our estimate:
 
 ---
 
-## 18 · How KOL makes money
+## 18 · How KOL makes money (as an add-on to Etsy)
 **ON SLIDE**
-How KOL makes money — honestly
-• Transaction fee — the aligned one: we earn only when she sells.
-• Platform subscription — free to start; a real monthly cost once she scales (fair, not "aligned").
-• Premium tools — optional, there when she wants them.
-*She starts free. The fee is the part that's truly aligned.*
+How KOL makes money — an add-on, not another middleman.
+• Share of the lift — KOL earns a cut only of the *extra* sales the story layer drives. Etsy keeps its existing fees; makers pay nothing new on their baseline.
+• Maker tools — free to start; a premium tier ($13.99/mo) for the AI story tools.
+• Platform licensing — Etsy can license the engine as it scales.
+*We only win when KOL creates sales that weren't there before.*
 
-**NOTES:** She starts free. We take a small fee only when she sells — that's the part that's truly aligned. Premium tools are there when she wants them.
+**NOTES:** KOL isn't another toll on the sale. As an add-on, the checkout stays Etsy's — we take a share only of the *incremental* sales the story layer drives. Makers keep their baseline, Etsy keeps its fees, plus a simple tools subscription. If we don't grow the pie, we don't get paid.
 
 ---
 
-## 19 · Unit economics
+## 19 · The economics — tied to the lift
 **ON SLIDE**
-What a maker's worth — and where we break even
-Free to start — get your world online
-$13.99/mo premium
-A maker doing ~$[X] GMV yields KOL ~$[Y]/yr. Break-even at ~[N] active makers. We grow only as they do.
+Tied to the lift it creates.
+Free to start · $13.99/mo premium tools
+KOL earns ~[Z]% of the incremental GMS it drives.
+In a category doing ~$[X], a [L]% sales lift → ~$[Y]/yr to KOL.
+*We grow only as Etsy's makers grow.*
 
-> ⚠ Fill in [X] / [Y] / [N] with your real numbers before presenting.
+> ⚠ Fill in [Z] / [X] / [L] / [Y] with your real numbers before presenting.
 
-**NOTES:** A new maker starts free; premium's $13.99. On our estimates a maker at [X] earns KOL about [Y] a year — we break even around [N] active makers. We grow only as they do.
+**NOTES:** The tools are free to start; premium's $13.99 a month. But the real model is the lift — we take a small share of the incremental sales we drive. On one story-rich category, even a modest lift is meaningful, and it grows only as makers grow.
 
 ---
 
