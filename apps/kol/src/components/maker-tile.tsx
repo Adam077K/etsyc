@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Play, ArrowUpRight, MapPin } from "@phosphor-icons/react";
 import type { Maker, Span, Ground } from "@/lib/fixtures/makers";
 import { CRAFT_ICON } from "@/lib/icons";
-import { rise, calm } from "@/lib/motion";
+import { rise, calm, inView } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const SPAN_CLASS: Record<Span, string> = {
@@ -47,7 +47,8 @@ export function MakerTile({ maker, index }: { maker: Maker; index: number }) {
     <motion.article
       variants={reduce ? calm : rise(30, 0.8)}
       initial="hidden"
-      animate="visible"
+      whileInView="visible"
+      viewport={inView}
       transition={{ delay: (index % 6) * 0.05 }}
       className={cn("group", SPAN_CLASS[maker.span])}
     >
@@ -136,7 +137,9 @@ function EditorialTile({
   );
 }
 
-/* Product still on a color field, caption on an ink strip. */
+/* Product still floated on a visible KOL color field, caption on an ink strip.
+   The product sits in a rounded inner frame so the color ground reads as a mat
+   (the "product on a color field" beat) — never text raw over the photo. */
 function ObjectTile({
   maker,
   Icon,
@@ -144,7 +147,6 @@ function ObjectTile({
   maker: Maker;
   Icon: (typeof CRAFT_ICON)[keyof typeof CRAFT_ICON];
 }) {
-  const onLight = maker.ground === "bone";
   return (
     <div
       className={cn(
@@ -154,29 +156,26 @@ function ObjectTile({
     >
       <div
         className={cn(
-          "relative flex-1 overflow-hidden",
+          "relative flex-1 p-4 sm:p-5",
           GROUND_BG[maker.ground as Ground],
         )}
       >
-        <Image
-          src={maker.image}
-          alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
-          fill
-          sizes={SIZES}
-          className="object-cover transition-transform duration-[900ms] ease-out-expo group-hover:scale-[1.06]"
-        />
-        <p
-          className={cn(
-            "meta absolute left-3 top-3 flex items-center gap-1.5",
-            onLight ? "text-ink/70" : "text-bone/85",
-          )}
-        >
-          <Icon size={14} weight="fill" />
-          {maker.discipline}
-        </p>
-        <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-ink text-bone opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <ArrowUpRight size={18} weight="bold" />
-        </span>
+        <div className="relative h-full w-full overflow-hidden rounded-xl">
+          <Image
+            src={maker.image}
+            alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
+            fill
+            sizes={SIZES}
+            className="object-cover transition-transform duration-[900ms] ease-out-expo group-hover:scale-[1.06]"
+          />
+          <span className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-ink/72 px-2.5 py-1 backdrop-blur-sm">
+            <Icon size={13} weight="fill" className="text-marigold" />
+            <span className="meta text-bone">{maker.discipline}</span>
+          </span>
+          <span className="absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-full bg-bone text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <ArrowUpRight size={18} weight="bold" />
+          </span>
+        </div>
       </div>
 
       <div className="bg-ink px-4 py-3.5">

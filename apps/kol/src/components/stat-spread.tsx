@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useReducedMotion, animate } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion, useInView, animate } from "framer-motion";
 import { ISSUE_STATS } from "@/lib/fixtures/makers";
-import { rise, calm } from "@/lib/motion";
+import { rise, calm, inView } from "@/lib/motion";
 import { LiquidDivider } from "./liquid";
 
-// Counts up once on mount. Default value is the final figure, so the number is
-// correct even if the animation never runs (reduced-motion / no observer).
+// Counts up when it scrolls into view, so the visitor watches the number climb.
 function Counter({ to, className }: { to: number; className?: string }) {
   const reduce = useReducedMotion();
+  const ref = useRef<HTMLSpanElement>(null);
+  const seen = useInView(ref, { once: true, margin: "-80px" });
   const [val, setVal] = useState(reduce ? to : 0);
 
   useEffect(() => {
-    if (reduce) return;
+    if (!seen || reduce) return;
     // animate() schedules onUpdate asynchronously — no sync setState in effect.
     const controls = animate(0, to, {
       duration: 1.6,
@@ -21,9 +22,13 @@ function Counter({ to, className }: { to: number; className?: string }) {
       onUpdate: (v) => setVal(Math.round(v)),
     });
     return () => controls.stop();
-  }, [to, reduce]);
+  }, [seen, to, reduce]);
 
-  return <span className={className}>{val}</span>;
+  return (
+    <span ref={ref} className={className}>
+      {val}
+    </span>
+  );
 }
 
 export function StatSpread() {
@@ -35,10 +40,11 @@ export function StatSpread() {
       <motion.div
         variants={v}
         initial="hidden"
-        animate="visible"
+        whileInView="visible"
+        viewport={inView}
         className="relative overflow-hidden rounded-3xl bg-clay px-6 py-14 text-center sm:px-12 sm:py-20"
       >
-        <LiquidDivider className="pointer-events-none absolute inset-x-0 top-0 opacity-30" />
+        <LiquidDivider className="pointer-events-none absolute inset-x-0 top-0 opacity-[0.55]" />
 
         <div className="relative">
           <div className="flex flex-wrap items-baseline justify-center gap-x-10 gap-y-6">

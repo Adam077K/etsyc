@@ -77,7 +77,10 @@ export function Masthead() {
           >
             <User size={20} />
           </button>
-          <button className="flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5">
+          <button
+            aria-label="Your bag"
+            className="flex items-center gap-2 rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5"
+          >
             <Handbag size={18} weight="fill" />
             <span className="hidden sm:inline">Bag</span>
           </button>

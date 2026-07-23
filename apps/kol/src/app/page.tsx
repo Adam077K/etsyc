@@ -15,7 +15,7 @@
  *   concept roll per new-work.md. Signature: liquid ink + warm-bloom hover.
  */
 
-import { GooDefs } from "@/components/liquid";
+import { GooDefs, LiquidDivider } from "@/components/liquid";
 import { Masthead } from "@/components/masthead";
 import { HeroSpread } from "@/components/hero-spread";
 import { Feed } from "@/components/feed";
@@ -28,6 +28,10 @@ export default function DiscoveryFeedPage() {
       <Masthead />
       <main>
         <HeroSpread />
+        {/* Signature liquid-ink seam: the cover film bleeds into the issue. */}
+        <div className="relative bg-ink py-4 sm:py-6">
+          <LiquidDivider className="mx-auto max-w-issue px-5 opacity-[0.62] sm:px-8" />
+        </div>
         <Feed />
       </main>
       <SiteFooter />

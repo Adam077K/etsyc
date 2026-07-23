@@ -42,5 +42,5 @@ export const calm: Variants = {
   visible: { opacity: 1, transition: { duration: 0.01 } },
 };
 
-/** Shared viewport config: animate once, a little before fully in view. */
-export const inView = { once: true, margin: "0px 0px -12% 0px" } as const;
+/** Shared viewport config: animate once, entering a little before fully in view. */
+export const inView = { once: true, margin: "-80px" } as const;

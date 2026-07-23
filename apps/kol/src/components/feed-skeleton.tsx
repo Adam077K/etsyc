@@ -22,7 +22,7 @@ export function FeedSkeleton() {
         <div
           key={i}
           className={cn(
-            "shimmer-sweep rounded-2xl bg-ink-raise ring-1 ring-line",
+            "shimmer-sweep rounded-2xl bg-[#3A2E26] ring-1 ring-line",
             shape,
           )}
         />

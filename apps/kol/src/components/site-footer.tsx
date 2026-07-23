@@ -2,13 +2,18 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, InstagramLogo, YoutubeLogo, EnvelopeSimple } from "@phosphor-icons/react";
-import { rise, calm } from "@/lib/motion";
+import { rise, calm, inView } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 
 const COLUMNS = [
   { title: "Shop", links: ["The issue", "By craft", "New makers", "Gift guide"] },
   { title: "Makers", links: ["Sell on KOL", "How it works", "Maker stories", "Apply"] },
   { title: "KOL", links: ["About", "The Journal", "Trust & proof", "Careers"] },
+];
+
+const SOCIAL = [
+  { Icon: InstagramLogo, label: "Follow KOL on Instagram" },
+  { Icon: YoutubeLogo, label: "Watch KOL on YouTube" },
 ];
 
 export function SiteFooter() {
@@ -21,7 +26,8 @@ export function SiteFooter() {
       <motion.div
         variants={v}
         initial="hidden"
-        animate="visible"
+        whileInView="visible"
+        viewport={inView}
         className="mx-auto max-w-issue px-5 py-20 sm:px-8 sm:py-28"
       >
         <p className="meta text-marigold">Next issue, in your inbox</p>
@@ -78,11 +84,11 @@ export function SiteFooter() {
               relationship.
             </p>
             <div className="mt-6 flex gap-2">
-              {[InstagramLogo, YoutubeLogo].map((Icon, i) => (
+              {SOCIAL.map(({ Icon, label }) => (
                 <a
-                  key={i}
+                  key={label}
                   href="#top"
-                  aria-label="Social"
+                  aria-label={label}
                   className="grid h-10 w-10 place-items-center rounded-full border border-bone/20 text-bone/80 transition-colors hover:border-bone/60 hover:text-bone"
                 >
                   <Icon size={18} />
