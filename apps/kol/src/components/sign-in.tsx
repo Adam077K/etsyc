@@ -255,7 +255,7 @@ function Sent({
           initial={reduce ? false : { scale: 1.7, rotate: -14, opacity: 0 }}
           animate={reduce ? undefined : { scale: 1, rotate: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 420, damping: 15, mass: 0.7, delay: 0.04 }}
-          className="relative grid h-16 w-16 place-items-center rounded-full bg-marigold text-ink shadow-[0_10px_28px_-8px_rgba(228,146,44,0.7)]"
+          className="relative grid h-16 w-16 place-items-center rounded-full bg-marigold text-ink shadow-[0_10px_28px_-8px_rgba(241,100,30,0.7)]"
         >
           <SealCheck size={32} weight="fill" />
         </motion.span>

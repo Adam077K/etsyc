@@ -433,7 +433,7 @@ same video node keeps playing world→product.
 | " | " | " | " | orange text/link on ink | 5.61:1 | 4.5 | ✅ |
 | marigold bright | `#F2A93B` | **`#FF7A3C`** | Etsy Orange (light) | bright display accent on ink ("on film.") | 6.90:1 | 3.0 | ✅ |
 | " | " | " | " | ink on bright (CTA hover) / focus ring | 6.90:1 | 4.5 | ✅ |
-| clay DEFAULT | `#B4462A` | **`#AE4328`** | Terracotta / Brick | bone body on clay (stat spread) | 4.95:1 | 4.5 | ✅ |
+| clay DEFAULT | `#B4462A` | **`#AE4328`** | Terracotta / Brick | bone body on clay (stat spread) | 4.67:1 | 4.5 | ✅ |
 | clay bright | `#E08462` | `#E08462` (kept) | " | clay-bright kicker on ink | 6.52:1 | 4.5 | ✅ |
 | plum | `#43223B` | **`#4C2740`** | Fig (bubblegum/lavender dk) | bone on plum / bone-dim on plum | 10.15 / 6.94 | 4.5 | ✅ |
 | olive | `#4E5A2A` | `#4E5A2A` (kept) | Moss (slime-green dk) | bone on olive / bone/70 eyebrow¹ | 6.01 / 6.01 | 4.5 | ✅ |

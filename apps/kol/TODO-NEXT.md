@@ -68,4 +68,9 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
   Cosmetic remnant of the P1-A fix; not a blocker.
 
 ## Copy / IA / a11y polish
-- _(All prior items in this section applied — see Applied above.)_
+- **[Etsy skin, a11y] Focus ring on bone grounds is under the 3:1 floor.** The
+  `#FF7A3C` (Etsy Orange-bright) focus outline measures ~2.09:1 on bone (improved
+  from ~1.61:1 with the old bright, still below the WCAG 3:1 non-text floor).
+  On ink grounds it passes comfortably; only bone-ground focus states are affected.
+  Fix: give `:focus-visible` a darker/denser ring token (or an ink outline) when
+  the ground is bone. Non-blocking (finish-reviewer advisory).
