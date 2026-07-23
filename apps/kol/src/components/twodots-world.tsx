@@ -351,7 +351,12 @@ function IdeaSection({ reduce, onView }: { reduce: boolean; onView: () => void }
     <section className="mx-auto max-w-issue px-5 py-24 sm:px-8 sm:py-32">
       <Reveal reduce={reduce} onView={onView}>
         <div className="grid gap-10 md:grid-cols-[1fr_1.05fr] md:gap-16">
-          <div className="flex flex-col justify-center">
+          {/* At xl the pinned top-left dock overlaps the top of this column as
+              the section scrolls; a top clearance on the whole heading+prose
+              stack (kicker → h2 → prose shift down as one) drops the reading
+              block below the dock's band. Clearance only — the internal
+              composition and prose are untouched. */}
+          <div className="flex flex-col justify-center xl:pt-56">
             <p className="meta mb-5 text-clay-bright">{d.ideaKicker}</p>
             <h2
               className="mb-6 font-display font-bold leading-[0.95] text-bone"
@@ -359,10 +364,7 @@ function IdeaSection({ reduce, onView }: { reduce: boolean; onView: () => void }
             >
               {d.ideaTitle}
             </h2>
-            {/* At xl the pinned top-left dock overlaps the top of this prose as
-                the section scrolls; a top clearance drops the reading block below
-                the dock's band. Clearance only — prose + composition untouched. */}
-            <div className="space-y-5 xl:pt-44">
+            <div className="space-y-5">
               {d.ideaBody.map((p, i) => (
                 <p
                   key={i}
