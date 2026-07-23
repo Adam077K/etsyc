@@ -2,10 +2,25 @@
 role: design-lead
 task: kol-dock-topleft
 branch: feat/kol-dock-topleft
-commit: 21bf028
+commit: 1fac1bd
 qa_verdict: PENDING
 tier: lite
 ---
+
+## RULING APPLIED (Option A) — commit 1fac1bd
+
+Store (maker world + product + twodots) docks TOP-LEFT; checkout + thank-you keep the
+pre-directive BOTTOM-RIGHT dock. Single-sourced via `DockCorner` + `dockAnchor` in
+film-geometry; FilmIntent.dockCorner drives corner-aware crop direction in film-stage.
+In-store gutters (xl only): world process left safe-lane (header + cards clear); twodots
+IdeaSection prose top clearance. Product breadcrumb: film cue nudged below the breadcrumb.
+Re-sweep 375/414/768/1440: checkout h1 + form clear at every width (wave-4 regression
+resolved); world/twodots overlaps cleared at xl. Gates: build OK · typecheck · detect ·
+e2e 4/4. Residual (matches main): thank-you "Back to the feed" CTA sits near the bottom-
+right dock at full scroll; twodots hero h2 tail sits under the dock (out of ruling scope).
+
+---
+
 
 # Dock TOP-LEFT (Founder directive)
 
