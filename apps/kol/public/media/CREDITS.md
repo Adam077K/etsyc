@@ -96,8 +96,10 @@ the screens-only stock pass, and the reuse above is a placeholder, not the shipp
 > PASS alone — Founder clearance is a separate, required gate.
 
 Curation: 182 Wix-export files → 61 deduped candidates (min-dim ≥ 600px, ≥ 40KB) →
-**8 images + 2 videos kept**. Skipped: 121 duplicates/thumbnails/sub-5KB, plus all
-face-forward costume portraits (governance — see below).
+**9 images + 2 videos kept** (quilt.jpg logged retroactively — it shipped in a
+prior wave to the Little Devil gallery without a CREDITS row; inspected faceless,
+now recorded). Skipped: 121 duplicates/thumbnails/sub-5KB, plus all face-forward
+costume portraits (governance — see below).
 
 ### Kept — no identifiable face (safe for hero/tile/process/product cards)
 
@@ -111,6 +113,7 @@ face-forward costume portraits (governance — see below).
 | twodots/devil-back.jpg | Little-devil costume (wings, tutu, trident) — **head-cropped** (top 28%) to remove a partial side profile present in the source; only the back of the hair remains | photo #09, cropped | none (cropped) |
 | twodots/tote.jpg | Hand-printed cat-face drawstring bag (product) | photo #55, cropped from brand card to isolate the bag | none |
 | twodots/felt.jpg | Felt-craft characters flat-lay (butterfly, cactus, panda…) | photo #33 | none |
+| twodots/quilt.jpg | Patchwork-quilt detail (eyelet lace, tartan, floral cotton patches, dusty-rose binding) — a made object, no people | photo #61, cropped to the corner detail | none |
 
 ### Kept — CONTAINS a child's face → FLAGGED for Founder approval
 
