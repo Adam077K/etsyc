@@ -26,7 +26,7 @@ import {
 import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip, dockTop } from "./film/film-geometry";
 
 /**
  * Thank-you — buyer journey step 8, and the payoff of the continuous film. The
@@ -261,7 +261,7 @@ function ThankYouFilm({
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     isMobileRef.current = window.matchMedia("(max-width: 767px)").matches;
     // Grow from the arriving corner into the full-bleed payoff.
-    snapTo({ originX: 100, originY: 100 });
+    snapTo({ originX: 0, originY: 0 });
     driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.8 });
     const t = setTimeout(() => (enteredRef.current = true), prefersReduced ? 0 : 820);
     return () => clearTimeout(t);
@@ -280,6 +280,7 @@ function ThankYouFilm({
       v,
       isMobileRef.current ? 0.22 : 0.28,
       dockClip(window.innerWidth, window.innerHeight),
+      dockTop(24),
     );
   });
 

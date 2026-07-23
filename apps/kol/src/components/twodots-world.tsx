@@ -27,7 +27,7 @@ import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip, dockTop } from "./film/film-geometry";
 
 /**
  * TwoDotsWorld — Sharon's BESPOKE maker world (/m/two-dots only).
@@ -138,12 +138,12 @@ export function TwoDotsWorld({ maker, world }: { maker: Maker; world: World }) {
 function dockedTarget(docked: number, clipAmt: number) {
   return {
     scale: docked,
-    x: -24,
-    y: -24,
+    x: 24,
+    y: dockTop(24),
     radius: 64,
     opacity: 1,
-    originX: 100,
-    originY: 100,
+    originX: 0,
+    originY: 0,
     shadow: 1,
     clip: clipAmt,
   };
@@ -188,7 +188,7 @@ function TwoDotsFilm({
     const prefersReduced =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    snapTo({ originX: 100, originY: 100 });
+    snapTo({ originX: 0, originY: 0 });
     if (!consumeHandoff()) {
       driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.55 });
     }
@@ -277,7 +277,7 @@ function TwoDotsFilm({
       return;
     }
     if (!enteredRef.current) return;
-    applyDockFrame(m, v, docked, dockClip(vw, vh));
+    applyDockFrame(m, v, docked, dockClip(vw, vh), dockTop(24));
   });
 
   return null;

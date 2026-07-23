@@ -26,7 +26,7 @@ import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip, dockTop } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -301,10 +301,10 @@ function WorldFilm({
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (consumeHandoff()) {
       // The feed/cover is animating the entrance — just lock the hero origin.
-      snapTo({ originX: 100, originY: 100 });
+      snapTo({ originX: 0, originY: 0 });
     } else {
       // Direct nav or back-nav from a product: settle to the full-bleed hero.
-      snapTo({ originX: 100, originY: 100 });
+      snapTo({ originX: 0, originY: 0 });
       driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.55 });
     }
     return () => setInteraction(null);
@@ -350,12 +350,12 @@ function WorldFilm({
       if (v > 0.6) {
         snapTo({
           scale: docked,
-          x: -24,
-          y: -24,
+          x: 24,
+          y: dockTop(24),
           radius: 64,
           opacity: 1,
-          originX: 100,
-          originY: 100,
+          originX: 0,
+          originY: 0,
           shadow: 1,
           clip: dockClip(window.innerWidth, window.innerHeight),
         });
@@ -365,10 +365,16 @@ function WorldFilm({
       return;
     }
     if (!enteredRef.current) return;
-    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow); the
-    // clip crops the dock to a landscape card on portrait phones so it never
-    // buries the world copy it scrolls past.
-    applyDockFrame(m, v, docked, dockClip(window.innerWidth, window.innerHeight));
+    // Shared hero→dock settle (lands by 72%, insets top-left below the masthead,
+    // linear shadow); the clip crops the dock to a landscape card on portrait
+    // phones so it never buries the world copy it scrolls past.
+    applyDockFrame(
+      m,
+      v,
+      docked,
+      dockClip(window.innerWidth, window.innerHeight),
+      dockTop(24),
+    );
   });
 
   return null;

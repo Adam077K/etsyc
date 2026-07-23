@@ -19,7 +19,7 @@ import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, stagger, inView } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { cornerTarget, dockAspect } from "./film/film-geometry";
+import { cornerTarget, dockAspect, dockTop } from "./film/film-geometry";
 
 const ERR = "text-error";
 const NUM = ["", "One", "Two", "Three", "Four", "Five"];
@@ -391,7 +391,7 @@ export function Checkout() {
    not selling. */
 function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
   const { present, driveTo } = useFilm();
-  const [card, setCard] = useState({ width: 176, margin: 24, ratio: 16 / 10 });
+  const [card, setCard] = useState({ width: 176, margin: 24, ratio: 16 / 10, top: 96 });
 
   // Runs once per maker; the film controls are stable.
   useEffect(() => {
@@ -412,8 +412,9 @@ function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
       const vh = window.innerHeight;
       const width = mobile ? 132 : 176;
       const margin = mobile ? 16 : 24;
-      setCard({ width, margin, ratio: dockAspect(vw, vh) });
-      driveTo(cornerTarget(vw, vh, { width, margin, radius: 16 }), {
+      const top = dockTop(margin);
+      setCard({ width, margin, ratio: dockAspect(vw, vh), top });
+      driveTo(cornerTarget(vw, vh, { width, margin, radius: 16, top }), {
         reduce: prefersReduced,
         duration: 0.55,
       });
@@ -428,8 +429,8 @@ function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
     <div
       className="pointer-events-none fixed z-[41]"
       style={{
-        right: card.margin,
-        bottom: card.margin,
+        left: card.margin,
+        top: card.top,
         width: card.width,
         aspectRatio: String(card.ratio),
       }}
