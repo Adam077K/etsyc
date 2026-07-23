@@ -14,7 +14,12 @@ import { cn } from "@/lib/utils";
  * KOL's fixed chrome.
  */
 
-const world = WORLDS["odd-clay"]!;
+function loadOddClay() {
+  const w = WORLDS["odd-clay"];
+  if (!w) throw new Error("sell-preview: missing 'odd-clay' world fixture");
+  return w;
+}
+const world = loadOddClay();
 const maker = COVER_MAKER;
 
 export interface PreviewState {
@@ -297,10 +302,7 @@ export function SellPreview(state: PreviewState) {
           )}
         </div>
         <div className="px-3 pb-2">
-          <VoiceTag
-            show={state.voiceovers.has("studio::The studio caption")}
-            on={textOnAccent}
-          />
+          <VoiceTag show={state.voiceovers.has("studio::The studio caption")} />
         </div>
       </button>
 
@@ -315,18 +317,12 @@ export function SellPreview(state: PreviewState) {
         <div className="px-6 py-9 text-center">
           <p
             className="mx-auto max-w-sm font-serif leading-[1.2]"
-            style={{ color: textOnAccent, fontSize: "clamp(1.1rem, 2.5vw, 1.6rem)" }}
+            style={{ color: textOnAccent, fontSize: "clamp(1.5rem, 2.5vw, 1.6rem)" }}
           >
             {world.voice}
           </p>
           {state.variants.voice === "follow" && (
-            <span
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-ui text-xs font-semibold"
-              style={{
-                backgroundColor: textOnAccent,
-                color: state.accentHex,
-              }}
-            >
+            <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-4 py-1.5 font-ui text-xs font-semibold text-bone backdrop-blur-sm">
               Follow {maker.studio}
             </span>
           )}
@@ -336,14 +332,13 @@ export function SellPreview(state: PreviewState) {
   );
 }
 
-function VoiceTag({ show, on }: { show: boolean; on?: string }) {
+/* A KOL-tooling tag (solid ink chip) so it stays legible on any ground and
+   reads as chrome, not the maker's brand — sharpens the D15 boundary. */
+function VoiceTag({ show }: { show: boolean }) {
   if (!show) return null;
   return (
-    <span
-      className="mt-2 inline-flex items-center gap-1 rounded-full bg-bone/15 px-2 py-0.5 font-ui text-[0.6rem] font-medium"
-      style={{ color: on ?? "#EFE6D6" }}
-    >
-      <SpeakerHigh size={11} weight="fill" />
+    <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-ink/80 px-2 py-0.5 font-ui text-[0.6rem] font-medium text-bone backdrop-blur-sm">
+      <SpeakerHigh size={11} weight="fill" className="text-marigold" />
       Tap to hear
     </span>
   );
