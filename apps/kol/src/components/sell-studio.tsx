@@ -136,7 +136,7 @@ export function SellStudio() {
         animate="visible"
         className="mb-5"
       >
-        <p className="meta text-marigold">Your studio · draft</p>
+        <p className="meta text-bone-dim">Your studio · draft</p>
         <h1 className="mt-2 font-display text-2xl font-bold leading-tight text-bone sm:text-3xl">
           Here&#39;s your world. Make it yours.
         </h1>

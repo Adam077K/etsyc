@@ -70,7 +70,7 @@ export function HeroSpread() {
         animate="visible"
         className="relative mx-auto flex min-h-[100svh] max-w-issue flex-col justify-end px-5 pb-16 pt-32 sm:px-8 sm:pb-20"
       >
-        <motion.p variants={item} className="meta mb-6 text-marigold">
+        <motion.p variants={item} className="meta mb-6 text-bone-dim">
           Issue 07 · Summer · 312 makers on film
         </motion.p>
 

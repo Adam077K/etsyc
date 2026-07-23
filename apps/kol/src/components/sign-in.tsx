@@ -102,7 +102,7 @@ export function SignIn() {
               <Sent email={email.trim()} onReset={reset} reduce={!!reduce} />
             ) : (
               <>
-                <p className="meta text-marigold">Sign in · or make your first visit</p>
+                <p className="meta text-bone-dim">Sign in · or make your first visit</p>
                 <h1
                   className="mt-5 font-display font-extrabold leading-[0.95] text-bone"
                   style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)" }}
@@ -260,7 +260,7 @@ function Sent({
           <SealCheck size={32} weight="fill" />
         </motion.span>
       </div>
-      <p className="meta mt-8 text-marigold">Note on its way</p>
+      <p className="meta mt-8 text-bone-dim">Note on its way</p>
       <h1
         className="mt-5 font-display font-extrabold leading-[0.95] text-bone"
         style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)" }}

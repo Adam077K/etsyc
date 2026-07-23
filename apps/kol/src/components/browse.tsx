@@ -90,7 +90,7 @@ export function Browse() {
     <>
       {/* Search header. */}
       <section className="mx-auto max-w-issue px-5 pb-8 pt-28 sm:px-8 sm:pt-32">
-        <p className="meta text-marigold">Search the issue</p>
+        <p className="meta text-bone-dim">Search the issue</p>
         <h1
           className="mt-4 max-w-3xl font-display font-extrabold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}

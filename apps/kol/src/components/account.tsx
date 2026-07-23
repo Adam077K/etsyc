@@ -95,7 +95,7 @@ export function Account() {
       {/* Profile band. */}
       <section className="mx-auto max-w-issue px-5 pb-10 pt-28 sm:px-8 sm:pt-32">
         <div className="flex items-start justify-between gap-4">
-          <p className="meta text-marigold">Your account</p>
+          <p className="meta text-bone-dim">Your account</p>
           <Link
             href="/sign-in"
             className="group flex items-center gap-2 font-ui text-sm text-bone-dim transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"

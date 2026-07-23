@@ -72,7 +72,7 @@ export function ThankYou() {
             transition={reduce ? { duration: 0 } : { duration: 0.9, ease: easeOut, delay: 0.2 }}
             className="relative mx-auto w-full max-w-3xl px-5 pb-14 text-center sm:px-8 sm:pb-20"
           >
-            <p className="meta mb-4 flex items-center justify-center gap-2 text-marigold">
+            <p className="meta mb-4 flex items-center justify-center gap-2 text-bone-dim">
               <Check size={15} weight="bold" />
               Order {MOCK_ORDER.number}
             </p>
@@ -103,7 +103,7 @@ export function ThankYou() {
           </motion.div>
         ) : (
           <div className="relative mx-auto w-full max-w-2xl px-5 pb-20 text-center">
-            <p className="meta mb-4 flex items-center justify-center gap-2 text-marigold">
+            <p className="meta mb-4 flex items-center justify-center gap-2 text-bone-dim">
               <Check size={15} weight="bold" />
               Order {MOCK_ORDER.number}
             </p>

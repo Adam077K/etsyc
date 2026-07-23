@@ -61,7 +61,7 @@ export function JournalStoryView({ story }: { story: JournalStory }) {
           transition={{ duration: 0.9, ease: easeOut, delay: 0.15 }}
           className="relative mx-auto w-full max-w-[52rem] px-5 pb-16 sm:px-8 sm:pb-24"
         >
-          <p className="meta mb-5 text-marigold">{story.kicker}</p>
+          <p className="meta mb-5 text-bone-dim">{story.kicker}</p>
           <h1
             className="font-display font-extrabold leading-[0.9] text-bone"
             style={{ fontSize: "clamp(2.5rem, 7.5vw, 6.5rem)" }}
@@ -264,7 +264,7 @@ function Colophon({ story, reduce }: { story: JournalStory; reduce: boolean }) {
       className="border-t border-line bg-ink-soft"
     >
       <div className="mx-auto max-w-[52rem] px-5 py-16 sm:px-8 sm:py-20">
-        <p className="meta text-marigold">Colophon</p>
+        <p className="meta text-bone-dim">Colophon</p>
 
         <dl className="mt-8 divide-y divide-line border-y border-line">
           {rows.map(([label, value]) => (

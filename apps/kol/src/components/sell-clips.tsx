@@ -177,7 +177,7 @@ function Header({
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
       <div>
-        <p className="meta text-marigold">Your films</p>
+        <p className="meta text-bone-dim">Your films</p>
         <h1 className="mt-3 font-display text-4xl font-bold leading-[0.95] text-bone sm:text-5xl">
           The film library
         </h1>

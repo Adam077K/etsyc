@@ -127,7 +127,7 @@ export function HowStory() {
           animate="visible"
           className="relative mx-auto w-full max-w-issue px-5 pb-16 pt-32 sm:px-8 sm:pb-24"
         >
-          <motion.p variants={item} className="meta mb-6 text-marigold">
+          <motion.p variants={item} className="meta mb-6 text-bone-dim">
             How KOL works · The Maker&#39;s Issue
           </motion.p>
 
@@ -194,7 +194,7 @@ export function HowStory() {
             viewport={inView}
             className="max-w-3xl"
           >
-            <p className="meta mb-4 text-marigold">The buyer&#39;s journey</p>
+            <p className="meta mb-4 text-bone-dim">The buyer&#39;s journey</p>
             <h2
               className="font-display font-extrabold leading-[0.95] text-bone"
               style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}
@@ -221,7 +221,7 @@ export function HowStory() {
             whileInView="visible"
             viewport={inView}
           >
-            <p className="meta mb-4 text-marigold">Trust is the conversion</p>
+            <p className="meta mb-4 text-bone-dim">Trust is the conversion</p>
             <h2
               className="font-display font-extrabold leading-[0.98] text-bone"
               style={{ fontSize: "clamp(2rem, 5vw, 3.75rem)" }}
@@ -244,7 +244,7 @@ export function HowStory() {
           >
             {/* Display-scale mono masthead — an entry point into the badge that
                 names the promise before the two layers spell it out. */}
-            <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-marigold">
+            <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-bone-dim">
               Every maker · Every claim · Real
             </p>
             <TrustBadge maker={COVER_MAKER} />
@@ -348,7 +348,7 @@ export function HowStory() {
           viewport={inView}
           className="mx-auto max-w-issue px-5 py-24 text-center sm:px-8 sm:py-32"
         >
-          <p className="meta text-marigold">Two ways in</p>
+          <p className="meta text-bone-dim">Two ways in</p>
           <h2
             className="mx-auto mt-6 max-w-4xl font-display font-extrabold leading-[0.95] text-bone"
             style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}

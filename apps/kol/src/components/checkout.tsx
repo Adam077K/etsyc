@@ -464,7 +464,7 @@ function Row({ label, value }: { label: string; value: string }) {
 function Fieldset({ legend, children }: { legend: string; children: React.ReactNode }) {
   return (
     <fieldset className="flex flex-col gap-4">
-      <legend className="meta mb-1 text-marigold">{legend}</legend>
+      <legend className="meta mb-1 text-bone-dim">{legend}</legend>
       {children}
     </fieldset>
   );

@@ -8,7 +8,7 @@ export default function NotFound() {
       <Link href="/" className="font-serif text-3xl leading-none text-bone">
         KOL
       </Link>
-      <p className="meta mt-10 text-marigold">Page not found</p>
+      <p className="meta mt-10 text-bone-dim">Page not found</p>
       <h1
         className="mt-5 max-w-2xl font-display font-extrabold leading-[0.95] text-bone"
         style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}

@@ -94,7 +94,7 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
           transition={reduce ? { duration: 0 } : { duration: 0.9, ease: easeOut, delay: 0.15 }}
           className="relative mx-auto w-full max-w-issue px-5 pb-16 sm:px-8 sm:pb-20"
         >
-          <p className="meta mb-4 text-marigold">{maker.discipline}</p>
+          <p className="meta mb-4 text-bone-dim">{maker.discipline}</p>
           <h1
             className="font-display font-extrabold leading-[0.9] text-bone"
             style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}
@@ -390,7 +390,7 @@ function StorySection({
       <Reveal reduce={reduce}>
         <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16">
           <div className="flex flex-col justify-center">
-            <p className="meta mb-5 text-marigold">The maker</p>
+            <p className="meta mb-5 text-bone-dim">The maker</p>
             <div className="space-y-6">
               {world.story.map((para, i) => (
                 <p
@@ -424,7 +424,7 @@ function ProcessSection({ world, reduce }: { world: World; reduce: boolean }) {
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
       <Reveal reduce={reduce}>
-        <p className="meta mb-3 text-marigold">How it&#39;s made</p>
+        <p className="meta mb-3 text-bone-dim">How it&#39;s made</p>
         <h2
           className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
@@ -479,7 +479,7 @@ function ProductsSection({
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
       <Reveal reduce={reduce}>
-        <p className="meta mb-3 text-marigold">The work</p>
+        <p className="meta mb-3 text-bone-dim">The work</p>
         <h2
           className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}

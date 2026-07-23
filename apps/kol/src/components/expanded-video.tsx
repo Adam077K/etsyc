@@ -220,7 +220,7 @@ export function ExpandedVideo({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: easeOut, delay: 0.05 }}
         >
-          <p className="meta mb-4 text-marigold">{maker.discipline}</p>
+          <p className="meta mb-4 text-bone-dim">{maker.discipline}</p>
           <h2
             className="font-display font-extrabold leading-[0.95] text-bone"
             style={{ fontSize: "clamp(2.5rem, 5vw, 4.25rem)" }}

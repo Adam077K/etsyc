@@ -152,7 +152,7 @@ function Header({ count, loading }: { count: number; loading: boolean }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
       <div>
-        <p className="meta text-marigold">Ask the Maker</p>
+        <p className="meta text-bone-dim">Ask the Maker</p>
         <h1 className="mt-3 font-display text-4xl font-bold leading-[0.95] text-bone sm:text-5xl">
           Your letters
         </h1>

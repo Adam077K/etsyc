@@ -72,7 +72,7 @@ export function SellHome() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduce ? 0.01 : 0.5, ease: easeOut }}
       >
-        <p className="meta text-marigold">Your studio · KOL</p>
+        <p className="meta text-bone-dim">Your studio · KOL</p>
         <h1
           className="mt-4 font-display font-extrabold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(2.25rem, 6vw, 4.25rem)" }}
