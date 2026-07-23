@@ -118,6 +118,13 @@ face-forward costume portraits (governance — see below).
 |---|---|---|---|
 | twodots/workshop.jpg | Two people at sewing machines in the real studio; foreground back-turned, **background minor in side profile** | story image + process step 02 + Workshop product gallery | ⚠ partially-identifiable minor (profile). Founder to approve or swap. |
 
+### Governance fallback plan — per image (so each Founder decision is one word)
+
+| Image | Current wiring | If Founder APPROVEs | If Founder DECLINEs / SWAPs |
+|---|---|---|---|
+| twodots/workshop.jpg | story slot + process 02 + Workshop product gallery (contains a background minor in profile) | keep as-is | **pre-staged swap** → story + process 02 take `materials.jpg`; Workshop gallery drops to its other two shots. Both faceless & already shipped — one edit each in `worlds.ts` + `commerce.ts`. Alt flat-lay: `felt.jpg`. |
+| twodots/devil-back.jpg | Little Devil product card + gallery (**faceless** head-cropped default) | *(upgrade path)* replace with uncropped #09 for fuller framing (head + felt horns; partial side profile) | no change — the faceless crop is already the conservative default |
+
 ### NOT shipped — held for Founder decision
 
 - Founder video **"Showing the little girl costume.mp4"** clearly features a

@@ -337,9 +337,10 @@ export const WORLDS: Record<string, MakerWorld> = {
   },
   "two-dots": {
     slug: "two-dots",
-    // Plum — the dress-up / stage-curtain register; makes the colourful costumes
-    // pop and reads theatrical-imaginative, the truest fit for a costume world.
-    accent: "plum",
+    // Clay — stage-red / theatrical curtain register; the truest fit for a
+    // dress-up costume world and keeps cross-world differentiation load-bearing
+    // (plum stays sole to Grain & Groove). CEO-approved reassignment.
+    accent: "clay",
     tagline: "Pick anyone you like. I'll sew you into them by the weekend.",
     story: [
       "I started making costumes because my own kids kept asking to be things the shops didn't sell. A specific dragon. A very specific swan. So I learned to sew the exact one in their head, not the nearest one on a shelf.",
