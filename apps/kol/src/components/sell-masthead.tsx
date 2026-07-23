@@ -54,7 +54,14 @@ export function SellMasthead({
         </div>
 
         {current ? (
-          <Stepper currentIndex={currentIndex} />
+          <>
+            <Stepper currentIndex={currentIndex} />
+            {/* Condensed orientation below md, where the full rail is hidden. */}
+            <span className="font-mono text-xs text-marigold md:hidden">
+              Step {currentIndex + 1} of {SELL_STOPS.length}
+              <span className="text-bone/55"> · {SELL_STOPS[currentIndex]?.label}</span>
+            </span>
+          </>
         ) : (
           <span className="meta hidden text-bone-dim md:inline">
             Your world, built from your story
@@ -84,7 +91,8 @@ export function SellMasthead({
                 href="/sell/interview"
                 className="rounded-full bg-bone px-4 py-2 font-ui text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5"
               >
-                Start
+                <span className="hidden sm:inline">Start your interview</span>
+                <span className="sm:hidden">Start</span>
               </Link>
             </>
           )}
@@ -126,7 +134,11 @@ function Stepper({ currentIndex }: { currentIndex: number }) {
             </span>
           );
           return (
-            <li key={stop.id} className="flex items-center gap-1.5">
+            <li
+              key={stop.id}
+              aria-current={active ? "step" : undefined}
+              className="flex items-center gap-1.5"
+            >
               {done ? (
                 <Link
                   href={stop.href}
@@ -136,7 +148,7 @@ function Stepper({ currentIndex }: { currentIndex: number }) {
                   {inner}
                 </Link>
               ) : (
-                <span aria-current={active ? "step" : undefined}>{inner}</span>
+                inner
               )}
               {i < SELL_STOPS.length - 1 && (
                 <span aria-hidden className="h-px w-4 bg-bone/20" />
