@@ -286,15 +286,15 @@ function Sparkline({ data, reduce }: { data: readonly number[]; reduce: boolean 
     >
       <defs>
         <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#E4922C" stopOpacity="0.24" />
-          <stop offset="100%" stopColor="#E4922C" stopOpacity="0" />
+          <stop offset="0%" stopColor="#F1641E" stopOpacity="0.24" />
+          <stop offset="100%" stopColor="#F1641E" stopOpacity="0" />
         </linearGradient>
       </defs>
       <polygon points={area} fill={`url(#${fillId})`} />
       <motion.polyline
         points={line}
         fill="none"
-        stroke="#E4922C"
+        stroke="#F1641E"
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -303,7 +303,7 @@ function Sparkline({ data, reduce }: { data: readonly number[]; reduce: boolean 
         viewport={{ once: true }}
         transition={{ duration: 1.1, ease: easeOut }}
       />
-      <circle cx={lx} cy={ly} r={3} fill="#F2A93B" />
+      <circle cx={lx} cy={ly} r={3} fill="#FF7A3C" />
     </svg>
   );
 }

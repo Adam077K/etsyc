@@ -347,13 +347,13 @@ function VoiceTag({ show }: { show: boolean }) {
 /* Lighten an accent for small legible text on ink (keeps it readable at AA). */
 function lightAccent(hex: string): string {
   const map: Record<string, string> = {
-    "#B4462A": "#E08462", // clay -> AA tint
-    "#43223B": "#C79ABE", // plum -> soft mauve
+    "#AE4328": "#E08462", // clay -> AA tint
+    "#4C2740": "#C79ABE", // plum -> soft mauve
     "#4E5A2A": "#A8B673", // olive -> pale olive
-    "#557E8F": "#7FA6B8", // sky -> AA tint
+    "#41628C": "#7FA6C8", // sky -> AA tint
     "#EFE6D6": "#EFE6D6", // bone stays
   };
-  return map[hex] ?? "#E4922C";
+  return map[hex] ?? "#F1641E";
 }
 
 function hexA(hex: string, a: number): string {

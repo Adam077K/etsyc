@@ -227,10 +227,10 @@ export interface AccentOption {
  * own glazes). The drafted default is "clay", matching her salt-fired work.
  */
 export const ACCENT_OPTIONS: AccentOption[] = [
-  { id: "clay", label: "Kiln Clay", hex: "#B4462A", onGround: "light" },
-  { id: "plum", label: "Fig Plum", hex: "#43223B", onGround: "light" },
+  { id: "clay", label: "Kiln Clay", hex: "#AE4328", onGround: "light" },
+  { id: "plum", label: "Fig Plum", hex: "#4C2740", onGround: "light" },
   { id: "olive", label: "Studio Olive", hex: "#4E5A2A", onGround: "light" },
-  { id: "sky", label: "Slip Blue", hex: "#557E8F", onGround: "light" },
+  { id: "sky", label: "Slip Blue", hex: "#41628C", onGround: "light" },
   { id: "bone", label: "Bone Paper", hex: "#EFE6D6", onGround: "dark" },
 ];
 
