@@ -17,11 +17,13 @@ import {
   Handbag,
   Heart,
   ArrowUpRight,
+  Play,
 } from "@phosphor-icons/react";
 import type { Maker, Ground } from "@/lib/fixtures/makers";
 import type { MakerWorld as World } from "@/lib/fixtures/worlds";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
+import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
 import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
@@ -119,6 +121,9 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
       {/* The world, scrolling around the docked film. */}
       <div className="relative z-10 bg-ink">
         <StorySection world={world} maker={maker} reduce={!!reduce} />
+        {world.wall && world.wall.length > 0 && (
+          <GalleryWall world={world} reduce={!!reduce} />
+        )}
         <ProcessSection world={world} reduce={!!reduce} />
         <ProductsSection world={world} maker={maker} reduce={!!reduce} />
 
@@ -432,6 +437,99 @@ function StorySection({
           </div>
         </div>
       </Reveal>
+    </section>
+  );
+}
+
+const WALL_RATIO: Record<
+  NonNullable<World["wall"]>[number]["ratio"],
+  string
+> = {
+  square: "aspect-square",
+  portrait: "aspect-[4/5]",
+  tall: "aspect-[3/4]",
+  landscape: "aspect-[5/4]",
+  video: "aspect-[16/10]",
+};
+
+/**
+ * GalleryWall — the maker's whole room, pinned to the wall: a dense editorial
+ * masonry (CSS columns, never a uniform grid) of her real stills and woven films.
+ * Present only for a maker with a deep media library, which is what makes this
+ * world read as unmistakably hers. Films play muted/looped through the SAME
+ * MakerFilm primitive as the rest of the build (poster fallback, reduced-motion
+ * safe, off-screen pause), so the wall breathes without ever competing with the
+ * persistent hero film docked in the corner. Chrome stays KOL-fixed (D15): the
+ * maker's brand lives in the imagery and her clay accent, not a broken system.
+ */
+function GalleryWall({ world, reduce }: { world: World; reduce: boolean }) {
+  const wall = world.wall!;
+  return (
+    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
+      <Reveal reduce={reduce}>
+        <div className="mb-10 border-t border-clay/40 pt-8">
+          {world.wallSectionKicker && (
+            <p className="meta mb-3 text-clay-bright">{world.wallSectionKicker}</p>
+          )}
+          <h2
+            className="max-w-2xl font-display font-bold leading-[0.95] text-bone"
+            style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
+          >
+            {world.wallSectionHeader}
+          </h2>
+        </div>
+      </Reveal>
+
+      {/* Masonry — packs tiles of different heights tight, like a pinboard. */}
+      <div className="gap-4 [column-gap:1rem] sm:columns-2 lg:columns-3">
+        {wall.map((item, i) => (
+          <Reveal
+            key={item.src + i}
+            reduce={reduce}
+            className="mb-4 break-inside-avoid"
+          >
+            <figure
+              className={cn(
+                "group/w relative w-full overflow-hidden rounded-3xl bg-ink-soft ring-1 ring-line",
+                WALL_RATIO[item.ratio],
+              )}
+            >
+              <div className="absolute inset-0 saturate-[0.94] transition-[transform,filter] duration-[900ms] ease-out-expo group-hover/w:scale-[1.04] group-hover/w:saturate-100">
+                {item.filmSrc ? (
+                  <MakerFilm
+                    videoSrc={item.filmSrc}
+                    poster={item.src}
+                    alt={item.alt}
+                    reduce={reduce}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                    drift={false}
+                  />
+                ) : (
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+              {item.filmSrc && (
+                <span className="pointer-events-none absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-ink/70 px-2.5 py-1 backdrop-blur-sm">
+                  <Play size={11} weight="fill" className="text-clay-bright" />
+                  <span className="meta text-[0.62rem] text-bone">On film</span>
+                </span>
+              )}
+              {item.caption && (
+                <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/85 via-ink/25 to-transparent p-4 pt-10">
+                  <span className="meta text-bone">{item.caption}</span>
+                </figcaption>
+              )}
+            </figure>
+          </Reveal>
+        ))}
+      </div>
     </section>
   );
 }
