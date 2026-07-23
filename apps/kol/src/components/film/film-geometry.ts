@@ -11,11 +11,23 @@ import type { FilmMotion, FilmTarget } from "./film-context";
 const DOCK_EASE = cubicBezier(0.16, 1, 0.3, 1);
 
 /**
+ * Single source of truth for the TOP-LEFT dock anchor. The docked film settles
+ * inset `DOCK_MARGIN` from the left and `dockTop(DOCK_MARGIN)` from the top
+ * (which clears the masthead), scaled about the top-left origin. Every dock
+ * expression here — `applyDockFrame` (scroll-linked) and `dockTarget` (one-shot)
+ * — reads these so the corner is never re-declared inline by a caller.
+ */
+export const DOCK_MARGIN = 24;
+/** Corner radius (px, pre-scale) of the settled world / thank-you / interlude
+    dock. The small product/checkout dock keeps its own tighter radius. */
+export const DOCK_RADIUS = 64;
+
+/**
  * The dock lives TOP-LEFT (Founder directive). Its top inset must clear the KOL
  * masthead, so we read the `--header-h` CSS var (never hardcoded) and add the
  * card margin. SSR-safe fallback matches the token default (72px).
  */
-export function dockTop(margin = 24): number {
+export function dockTop(margin = DOCK_MARGIN): number {
   if (typeof document === "undefined") return 72 + margin;
   const h =
     parseInt(
@@ -53,27 +65,54 @@ export function dockClip(vw: number, vh: number): number {
  * Scroll-linked hero→dock settle, shared by the maker world and the thank-you
  * payoff. Given hero scroll progress `v` (0→1) and the docked scale, it drives
  * the persistent film's transform to the TOP-LEFT dock: it LANDS docked by 72%
- * of the hero scroll, insets 24px from the left and `topInset` from the top
- * (which clears the masthead — pass `dockTop(24)`), and ramps the shadow linearly
- * over [0.5, 0.9]. Transform/opacity only, origin top-left (from HERO_TARGET).
- * `clipAmt` (from `dockClip`) ramps in with the dock so a portrait phone lands
- * on a landscape card instead of a full-height column that buries the page; the
- * FilmStage fades its chip out as it docks (clip>0). Stays 0 over the hero (p→0).
+ * of the hero scroll, insets `DOCK_MARGIN` from the left and `topInset` from the
+ * top (which clears the masthead — pass `dockTop()`), and ramps the shadow
+ * linearly over [0.5, 0.9]. Transform/opacity only, origin top-left (from
+ * HERO_TARGET). `clipAmt` (from `dockClip`) ramps in with the dock so a portrait
+ * phone lands on a landscape card instead of a full-height column that buries the
+ * page; the FilmStage fades its chip out as it docks (clip>0). Stays 0 over the
+ * hero (p→0).
  */
 export function applyDockFrame(
   m: FilmMotion,
   v: number,
   docked: number,
   clipAmt = 0,
-  topInset = 24,
+  topInset = DOCK_MARGIN,
 ): void {
   const p = DOCK_EASE(Math.min(v / 0.72, 1));
   m.scale.set(1 + (docked - 1) * p);
-  m.x.set(24 * p);
+  m.x.set(DOCK_MARGIN * p);
   m.y.set(topInset * p);
-  m.radius.set(64 * DOCK_EASE(Math.min(v / 0.55, 1)));
+  m.radius.set(DOCK_RADIUS * DOCK_EASE(Math.min(v / 0.55, 1)));
   m.shadow.set(v <= 0.5 ? 0 : Math.min((v - 0.5) / 0.4, 1));
   m.clip.set(clipAmt * p);
+}
+
+/**
+ * The settled corner dock as a full transform target — for callers that drive
+ * the film to the dock in ONE shot (the twodots interlude re-dock, and the
+ * reduced-motion snap) rather than scroll-linked via `applyDockFrame`. `docked`
+ * is the uniform scale; `clipAmt` (from `dockClip`) crops a portrait phone to a
+ * landscape card. Position is the shared TOP-LEFT anchor — this is the single
+ * source those callers import instead of re-declaring the corner inline.
+ */
+export function dockTarget(
+  docked: number,
+  clipAmt = 0,
+  margin = DOCK_MARGIN,
+): FilmTarget {
+  return {
+    scale: docked,
+    x: margin,
+    y: dockTop(margin),
+    radius: DOCK_RADIUS,
+    opacity: 1,
+    originX: 0,
+    originY: 0,
+    shadow: 1,
+    clip: clipAmt,
+  };
 }
 
 /** Full-bleed hero: the film fills the viewport (world / thank-you payoff).
@@ -102,7 +141,7 @@ export function cornerTarget(
   vh: number,
   {
     width = 176,
-    margin = 24,
+    margin = DOCK_MARGIN,
     radius = 18,
     opacity = 1,
     top,

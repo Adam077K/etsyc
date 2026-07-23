@@ -27,7 +27,13 @@ import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip, dockTop } from "./film/film-geometry";
+import {
+  HERO_TARGET,
+  applyDockFrame,
+  dockClip,
+  dockTarget,
+  dockTop,
+} from "./film/film-geometry";
 
 /**
  * TwoDotsWorld — Sharon's BESPOKE maker world (/m/two-dots only).
@@ -135,20 +141,6 @@ export function TwoDotsWorld({ maker, world }: { maker: Maker; world: World }) {
 
 /* ---------- Film driver: hero dock + interlude bloom + per-beat label ---------- */
 
-function dockedTarget(docked: number, clipAmt: number) {
-  return {
-    scale: docked,
-    x: 24,
-    y: dockTop(24),
-    radius: 64,
-    opacity: 1,
-    originX: 0,
-    originY: 0,
-    shadow: 1,
-    clip: clipAmt,
-  };
-}
-
 function TwoDotsFilm({
   maker,
   heroSrc,
@@ -244,7 +236,7 @@ function TwoDotsFilm({
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const docked = isMobileRef.current ? 0.2 : 0.26;
-      driveTo(dockedTarget(docked, dockClip(vw, vh)), {
+      driveTo(dockTarget(docked, dockClip(vw, vh)), {
         reduce: prefersReduced,
         duration: 0.6,
       });
@@ -272,7 +264,7 @@ function TwoDotsFilm({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     if (reduce) {
-      if (v > 0.6) snapTo(dockedTarget(docked, dockClip(vw, vh)));
+      if (v > 0.6) snapTo(dockTarget(docked, dockClip(vw, vh)));
       else snapTo({ ...HERO_TARGET });
       return;
     }
