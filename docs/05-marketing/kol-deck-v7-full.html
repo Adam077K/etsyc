@@ -1,0 +1,345 @@
+<title>KOL — Final Pitch Deck (v7)</title>
+<style>
+  :root{
+    --paper:#ECE8E1; --paper2:#E4DFD5; --ink:#17130F; --ink2:#4A423A; --meta:#8A8175;
+    --terra:#BF5630; --rust:#7C2D12; --line:#D8D1C4; --stage:#14110E; --cream:#EDE6DB;
+    --grotesk:"Helvetica Neue",Helvetica,Arial,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--stage);color:var(--ink);font-family:var(--grotesk);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  /* STAGE */
+  .stage{position:fixed;inset:0;display:grid;place-items:center;background:
+      radial-gradient(1200px 800px at 50% -10%, #22 1b16, transparent),
+      var(--stage)}
+  .slide{
+    position:relative;width:min(95vw, calc(94vh * 16/9));aspect-ratio:16/9;
+    background:var(--paper);color:var(--ink);border-radius:6px;overflow:hidden;
+    box-shadow:0 30px 90px rgba(0,0,0,.55),0 4px 14px rgba(0,0,0,.4);
+    container-type:size;
+    background-image:radial-gradient(rgba(120,110,95,.05) 1px,transparent 1px);background-size:3px 3px;
+  }
+  .slide::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 120% at 50% 40%, transparent 60%, rgba(20,17,14,.06));}
+  .pane{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:8.5cqw}
+  .pane.on{display:flex}
+  .pane.center{align-items:center;text-align:center}
+
+  /* type scale in container units */
+  .kol{font-size:7cqw;font-weight:800;letter-spacing:-.03em;line-height:.9}
+  .kol .o{color:var(--terra)}
+  .eyebrow{font-size:1.5cqw;letter-spacing:.28em;text-transform:uppercase;color:var(--meta);font-weight:700}
+  h1{font-size:6cqw;font-weight:800;letter-spacing:-.02em;line-height:1.04;text-wrap:balance;max-width:20ch}
+  .big{font-size:4.6cqw;font-weight:700;letter-spacing:-.015em;line-height:1.1;text-wrap:balance;max-width:24ch}
+  .huge{font-size:12cqw;font-weight:800;letter-spacing:-.03em;line-height:.95}
+  .lede{font-size:2.3cqw;color:var(--ink2);line-height:1.4;max-width:40ch;margin-top:2.4cqw;font-weight:500}
+  .sub{font-size:1.9cqw;color:var(--meta);margin-top:1.8cqw;max-width:44ch;line-height:1.4}
+  .kick{font-size:1.7cqw;letter-spacing:.02em;color:var(--terra);font-weight:700;text-transform:uppercase;margin-bottom:2.2cqw}
+  .accent-line{width:7cqw;height:.5cqw;background:var(--terra);border-radius:2px;margin:2.4cqw 0}
+  em{font-style:italic;color:var(--ink)}
+  .terra{color:var(--terra)}
+
+  /* three cards */
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw;width:100%;margin-top:1cqw}
+  .card{background:var(--paper2);border:1px solid var(--line);border-radius:1.2cqw;padding:3cqw 2.4cqw}
+  .card .num{font-size:4.2cqw;font-weight:800;color:var(--terra);line-height:1}
+  .card .ct{font-size:2.2cqw;font-weight:700;margin-top:1.4cqw;line-height:1.15}
+  .card .cd{font-size:1.5cqw;color:var(--meta);margin-top:.8cqw;line-height:1.35}
+
+  /* browser mock */
+  .browser{width:100%;max-width:78cqw;background:#fff;border:1px solid var(--line);border-radius:1.4cqw;overflow:hidden;box-shadow:0 3cqw 6cqw rgba(20,17,14,.14);align-self:center}
+  .bbar{display:flex;align-items:center;gap:1cqw;padding:1.2cqw 1.6cqw;background:#F4F1EA;border-bottom:1px solid var(--line)}
+  .bdot{width:1.1cqw;height:1.1cqw;border-radius:50%;background:#D9D2C6}
+  .burl{margin-left:1cqw;flex:1;background:#fff;border:1px solid var(--line);border-radius:.8cqw;font-family:var(--mono);font-size:1.3cqw;color:var(--meta);padding:.5cqw 1.2cqw}
+  .bwin{height:34cqw;position:relative;background:linear-gradient(180deg,#FBF9F5,#F1EDE6);display:flex;align-items:center;justify-content:center;text-align:center}
+  .mockcap{color:var(--meta);font-size:1.5cqw;line-height:1.4;max-width:40cqw;padding:2cqw}
+  .mockcap b{color:var(--terra)}
+  .mtag{position:absolute;top:1.4cqw;right:1.4cqw;font-size:1.1cqw;font-family:var(--mono);color:#fff;background:var(--terra);padding:.4cqw .9cqw;border-radius:.6cqw;letter-spacing:.04em}
+  /* wireframe bits */
+  .wf-feed{position:absolute;inset:2.4cqw;display:grid;grid-template-columns:repeat(3,1fr);gap:1.6cqw;opacity:.85}
+  .wf-card{background:#fff;border:1px solid var(--line);border-radius:1cqw;overflow:hidden;display:flex;flex-direction:column}
+  .wf-vid{flex:1;background:linear-gradient(135deg,#E7E0D4,#D8CFBF);position:relative}
+  .wf-vid::after{content:"▶";position:absolute;inset:0;display:grid;place-items:center;color:rgba(191,86,48,.8);font-size:2.4cqw}
+  .wf-meta{height:3.4cqw;border-top:1px solid var(--line);display:flex;align-items:center;padding:0 1cqw;gap:.7cqw}
+  .wf-badge{font-size:1cqw;color:var(--terra);border:1px solid var(--terra);border-radius:2cqw;padding:.15cqw .7cqw;font-weight:700}
+  .wf-world{position:absolute;inset:0;display:grid;grid-template-columns:1.15fr 1fr}
+  .wf-video{background:linear-gradient(135deg,#CDB7A6,#A8876F);position:relative}
+  .wf-video::after{content:"▶";position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.9);font-size:3cqw}
+  .wf-story{padding:2.4cqw;display:flex;flex-direction:column;gap:1.2cqw}
+  .wf-line{height:1.5cqw;background:#E7E0D4;border-radius:1cqw}
+  .wf-line.s{width:60%} .wf-line.m{width:80%}
+  .wf-shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:1cqw;margin-top:auto}
+  .wf-prod{aspect-ratio:1;background:#EDE6D9;border-radius:.8cqw;border:1px solid var(--line)}
+  .wf-prod.hot{border-color:var(--terra);box-shadow:0 0 0 .3cqw rgba(191,86,48,.25)}
+
+  /* etsy add-on */
+  .wf-etsy{position:absolute;inset:0;background:#fff;display:flex;flex-direction:column}
+  .etsy-top{height:5cqw;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 2.4cqw;gap:1.4cqw}
+  .etsy-logo{font-size:2.4cqw;font-weight:800;color:#F1641E;letter-spacing:-.02em}
+  .etsy-search{flex:1;height:2.6cqw;background:#F4F1EA;border:1px solid var(--line);border-radius:2cqw}
+  .kol-addon{margin-left:auto;display:flex;gap:1cqw}
+  .kol-btn{font-size:1.35cqw;font-weight:700;color:#fff;background:var(--terra);border-radius:2cqw;padding:.7cqw 1.6cqw;display:flex;align-items:center;gap:.6cqw;box-shadow:0 .6cqw 1.4cqw rgba(191,86,48,.3)}
+  .kol-btn .k{font-weight:800}
+  .etsy-body{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1.6cqw;padding:2.4cqw}
+  .etsy-tile{background:#F4F1EA;border:1px solid var(--line);border-radius:1cqw}
+  .addon-note{position:absolute;left:50%;bottom:2.2cqw;transform:translateX(-50%);background:var(--ink);color:var(--cream);font-size:1.3cqw;padding:.8cqw 1.6cqw;border-radius:2cqw;font-weight:600}
+  .addon-note b{color:var(--terra)}
+
+  /* quotes */
+  .quotes{display:flex;flex-direction:column;gap:2.2cqw;width:100%;max-width:70cqw}
+  .quote{font-size:2.5cqw;line-height:1.28;font-weight:600;padding-left:3cqw;position:relative}
+  .quote::before{content:"\201C";position:absolute;left:0;top:-1cqw;font-size:6cqw;color:var(--terra);font-family:Georgia,serif;line-height:1}
+  .quote.small{font-size:1.9cqw;color:var(--ink2);font-weight:500}
+
+  /* stat */
+  .statwrap{display:flex;align-items:baseline;gap:2cqw;flex-wrap:wrap;justify-content:center}
+  .barrow{display:flex;height:2.4cqw;width:64cqw;border-radius:1.4cqw;overflow:hidden;margin-top:3cqw;border:1px solid var(--line)}
+  .seg{height:100%} .seg.l{background:var(--terra)} .seg.m{background:#CE8A62} .seg.s{background:#D8C9BC} .seg.x{background:#C7BEB0}
+  .legend{display:flex;gap:2cqw;flex-wrap:wrap;justify-content:center;margin-top:1.6cqw;font-size:1.35cqw;color:var(--meta)}
+  .legend i{display:inline-block;width:1.2cqw;height:1.2cqw;border-radius:.3cqw;margin-right:.5cqw;vertical-align:middle}
+
+  /* map */
+  .map{position:relative;width:70cqw;height:44cqw;align-self:center;margin-top:1cqw}
+  .axis{position:absolute;background:var(--ink)}
+  .axis.x{left:0;right:0;top:50%;height:2px} .axis.y{top:0;bottom:0;left:50%;width:2px}
+  .axlabel{position:absolute;font-size:1.4cqw;color:var(--meta);font-weight:700}
+  .corner-halo{position:absolute;top:2cqw;right:2cqw;width:26cqw;height:16cqw;background:radial-gradient(closest-side, rgba(191,86,48,.22), transparent);border-radius:50%}
+  .node{position:absolute;transform:translate(-50%,-50%);text-align:center;font-size:1.4cqw;color:var(--ink2);font-weight:600}
+  .node .pin{width:1.6cqw;height:1.6cqw;border-radius:50%;background:#B9B0A2;margin:0 auto .5cqw}
+  .node.kol{color:var(--terra);font-weight:800;font-size:1.9cqw}
+  .node.kol .pin{width:3cqw;height:3cqw;background:var(--terra);box-shadow:0 0 0 .8cqw rgba(191,86,48,.2)}
+
+  /* anchor / money */
+  .anchor{display:flex;align-items:center;gap:4cqw;width:100%;margin-top:1cqw}
+  .anchor .num{font-size:9cqw;font-weight:800;letter-spacing:-.03em;line-height:.9}
+  .anchor .num .u{font-size:2cqw;color:var(--meta);font-weight:600;display:block;letter-spacing:0}
+  .est{border-left:.4cqw solid var(--line);padding-left:2.4cqw;display:flex;flex-direction:column;gap:1.4cqw}
+  .est .h{font-size:1.4cqw;text-transform:uppercase;letter-spacing:.12em;color:var(--meta);font-weight:700}
+  .est .row{font-size:1.9cqw;color:var(--ink2)}
+  .est .row b{color:var(--ink)}
+  .est .tag{font-size:1.2cqw;color:var(--terra)}
+
+  .money{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2cqw;width:100%;margin-top:1cqw}
+  .mcard{border:1px solid var(--line);border-radius:1.2cqw;padding:2.6cqw;background:var(--paper2)}
+  .mcard.hot{border-color:var(--terra);background:#fff}
+  .mcard .mt{font-size:1.9cqw;font-weight:800}
+  .mcard .md{font-size:1.45cqw;color:var(--meta);margin-top:.8cqw;line-height:1.4}
+  .mcard .pill{font-size:1.1cqw;color:var(--terra);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+
+  .econ{display:grid;grid-template-columns:1fr 1fr;gap:3cqw;width:100%;align-items:center;margin-top:1cqw}
+  .price .tier{display:flex;align-items:baseline;gap:1.2cqw;padding:1.6cqw 0;border-bottom:1px solid var(--line)}
+  .price .tier b{font-size:3cqw;color:var(--terra)} .price .tier span{font-size:1.7cqw;color:var(--ink2)}
+  .econbox{background:var(--paper2);border:1px solid var(--line);border-radius:1.2cqw;padding:2.6cqw;font-size:1.7cqw;color:var(--ink2);line-height:1.5}
+  .econbox b{color:var(--ink)}
+
+  .flyw{display:flex;align-items:center;gap:2cqw;width:100%;margin-top:2cqw;flex-wrap:wrap;justify-content:center}
+  .fchip{background:var(--paper2);border:1px solid var(--line);border-radius:2cqw;padding:1.2cqw 2cqw;font-size:1.6cqw;font-weight:600}
+  .farrow{color:var(--terra);font-size:2.4cqw}
+
+  .metrics{display:flex;gap:2.4cqw;margin-top:2.6cqw;flex-wrap:wrap}
+  .metric{background:var(--paper2);border:1px solid var(--line);border-radius:1.2cqw;padding:2cqw 2.4cqw;min-width:22cqw}
+  .metric .ml{font-size:1.3cqw;color:var(--meta);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+  .metric .mv{font-size:2.1cqw;font-weight:800;margin-top:.5cqw}
+  .metric.secondary{opacity:.7}
+
+  .foot{position:absolute;left:8.5cqw;right:8.5cqw;bottom:4cqw;display:flex;justify-content:space-between;align-items:center;font-size:1.3cqw;color:var(--meta)}
+  .foot .src{font-family:var(--mono);font-size:1.05cqw}
+
+  /* NAV / CHROME */
+  .hud{position:fixed;left:0;right:0;bottom:0;height:46px;display:flex;align-items:center;gap:14px;padding:0 16px;color:var(--cream);font-size:13px;z-index:20;
+    background:linear-gradient(0deg, rgba(20,17,14,.92), transparent)}
+  .hud button{font:inherit;color:var(--cream);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 12px;cursor:pointer}
+  .hud button:hover{background:rgba(191,86,48,.35);border-color:var(--terra)}
+  .hud .count{font-variant-numeric:tabular-nums;font-weight:700}
+  .hud .actname{color:#B9B0A2}
+  .hud .spacer{flex:1}
+  .progress{position:fixed;top:0;left:0;height:3px;background:var(--terra);z-index:30;transition:width .25s ease}
+  .zone{position:fixed;top:0;bottom:46px;width:22%;z-index:10;cursor:pointer}
+  .zone.left{left:0} .zone.right{right:0;width:78%}
+  .notes{position:fixed;left:0;right:0;bottom:46px;max-height:34vh;overflow:auto;padding:16px 22px;color:var(--cream);
+    background:rgba(20,17,14,.96);border-top:2px solid var(--terra);font-size:15px;line-height:1.5;display:none;z-index:19}
+  .notes.on{display:block}
+  .notes .nlab{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--terra);font-weight:700;margin-bottom:6px}
+  .notes em{color:#fff;font-style:italic}
+  .hint{position:fixed;top:14px;right:16px;color:rgba(237,230,219,.6);font-size:12px;z-index:20}
+  @media (max-width:700px){ h1{font-size:7cqw} .hud{font-size:11px} .hud .hidesm{display:none} }
+</style>
+
+<div class="progress" id="prog"></div>
+<div class="stage">
+  <div class="slide" id="slide"><!-- panes injected below --></div>
+</div>
+
+<div class="zone left" id="zl" aria-label="previous"></div>
+<div class="zone right" id="zr" aria-label="next"></div>
+
+<div class="notes" id="notes"><div class="nlab">Founder says</div><div id="notesText"></div></div>
+
+<div class="hud">
+  <button id="prev">‹ Prev</button>
+  <button id="next">Next ›</button>
+  <span class="count"><span id="cur">1</span> / <span id="tot">23</span></span>
+  <span class="actname" id="act">Cold open</span>
+  <span class="spacer"></span>
+  <span class="hidesm" style="color:#B9B0A2">KOL · Final Pitch v7</span>
+  <button id="ntoggle">Notes (N)</button>
+  <button id="full">Fullscreen</button>
+</div>
+<div class="hint">← → to move · N for notes</div>
+
+<script>
+const S = [
+ {act:"Cold open", html:`<div class="pane center on"><div class="kol">K<span class="o">O</span>L</div><h1 style="margin-top:4cqw">Behind everything you love is a person you never meet.</h1></div>`,
+  note:`Everything on this table was made by a real person. You'll probably never know who.`},
+
+ {act:"Cold open", html:`<div class="pane on"><div class="big">So the humans disappear —<br>and the buyer is left guessing.</div><div class="accent-line"></div><div class="lede">The oldest fear in handmade: <em>“will it actually be what they showed me?”</em></div></div>`,
+  note:`Online, they flatten into a thumbnail and a price. And the buyer's left with the oldest fear in handmade — will it actually be what they showed me?`},
+
+ {act:"What KOL is", html:`<div class="pane center on"><div class="kick">Introducing KOL</div><h1 style="font-size:4.6cqw;max-width:26ch">A new way to shop handmade — where the <span class="terra">maker's story and the product</span> come together.</h1><div class="sub">Story-based shopping, combined with real product shopping. Not a stripped-down listing — and not a video you can't buy from.</div></div>`,
+  note:`KOL is a new way to shop handmade — it brings the maker's story and the product together. Story-based shopping, combined with the product shopping you already do. Not one instead of the other.`},
+
+ {act:"What KOL is", html:`<div class="pane on"><div class="kick">Three things KOL does</div><div class="cards3">
+    <div class="card"><div class="num">1</div><div class="ct">Meet</div><div class="cd">the real maker, on film.</div></div>
+    <div class="card"><div class="num">2</div><div class="ct">Step in</div><div class="cd">her story and her products, together in one world.</div></div>
+    <div class="card"><div class="num">3</div><div class="ct">Trust &amp; buy</div><div class="cd">from a verified real person — and come back.</div></div></div></div>`,
+  note:`It does three things — and I'd rather show you than tell you.`},
+
+ {act:"What KOL is", html:`<div class="pane on"><div class="kick">It lives inside what Etsy already has</div><div class="big" style="font-size:3.4cqw;margin-bottom:2cqw">Not a new place to send buyers. An add-on.</div>
+   <div class="browser"><div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">etsy.com</span></div>
+   <div class="bwin"><span class="mtag">proposed pilot</span>
+     <div class="wf-etsy"><div class="etsy-top"><span class="etsy-logo">Etsy</span><span class="etsy-search"></span><span class="kol-addon"><span class="kol-btn"><span class="k">KOL</span> · Makers on film</span><span class="kol-btn" style="background:var(--ink)">Stores</span></span></div>
+     <div class="etsy-body"><span class="etsy-tile"></span><span class="etsy-tile"></span><span class="etsy-tile"></span><span class="etsy-tile"></span><span class="etsy-tile"></span><span class="etsy-tile"></span><span class="etsy-tile"></span><span class="etsy-tile"></span></div>
+     <div class="addon-note">KOL buttons open the <b>discovery feed</b> &amp; <b>maker stores</b> — layered onto Etsy's home</div></div>
+   </div></div></div>`,
+  note:`And it's not a new place we're asking buyers to go. It's an add-on to what Etsy already has — a door, right from the homepage, into makers on film. Watch what happens when you open it.`},
+
+ {act:"The maker", html:`<div class="pane on"><div class="kick">Meet Sharon</div><div class="big">She hand-sews costumes for kids.<br><span class="terra">Two Dots.</span></div>
+   <div class="browser" style="max-width:56cqw;margin-top:2cqw"><div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">a real Etsy seller · our first maker</span></div>
+   <div class="bwin"><span class="mtag">M0 · real footage</span><div class="mockcap"><b>Sharon's real hands making</b> + a finished piece. Consent-gated.</div></div></div></div>`,
+  note:`This is Sharon. She hand-sews costumes for kids and sells them on Etsy as Two Dots. She's real, and she's our first maker.`},
+
+ {act:"The maker", html:`<div class="pane on"><div class="big" style="font-size:3.6cqw">Sharon never opened a design tool.<br>She just talked — and never set up a shot.</div>
+   <div class="browser" style="margin-top:2cqw"><div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">kol.com/setup</span></div>
+   <div class="bwin"><span class="mtag">M1 · interview → page builds</span><div class="mockcap">Her <b>audio, captured from the conversation</b> — hands-only film, no studio. Her rambly, real words come back on the page, <b>unpolished — hers.</b></div></div></div></div>`,
+  note:`She didn't open a design tool, and she didn't set up a single shot. She talked. We captured her voice — her real words — and built her world from them.`},
+
+ {act:"The maker", html:`<div class="pane on"><div class="big" style="margin-bottom:1.6cqw">Her world unfolds around her voice.</div>
+   <div class="browser"><div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">kol.com/twodots</span></div>
+   <div class="bwin"><span class="mtag">M2 · maker world (hero)</span><div class="wf-world"><div class="wf-video"></div><div class="wf-story"><div class="wf-line m"></div><div class="wf-line s"></div><div class="wf-line m"></div><div class="wf-shelf"><span class="wf-prod"></span><span class="wf-prod"></span><span class="wf-prod"></span></div></div></div></div></div></div>`,
+  note:`And this is what she gets — not a listing. A world that opens around her, in her own voice.`},
+
+ {act:"The buyer", html:`<div class="pane on"><div class="kick">Now meet Shyla</div><div class="big">A mother. A school event in a week.<br>Wants handmade — that <span class="terra">fits</span>, and <span class="terra">arrives</span>.</div><div class="sub">Her #1 fear buying small: it won't be as advertised.</div></div>`,
+  note:`Shyla's a mom. Her daughter has a school event in a week. She wants something handmade — but it has to be right, and it has to arrive.`},
+
+ {act:"The buyer", html:`<div class="pane on"><div class="big" style="font-size:3.4cqw;margin-bottom:1.6cqw">She finds a maker fast —<br>the film is the <span class="terra">invitation</span>, not the toll.</div>
+   <div class="browser"><div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">kol.com/discover</span></div>
+   <div class="bwin"><span class="mtag">M3 · discovery feed</span><div class="wf-feed">
+     <div class="wf-card"><div class="wf-vid"></div><div class="wf-meta"><span class="wf-badge">verified</span><span style="font-size:1cqw;color:var(--meta)">ships in 3d</span></div></div>
+     <div class="wf-card"><div class="wf-vid"></div><div class="wf-meta"><span class="wf-badge">verified</span></div></div>
+     <div class="wf-card"><div class="wf-vid"></div><div class="wf-meta"><span class="wf-badge">verified</span></div></div>
+   </div></div></div></div>`,
+  note:`She finds Sharon in seconds — sees she's a verified maker, sees it'll arrive in time. The film's there if she wants it, not a toll she has to pay.`},
+
+ {act:"The buyer", html:`<div class="pane on"><div class="big" style="font-size:3.6cqw;margin-bottom:1.6cqw">She lands on Two Dots —<br>and the fear drops.</div>
+   <div class="browser"><div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">kol.com/twodots</span></div>
+   <div class="bwin"><span class="mtag">M2 · store + proof</span><div class="wf-world"><div class="wf-video"></div><div class="wf-story"><div style="display:flex;gap:.8cqw;flex-wrap:wrap"><span class="wf-badge">Real-Maker verified</span><span class="wf-badge">verified reviews</span><span class="wf-badge">ships by Fri</span></div><div class="wf-line m"></div><div class="wf-line s"></div><div class="wf-shelf"><span class="wf-prod"></span><span class="wf-prod"></span><span class="wf-prod"></span></div></div></div></div></div></div>`,
+  note:`She steps in — Sharon's still talking, real reviews, a real kid wearing it, a ship date she can count on. This is a verified, real maker. The fear drops.`},
+
+ {act:"The buyer", html:`<div class="pane on"><div class="big" style="font-size:3.6cqw;margin-bottom:1.6cqw">Click anything —<br>and she <span class="terra">turns to tell you</span> about it.</div>
+   <div class="browser"><div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">kol.com/twodots</span></div>
+   <div class="bwin"><span class="mtag">M4 · click-to-narrate</span><div class="wf-world"><div class="wf-video"></div><div class="wf-story"><div class="wf-line m"></div><div class="wf-line s"></div><div class="wf-shelf"><span class="wf-prod hot"></span><span class="wf-prod"></span><span class="wf-prod"></span></div><div style="font-size:1.35cqw;color:var(--terra);font-weight:700;margin-top:1cqw">▶ video swaps → Sharon narrates <em>this</em> piece</div></div></div></div></div></div>`,
+  note:`Here's the part I love. She clicks the costume — and Sharon turns and tells her about that one. The product doesn't just sit there. It talks back.`},
+
+ {act:"The buyer", html:`<div class="pane center on"><h1 style="font-size:5.4cqw">You didn't shop.<br>You met <span class="terra">someone</span>.</h1><div class="sub" style="max-width:48ch">She buys two. And when a friend asks, she doesn't send a link — she tells Sharon's story. That's how Sharon gets found again.</div></div>`,
+  note:`She buys two. But she didn't shop — she met someone. And when a friend asks, she doesn't send a link. She tells Sharon's story. That's how Sharon gets found again.`},
+
+ {act:"Why it works", html:`<div class="pane on"><div class="kick">We didn't guess. We listened — 5 interviews.</div><div class="quotes">
+   <div class="quote">My biggest concern buying from small sellers is the failure to provide what they advertise.</div>
+   <div class="quote">Verified photos and videos make me trust a product more.</div>
+   <div class="quote small">I'd want better design, easier navigation, and videos of how the product is used.</div></div></div>`,
+  note:`We didn't guess this. Five interviews. Their words: they don't trust small sellers to deliver what's advertised — and video is what earns that trust back. That's the whole product.`},
+
+ {act:"Why it works", html:`<div class="pane center on"><div class="huge terra">69.4%</div><div class="lede" style="text-align:center;max-width:38ch">of the <b style="color:var(--ink)">83 people</b> we surveyed said KOL sounds better than how they shop now.</div>
+   <div class="barrow"><span class="seg l" style="width:30.7%"></span><span class="seg m" style="width:38.7%"></span><span class="seg s" style="width:19%"></span><span class="seg x" style="width:11.6%"></span></div>
+   <div class="legend"><span><i style="background:var(--terra)"></i>Much better</span><span><i style="background:#CE8A62"></i>A bit better</span><span><i style="background:#D8C9BC"></i>About the same</span><span><i style="background:#C7BEB0"></i>Different</span></div>
+   <div class="sub" style="text-align:center">Early stated preference — before a dollar of marketing. A signal, not a proof.</div></div>`,
+  note:`Early days — we asked 83 people. Nearly seventy percent said this sounds better than how they shop today. Stated preference, before any marketing. It's a signal, not a proof — and it points the right way.`},
+
+ {act:"The opportunity", html:`<div class="pane on"><div class="kick">Story and shopping have never lived in the same place</div>
+   <div class="map"><div class="corner-halo"></div><div class="axis x"></div><div class="axis y"></div>
+     <div class="axlabel" style="left:0;top:52%">social reach</div><div class="axlabel" style="right:0;top:52%;text-align:right">durable maker-trust →</div>
+     <div class="axlabel" style="left:50%;top:0;transform:translateX(-50%)">evergreen story ↑</div><div class="axlabel" style="left:50%;bottom:0;transform:translateX(-50%)">live / transient</div>
+     <div class="node" style="left:22%;top:32%"><div class="pin"></div>TikTok Shop</div>
+     <div class="node" style="left:14%;top:58%"><div class="pin"></div>Instagram</div>
+     <div class="node" style="left:36%;top:72%"><div class="pin"></div>Whatnot</div>
+     <div class="node" style="left:60%;top:64%"><div class="pin"></div>Bambuser</div>
+     <div class="node kol" style="left:78%;top:22%"><div class="pin"></div>KOL</div></div></div>`,
+  note:`Story lives on TikTok and Whatnot. Trust and craft live where the makers are. Nobody has put an evergreen, human-made story at the center of the store. That corner is open.`},
+
+ {act:"The opportunity", html:`<div class="pane on"><div class="big" style="font-size:3.2cqw;margin-bottom:1.4cqw">Without a story, a maker competes on price alone.</div>
+   <div class="anchor"><div class="num">$11.9B<span class="u">Etsy GMS · consolidated, FY2025</span></div>
+   <div class="est"><div class="h">Directional — our estimate</div><div class="row">A told story lets a maker hold <b>~20–40% more</b> of their price <span class="tag">est.</span></div><div class="row">Shops with short-form video sell <b>markedly more</b> <span class="tag">est.</span></div><div class="row">…and lean less on paid reach</div></div></div>
+   <div class="foot"><span>Story isn't decoration — it's margin.</span><span class="src">Etsy 10-K FY2025 · 5.6M marketplace sellers</span></div></div>`,
+  note:`On Etsy's own $11.9 billion in sales, our estimate is a maker with a told story can hold twenty-to-forty percent more of their price. Story isn't decoration — it's margin.`},
+
+ {act:"Business model", html:`<div class="pane on"><div class="kick">How KOL makes money — honestly</div><div class="money">
+   <div class="mcard hot"><div class="pill">the aligned one</div><div class="mt">Transaction fee</div><div class="md">We earn only when she sells.</div></div>
+   <div class="mcard"><div class="pill">free to start</div><div class="mt">Platform subscription</div><div class="md">A real monthly cost once she scales — not "aligned," just fair.</div></div>
+   <div class="mcard"><div class="pill">optional</div><div class="mt">Premium tools</div><div class="md">There when she wants them.</div></div></div>
+   <div class="sub">She starts free. The fee is the part that's truly aligned.</div></div>`,
+  note:`She starts free. We take a small fee only when she sells — that's the part that's truly aligned. Premium tools are there when she wants them.`},
+
+ {act:"Business model", html:`<div class="pane on"><div class="kick">What a maker's worth — and where we break even</div><div class="econ">
+   <div class="price"><div class="tier"><b>Free</b><span>to start — get your world online</span></div><div class="tier"><b>$13.99</b><span>/mo premium</span></div></div>
+   <div class="econbox">A maker doing <b>~$[X] GMV</b> yields KOL <b>~$[Y]/yr</b>.<br>Break-even at <b>~[N] active makers</b>.<br><span style="font-size:1.3cqw;color:var(--meta)">We grow only as they do.</span></div></div></div>`,
+  note:`A new maker starts free; premium's $13.99. On our estimates a maker at [X] earns KOL about [Y] a year — we break even around [N] active makers. We grow only as they do.`},
+
+ {act:"The moat", html:`<div class="pane on"><div class="big" style="font-size:3.2cqw;margin-bottom:1cqw">The magic is a conversation.<br>The moat is what it <span class="terra">leaves behind</span>.</div>
+   <div class="flyw"><span class="fchip">conversation</span><span class="farrow">→</span><span class="fchip">her words</span><span class="farrow">→</span><span class="fchip">her living world</span></div>
+   <div class="flyw"><span class="fchip" style="border-color:var(--terra)">verified makers</span><span class="farrow">+</span><span class="fchip" style="border-color:var(--terra)">real stories</span><span class="farrow">+</span><span class="fchip" style="border-color:var(--terra)">buyer-trust data</span><span class="farrow">→</span><span class="fchip" style="background:var(--ink);color:var(--cream)">compounding moat</span></div>
+   <div class="sub" style="text-align:center;margin-top:2cqw">Anyone can bolt AI onto onboarding. The accumulating trust — nobody can copy.</div></div>`,
+  note:`Anyone can bolt AI onto onboarding. What they can't copy is what builds up underneath — verified makers, real stories, and the trust data of buyers coming back. That compounds. That's ours.`},
+
+ {act:"The ask", html:`<div class="pane on"><div class="kick">The ask — Etsy is the hero</div><h1 style="font-size:3.8cqw;max-width:26ch">You already stand for celebrating the human. Let us deliver it to the <span class="terra">buyer</span>.</h1>
+   <div class="metrics"><div class="metric"><div class="ml">Primary — what Buyer-Exp owns</div><div class="mv">“Not as described” ↓ · Repeat-purchase ↑</div></div><div class="metric secondary"><div class="ml">Secondary</div><div class="mv">Conversion · Add-to-basket</div></div></div>
+   <div class="sub">Run it in one story-rich category. Instrument it like any launch — judge it over 2–3 quarters. KOL keeps the engine and the trust data.</div></div>`,
+  note:`Etsy already stands for celebrating the human. KOL is the storefront that finally delivers that to the buyer — measured where it counts: fewer 'not as described' disputes, and more buyers who come back. Instrument it like any launch. Just judge it over quarters, not a two-week test.`},
+
+ {act:"Vision", html:`<div class="pane center on"><h1 style="font-size:4.6cqw;max-width:24ch">For anything a human stands behind, the story should come <span class="terra">first</span>.</h1></div>`,
+  note:`This may not be the future of all shopping. But for anything a person made with their hands — the story is the difference. It should come first.`},
+
+ {act:"Close", html:`<div class="pane center on"><div class="kol" style="font-size:6cqw">K<span class="o">O</span>L</div><h1 style="font-size:4cqw;margin-top:3cqw;max-width:28ch">Every maker, finally heard — starting with <span class="terra">Sharon</span>.</h1><div class="sub" style="text-align:center">Because everyone behind everything you love has a story worth stepping into. Thank you.</div></div>`,
+  note:`KOL. Every maker, finally heard — starting with Sharon. Because everyone behind everything you love has a story worth stepping into. Thank you.`},
+];
+
+let i = 0;
+const slide = document.getElementById('slide');
+const cur = document.getElementById('cur'), tot = document.getElementById('tot');
+const actEl = document.getElementById('act'), prog = document.getElementById('prog');
+const notes = document.getElementById('notes'), notesText = document.getElementById('notesText');
+tot.textContent = S.length;
+
+function render(){
+  slide.innerHTML = S[i].html;
+  cur.textContent = i+1;
+  actEl.textContent = S[i].act;
+  prog.style.width = ((i+1)/S.length*100)+'%';
+  notesText.innerHTML = '<em>“'+S[i].note+'”</em>';
+}
+function go(n){ i = Math.max(0, Math.min(S.length-1, n)); render(); }
+document.getElementById('next').onclick = ()=>go(i+1);
+document.getElementById('prev').onclick = ()=>go(i-1);
+document.getElementById('zr').onclick = ()=>go(i+1);
+document.getElementById('zl').onclick = ()=>go(i-1);
+document.getElementById('ntoggle').onclick = ()=>notes.classList.toggle('on');
+document.getElementById('full').onclick = ()=>{ if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();} else {document.exitFullscreen&&document.exitFullscreen();} };
+window.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+  else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(S.length-1);}
+  else if(e.key.toLowerCase()==='n'){notes.classList.toggle('on');}
+});
+render();
+</script>
