@@ -9,7 +9,7 @@ import { CraftFilter, type Filter } from "./craft-filter";
 import { MakerTile } from "./maker-tile";
 import { FeedSkeleton } from "./feed-skeleton";
 import { ExpandedVideo } from "./expanded-video";
-import { rise, calm } from "@/lib/motion";
+import { rise, calm, stagger } from "@/lib/motion";
 
 /** The searchable haystack for a maker — humans and their craft, never SKUs. */
 function haystack(m: Maker): string {
@@ -88,21 +88,36 @@ export function Browse() {
 
   return (
     <>
-      {/* Search header. */}
-      <section className="mx-auto max-w-issue px-5 pb-8 pt-28 sm:px-8 sm:pt-32">
-        <p className="meta text-bone-dim">Search the issue</p>
-        <h1
+      {/* Search header — inks in on a stagger on arrival so the search moment
+          ("you'll always find a person first") lands as an authored opening. */}
+      <motion.section
+        variants={reduce ? calm : stagger(0.06, 0.1)}
+        initial="hidden"
+        animate="visible"
+        className="mx-auto max-w-issue px-5 pb-8 pt-28 sm:px-8 sm:pt-32"
+      >
+        <motion.p variants={reduce ? calm : rise(14, 0.55)} className="meta text-bone-dim">
+          Search the issue
+        </motion.p>
+        <motion.h1
+          variants={reduce ? calm : rise(26, 0.85)}
           className="mt-4 max-w-3xl font-display font-extrabold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}
         >
           Meet the makers.
-        </h1>
-        <p className="mt-4 max-w-xl font-serif text-lg italic leading-snug text-bone/70">
+        </motion.h1>
+        <motion.p
+          variants={reduce ? calm : rise(16, 0.7)}
+          className="mt-4 max-w-xl font-serif text-lg italic leading-snug text-bone/70"
+        >
           Search a name, a craft, a place, or a way of working. You&rsquo;ll
           always find a person first &mdash; never a shelf of products.
-        </p>
+        </motion.p>
 
-        <div className="mt-8 flex w-full max-w-2xl items-center gap-3 rounded-full border border-bone/25 bg-ink-soft px-5 py-4 transition-colors focus-within:border-marigold/70 focus-within:ring-2 focus-within:ring-marigold/40">
+        <motion.div
+          variants={reduce ? calm : rise(16, 0.7)}
+          className="mt-8 flex w-full max-w-2xl items-center gap-3 rounded-full border border-bone/25 bg-ink-soft px-5 py-4 transition-colors focus-within:border-marigold/70 focus-within:ring-2 focus-within:ring-marigold/40"
+        >
           <MagnifyingGlass size={22} className="shrink-0 text-bone/50" />
           <input
             ref={inputRef}
@@ -126,8 +141,8 @@ export function Browse() {
               <X size={18} weight="bold" />
             </button>
           )}
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Sticky craft rail. */}
       <div className="sticky top-[var(--header-h)] z-30 bg-ink/85 backdrop-blur-md">
@@ -155,7 +170,13 @@ export function Browse() {
             }}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-6 lg:grid-cols-12 max-sm:[&>*]:!col-span-1">
+          // Keyed by craft so switching a craft chip re-deals the spread (the
+          // room changes); a live text query filters in place without a remount,
+          // so typing never restarts a playing film.
+          <div
+            key={active}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-6 lg:grid-cols-12 max-sm:[&>*]:!col-span-1"
+          >
             {results.map((maker, i) => (
               <MakerTile
                 key={maker.id}
