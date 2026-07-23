@@ -28,6 +28,11 @@ export function MakerFilm({
   className,
   /** Ken-Burns drift on the STILL. Set false when an ancestor already drifts. */
   drift = true,
+  /** Optional external handle on the <video> — the continuous film layer uses
+      it to seed currentTime for a seamless feed→world handoff. */
+  videoRef: externalRef,
+  /** Seed the clip's playhead on mount (currentTime continuity across a seam). */
+  initialTime,
 }: {
   videoSrc?: string;
   poster: string;
@@ -37,10 +42,26 @@ export function MakerFilm({
   priority?: boolean;
   className?: string;
   drift?: boolean;
+  videoRef?: React.MutableRefObject<HTMLVideoElement | null>;
+  initialTime?: number;
 }) {
   const [failed, setFailed] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const useVideo = Boolean(videoSrc) && !reduce && !failed;
+
+  // Bridge the internal ref to the optional external handle, and seed the
+  // playhead when a starting time is supplied (feed→world currentTime carry).
+  const setVideoNode = (el: HTMLVideoElement | null) => {
+    videoRef.current = el;
+    if (externalRef) externalRef.current = el;
+    if (el && initialTime !== undefined && Number.isFinite(initialTime)) {
+      try {
+        el.currentTime = initialTime;
+      } catch {
+        /* seeking before metadata resolves is a no-op; the loop stays seamless. */
+      }
+    }
+  };
 
   useEffect(() => {
     if (!useVideo) return;
@@ -61,7 +82,7 @@ export function MakerFilm({
   if (useVideo) {
     return (
       <video
-        ref={videoRef}
+        ref={setVideoNode}
         src={videoSrc}
         poster={poster}
         muted
