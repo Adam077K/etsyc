@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -30,6 +30,11 @@ export function SignIn() {
   const [error, setError] = useState<string | undefined>();
   const inputRef = useRef<HTMLInputElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the pending "sealing the envelope" timer if we unmount mid-send.
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
 
   function onSubmit(ev: React.FormEvent) {
     ev.preventDefault();
@@ -145,6 +150,7 @@ export function SignIn() {
                   {error && (
                     <p
                       id="signin-error"
+                      role="alert"
                       className="mt-1.5 flex items-center gap-1.5 font-ui text-xs text-error"
                     >
                       <WarningCircle size={13} weight="fill" />

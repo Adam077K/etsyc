@@ -33,7 +33,8 @@ const COLUMNS = [
       { label: "About", href: "/journal" },
       { label: "The Journal", href: "/journal" },
       { label: "Trust & proof", href: "/#feed" },
-      { label: "Careers", href: "/journal" },
+      // No careers content this pass — the designed not-found is the honest answer.
+      { label: "Careers", href: "/careers" },
     ],
   },
 ];
@@ -125,7 +126,7 @@ export function SiteFooter() {
           </div>
 
           {COLUMNS.map((col) => (
-            <nav key={col.title}>
+            <nav key={col.title} aria-label={col.title}>
               <p className="meta text-bone-dim">{col.title}</p>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (

@@ -28,9 +28,13 @@ const NAV = [
 export function Masthead({
   variant = "overlay",
   active = "Discover",
+  signedIn = false,
 }: {
   variant?: "overlay" | "solid";
   active?: string;
+  /** On signed-in surfaces (e.g. /account) hide the masthead "Sign in" link —
+      the page carries its own "Sign out". */
+  signedIn?: boolean;
 }) {
   const [scrolled, setScrolled] = useState(variant === "solid");
 
@@ -73,8 +77,9 @@ export function Masthead({
               href={item.href}
               aria-current={active === item.label ? "page" : undefined}
               className={cn(
-                "font-ui text-sm text-bone/80 transition-colors hover:text-bone",
-                active === item.label && "text-bone",
+                "relative font-ui text-sm text-bone/80 transition-colors hover:text-bone",
+                active === item.label &&
+                  "text-bone after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-full after:bg-marigold after:content-['']",
               )}
             >
               {item.label}
@@ -83,12 +88,14 @@ export function Masthead({
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-3">
-          <Link
-            href="/sign-in"
-            className="hidden font-ui text-sm text-bone/80 transition-colors hover:text-bone lg:inline"
-          >
-            Sign in
-          </Link>
+          {!signedIn && (
+            <Link
+              href="/sign-in"
+              className="hidden font-ui text-sm text-bone/80 transition-colors hover:text-bone lg:inline"
+            >
+              Sign in
+            </Link>
+          )}
           <Link
             href="/browse?focus=1"
             aria-label="Search makers"

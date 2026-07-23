@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function AccountPage() {
   return (
     <>
-      <Masthead variant="solid" active="Account" />
+      <Masthead variant="solid" active="Account" signedIn />
       <Account />
       <SiteFooter />
     </>

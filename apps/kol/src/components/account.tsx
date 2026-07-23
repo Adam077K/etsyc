@@ -37,6 +37,9 @@ const initials = VISITOR.name
   .map((w) => w[0])
   .join("");
 
+// Fallback still if a product gallery ever comes back empty (noUncheckedIndexedAccess).
+const FALLBACK_IMG = "/media/clay-shelf.jpg";
+
 // Order status in the maker's own voice — never a courier tracking number.
 const ORDER_STATUS: Record<string, { stage: string; detail: string }> = {
   "odd-clay": {
@@ -164,7 +167,7 @@ export function Account() {
                         className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
                       >
                         <Image
-                          src={line.product.gallery[0]!}
+                          src={line.product.gallery[0] ?? FALLBACK_IMG}
                           alt={line.product.name}
                           fill
                           sizes="64px"
@@ -210,7 +213,7 @@ export function Account() {
                 </span>
               </div>
               <p className="flex items-center gap-2 border-t border-line px-6 py-4 font-ui text-sm text-bone-dim">
-                <Package size={17} weight="fill" className="text-sky" />
+                <Package size={17} weight="fill" className="text-bone-dim" />
                 {MOCK_ORDER.deliveryEstimate}. We&rsquo;ll email you the moment each maker ships.
               </p>
             </div>
@@ -244,7 +247,7 @@ export function Account() {
                       >
                         <div className="relative aspect-[3/4]">
                           <Image
-                            src={product.gallery[0]!}
+                            src={product.gallery[0] ?? FALLBACK_IMG}
                             alt={product.name}
                             fill
                             sizes="240px"
@@ -301,12 +304,12 @@ export function Account() {
                   const hasWorld = Boolean(getWorld(maker.id));
                   const inner = (
                     <>
-                      <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full ring-1 ring-line">
+                      <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-1 ring-line">
                         <Image
                           src={maker.image}
                           alt={maker.name}
                           fill
-                          sizes="56px"
+                          sizes="80px"
                           className="object-cover"
                         />
                       </span>
