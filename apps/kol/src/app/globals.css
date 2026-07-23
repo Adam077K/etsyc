@@ -117,8 +117,9 @@
     scroll-behavior: auto !important;
   }
   .film-drift,
-  .breathe {
-    animation: none;
+  .breathe,
+  .animate-float {
+    animation: none !important;
     transform: none;
   }
   .press:active {

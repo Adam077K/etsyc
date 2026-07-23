@@ -121,21 +121,34 @@ function EditorialTile({
       >
         {/* Drift lives on the still (film makers only) — a real clip carries its
             own motion, so MakerFilm never drifts the video. Still tiles breathe
-            on a nested layer so idle presence never fights the hover scale. */}
-        <div
-          className={cn("h-full w-full", isStill && "breathe")}
-          style={isStill ? { animationDelay: `${-((index % 6) * 1.3)}s` } : undefined}
-        >
+            on a nested layer so idle presence never fights the hover scale; the
+            breathe wrapper is only mounted for stills (film tiles skip it). */}
+        {isStill ? (
+          <div
+            className="breathe h-full w-full"
+            style={{ animationDelay: `${-((index % 6) * 1.3)}s` }}
+          >
+            <MakerFilm
+              videoSrc={undefined}
+              poster={maker.image}
+              alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
+              reduce={!!reduce}
+              sizes={SIZES}
+              className="object-cover"
+              drift={false}
+            />
+          </div>
+        ) : (
           <MakerFilm
-            videoSrc={maker.kind === "film" ? maker.filmSrc : undefined}
+            videoSrc={maker.filmSrc}
             poster={maker.image}
             alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
             reduce={!!reduce}
             sizes={SIZES}
             className="object-cover"
-            drift={maker.kind === "film"}
+            drift
           />
-        </div>
+        )}
       </div>
 
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-transparent" />
@@ -153,7 +166,7 @@ function EditorialTile({
             (never grid-rows/margin) so the reveal stays off the layout thread —
             the serif ink-in + marigold underline wipe are unchanged. */}
         <p
-          className="pointer-events-none absolute inset-x-4 bottom-full mb-2 font-serif text-[0.95rem] italic leading-snug text-bone opacity-0 [clip-path:inset(0_0_100%_0)] [transform:translateY(8px)] transition-[opacity,transform,clip-path] duration-500 ease-out-expo group-hover:opacity-100 group-hover:[clip-path:inset(0_0_0_0)] group-hover:[transform:translateY(0)] group-focus-within:opacity-100 group-focus-within:[clip-path:inset(0_0_0_0)] group-focus-within:[transform:translateY(0)] sm:inset-x-5"
+          className="pointer-events-none absolute inset-x-4 bottom-full mb-2 font-serif text-[0.95rem] italic leading-snug text-bone opacity-0 [clip-path:inset(0_0_100%_0)] [transform:translateY(8px)] [text-shadow:0_1px_6px_rgba(28,22,19,0.85)] transition-[opacity,transform,clip-path] duration-500 ease-out-expo group-hover:opacity-100 group-hover:[clip-path:inset(0_0_0_0)] group-hover:[transform:translateY(0)] group-focus-within:opacity-100 group-focus-within:[clip-path:inset(0_0_0_0)] group-focus-within:[transform:translateY(0)] sm:inset-x-5"
         >
           “{maker.blurb}”
         </p>

@@ -54,7 +54,7 @@ export function ValuesSpread({
           </h2>
 
           <motion.div
-            variants={reduce ? undefined : stagger(0.1, 0.04)}
+            variants={reduce ? calm : stagger(0.1, 0.04)}
             initial="hidden"
             whileInView="visible"
             viewport={inView}
@@ -80,7 +80,7 @@ export function ValuesSpread({
                   <span
                     className={cn(
                       "font-mono text-[0.65rem] tabular-nums transition-colors",
-                      isActive ? "text-ink/60" : "text-bone/45 group-hover/chip:text-bone/70",
+                      isActive ? "text-ink/70" : "text-bone/75 group-hover/chip:text-bone",
                     )}
                   >
                     {String(count).padStart(2, "0")}

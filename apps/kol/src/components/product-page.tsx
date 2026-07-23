@@ -70,17 +70,27 @@ export function ProductPage({
   const [saved, setSaved] = useState(false);
   const [show3d, setShow3d] = useState(false);
   const [pipOpen, setPipOpen] = useState(true);
+  // The PiP is a fixed overlay — mount it only AFTER hydration so we can pick the
+  // mobile-collapsed initial state synchronously (no expanded-PiP flash over the
+  // title) while SSR and first client paint stay identical (no #418). The old
+  // rAF-defer briefly painted the expanded PiP over the h1 at 375px.
+  const [pipMounted, setPipMounted] = useState(false);
   const trustRef = useRef<HTMLDivElement>(null);
   const accentText = ACCENT_TEXT[world.accent];
 
-  // The PiP must never trap the content beneath it. Start collapsed on small
-  // screens (it would cover a gallery thumbnail), and auto-collapse once the
-  // trust badge — the D7 proof — scrolls into view on any width.
+  // Mount the PiP collapsed on small screens (it would otherwise cover the title
+  // / a thumbnail), and auto-collapse once the trust badge — the D7 proof —
+  // scrolls into view on any width.
   useEffect(() => {
-    // Defer the mobile check a frame so it isn't a synchronous setState.
-    const raf = requestAnimationFrame(() => {
-      if (window.matchMedia("(max-width: 639px)").matches) setPipOpen(false);
-    });
+    const mobile =
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 639px)").matches;
+    // Intentional mount-time init: pick the collapsed initial state on mobile and
+    // reveal the fixed PiP only after hydration (see pipMounted comment above).
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (mobile) setPipOpen(false);
+    setPipMounted(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
     const el = trustRef.current;
     let io: IntersectionObserver | undefined;
     if (el && typeof IntersectionObserver !== "undefined") {
@@ -93,7 +103,6 @@ export function ProductPage({
       io.observe(el);
     }
     return () => {
-      cancelAnimationFrame(raf);
       io?.disconnect();
     };
   }, []);
@@ -101,15 +110,19 @@ export function ProductPage({
   return (
     <div className="relative min-h-screen bg-ink">
       <ProductChrome maker={maker} />
-      <ContextualFilm
-        maker={maker}
-        product={product}
-        reduce={!!reduce}
-        open={pipOpen}
-        onOpenChange={setPipOpen}
-      />
+      {pipMounted && (
+        <ContextualFilm
+          maker={maker}
+          product={product}
+          reduce={!!reduce}
+          open={pipOpen}
+          onOpenChange={setPipOpen}
+        />
+      )}
 
-      <main className="mx-auto max-w-issue px-5 pb-24 pt-24 sm:px-8 sm:pt-28">
+      {/* Extra bottom breathing room on mobile so the fixed PiP never traps the
+          final content beneath it. */}
+      <main className="mx-auto max-w-issue px-5 pb-[7rem] pt-24 sm:px-8 sm:pb-24 sm:pt-28">
         {/* Where you are — back into the maker's world. */}
         <nav aria-label="Breadcrumb" className="mb-8 flex flex-wrap items-center gap-2 font-ui text-sm">
           <Link
@@ -501,16 +514,26 @@ function Gallery({
         </motion.div>
 
         {note && (
-          <span className="pointer-events-none absolute left-4 top-4 rounded-full bg-ink/72 px-3 py-1 backdrop-blur-sm">
+          // Deeper ground: over near-white product photography backdrop-blur
+          // bleeds the bright image through a light pill, so the note needs a
+          // solid-enough ink ground to hold AA against text-bone.
+          <span className="pointer-events-none absolute left-4 top-4 rounded-full bg-ink/85 px-3 py-1 backdrop-blur-sm">
             <span className="meta text-bone">{note}</span>
           </span>
         )}
         {multi && (
-          <span className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-ink/72 px-2.5 py-1 font-mono text-[0.65rem] tabular-nums text-bone backdrop-blur-sm">
+          <span className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-ink/85 px-2.5 py-1 font-mono text-[0.65rem] tabular-nums text-bone backdrop-blur-sm">
             {active + 1} / {n}
           </span>
         )}
       </div>
+      {/* Screen-reader announcement of the active slide (the visible counter is
+          aria-hidden decoration; this polite live region is what's announced). */}
+      {multi && (
+        <span aria-live="polite" aria-atomic="true" className="sr-only">
+          Image {active + 1} of {n}
+        </span>
+      )}
       {multi && (
         <div className="mt-4 grid grid-cols-3 gap-3 sm:gap-4">
           {gallery.map((src, i) => (
