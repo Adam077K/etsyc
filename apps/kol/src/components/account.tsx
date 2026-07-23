@@ -243,7 +243,7 @@ export function Account() {
                     >
                       <Link
                         href={`/m/${product.worldSlug}/p/${product.id}`}
-                        className="block overflow-hidden rounded-2xl ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                        className="press block overflow-hidden rounded-2xl ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                       >
                         <div className="relative aspect-[3/4]">
                           <Image
@@ -274,7 +274,7 @@ export function Account() {
                           setSaved((prev) => prev.filter((id) => id !== product.id))
                         }
                         aria-label={`Remove ${product.name} from saved`}
-                        className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-ink/70 text-marigold backdrop-blur-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                        className="press absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-ink/70 text-marigold backdrop-blur-sm hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                       >
                         <Heart size={19} weight="fill" />
                       </button>
@@ -304,13 +304,13 @@ export function Account() {
                   const hasWorld = Boolean(getWorld(maker.id));
                   const inner = (
                     <>
-                      <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-1 ring-line">
+                      <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-1 ring-line transition-[box-shadow] duration-500 group-hover:ring-marigold/40">
                         <Image
                           src={maker.image}
                           alt={maker.name}
                           fill
                           sizes="80px"
-                          className="object-cover"
+                          className="object-cover transition-[transform,filter] duration-700 ease-out-expo group-hover:scale-[1.06] group-hover:saturate-[1.12]"
                         />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -336,7 +336,7 @@ export function Account() {
                   return (
                     <div
                       key={maker.id}
-                      className="group flex items-center gap-4 rounded-2xl border border-line bg-ink-soft p-4"
+                      className="group flex items-center gap-4 rounded-2xl border border-line bg-ink-soft p-4 transition-[transform,border-color,box-shadow] duration-500 ease-out-expo hover:-translate-y-1 hover:border-marigold/40 hover:shadow-[0_22px_50px_-26px_rgba(0,0,0,0.7)]"
                     >
                       {hasWorld ? (
                         <Link
@@ -353,7 +353,7 @@ export function Account() {
                           setFollowed((prev) => prev.filter((id) => id !== maker.id))
                         }
                         aria-label={`Unfollow ${maker.studio}`}
-                        className="flex shrink-0 items-center gap-1.5 rounded-full border border-marigold/50 bg-marigold/10 px-4 py-2 font-ui text-xs font-semibold text-marigold transition-colors hover:border-marigold hover:bg-marigold/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                        className="press flex shrink-0 items-center gap-1.5 rounded-full border border-marigold/50 bg-marigold/10 px-4 py-2 font-ui text-xs font-semibold text-marigold hover:border-marigold hover:bg-marigold/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                       >
                         <Heart size={14} weight="fill" />
                         Following

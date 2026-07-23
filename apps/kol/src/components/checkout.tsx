@@ -16,7 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import { resolveBag, bagTotals, gbp } from "@/lib/fixtures/commerce";
 import type { Maker } from "@/lib/fixtures/makers";
-import { rise, calm } from "@/lib/motion";
+import { rise, calm, stagger, inView } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
 import { cornerTarget } from "./film/film-geometry";
@@ -279,7 +279,7 @@ export function Checkout() {
 
             <button
               type="submit"
-              className="group flex w-full items-center justify-center gap-2.5 rounded-full bg-marigold px-7 py-4 font-ui text-base font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+              className="press group flex w-full items-center justify-center gap-2.5 rounded-full bg-marigold px-7 py-4 font-ui text-base font-semibold text-ink hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Place order · {gbp(totals.total)}
               <ArrowRight size={19} weight="bold" className="transition-transform group-hover:translate-x-1" />
@@ -345,18 +345,29 @@ export function Checkout() {
               </dl>
             </div>
 
-            {/* The human thread — the makers are present. */}
+            {/* The human thread — the makers are present. The portrait cluster
+                staggers in on scroll and each face lifts on hover, so the people
+                readying the order feel present, not printed. */}
             <div className="mt-5 flex items-center gap-4 rounded-3xl border border-line bg-ink-soft px-6 py-5">
-              <div className="flex -space-x-3">
+              <motion.div
+                variants={reduce ? undefined : stagger(0, 0.09)}
+                initial="hidden"
+                whileInView="visible"
+                viewport={inView}
+                className="flex -space-x-3"
+              >
                 {makers.map((m) => (
-                  <span
+                  <motion.span
                     key={m.id}
+                    variants={reduce ? calm : rise(10, 0.5)}
+                    whileHover={reduce ? undefined : { y: -5, scale: 1.09 }}
+                    transition={{ type: "spring", stiffness: 340, damping: 22 }}
                     className="relative h-11 w-11 overflow-hidden rounded-full ring-2 ring-ink-soft"
                   >
                     <Image src={m.image} alt={m.name} fill sizes="44px" className="object-cover" />
-                  </span>
+                  </motion.span>
                 ))}
-              </div>
+              </motion.div>
               <p className="font-serif text-sm italic leading-snug text-bone/80">
                 {makers.map((m) => m.name.split(" ").at(0) ?? m.name).join(" and ")} are
                 readying your order by hand.
