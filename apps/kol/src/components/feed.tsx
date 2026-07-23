@@ -217,7 +217,7 @@ export function Feed() {
           variants={reduce ? calm : rise(16, 0.7)}
           className="max-w-xs font-ui text-sm leading-relaxed text-bone/65"
         >
-          Tap anyone to watch them work.
+          Click anyone to watch them work.
         </motion.p>
       </motion.div>
 

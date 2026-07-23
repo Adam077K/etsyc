@@ -125,14 +125,14 @@ export function HeroSpread() {
           initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: reduce ? 0.2 : 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="order-1 w-full lg:order-2"
+          className="order-1 w-full lg:order-2 lg:-mr-8 lg:w-auto lg:justify-self-end"
         >
           <button
             type="button"
             onClick={enterHeroWorld}
             disabled={!hasWorld}
             aria-label={`Enter ${HERO_MAKER.studio} — ${HERO_MAKER.name} on film`}
-            className="press group relative block w-full overflow-hidden rounded-3xl bg-ink-soft ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:cursor-default lg:ml-auto lg:max-w-[440px]"
+            className="press group relative block w-full overflow-hidden rounded-3xl bg-ink-soft ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:cursor-default lg:w-[504px] lg:rounded-r-none"
           >
             <div className="relative aspect-[4/5] w-full sm:aspect-[3/4]">
               <div className="absolute inset-0 saturate-[0.94] brightness-[0.96] transition-[transform,filter] duration-[900ms] ease-out-expo group-hover:scale-[1.03] group-hover:saturate-100 group-hover:brightness-100">
