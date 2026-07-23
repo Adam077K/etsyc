@@ -32,8 +32,7 @@ const COLUMNS = [
     links: [
       { label: "About", href: "/journal" },
       { label: "The Journal", href: "/journal" },
-      { label: "Trust & proof", href: "/#feed" },
-      // No careers content this pass — the designed not-found is the honest answer.
+      { label: "Trust & proof", href: "/how" },
       { label: "Careers", href: "/careers" },
     ],
   },
