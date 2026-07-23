@@ -378,6 +378,16 @@ export const ISSUE_STATS = {
 
 export const ALL_MAKERS: Maker[] = [COVER_MAKER, ...MAKERS];
 
+/**
+ * The homepage hero features Sharon (Two Dots) in person — a face-to-camera
+ * portrait talking-head — per Founder directive (2026-07-23). Deliberately
+ * distinct from COVER_MAKER (odd-clay), which still anchors the seller/how
+ * example surfaces and is the film-continuity journey's other entry. The `??`
+ * is a type-safe guard: two-dots is a permanent fixture in MAKERS.
+ */
+export const HERO_MAKER: Maker =
+  MAKERS.find((m) => m.id === "two-dots") ?? COVER_MAKER;
+
 /** Look up a maker by id (id doubles as the /m/[slug] route slug). */
 export function getMaker(id: string): Maker | undefined {
   return ALL_MAKERS.find((m) => m.id === id);
