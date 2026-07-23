@@ -32,7 +32,6 @@ import {
   applyDockFrame,
   dockClip,
   dockTarget,
-  dockTop,
 } from "./film/film-geometry";
 
 /**
@@ -269,7 +268,7 @@ function TwoDotsFilm({
       return;
     }
     if (!enteredRef.current) return;
-    applyDockFrame(m, v, docked, dockClip(vw, vh), dockTop(24));
+    applyDockFrame(m, v, docked, dockClip(vw, vh));
   });
 
   return null;
@@ -360,7 +359,10 @@ function IdeaSection({ reduce, onView }: { reduce: boolean; onView: () => void }
             >
               {d.ideaTitle}
             </h2>
-            <div className="space-y-5">
+            {/* At xl the pinned top-left dock overlaps the top of this prose as
+                the section scrolls; a top clearance drops the reading block below
+                the dock's band. Clearance only — prose + composition untouched. */}
+            <div className="space-y-5 xl:pt-44">
               {d.ideaBody.map((p, i) => (
                 <p
                   key={i}

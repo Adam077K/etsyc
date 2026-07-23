@@ -38,6 +38,32 @@ export function dockTop(margin = DOCK_MARGIN): number {
 }
 
 /**
+ * Which corner the film docks to. Per the Founder directive the STORE (maker
+ * world + product) docks TOP-LEFT; checkout + thank-you keep the pre-directive
+ * BOTTOM-RIGHT dock (they were never in the directive, and moving them re-broke
+ * a shipped checkout fix). A route names its corner; the helpers resolve it.
+ */
+export type DockCorner = "top-left" | "bottom-right";
+
+/**
+ * Resolve a dock corner to its transform anchor: the origin the film scales
+ * about, plus the inset translate that pins the shrunk card `margin` in from the
+ * two live edges. TOP-LEFT additionally clears the masthead (via `dockTop`);
+ * BOTTOM-RIGHT sits `margin` in from the bottom/right edges. Single source —
+ * every dock helper resolves position through here, so a caller only ever names
+ * a corner, never re-derives coordinates inline.
+ */
+export function dockAnchor(
+  corner: DockCorner,
+  margin = DOCK_MARGIN,
+): { originX: number; originY: number; x: number; y: number } {
+  if (corner === "bottom-right") {
+    return { originX: 100, originY: 100, x: -margin, y: -margin };
+  }
+  return { originX: 0, originY: 0, x: margin, y: dockTop(margin) };
+}
+
+/**
  * The corner dock is a landscape card. Because the persistent film is scaled
  * UNIFORMLY (never distorted), the docked box always inherits the viewport
  * aspect — fine on a landscape desktop (~16/10), but on a portrait phone it
@@ -63,27 +89,29 @@ export function dockClip(vw: number, vh: number): number {
 
 /**
  * Scroll-linked hero→dock settle, shared by the maker world and the thank-you
- * payoff. Given hero scroll progress `v` (0→1) and the docked scale, it drives
- * the persistent film's transform to the TOP-LEFT dock: it LANDS docked by 72%
- * of the hero scroll, insets `DOCK_MARGIN` from the left and `topInset` from the
- * top (which clears the masthead — pass `dockTop()`), and ramps the shadow
- * linearly over [0.5, 0.9]. Transform/opacity only, origin top-left (from
- * HERO_TARGET). `clipAmt` (from `dockClip`) ramps in with the dock so a portrait
- * phone lands on a landscape card instead of a full-height column that buries the
- * page; the FilmStage fades its chip out as it docks (clip>0). Stays 0 over the
- * hero (p→0).
+ * payoff. Given hero scroll progress `v` (0→1), the docked scale, and the dock
+ * `corner`, it drives the persistent film's transform to that corner: it LANDS
+ * docked by 72% of the hero scroll, insets to the corner anchor, and ramps the
+ * shadow linearly over [0.5, 0.9]. Transform/opacity only; it sets the origin to
+ * match the corner so the scale settles toward it. `clipAmt` (from `dockClip`)
+ * ramps in with the dock so a portrait phone lands on a landscape card instead of
+ * a full-height column; the FilmStage fades its chip out as it docks (clip>0).
+ * Stays 0 over the hero (p→0).
  */
 export function applyDockFrame(
   m: FilmMotion,
   v: number,
   docked: number,
   clipAmt = 0,
-  topInset = DOCK_MARGIN,
+  corner: DockCorner = "top-left",
 ): void {
+  const a = dockAnchor(corner);
   const p = DOCK_EASE(Math.min(v / 0.72, 1));
+  m.originX.set(a.originX);
+  m.originY.set(a.originY);
   m.scale.set(1 + (docked - 1) * p);
-  m.x.set(DOCK_MARGIN * p);
-  m.y.set(topInset * p);
+  m.x.set(a.x * p);
+  m.y.set(a.y * p);
   m.radius.set(DOCK_RADIUS * DOCK_EASE(Math.min(v / 0.55, 1)));
   m.shadow.set(v <= 0.5 ? 0 : Math.min((v - 0.5) / 0.4, 1));
   m.clip.set(clipAmt * p);
@@ -94,47 +122,47 @@ export function applyDockFrame(
  * the film to the dock in ONE shot (the twodots interlude re-dock, and the
  * reduced-motion snap) rather than scroll-linked via `applyDockFrame`. `docked`
  * is the uniform scale; `clipAmt` (from `dockClip`) crops a portrait phone to a
- * landscape card. Position is the shared TOP-LEFT anchor — this is the single
- * source those callers import instead of re-declaring the corner inline.
+ * landscape card; `corner` picks the anchor. Single source — callers import this
+ * instead of re-declaring the corner inline.
  */
 export function dockTarget(
   docked: number,
   clipAmt = 0,
-  margin = DOCK_MARGIN,
+  corner: DockCorner = "top-left",
 ): FilmTarget {
+  const a = dockAnchor(corner);
   return {
     scale: docked,
-    x: margin,
-    y: dockTop(margin),
+    x: a.x,
+    y: a.y,
     radius: DOCK_RADIUS,
     opacity: 1,
-    originX: 0,
-    originY: 0,
+    originX: a.originX,
+    originY: a.originY,
     shadow: 1,
     clip: clipAmt,
   };
 }
 
 /** Full-bleed hero: the film fills the viewport (world / thank-you payoff).
-    Origin top-left so the hero→dock scale settles toward the TOP-LEFT dock. */
+    Corner-agnostic — at scale 1 the origin is irrelevant, and each route snaps
+    its own dock origin, so the hero carries none (letting the film grow from
+    whichever corner it arrived at). */
 export const HERO_TARGET: FilmTarget = {
   scale: 1,
   x: 0,
   y: 0,
   radius: 0,
   opacity: 1,
-  originX: 0,
-  originY: 0,
   shadow: 0,
   clip: 0,
 };
 
 /**
- * The docked corner card used on product + checkout. Anchored TOP-LEFT
- * (origin 0/0), so a uniform scale shrinks the full-viewport box toward that
- * corner; the translate insets it `margin` from the left and `top` from the top
- * (pass `dockTop(margin)` to clear the masthead — defaults to `margin`). Radius
- * is pre-divided by the scale so it reads as ~`radius` px after the box shrinks.
+ * The small docked corner card used on product (top-left) + checkout
+ * (bottom-right). A uniform scale shrinks the full-viewport box toward the
+ * corner anchor (origin + inset from `dockAnchor`). Radius is pre-divided by the
+ * scale so it reads as ~`radius` px after the box shrinks.
  */
 export function cornerTarget(
   vw: number,
@@ -144,24 +172,25 @@ export function cornerTarget(
     margin = DOCK_MARGIN,
     radius = 18,
     opacity = 1,
-    top,
+    corner = "top-left",
   }: {
     width?: number;
     margin?: number;
     radius?: number;
     opacity?: number;
-    top?: number;
+    corner?: DockCorner;
   } = {},
 ): FilmTarget {
   const scale = vw > 0 ? width / vw : 0.14;
+  const a = dockAnchor(corner, margin);
   return {
     scale,
-    x: margin,
-    y: top ?? margin,
+    x: a.x,
+    y: a.y,
     radius: scale > 0 ? radius / scale : radius,
     opacity,
-    originX: 0,
-    originY: 0,
+    originX: a.originX,
+    originY: a.originY,
     shadow: 1,
     clip: dockClip(vw, vh),
   };

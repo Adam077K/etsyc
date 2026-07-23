@@ -26,7 +26,7 @@ import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip, dockTop } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip, dockTarget } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -348,17 +348,7 @@ function WorldFilm({
       // the hero, then SNAP it to the docked corner past the hero so it never
       // covers the world content the buyer needs to read (no per-frame move).
       if (v > 0.6) {
-        snapTo({
-          scale: docked,
-          x: 24,
-          y: dockTop(24),
-          radius: 64,
-          opacity: 1,
-          originX: 0,
-          originY: 0,
-          shadow: 1,
-          clip: dockClip(window.innerWidth, window.innerHeight),
-        });
+        snapTo(dockTarget(docked, dockClip(window.innerWidth, window.innerHeight)));
       } else {
         snapTo({ ...HERO_TARGET });
       }
@@ -373,7 +363,6 @@ function WorldFilm({
       v,
       docked,
       dockClip(window.innerWidth, window.innerHeight),
-      dockTop(24),
     );
   });
 
@@ -545,8 +534,11 @@ function GalleryWall({ world, reduce }: { world: World; reduce: boolean }) {
 }
 
 function ProcessSection({ world, reduce }: { world: World; reduce: boolean }) {
+  // At xl the top-left dock (~400px) is pinned over this whole section as it
+  // scrolls; a left safe-lane (xl:pl) keeps its header + process cards clear of
+  // the dock's x-band. Below xl the dock is smaller / cropped and clears on its own.
   return (
-    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
+    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32 xl:pl-[27rem]">
       <Reveal reduce={reduce}>
         <p className="meta mb-3 text-bone-dim">How it&#39;s made</p>
         <h2

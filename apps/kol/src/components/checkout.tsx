@@ -19,7 +19,7 @@ import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, stagger, inView } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { cornerTarget, dockAspect, dockTop } from "./film/film-geometry";
+import { cornerTarget, dockAspect } from "./film/film-geometry";
 
 const ERR = "text-error";
 const NUM = ["", "One", "Two", "Three", "Four", "Five"];
@@ -391,9 +391,11 @@ export function Checkout() {
    not selling. */
 function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
   const { present, driveTo } = useFilm();
-  const [card, setCard] = useState({ width: 176, margin: 24, ratio: 16 / 10, top: 96 });
+  const [card, setCard] = useState({ width: 176, margin: 24, ratio: 16 / 10 });
 
-  // Runs once per maker; the film controls are stable.
+  // Runs once per maker; the film controls are stable. Checkout keeps the
+  // pre-directive BOTTOM-RIGHT dock (the top-left store directive never covered
+  // it, and moving it here re-broke the address-field clearance).
   useEffect(() => {
     present({
       makerId: maker.id,
@@ -402,6 +404,7 @@ function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
       alt: `${maker.name} — ${maker.studio}`,
       chip: "now-playing",
       stageChip: false,
+      dockCorner: "bottom-right",
     });
     const apply = () => {
       const mobile = window.matchMedia("(max-width: 639px)").matches;
@@ -412,9 +415,8 @@ function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
       const vh = window.innerHeight;
       const width = mobile ? 132 : 176;
       const margin = mobile ? 16 : 24;
-      const top = dockTop(margin);
-      setCard({ width, margin, ratio: dockAspect(vw, vh), top });
-      driveTo(cornerTarget(vw, vh, { width, margin, radius: 16, top }), {
+      setCard({ width, margin, ratio: dockAspect(vw, vh) });
+      driveTo(cornerTarget(vw, vh, { width, margin, radius: 16, corner: "bottom-right" }), {
         reduce: prefersReduced,
         duration: 0.55,
       });
@@ -429,8 +431,8 @@ function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
     <div
       className="pointer-events-none fixed z-[41]"
       style={{
-        left: card.margin,
-        top: card.top,
+        right: card.margin,
+        bottom: card.margin,
         width: card.width,
         aspectRatio: String(card.ratio),
       }}

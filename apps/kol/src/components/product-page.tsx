@@ -609,7 +609,7 @@ function ContextualFilm({
       const top = dockTop(margin);
       setCard({ width, margin, ratio: dockAspect(vw, vh), top });
       if (open) {
-        driveTo(cornerTarget(vw, vh, { width, margin, radius: 18, top }), {
+        driveTo(cornerTarget(vw, vh, { width, margin, radius: 18 }), {
           reduce: prefersReduced,
           duration: 0.55,
         });
@@ -696,7 +696,7 @@ function ContextualFilm({
           at sm+. The accessible name is identical at every width — the "Now
           playing" label lives in aria-label. */}
       {!open && (
-        <div className="fixed left-4 top-[calc(var(--header-h)+1rem)] z-[41] sm:left-6 sm:top-[calc(var(--header-h)+1.5rem)]">
+        <div className="fixed left-4 top-[calc(var(--header-h)+3.25rem)] z-[41] sm:left-6 sm:top-[calc(var(--header-h)+3.5rem)]">
           <motion.button
             type="button"
             onClick={() => onOpenChange(true)}
