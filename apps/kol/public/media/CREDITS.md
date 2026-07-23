@@ -50,3 +50,24 @@ change.
 | Surface | Slot | Interim | Proper shot |
 |---|---|---|---|
 | `/how` hero | Cinematic opener ground (`how-story.tsx`) | `indigo-dye.jpg` — an abstract dye swirl; reads impersonal in the least-scrimmed quadrant (interim fix: right scrim floored at `ink/30`) | A real maker's hands or face mid-process (throwing, dyeing, carving) — the thesis page's first human impression should be a person, not a texture |
+
+## Worlds expansion — Grain & Groove + Ember & Rue + Risograph Room
+
+No new files were added. These three worlds reuse **existing** local media only, so
+every image is honest stock that already renders. Where an image is reused across
+maker contexts, the content genuinely fits the new craft — the same practice the
+build already uses (e.g. `salt-ceramics.jpg` is both Salt Kiln's feed tile and
+Odd Clay's carafe gallery). No portrait is ever reused as a different named maker.
+
+| File | Reused as | In |
+|---|---|---|
+| woodwork.jpg | Bench / drilling timber (own feed tile) | Grain & Groove — hero, process, studio, Butterfly Board |
+| stool-blue.jpg | Finished hand-joined stool | Grain & Groove — process, Field Stool |
+| maker-soren.jpg | Tomás Reyes' portrait (previously unused reserve) | Grain & Groove — story |
+| apothecary.jpg | Dropper + oil bottles (own feed tile) | Ember & Rue — hero, process, studio, Neroli & Cedar Oil |
+| salt-ceramics.jpg | Glazed stoneware vessels Noor decants into (ceramic bottle-vases) | Ember & Rue — story, process, Sealed Vessel |
+| prints-wall.jpg | Wall of finished riso prints (own feed tile) | Risograph Room — hero, process, studio, Overprint Study |
+| indigo-dye.jpg | Riso ink (abstract ink/pigment swirl, reframed from the dye vat) | Risograph Room — story, process, Ink Field |
+
+Replace with KOL's own maker footage/photography before any public launch — this is
+the screens-only stock pass, and the reuse above is a placeholder, not the shipped look.
