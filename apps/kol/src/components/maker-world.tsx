@@ -286,6 +286,10 @@ function WorldFilm({
       alt: `${maker.name} — ${maker.discipline}, ${maker.studio}`,
       clipLabel,
       chip: "now-playing",
+      // Cold/direct entry only: open a low-framed portrait clip on its action
+      // (applied once on the film node's first mount; the feed→world carry wins
+      // when arriving via a handoff). Omitted makers open at 0:00 as before.
+      seedTime: maker.filmSeed,
     });
     const prefersReduced =
       typeof window !== "undefined" &&

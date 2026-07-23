@@ -58,6 +58,14 @@ export interface Maker {
    * public/media/video/README.md for the filename → surface map.
    */
   filmSrc?: string;
+  /**
+   * Playhead (seconds) to seed the hero clip on its first/cold mount, so a
+   * portrait clip whose action sits low in frame doesn't open on the empty
+   * centre band a full-bleed landscape hero crops to. Only applied once on the
+   * persistent film node's first mount (via <MakerFilm initialTime>), so it
+   * never fights the feed→world currentTime carry. Omit to open at 0:00.
+   */
+  filmSeed?: number;
 }
 
 export const CRAFTS: Craft[] = [
@@ -333,6 +341,10 @@ export const MAKERS: Maker[] = [
     tone: "light",
     values: ["Hand-sewn", "Parent & child"],
     filmSrc: "/media/video/two-dots.mp4",
+    // Portrait clip; the hands-on-felt proof moment sits low in frame. Seed to
+    // 0:06 so the full-bleed hero opens on a hand smoothing felt, not the empty
+    // white centre band the crop otherwise lands on at 0:00.
+    filmSeed: 6,
   },
 ];
 
