@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-ink text-bone font-ui;
+    font-feature-settings: "ss01", "cv01";
+  }
+
+  ::selection {
+    background: #e4922c;
+    color: #1c1613;
+  }
+
+  /* Keyboard focus is a first-class state, marigold on any ground. */
+  :focus-visible {
+    outline: 2px solid #f2a93b;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Display type wants a tight tracking floor (craft-floor). */
+  .font-display {
+    letter-spacing: -0.03em;
+  }
+}
+
+@layer components {
+  /* Tracked mono colophon label — the magazine's data voice. */
+  .meta {
+    @apply font-mono uppercase tracking-meta text-[0.7rem] leading-none;
+  }
+
+  /* Cinematic still-in-motion: the "film" feel without a wired clip. A slow
+     Ken-Burns drift reads as living footage; the WATCH affordance carries the
+     promise that the real product autoplays the maker's clip here. */
+  .film-drift {
+    animation: drift 18s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  /* Loading shimmer sweep. */
+  .shimmer-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer-sweep::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(239, 230, 214, 0.08),
+      transparent
+    );
+    animation: shimmer 1.8s infinite;
+  }
+}
+
+/* Motion is never load-bearing — reduced-motion settles everything. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .film-drift {
+    animation: none;
+    transform: none;
+  }
+}
