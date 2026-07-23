@@ -679,9 +679,15 @@ export interface BagLine {
   qty: number;
 }
 
+// The demo journey is Sharon's (Two Dots) — a buyer discovers her, shops her
+// world, and checks out HER pieces. The bag is the fixed mock cart for this
+// screens-only pass, so it holds two Two Dots items: the continuous film and the
+// personal thank-you then carry Sharon coherently feed→world→product→checkout→
+// thank-you. Both lines are the same maker, so the thank-you resolves to one
+// present maker (no stray second-maker note).
 export const MOCK_BAG: BagLine[] = [
-  { productId: "carafe", qty: 1 },
-  { productId: "wrap", qty: 1 },
+  { productId: "butterfly-wings", qty: 1 },
+  { productId: "cat-tote", qty: 1 },
 ];
 
 export interface ResolvedLine {

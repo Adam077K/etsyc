@@ -369,8 +369,8 @@ export function Checkout() {
                 ))}
               </motion.div>
               <p className="font-serif text-sm italic leading-snug text-bone/80">
-                {makers.map((m) => m.name.split(" ").at(0) ?? m.name).join(" and ")} are
-                readying your order by hand.
+                {makers.map((m) => m.name.split(" ").at(0) ?? m.name).join(" and ")}{" "}
+                {makers.length === 1 ? "is" : "are"} readying your order by hand.
               </p>
             </div>
 
