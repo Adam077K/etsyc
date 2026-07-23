@@ -119,13 +119,13 @@ plus all face-forward costume portraits (governance — see below).
 
 | File | Depicts | Where used | Flag |
 |---|---|---|---|
-| twodots/workshop.jpg | Two people at sewing machines in the real studio; foreground back-turned, **background minor in side profile** | **UNWIRED — fallback applied pre-deploy** (was: story + process 02 + Workshop gallery) | ⚠ partially-identifiable minor (profile). Swapped out of the deploy path → materials.jpg (story) + felt.jpg (process 02 + gallery). File held internal, unwired; one-line revert if the Founder approves the original. |
+| twodots/workshop.jpg | Two people at sewing machines in the real studio; foreground back-turned, **background minor (~10–12yo) in ¾ profile** | **UNWIRED — fallback applied pre-deploy** (was: story + process 02 + Workshop gallery) | ⚠ identifiable minor (¾ profile). Swapped out of the deploy path → quilt.jpg (story), felt.jpg (process 02), [materials.jpg, felt.jpg] (Workshop gallery). File held internal, unwired; one-line revert if the Founder approves the original. |
 
 ### Governance fallback plan — per image (so each Founder decision is one word)
 
 | Image | Current wiring | If Founder APPROVEs | If Founder DECLINEs / SWAPs |
 |---|---|---|---|
-| twodots/workshop.jpg | **SWAP APPLIED (pre-deploy)** — story → `materials.jpg`; process 02 → `felt.jpg`; Workshop gallery → `[materials.jpg, felt.jpg]`. workshop.jpg now unwired. | revert the three swaps to `workshop.jpg` (one line each) | already swapped — no further action. NB: process 02 + gallery took `felt.jpg` rather than `materials.jpg` because materials.jpg was already in process 01 / gallery slot 1, so a literal materials swap would have duplicated adjacent cards / a carousel. |
+| twodots/workshop.jpg | **SWAP APPLIED (pre-deploy)** — story → `quilt.jpg`; process 02 → `felt.jpg`; Workshop gallery → `[materials.jpg, felt.jpg]`. workshop.jpg now unwired. | revert the three swaps to `workshop.jpg` (one line each) | already swapped — no further action. NB: critic mapped process 02 → `materials.jpg`, but step 01 already uses `materials.jpg`, so held at `felt.jpg` to avoid an identical adjacent card; flip to `materials.jpg` if the repeat is confirmed intended. Gallery slot 2 is `felt.jpg` so the two-shot carousel stays distinct. |
 | twodots/devil-back.jpg | Little Devil product card + gallery (**faceless** head-cropped default) | *(upgrade path)* replace with uncropped #09 for fuller framing (head + felt horns; partial side profile) | no change — the faceless crop is already the conservative default |
 
 ### NOT shipped — held for Founder decision

@@ -373,10 +373,11 @@ export const WORLDS: Record<string, MakerWorld> = {
       "I care most about the five seconds after they put it on, when they stop being shy and start being the thing. You can't buy that off a rack. You have to sew it in.",
     ],
     // Governance fallback applied pre-deploy: workshop.jpg (background minor in
-    // profile) is swapped out of the deploy path → the faceless materials flat-lay.
-    // One-line revert to workshop.jpg if the Founder later approves the original.
-    storyImage: "/media/twodots/materials.jpg",
-    storyImageAlt: "Sewing materials — beads, denim, fabric, scissors and yarn — laid out ready to cut in the Two Dots studio",
+    // profile) is swapped out of the deploy path → the faceless quilt-detail still
+    // (fabric close-up suits the story beat). One-line revert to workshop.jpg if
+    // the Founder later approves the original.
+    storyImage: "/media/twodots/quilt.jpg",
+    storyImageAlt: "A patchwork-quilt detail — eyelet lace, tartan and floral cotton patches with a dusty-rose binding, from the Two Dots studio",
     processSectionHeader: "Made the slow way, on purpose.",
     process: [
       {
@@ -391,9 +392,11 @@ export const WORLDS: Record<string, MakerWorld> = {
         label: "02",
         title: "Cut and sewn here, by hand",
         body: "It's all made in the room, often with the parent at the next machine. Real seams, real hems — built to be run in, sat in, and slept in if it comes to that.",
-        // Governance fallback: workshop.jpg swapped out → felt.jpg (the CREDITS-
-        // named faceless alt). NOT materials.jpg — step 01 already uses that, and
-        // two identical adjacent process cards would read as a bug in the demo.
+        // Governance fallback: workshop.jpg swapped out. Critic mapped this to
+        // materials.jpg, but step 01 already uses materials.jpg — side by side the
+        // two cards render an identical photo (reads as a bug, not before/during
+        // continuity). Held at felt.jpg (CREDITS-named alt, faceless, fits "cut and
+        // sewn here") to keep the process trio distinct; awaiting critic confirm.
         image: "/media/twodots/felt.jpg",
       },
       {
@@ -433,7 +436,7 @@ export const WORLDS: Record<string, MakerWorld> = {
       {
         src: "/media/twodots/butterfly-back.jpg",
         filmSrc: "/media/video/product-butterfly-wings.mp4",
-        alt: "A child, hooded so no face shows, spinning to lift handmade felt butterfly wings",
+        alt: "A child seen from behind, curly hair showing, spinning to lift handmade felt butterfly wings",
         ratio: "tall",
         caption: "Wings that spin",
       },
