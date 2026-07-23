@@ -178,7 +178,7 @@ export const TWODOTS_DEEP: TwoDotsDeep = {
     },
     {
       title: "She measures and sews to fit",
-      body: "Measured to your child, cut and stitched by hand in the studio, ready in one to two weeks. Real seams, no scratchy elastic.",
+      body: "Measured to your child, then cut and stitched to order by hand in the studio. Real seams, no scratchy elastic.",
     },
     {
       title: "Resized as they grow",

@@ -232,6 +232,13 @@ function TwoDotsFilm({
       driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.6 });
     };
     const redock = () => {
+      // Only re-dock if a bloom actually happened. The interlude IO fires a
+      // mandatory initial callback at ratio 0 on cold load, which dispatches
+      // redock BEFORE any bloom — without this guard it would cancel the mount
+      // driveTo(HERO_TARGET) one frame in and open the world docked instead of
+      // full-bleed. No bloom yet → nothing to re-dock (also makes the unmount
+      // safety-dispatch and the reduced-motion path a no-op until bloomed).
+      if (!interludeRef.current) return;
       interludeRef.current = false;
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const vw = window.innerWidth;
@@ -662,7 +669,7 @@ function ProductsSection({
   onView: () => void;
 }) {
   return (
-    <section className="mx-auto max-w-issue px-5 py-24 sm:px-8 sm:py-32">
+    <section className="mx-auto max-w-issue px-5 pt-24 pb-[260px] sm:px-8 sm:pt-32 sm:pb-[260px]">
       <Reveal reduce={reduce} onView={onView}>
         <p className="meta mb-3 text-clay-bright">The work</p>
         <h2
@@ -700,7 +707,7 @@ function ProductsSection({
                       {product.name}
                     </Link>
                   </h3>
-                  <span className="font-display text-2xl font-bold text-marigold">
+                  <span className="font-display text-2xl font-bold text-bone">
                     {product.price}
                   </span>
                 </div>
