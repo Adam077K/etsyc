@@ -7,8 +7,11 @@ import {
   motion,
   useScroll,
   useTransform,
+  useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
+  animate,
+  type PanInfo,
 } from "framer-motion";
 import {
   ArrowLeft,
@@ -18,10 +21,13 @@ import {
   Heart,
   ArrowUpRight,
   Play,
+  CaretLeft,
+  CaretRight,
+  HandTap,
 } from "@phosphor-icons/react";
 import type { Maker, Ground } from "@/lib/fixtures/makers";
 import type { MakerWorld as World } from "@/lib/fixtures/worlds";
-import { rise, calm, inView, easeOut } from "@/lib/motion";
+import { rise, calm, stagger, inView, easeOut } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
@@ -37,12 +43,32 @@ const ACCENT_BG: Record<Ground, string> = {
   ink: "bg-ink-raise",
 };
 
+/** The per-maker accent's stable "bright" tint — a warm, readable hairline/label
+    colour that survives the theme-wave remap of the base ground token. */
+const ACCENT_BRIGHT: Record<Ground, string> = {
+  clay: "text-clay-bright",
+  sky: "text-sky",
+  plum: "text-plum",
+  olive: "text-olive",
+  bone: "text-bone-dim",
+  ink: "text-bone-dim",
+};
+
+function heroDefaultLabel(maker: Maker): string {
+  return maker.kind === "film" ? `Now playing · ${maker.duration}` : "On film";
+}
+
 /**
  * maker-world (/m/[slug]) — the maker's branded world unfolds AROUND the
  * still-playing film (buyer journey steps 3-5). The film opens full-bleed and
  * DOCKS to a corner as you scroll, staying present while the world scrolls past.
- * Per-maker personality lives in imagery, an accent ground (clay vs sky), and
- * copy voice — never in a broken palette or type (DESIGN.md is the contract).
+ *
+ * Evolved from a stacked-section layout into a film-LED journey: the docked film
+ * narrates a contextual label per beat (generalized from the bespoke Two Dots
+ * world via `world.filmNarration`), the process becomes a draggable make-reel
+ * (the signature interactive moment), and a full-bleed film interlude breaks the
+ * rhythm. Per-maker personality lives in imagery, an accent ground, and copy
+ * voice — never a broken palette or type (DESIGN.md is the contract).
  */
 export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
   // `useReducedMotion` resolves to the client's true preference immediately, but
@@ -58,6 +84,14 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
   const reduce = mounted ? reduceRaw : false;
   const heroRef = useRef<HTMLDivElement>(null);
   const textOnAccent = world.accent === "bone" ? "text-ink" : "text-bone";
+  const accentBright = ACCENT_BRIGHT[world.accent];
+
+  // The corner film narrates a contextual label per beat; sections set it as they
+  // scroll into view and the stage crossfades it (buyer-journey "narration").
+  const nar = world.filmNarration;
+  const [label, setLabel] = useState<string>(
+    nar?.hero ?? heroDefaultLabel(maker),
+  );
 
   return (
     <div className="relative bg-ink">
@@ -70,6 +104,8 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
         heroSrc={world.heroFilm ?? maker.image}
         heroRef={heroRef}
         reduce={!!reduce}
+        label={label}
+        hasInterlude={!!world.interlude}
       />
 
       {/* Hero — the film plays full-bleed behind (fixed, z-40); the scrim + text
@@ -118,35 +154,53 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
         </div>
       </section>
 
-      {/* The world, scrolling around the docked film. */}
+      {/* The world, scrolling around the docked film. Split around the interlude:
+          the interlude sits ABOVE the film (z-45, like the hero) so its quote
+          reads over the bloomed footage; the docked beats sit below (z-10). */}
       <div className="relative z-10 bg-ink">
-        <StorySection world={world} maker={maker} reduce={!!reduce} />
+        <StorySection
+          world={world}
+          maker={maker}
+          reduce={!!reduce}
+          accentBright={accentBright}
+          onView={() => nar?.story && setLabel(nar.story)}
+        />
         {world.wall && world.wall.length > 0 && (
           <GalleryWall world={world} reduce={!!reduce} />
         )}
-        <ProcessSection world={world} reduce={!!reduce} />
-        <ProductsSection world={world} maker={maker} reduce={!!reduce} />
+        <MakeReel
+          world={world}
+          reduce={!!reduce}
+          accentBright={accentBright}
+          onLabel={setLabel}
+        />
+      </div>
 
-        {/* Studio — the per-maker accent color-block. */}
-        <Reveal reduce={!!reduce}>
-          <section className={cn("relative overflow-hidden", ACCENT_BG[world.accent])}>
-            <div className="relative aspect-[16/9] w-full sm:aspect-[21/9]">
-              <Image
-                src={world.studioImage}
-                alt={world.studioCaption}
-                fill
-                sizes="100vw"
-                className="object-cover opacity-90 mix-blend-multiply"
-              />
-              {/* Locked scrim rule — caption never sits raw over the image
-                  (illegible over the near-white indigo vat otherwise). */}
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink/75 to-transparent" />
-              <div className="absolute inset-0 flex items-end p-6 sm:p-12">
-                <p className="meta text-bone">{world.studioCaption}</p>
-              </div>
-            </div>
-          </section>
-        </Reveal>
+      {world.interlude && (
+        <WorldInterlude
+          quote={world.interlude.quote}
+          attribution={`${maker.name} · ${maker.studio}`}
+          label={nar?.interlude ?? nar?.hero ?? heroDefaultLabel(maker)}
+          accentBright={accentBright}
+          reduce={!!reduce}
+          onLabel={setLabel}
+        />
+      )}
+
+      <div className="relative z-10 bg-ink">
+        <ProductsSection
+          world={world}
+          maker={maker}
+          reduce={!!reduce}
+          onView={() => nar?.products && setLabel(nar.products)}
+        />
+
+        {/* Studio — the per-maker accent color-block, with a slow parallax lift. */}
+        <StudioBlock
+          world={world}
+          reduce={!!reduce}
+          onView={() => nar?.studio && setLabel(nar.studio)}
+        />
 
         {/* Voice — accent-drenched close. */}
         <Reveal reduce={!!reduce}>
@@ -245,25 +299,44 @@ function WorldChrome() {
   );
 }
 
+function dockedTarget(docked: number, clipAmt: number) {
+  return {
+    scale: docked,
+    x: -24,
+    y: -24,
+    radius: 64,
+    opacity: 1,
+    originX: 100,
+    originY: 100,
+    shadow: 1,
+    clip: clipAmt,
+  };
+}
+
 /**
  * WorldFilm — drives the persistent app-shell FilmStage for the maker world.
  * It renders nothing itself; the film lives in <FilmStage> (app shell) and never
- * re-mounts on entry. This component (a) presents the maker's film intent, (b)
- * plays the "grow into the world" entrance when arriving directly, and (c) binds
- * the hero's scroll progress to the stage's shared transform so the film docks
- * to the bottom-right corner exactly as before — now backed by a continuous
- * element. When docked it grants the stage a tap-to-top interaction.
+ * re-mounts on entry. This component (a) presents the maker's film intent and
+ * re-narrates its contextual label per beat, (b) plays the "grow into the world"
+ * entrance when arriving directly, (c) binds the hero's scroll progress to the
+ * stage's shared transform so the film docks to the corner, and (d) blooms the
+ * film back to full-bleed for the interlude beat, then re-docks — all backed by
+ * one continuous element. When docked it grants the stage a tap-to-top action.
  */
 function WorldFilm({
   maker,
   heroSrc,
   heroRef,
   reduce,
+  label,
+  hasInterlude,
 }: {
   maker: Maker;
   heroSrc: string;
   heroRef: React.RefObject<HTMLDivElement | null>;
   reduce: boolean;
+  label: string;
+  hasInterlude: boolean;
 }) {
   const film = useFilm();
   const { present, driveTo, snapTo, setInteraction, consumeHandoff, m } = film;
@@ -272,8 +345,10 @@ function WorldFilm({
     offset: ["start start", "end start"],
   });
 
-  const clipLabel =
-    maker.kind === "film" ? `Now playing · ${maker.duration}` : "On film";
+  // While the interlude owns the film (full-bleed), the hero-dock driver must not
+  // fight it. The hero useScroll only emits over the hero's own range, but guard
+  // anyway so a stray event during the interlude can't re-dock mid-bloom.
+  const interludeRef = useRef(false);
 
   // Present the film + settle the entrance. Three arrival paths, disambiguated
   // by an explicit handoff flag (not an opacity heuristic):
@@ -289,7 +364,7 @@ function WorldFilm({
       videoSrc: maker.filmSrc,
       poster: heroSrc,
       alt: `${maker.name} — ${maker.discipline}, ${maker.studio}`,
-      clipLabel,
+      clipLabel: label,
       chip: "now-playing",
       // Cold/direct entry only: open a low-framed portrait clip on its action
       // (applied once on the film node's first mount; the feed→world carry wins
@@ -311,6 +386,20 @@ function WorldFilm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maker.id]);
 
+  // Update just the narrated label as beats scroll by (idempotent present()).
+  useEffect(() => {
+    present({
+      makerId: maker.id,
+      videoSrc: maker.filmSrc,
+      poster: heroSrc,
+      alt: `${maker.name} — ${maker.discipline}, ${maker.studio}`,
+      clipLabel: label,
+      chip: "now-playing",
+      seedTime: maker.filmSeed,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [label]);
+
   // Mobile caps the dock smaller so it never occludes the Add-to-bag corner.
   const isMobileRef = useRef(false);
   useEffect(() => {
@@ -331,7 +420,43 @@ function WorldFilm({
     return () => clearTimeout(t);
   }, [reduce]);
 
+  // Interlude bloom/redock — the interlude section dispatches these as it enters
+  // and leaves centre; geometry ownership stays here (one place drives the film).
+  // Only wired when the world actually has an interlude beat.
+  useEffect(() => {
+    if (!hasInterlude) return;
+    const bloom = () => {
+      interludeRef.current = true;
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.6 });
+    };
+    const redock = () => {
+      // Only re-dock if a bloom actually happened. The interlude IO fires a
+      // mandatory initial callback at ratio 0 on cold load, which dispatches
+      // redock BEFORE any bloom — without this guard it would cancel the mount
+      // driveTo(HERO_TARGET) one frame in and open the world docked instead of
+      // full-bleed. No bloom yet → nothing to re-dock.
+      if (!interludeRef.current) return;
+      interludeRef.current = false;
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const docked = isMobileRef.current ? 0.2 : 0.26;
+      driveTo(dockedTarget(docked, dockClip(vw, vh)), {
+        reduce: prefersReduced,
+        duration: 0.6,
+      });
+    };
+    window.addEventListener("world:film-bloom", bloom);
+    window.addEventListener("world:film-redock", redock);
+    return () => {
+      window.removeEventListener("world:film-bloom", bloom);
+      window.removeEventListener("world:film-redock", redock);
+    };
+  }, [driveTo, hasInterlude]);
+
   useMotionValueEvent(scrollYProgress, "change", (v) => {
+    if (interludeRef.current) return;
     // Docked state → grant / retire the tap-to-top interaction.
     if (v > 0.88) {
       setInteraction({
@@ -348,17 +473,7 @@ function WorldFilm({
       // the hero, then SNAP it to the docked corner past the hero so it never
       // covers the world content the buyer needs to read (no per-frame move).
       if (v > 0.6) {
-        snapTo({
-          scale: docked,
-          x: -24,
-          y: -24,
-          radius: 64,
-          opacity: 1,
-          originX: 100,
-          originY: 100,
-          shadow: 1,
-          clip: dockClip(window.innerWidth, window.innerHeight),
-        });
+        snapTo(dockedTarget(docked, dockClip(window.innerWidth, window.innerHeight)));
       } else {
         snapTo({ ...HERO_TARGET });
       }
@@ -374,15 +489,17 @@ function WorldFilm({
   return null;
 }
 
-/* Reveal wrapper — scroll-in, reduced-motion safe. */
+/* Reveal wrapper — scroll-in, reduced-motion safe, optional in-view callback. */
 function Reveal({
   children,
   reduce,
   className,
+  onView,
 }: {
   children: React.ReactNode;
   reduce: boolean;
   className?: string;
+  onView?: () => void;
 }) {
   return (
     <motion.div
@@ -390,6 +507,7 @@ function Reveal({
       initial="hidden"
       whileInView="visible"
       viewport={inView}
+      onViewportEnter={onView}
       className={className}
     >
       {children}
@@ -401,42 +519,72 @@ function StorySection({
   world,
   maker,
   reduce,
+  accentBright,
+  onView,
 }: {
   world: World;
   maker: Maker;
   reduce: boolean;
+  accentBright: string;
+  onView: () => void;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  // Slow parallax lift on the portrait — transform only, cancelled on reduce.
+  const y = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [34, -34]);
+
   return (
-    <section className="mx-auto max-w-issue px-5 py-24 sm:px-8 sm:py-32">
-      <Reveal reduce={reduce}>
-        <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16">
-          <div className="flex flex-col justify-center">
-            <p className="meta mb-5 text-bone-dim">The maker</p>
-            <div className="space-y-6">
-              {world.story.map((para, i) => (
-                <p
-                  key={i}
-                  className={cn(
-                    "font-serif leading-relaxed text-bone/90",
-                    i === 0 ? "text-2xl sm:text-[1.7rem]" : "text-lg text-bone/75",
-                  )}
-                >
-                  {para}
-                </p>
-              ))}
-            </div>
+    <section
+      ref={ref}
+      className="mx-auto max-w-issue px-5 py-24 sm:px-8 sm:py-32"
+    >
+      <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16">
+        <motion.div
+          className="flex flex-col justify-center"
+          variants={reduce ? calm : stagger(0.05, 0.12)}
+          initial="hidden"
+          whileInView="visible"
+          viewport={inView}
+          onViewportEnter={onView}
+        >
+          <motion.p
+            variants={reduce ? calm : rise(18, 0.7)}
+            className={cn("meta mb-5", accentBright)}
+          >
+            The maker
+          </motion.p>
+          <div className="space-y-6">
+            {world.story.map((para, i) => (
+              <motion.p
+                key={i}
+                variants={reduce ? calm : rise(22, 0.8)}
+                className={cn(
+                  "font-serif leading-relaxed text-bone/90",
+                  i === 0 ? "text-2xl sm:text-[1.7rem]" : "text-lg text-bone/75",
+                )}
+              >
+                {para}
+              </motion.p>
+            ))}
           </div>
+        </motion.div>
+        <Reveal reduce={reduce}>
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl ring-1 ring-line">
-            <Image
-              src={world.storyImage}
-              alt={world.storyImageAlt ?? `${maker.name}, ${maker.studio}`}
-              fill
-              sizes="(max-width: 768px) 100vw, 45vw"
-              className="object-cover"
-            />
+            <motion.div style={{ y }} className="absolute inset-[-6%]">
+              <Image
+                src={world.storyImage}
+                alt={world.storyImageAlt ?? `${maker.name}, ${maker.studio}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 45vw"
+                className="object-cover"
+              />
+            </motion.div>
           </div>
-        </div>
-      </Reveal>
+        </Reveal>
+      </div>
     </section>
   );
 }
@@ -455,22 +603,14 @@ const WALL_RATIO: Record<
 /**
  * GalleryWall — the maker's whole room, pinned to the wall: a dense editorial
  * masonry (CSS columns, never a uniform grid) of her real stills and woven films.
- * Present only for a maker with a deep media library, which is what makes this
- * world read as unmistakably hers. Films play muted/looped through the SAME
- * MakerFilm primitive as the rest of the build (poster fallback, reduced-motion
- * safe, off-screen pause), so the wall breathes without ever competing with the
- * persistent hero film docked in the corner. Chrome stays KOL-fixed (D15): the
- * maker's brand lives in the imagery and her clay accent, not a broken system.
+ * Present only for a maker with a deep media library. Films play muted/looped
+ * through the SAME MakerFilm primitive as the rest of the build.
  */
 function GalleryWall({ world, reduce }: { world: World; reduce: boolean }) {
   const wall = world.wall!;
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
       <Reveal reduce={reduce}>
-        {/* Hairline uses the stable clay-bright tint, not the clay BASE token:
-            the base is remapped across theme waves (…→deep rust) and goes
-            invisible on ink at 40%; clay-bright keeps a warm, readable line that
-            carries her clay accent regardless of the base value. */}
         <div className="mb-10 border-t border-clay-bright/30 pt-8">
           {world.wallSectionKicker && (
             <p className="meta mb-3 text-clay-bright">{world.wallSectionKicker}</p>
@@ -538,50 +678,414 @@ function GalleryWall({ world, reduce }: { world: World; reduce: boolean }) {
   );
 }
 
-function ProcessSection({ world, reduce }: { world: World; reduce: boolean }) {
+/**
+ * MakeReel — the making, frame by frame: the maker's process as a single physical
+ * filmstrip you throw. Drag it with momentum, step it with the arrow buttons or
+ * the left/right keys — the same active frame drives all three, so nothing is
+ * drag-only. As each frame becomes active, the corner-docked film re-narrates its
+ * contextual label, so the film reads the process while you rummage through it.
+ * This replaces the old stacked 3-up card grid (the "reads like a website" beat).
+ * Reduced motion drops the throw + spring and jumps instantly; keyboard and the
+ * arrow buttons still work, so the reel is never motion-dependent.
+ */
+function MakeReel({
+  world,
+  reduce,
+  accentBright,
+  onLabel,
+}: {
+  world: World;
+  reduce: boolean;
+  accentBright: string;
+  onLabel: (l: string) => void;
+}) {
+  const steps = world.process;
+  const n = steps.length;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [active, setActive] = useState(0);
+  const x = useMotionValue(0);
+  const metricsRef = useRef<{ offsets: number[]; max: number }>({
+    offsets: [],
+    max: 0,
+  });
+  // `max` is also mirrored to state because dragConstraints is read during render
+  // (a ref read there is stale + lint-flagged); the ref carries offsets for the
+  // drag-settle handler, which runs outside render.
+  const [maxScroll, setMaxScroll] = useState(0);
+  const [ready, setReady] = useState(false);
+
+  // Measure each card's left offset + the max scroll, so snap targets are exact
+  // even with unequal card widths. ResizeObserver keeps them right on resize.
+  useEffect(() => {
+    const measure = () => {
+      const vp = viewportRef.current;
+      const track = trackRef.current;
+      if (!vp || !track) return;
+      const base = track.getBoundingClientRect().left;
+      const offsets = cardRefs.current.map((c) =>
+        c ? c.getBoundingClientRect().left - base : 0,
+      );
+      const max = Math.max(0, track.scrollWidth - vp.clientWidth);
+      metricsRef.current = { offsets, max };
+      setMaxScroll(max);
+      setReady(true);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (viewportRef.current) ro.observe(viewportRef.current);
+    if (trackRef.current) ro.observe(trackRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [n]);
+
+  const targetFor = (i: number) => {
+    const { offsets, max } = metricsRef.current;
+    const raw = offsets[i] ?? 0;
+    return -Math.min(raw, max);
+  };
+
+  const goTo = (i: number, animateIt = true) => {
+    const next = Math.max(0, Math.min(n - 1, i));
+    setActive(next);
+    const target = targetFor(next);
+    if (reduce || !animateIt) {
+      x.set(target);
+      return;
+    }
+    animate(x, target, { type: "spring", stiffness: 260, damping: 36 });
+  };
+
+  // Keep the track parked on the active card once measured (and on resize).
+  useEffect(() => {
+    if (!ready) return;
+    x.set(targetFor(active));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
+
+  // Narrate the active frame's label to the corner film.
+  useEffect(() => {
+    const l = steps[active]?.filmLabel ?? world.filmNarration?.process;
+    if (l) onLabel(l);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
+  function settle(info: PanInfo) {
+    const cur = x.get();
+    const { offsets, max } = metricsRef.current;
+    let best = 0;
+    let bestD = Infinity;
+    offsets.forEach((off, i) => {
+      const d = Math.abs(-Math.min(off, max) - cur);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    });
+    // Velocity-aware: a fast flick advances even on a short drag (momentum).
+    if (info.velocity.x < -420) best = Math.min(best + 1, n - 1);
+    else if (info.velocity.x > 420) best = Math.max(best - 1, 0);
+    goTo(best);
+  }
+
+  const multi = n > 1;
+  const atStart = active === 0;
+  const atEnd = active === n - 1;
+
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
-      <Reveal reduce={reduce}>
-        <p className="meta mb-3 text-bone-dim">How it&#39;s made</p>
-        <h2
-          className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
-          style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
-        >
-          {world.processSectionHeader}
-        </h2>
-      </Reveal>
-      <div
-        className={cn(
-          "grid gap-5 sm:gap-6",
-          world.process.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3",
-        )}
+      <Reveal
+        reduce={reduce}
+        onView={() => {
+          const l = steps[active]?.filmLabel ?? world.filmNarration?.process;
+          if (l) onLabel(l);
+        }}
       >
-        {world.process.map((step) => (
-          <Reveal reduce={reduce} key={step.id}>
-            <article className="group overflow-hidden rounded-3xl bg-ink-soft ring-1 ring-line">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <Image
-                  src={step.image}
-                  alt={step.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-[900ms] ease-out-expo group-hover:scale-105"
-                />
-                <span className="meta absolute left-4 top-4 text-bone/80">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className={cn("meta mb-3", accentBright)}>How it&#39;s made</p>
+            <h2
+              className="max-w-2xl font-display font-bold leading-[0.95] text-bone"
+              style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
+            >
+              {world.processSectionHeader}
+            </h2>
+          </div>
+          {multi && (
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <span className="mr-1 flex items-center gap-1.5 font-ui text-xs text-bone-dim">
+                <HandTap size={15} weight="regular" />
+                Drag the reel
+              </span>
+              <button
+                type="button"
+                onClick={() => goTo(active - 1)}
+                disabled={atStart}
+                aria-label="Previous step"
+                className="press grid h-11 w-11 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+              >
+                <CaretLeft size={18} weight="bold" />
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo(active + 1)}
+                disabled={atEnd}
+                aria-label="Next step"
+                className="press grid h-11 w-11 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+              >
+                <CaretRight size={18} weight="bold" />
+              </button>
+            </div>
+          )}
+        </div>
+      </Reveal>
+
+      <div
+        ref={viewportRef}
+        tabIndex={multi ? 0 : -1}
+        role={multi ? "group" : undefined}
+        aria-roledescription={multi ? "carousel" : undefined}
+        aria-label={
+          multi
+            ? `How it's made — step ${active + 1} of ${n}. Use the left and right arrow keys or drag to browse.`
+            : undefined
+        }
+        onKeyDown={
+          multi
+            ? (e) => {
+                if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  goTo(active + 1);
+                } else if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  goTo(active - 1);
+                }
+              }
+            : undefined
+        }
+        className="-mx-5 touch-pan-y overflow-hidden px-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-4 focus-visible:ring-offset-ink sm:mx-0 sm:px-0"
+      >
+        <motion.div
+          ref={trackRef}
+          className="flex gap-4 sm:gap-6"
+          style={{ x }}
+          drag={multi && !reduce ? "x" : false}
+          dragConstraints={{ left: -maxScroll, right: 0 }}
+          dragElastic={0.12}
+          onDragEnd={(_, info) => settle(info)}
+        >
+          {steps.map((step, i) => (
+            <div
+              key={step.id}
+              ref={(el) => {
+                cardRefs.current[i] = el;
+              }}
+              className={cn(
+                "w-[80vw] shrink-0 overflow-hidden rounded-3xl bg-ink-soft ring-1 transition-[opacity,box-shadow] duration-500 sm:w-[52vw] lg:w-[38vw] lg:max-w-[520px]",
+                i === active
+                  ? "opacity-100 ring-bone/25"
+                  : "opacity-70 ring-line",
+              )}
+            >
+              <div className="group/r relative aspect-[16/11] overflow-hidden">
+                {step.filmSrc ? (
+                  <MakerFilm
+                    videoSrc={step.filmSrc}
+                    poster={step.image}
+                    alt={step.title}
+                    reduce={reduce}
+                    sizes="(max-width: 640px) 80vw, (max-width: 1024px) 52vw, 38vw"
+                    className="object-cover"
+                    drift={false}
+                  />
+                ) : (
+                  <Image
+                    src={step.image}
+                    alt={step.title}
+                    fill
+                    draggable={false}
+                    sizes="(max-width: 640px) 80vw, (max-width: 1024px) 52vw, 38vw"
+                    className="pointer-events-none select-none object-cover transition-transform duration-[900ms] ease-out-expo group-hover/r:scale-105"
+                  />
+                )}
+                <span className="absolute left-4 top-4 font-display text-5xl font-bold leading-none text-bone/85 [text-shadow:0_2px_12px_rgba(28,22,19,0.8)]">
                   {step.label}
                 </span>
+                {step.filmSrc && (
+                  <span className="pointer-events-none absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-ink/70 px-2.5 py-1 backdrop-blur-sm">
+                    <Play size={11} weight="fill" className={accentBright} />
+                    <span className="meta text-[0.62rem] text-bone">On film</span>
+                  </span>
+                )}
               </div>
-              <div className="p-6">
+              <div className="p-6 sm:p-7">
                 <h3 className="font-display text-xl font-bold text-bone">{step.title}</h3>
                 <p className="mt-2 font-ui text-sm leading-relaxed text-bone/70">
                   {step.body}
                 </p>
               </div>
-            </article>
-          </Reveal>
-        ))}
+            </div>
+          ))}
+        </motion.div>
       </div>
+
+      {/* Progress rail — a physical readout of where the reel sits, and a second
+          non-drag control (each segment steps to its frame). */}
+      {multi && (
+        <div className="mt-6 flex items-center gap-3">
+          <div className="flex flex-1 gap-1.5" role="tablist" aria-label="Steps">
+            {steps.map((step, i) => (
+              <button
+                key={step.id}
+                type="button"
+                role="tab"
+                aria-selected={i === active}
+                aria-label={`Step ${i + 1}: ${step.title}`}
+                onClick={() => goTo(i)}
+                className="press group/seg h-8 flex-1 focus-visible:outline-none"
+              >
+                <span
+                  className={cn(
+                    "block h-1 w-full rounded-full transition-colors duration-300 group-focus-visible/seg:ring-2 group-focus-visible/seg:ring-marigold group-focus-visible/seg:ring-offset-2 group-focus-visible/seg:ring-offset-ink",
+                    i === active ? "bg-marigold" : "bg-bone/20 group-hover/seg:bg-bone/40",
+                  )}
+                />
+              </button>
+            ))}
+          </div>
+          <span className="shrink-0 font-mono text-[0.7rem] tabular-nums text-bone-dim">
+            {String(active + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
+          </span>
+        </div>
+      )}
+      {multi && (
+        <span aria-live="polite" aria-atomic="true" className="sr-only">
+          Step {active + 1} of {n}: {steps[active]?.title}
+        </span>
+      )}
     </section>
+  );
+}
+
+/**
+ * WorldInterlude — a full-bleed film beat between the making and the shop: the
+ * persistent film blooms back to full-bleed behind a single line pulled from the
+ * maker's own story, then re-docks on leave. Driven by IO events the WorldFilm
+ * driver listens for, so film geometry stays owned in one place. The cinematic
+ * interruption that breaks the stacked-section rhythm.
+ */
+function WorldInterlude({
+  quote,
+  attribution,
+  label,
+  accentBright,
+  reduce,
+  onLabel,
+}: {
+  quote: string;
+  attribution: string;
+  label: string;
+  accentBright: string;
+  reduce: boolean;
+  onLabel: (l: string) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (entry.intersectionRatio >= 0.55) {
+          onLabel(label);
+          window.dispatchEvent(new Event("world:film-bloom"));
+        } else {
+          window.dispatchEvent(new Event("world:film-redock"));
+        }
+      },
+      { threshold: [0, 0.55, 1] },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      // Safety: never leave the film bloomed if this unmounts mid-view.
+      window.dispatchEvent(new Event("world:film-redock"));
+    };
+  }, [onLabel, label]);
+
+  return (
+    <section
+      ref={ref}
+      className="relative z-[45] flex min-h-[92svh] items-center justify-center overflow-hidden py-24"
+    >
+      {/* The film plays behind (app-shell FilmStage, z-40); this section is z-45 so
+          its scrim + quote sit above the bloomed footage and stay legible. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/70" />
+      <motion.blockquote
+        variants={reduce ? calm : rise(28, 0.9)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={inView}
+        className="relative z-[45] mx-auto max-w-4xl px-6 text-center"
+      >
+        <Play size={30} weight="fill" className={cn("mx-auto mb-6", accentBright)} />
+        <p
+          className="font-serif italic leading-[1.15] text-bone"
+          style={{ fontSize: "clamp(1.9rem, 4.5vw, 3.5rem)" }}
+        >
+          &ldquo;{quote}&rdquo;
+        </p>
+        <footer className="mt-8 meta text-bone-dim">— {attribution}</footer>
+      </motion.blockquote>
+    </section>
+  );
+}
+
+function StudioBlock({
+  world,
+  reduce,
+  onView,
+}: {
+  world: World;
+  reduce: boolean;
+  onView: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [40, -40]);
+
+  return (
+    <Reveal reduce={reduce} onView={onView}>
+      <section
+        ref={ref}
+        className={cn("relative overflow-hidden", ACCENT_BG[world.accent])}
+      >
+        <div className="relative aspect-[16/9] w-full sm:aspect-[21/9]">
+          <motion.div style={{ y }} className="absolute inset-[-8%]">
+            <Image
+              src={world.studioImage}
+              alt={world.studioCaption}
+              fill
+              sizes="100vw"
+              className="object-cover opacity-90 mix-blend-multiply"
+            />
+          </motion.div>
+          {/* Locked scrim rule — caption never sits raw over the image. */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink/75 to-transparent" />
+          <div className="absolute inset-0 flex items-end p-6 sm:p-12">
+            <p className="meta text-bone">{world.studioCaption}</p>
+          </div>
+        </div>
+      </section>
+    </Reveal>
   );
 }
 
@@ -589,14 +1093,16 @@ function ProductsSection({
   world,
   maker,
   reduce,
+  onView,
 }: {
   world: World;
   maker: Maker;
   reduce: boolean;
+  onView: () => void;
 }) {
   return (
     <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
-      <Reveal reduce={reduce}>
+      <Reveal reduce={reduce} onView={onView}>
         <p className="meta mb-3 text-bone-dim">The work</p>
         <h2
           className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
