@@ -15,7 +15,7 @@ Two teams (belief-auditor + buyer-experience-reframer) re-audited v2 against the
 ## ⚑ v2 (2026-07-23) — five-judge board review applied. The ARTIFACT is the authoritative v2.
 The slide-by-slide artifact (build tickets) now carries the current v2; this doc's per-slide blocks below retain the v1 numbering + the deep ASSET/DATA/TOOL detail (still valid content). **v2 structural changes:**
 - **24 → 22 slides.** Act IV merged: old **S17(prize)+S18(pays) → new S18 "the money"**; old **S20(built)+S21(pilot) → new S19 "real + the pilot."** Old S19(why-now) → new S17.
-- **Moat = the co-creation engine** (a conversation → a living world), NOT the clip-swap. Planted S14, landed S21.
+- **Moat = the co-creation engine** (a conversation → a living world), NOT a UI feature. Planted S14, landed S21.
 - **Frequency fix:** added the **return-loop beat at S13** (saved-to-your-world + new-drop → purchase #2) + made the pilot the **honest test** of the one unknown (S19). −9% stays the *why-now*, framed as market headwind (see TONE PRINCIPLE).
 - **Real math on the money slide:** $72M/$211M/$476M prize range → Etsy +$54M → KOL $32–42M/yr (15–20% rev-share); pilot ≈ $0 yr 1. On-slide = one hero + one supporting figure; full derivation in speaker notes.
 - **All headlines → fragments** (story-strategist's table, ≤8 words). **"5 interviews," not "7 recordings."** Cut the scripted stumble (S13), trimmed the CEO quote (S17), cut the off-target Gen-Z 73% stat.
@@ -46,7 +46,7 @@ The slide-by-slide artifact (build tickets) now carries the current v2; this doc
 ---
 
 ## The storyline (one breath)
-Behind everything you buy online there's a person — and the listing flattens her to a photo and a price, at the exact moment AI made "real" impossible to tell. As machine-made content floods every feed, that human connection gets harder to feel. **KOL is a new trust layer for Etsy:** built into their site, it opens the human behind each listing — a maker on film, her whole world unfolding around her voice; the video follows what you look at; you meet her, trust her, and you come *back* to her. We prove it with Sharon of Two Dots — a real Etsy seller — whose entire world she built by just *talking*. Then the case for Etsy: who it helps (buyer, maker, Etsy), why our research says it works, the size of the frequency prize, how it pays for itself, what we've already built, and how the pilot starts. Close: every maker, a world of their own — inside Etsy.
+Behind everything you buy online there's a person — and the listing flattens her to a photo and a price, at the exact moment AI made "real" impossible to tell. As machine-made content floods every feed, that human connection gets harder to feel. **KOL is a new way to shop from real makers — a trust layer we're building for Etsy:** a maker on film, her whole world unfolding around her voice; you meet her, you believe her (verified, not vibes), and you come *back* to her. We prove it with Sharon of Two Dots — a real Etsy seller. Then the case for Etsy: who it helps (buyer, maker, Etsy), why our research says it works, the size of the frequency prize, how it pays for itself, what's already running, and how the pilot starts. Close: every maker, a world of their own.
 
 ## Time & act budget
 
@@ -133,10 +133,10 @@ Behind everything you buy online there's a person — and the listing flattens h
 - **[ASSET]** Scroll sequence of Two Dots blocks: story, materials, process media, products.
 - **[TOOL]** Figma frames + subtle parallax motion.
 
-### S11 · The clip swap (the moat)
-- **[SLIDE]** *Click a piece — and the video follows what you're looking at.*
-- **[SAY]** And here's the part nobody else does. Click a piece — the video shrinks to the corner and Sharon starts telling you about *that* piece. The story follows what you're looking at. Like a real shopkeeper turning to the thing in your hand.
-- **[ASSET]** Video shrinks to corner; contextual narration clip swaps in for the clicked product. **This is the defensible novelty — flag it as such in Q&A.**
+### S11 · Product page (pre-recorded UI, in her brand)
+- **[SLIDE]** *Click a piece — it opens, still in her world.*
+- **[SAY]** Click a piece, and it opens as her own product page — her photos, her words, the trust badge, real reviews. Still unmistakably her world. Not a flat listing dropped into a grid.
+- **[ASSET]** A pre-designed product page in her brand (her product photos, description, trust badge, verified reviews). **⚑ PRODUCT FIX (Founder 2026-07-23):** the product section is **pre-recorded product-page UI** — the "video follows what you click / contextual-narration swap" mechanic is **DROPPED**. Her brand still wraps the page (never a flat listing, D16-1). Supersedes concept-lock buyer-journey step 5 (contextual clip swap).
 - **[TOOL]** Motion design; higgsfield product + narration clip.
 
 ### S12 · Trust, honestly
@@ -267,7 +267,7 @@ Behind everything you buy online there's a person — and the listing flattens h
 5. Two Dots product beauty shots/turns ×3–4 (S10, S11).
 
 ### B. Design (Figma / product-designer) — KOL UI frames in Two Dots' brand
-- Feed layout (S7) · world-unfold sequence (S9) · scroll blocks (S10) · clip-swap (S11) · trust detail (S12) · checkout+thank-you (S13) · seller 3-beat (S14) · KOL world hero (S6) · logo lockup (S5) · rollout timeline (S21).
+- Feed layout (S7) · world-unfold sequence (S9) · scroll blocks (S10) · **product page UI (S11)** · trust detail (S12) · checkout+thank-you (S13) · seller 3-beat (S14) · KOL world hero (S6) · logo lockup (S5) · rollout timeline (S21).
 
 ### C. Source (research-lead) — every `[SRC]` above, real citations
 - Etsy: GMS, active buyers, active sellers, purchase frequency, one-and-done %, habitual-buyer YoY, "Keep Commerce Human" pillar — from the 10-K + Q1 2026 shareholder letter.
