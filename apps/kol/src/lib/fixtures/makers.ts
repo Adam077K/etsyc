@@ -16,7 +16,8 @@ export type CraftId =
   | "print"
   | "leather"
   | "metal"
-  | "glass";
+  | "glass"
+  | "costume";
 
 export interface Craft {
   id: CraftId;
@@ -70,6 +71,7 @@ export const CRAFTS: Craft[] = [
   { id: "leather", label: "Leather" },
   { id: "metal", label: "Metal" },
   { id: "glass", label: "Glass" },
+  { id: "costume", label: "Costumes" },
 ];
 
 /** The hero — the issue's cover maker, on film. */
@@ -312,6 +314,25 @@ export const MAKERS: Maker[] = [
     tone: "light",
     values: ["Small-batch"],
     ground: "bone",
+  },
+  {
+    // Two Dots — the FIRST real-maker world (real video + photography, Founder-
+    // provided). Sharon's children's-costume studio. Name/place are placeholders
+    // pending Founder confirmation (real business; do not fabricate specifics).
+    id: "two-dots",
+    name: "Sharon",
+    studio: "Two Dots",
+    place: "Israel",
+    craft: "costume",
+    discipline: "Hand-sewn children's costumes",
+    blurb: "A costume isn't clothes — it's permission. For one afternoon they get to be the whole story.",
+    image: "/media/twodots/hero-poster.jpg",
+    kind: "film",
+    duration: "0:45",
+    span: "tall",
+    tone: "light",
+    values: ["Hand-sewn", "Parent & child"],
+    filmSrc: "/media/video/two-dots.mp4",
   },
 ];
 
