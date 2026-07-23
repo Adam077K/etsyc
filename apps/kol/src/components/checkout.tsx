@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,8 +15,11 @@ import {
   CaretDown,
 } from "@phosphor-icons/react";
 import { resolveBag, bagTotals, gbp } from "@/lib/fixtures/commerce";
+import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { useFilm } from "./film/film-context";
+import { cornerTarget } from "./film/film-geometry";
 
 const ERR = "text-error";
 const NUM = ["", "One", "Two", "Three", "Four", "Five"];
@@ -111,6 +114,9 @@ export function Checkout() {
 
   return (
     <div className="min-h-screen bg-ink">
+      {/* The maker stays present through checkout — the continuous film docks in
+          the corner (never re-mounted from black between product and here). */}
+      {makers[0] && <CheckoutFilm maker={makers[0]} reduce={!!reduce} />}
       {/* KOL chrome — deliberately plain and trustworthy. */}
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
@@ -364,6 +370,73 @@ export function Checkout() {
           </aside>
         </form>
       </motion.main>
+    </div>
+  );
+}
+
+/* The persistent film, docked as a quiet corner presence while you pay. It
+   arrives already playing from the product page and continues here; on direct
+   entry it fades in. KOL chrome stays plain (D15) — the maker is simply present,
+   not selling. */
+function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
+  const { present, driveTo } = useFilm();
+  const [card, setCard] = useState({ width: 176, margin: 24, ratio: 16 / 10 });
+
+  // Runs once per maker; the film controls are stable.
+  useEffect(() => {
+    present({
+      makerId: maker.id,
+      videoSrc: maker.filmSrc,
+      poster: maker.image,
+      alt: `${maker.name} — ${maker.studio}`,
+      chip: "now-playing",
+      stageChip: false,
+    });
+    const apply = () => {
+      const mobile = window.matchMedia("(max-width: 639px)").matches;
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const width = mobile ? 132 : 176;
+      const margin = mobile ? 16 : 24;
+      setCard({ width, margin, ratio: vw / vh });
+      driveTo(cornerTarget(vw, vh, { width, margin, radius: 16 }), {
+        reduce: prefersReduced,
+        duration: 0.55,
+      });
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maker.id]);
+
+  return (
+    <div
+      className="pointer-events-none fixed z-[41]"
+      style={{
+        right: card.margin,
+        bottom: card.margin,
+        width: card.width,
+        aspectRatio: String(card.ratio),
+      }}
+    >
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent px-2.5 pb-2.5 pt-6">
+        <p className="flex items-center gap-1.5">
+          <span
+            className={cn(
+              "h-1.5 w-1.5 rounded-full bg-marigold",
+              reduce ? "" : "animate-float",
+            )}
+          />
+          <span className="meta text-[0.55rem] text-bone-dim">On the bench</span>
+        </p>
+        <p className="mt-1 font-ui text-[0.72rem] font-semibold leading-tight text-bone">
+          {maker.name.split(" ").at(0) ?? maker.name} is finishing your order
+        </p>
+      </div>
     </div>
   );
 }
