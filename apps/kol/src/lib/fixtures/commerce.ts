@@ -611,7 +611,10 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     clipLabel: "Inside a Two Dots session",
     clipDuration: "0:45",
     filmSrc: "/media/video/two-dots.mp4",
-    gallery: ["/media/twodots/materials.jpg", "/media/twodots/workshop.jpg"],
+    // Governance fallback: workshop.jpg (background minor in profile) dropped from
+    // the deploy path → felt.jpg keeps a second distinct faceless shot (materials
+    // already fills slot 1, so it can't be the swap target without a dup carousel).
+    gallery: ["/media/twodots/materials.jpg", "/media/twodots/felt.jpg"],
     description: [
       "Two hours, one grown-up, one child, and one costume you build together and walk out wearing. I set up the machines and the felt; you two supply the idea and the arguing about which animal.",
       "You don't need to know how to sew. That's my job. Your job is to be there, elbow to elbow, making the thing your kid will remember longer than any toy.",

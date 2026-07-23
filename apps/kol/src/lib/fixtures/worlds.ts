@@ -372,8 +372,11 @@ export const WORLDS: Record<string, MakerWorld> = {
       "Everything here is cut and stitched by hand, in a small room that is always covered in felt. Parents come and make alongside me — that's half the point. The child leaves wearing something, and the grown-up leaves having made it.",
       "I care most about the five seconds after they put it on, when they stop being shy and start being the thing. You can't buy that off a rack. You have to sew it in.",
     ],
-    storyImage: "/media/twodots/workshop.jpg",
-    storyImageAlt: "Two makers at sewing machines in the Two Dots studio, fabric in hand",
+    // Governance fallback applied pre-deploy: workshop.jpg (background minor in
+    // profile) is swapped out of the deploy path → the faceless materials flat-lay.
+    // One-line revert to workshop.jpg if the Founder later approves the original.
+    storyImage: "/media/twodots/materials.jpg",
+    storyImageAlt: "Sewing materials — beads, denim, fabric, scissors and yarn — laid out ready to cut in the Two Dots studio",
     processSectionHeader: "Made the slow way, on purpose.",
     process: [
       {
@@ -388,7 +391,10 @@ export const WORLDS: Record<string, MakerWorld> = {
         label: "02",
         title: "Cut and sewn here, by hand",
         body: "It's all made in the room, often with the parent at the next machine. Real seams, real hems — built to be run in, sat in, and slept in if it comes to that.",
-        image: "/media/twodots/workshop.jpg",
+        // Governance fallback: workshop.jpg swapped out → felt.jpg (the CREDITS-
+        // named faceless alt). NOT materials.jpg — step 01 already uses that, and
+        // two identical adjacent process cards would read as a bug in the demo.
+        image: "/media/twodots/felt.jpg",
       },
       {
         id: "become",

@@ -96,10 +96,10 @@ the screens-only stock pass, and the reuse above is a placeholder, not the shipp
 > PASS alone — Founder clearance is a separate, required gate.
 
 Curation: 182 Wix-export files → 61 deduped candidates (min-dim ≥ 600px, ≥ 40KB) →
-**9 images + 2 videos kept** (quilt.jpg logged retroactively — it shipped in a
-prior wave to the Little Devil gallery without a CREDITS row; inspected faceless,
-now recorded). Skipped: 121 duplicates/thumbnails/sub-5KB, plus all face-forward
-costume portraits (governance — see below).
+**8 images + 2 videos kept** (matches disk; quilt.jpg logged retroactively — it
+shipped in a prior wave to the Little Devil gallery without a CREDITS row;
+inspected faceless, now recorded). Skipped: 121 duplicates/thumbnails/sub-5KB,
+plus all face-forward costume portraits (governance — see below).
 
 ### Kept — no identifiable face (safe for hero/tile/process/product cards)
 
@@ -119,13 +119,13 @@ costume portraits (governance — see below).
 
 | File | Depicts | Where used | Flag |
 |---|---|---|---|
-| twodots/workshop.jpg | Two people at sewing machines in the real studio; foreground back-turned, **background minor in side profile** | story image + process step 02 + Workshop product gallery | ⚠ partially-identifiable minor (profile). Founder to approve or swap. |
+| twodots/workshop.jpg | Two people at sewing machines in the real studio; foreground back-turned, **background minor in side profile** | **UNWIRED — fallback applied pre-deploy** (was: story + process 02 + Workshop gallery) | ⚠ partially-identifiable minor (profile). Swapped out of the deploy path → materials.jpg (story) + felt.jpg (process 02 + gallery). File held internal, unwired; one-line revert if the Founder approves the original. |
 
 ### Governance fallback plan — per image (so each Founder decision is one word)
 
 | Image | Current wiring | If Founder APPROVEs | If Founder DECLINEs / SWAPs |
 |---|---|---|---|
-| twodots/workshop.jpg | story slot + process 02 + Workshop product gallery (contains a background minor in profile) | keep as-is | **pre-staged swap** → story + process 02 take `materials.jpg`; Workshop gallery drops to its other two shots. Both faceless & already shipped — one edit each in `worlds.ts` + `commerce.ts`. Alt flat-lay: `felt.jpg`. |
+| twodots/workshop.jpg | **SWAP APPLIED (pre-deploy)** — story → `materials.jpg`; process 02 → `felt.jpg`; Workshop gallery → `[materials.jpg, felt.jpg]`. workshop.jpg now unwired. | revert the three swaps to `workshop.jpg` (one line each) | already swapped — no further action. NB: process 02 + gallery took `felt.jpg` rather than `materials.jpg` because materials.jpg was already in process 01 / gallery slot 1, so a literal materials swap would have duplicated adjacent cards / a carousel. |
 | twodots/devil-back.jpg | Little Devil product card + gallery (**faceless** head-cropped default) | *(upgrade path)* replace with uncropped #09 for fuller framing (head + felt horns; partial side profile) | no change — the faceless crop is already the conservative default |
 
 ### NOT shipped — held for Founder decision
