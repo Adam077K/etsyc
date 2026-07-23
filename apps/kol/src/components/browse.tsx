@@ -50,12 +50,18 @@ export function Browse() {
   // world isn't filmed yet (the overlay shows "world coming soon").
   const [openedId, setOpenedId] = useState<string | null>(null);
   const [browseIndex, setBrowseIndex] = useState(0);
+  const firstPaint = useRef(true);
 
-  // Brief warm-skeleton beat on first paint (matches the feed's rhythm).
+  // Warm-skeleton beat on first paint AND on each craft switch, so switching a
+  // craft chip re-deals the spread as choreography (matching the feed's rhythm)
+  // rather than snapping on fast hardware. A live text query is NOT in the deps,
+  // so typing filters in place without a skeleton or a film restart.
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 420);
+    setLoading(true);
+    const t = setTimeout(() => setLoading(false), firstPaint.current ? 420 : 300);
+    firstPaint.current = false;
     return () => clearTimeout(t);
-  }, []);
+  }, [active]);
 
   useEffect(() => {
     if (shouldFocus && !loading) inputRef.current?.focus();

@@ -138,7 +138,7 @@ export function ExpandedVideo({
   return (
     <motion.div
       ref={overlayRef}
-      className="fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-ink/92 backdrop-blur-xl lg:flex-row lg:overflow-hidden"
+      className="fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-ink/92 backdrop-blur-lg lg:flex-row lg:overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -199,6 +199,9 @@ export function ExpandedVideo({
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
                 videoRef={filmVideoRef}
+                // Match the first video frame to the poster still (no jump as the
+                // overlay opens); the enter-world handoff carries from here on.
+                initialTime={maker.filmSeed}
               />
             </motion.div>
           </AnimatePresence>

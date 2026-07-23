@@ -147,6 +147,10 @@ function EditorialTile({
             sizes={SIZES}
             className="object-cover"
             drift
+            // Seed the clip to the frame the poster still was cut from, so the
+            // first painted video frame matches the poster — no jump on autoload
+            // (e.g. Two Dots' pinned lead tile: poster is the 0:06 frame).
+            initialTime={maker.filmSeed}
           />
         )}
       </div>
