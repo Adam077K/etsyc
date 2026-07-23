@@ -47,7 +47,16 @@ export function MakerFilm({
 }) {
   const [failed, setFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const useVideo = Boolean(videoSrc) && !reduce && !failed;
+  // `useReducedMotion()` is false on the server and true on the reduced-motion
+  // client, so choosing video-vs-still from `reduce` at first paint would swap
+  // element types at hydration (React #418). Gate on mount: the server and the
+  // first client paint render identically (reduce ignored), then reduced motion
+  // applies. globals.css disables .film-drift under the media query meanwhile.
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
+  const effectiveReduce = mounted ? reduce : false;
+  const useVideo = Boolean(videoSrc) && !effectiveReduce && !failed;
 
   // Bridge the internal ref to the optional external handle, and seed the
   // playhead when a starting time is supplied (feed→world currentTime carry).
@@ -103,7 +112,11 @@ export function MakerFilm({
       fill
       priority={priority}
       sizes={sizes}
-      className={cn(className, drift && !reduce && "film-drift")}
+      // No `!reduce` gate: `useReducedMotion()` is false on the server and true
+      // on the reduced-motion client, so gating the class here mismatches at
+      // hydration (React #418). globals.css already disables `.film-drift` under
+      // the prefers-reduced-motion media query, so the class is safe to keep.
+      className={cn(className, drift && "film-drift")}
     />
   );
 }
