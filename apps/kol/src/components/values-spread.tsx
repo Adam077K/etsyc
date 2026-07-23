@@ -42,7 +42,7 @@ export function ValuesSpread({
         className="bg-olive px-5 py-14 sm:px-8 sm:py-20"
       >
         <div className="mx-auto max-w-issue">
-          <p className="meta flex items-center gap-2 text-bone/70">
+          <p className="meta flex items-center gap-2 text-bone">
             <Leaf size={14} weight="fill" />
             Values
           </p>

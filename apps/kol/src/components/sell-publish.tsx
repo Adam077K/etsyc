@@ -28,7 +28,7 @@ type Phase = "ready" | "publishing" | "live";
 // Lena's kiln-clay accent (screens-only demo). WIRING TODO: a real integration
 // pass must read the maker's accent selection from the studio state / store
 // config instead of hardcoding it here.
-const ACCENT = "#B4462A";
+const ACCENT = "#7C2D12";
 
 export function SellPublish() {
   const reduce = useReducedMotion();

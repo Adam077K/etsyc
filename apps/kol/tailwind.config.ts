@@ -1,8 +1,14 @@
 import type { Config } from "tailwindcss";
 
 /**
- * "The Maker's Issue" tokens (see DESIGN.md). Warm ink + brave color-blocked
- * grounds — deliberately not the cream/serif/terracotta AI default.
+ * "The Maker's Issue" tokens (see DESIGN.md).
+ *
+ * ETSY BRAND SKIN (Founder directive, 2026-07-23, pre-pitch): the accent system
+ * is re-badged to Etsy's palette — signal = Etsy Orange, grounds remapped into
+ * Etsy's Collage family (terracotta / fig / moss / denim). The espresso-ink
+ * ground and bone text system are unchanged (the dark editorial world is the
+ * product's identity). Every accent pairing is scripted-AA verified; see the
+ * mapping table in DECISIONS.md.
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
@@ -19,21 +25,29 @@ const config: Config = {
           dim: "#CDBFA6",
           deep: "#B7A98C",
         },
-        plum: "#43223B",
+        // Fig — Etsy bubblegum/lavender family, darkened to a bone-legible ground.
+        plum: "#4C2740",
+        // Moss — Etsy slime-green family, kept dark for the craft/values spread.
         olive: "#4E5A2A",
         clay: {
-          DEFAULT: "#B4462A",
-          // AA-safe (~6.4:1 on ink) tint for small accent text on dark grounds.
+          // Rust/sienna — Etsy earth family. Deepened well below the accent
+          // orange's value so the stat spread reads two-colour (blobs separate
+          // from the ground) instead of monochrome; also lifts bone body to ~7.6:1.
+          DEFAULT: "#7C2D12",
+          // AA-safe (~6.5:1 on ink) tint for small accent text on dark grounds.
           bright: "#E08462",
         },
         sky: {
-          DEFAULT: "#557E8F",
-          // AA-safe (~6.8:1 on ink) tint for small accent text on dark grounds.
-          bright: "#7FA6B8",
+          // Denim — Etsy's brand blue (replaces the pool-blue; higher bone contrast).
+          DEFAULT: "#41628C",
+          // AA-safe (~7:1 on ink) tint for small accent text on dark grounds.
+          bright: "#7FA6C8",
         },
         marigold: {
-          DEFAULT: "#E4922C",
-          bright: "#F2A93B",
+          // Etsy Orange — THE signal (CTA / active / link-hover / one display accent).
+          DEFAULT: "#F1641E",
+          // Lightened Etsy Orange for the sanctioned display accent + focus ring.
+          bright: "#FF7A3C",
         },
         // Form validation — a warm coral that stays within the palette family.
         error: "#F0876B",

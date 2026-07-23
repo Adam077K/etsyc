@@ -12,6 +12,8 @@ KOL's feed is a **living printed magazine of makers-on-film** — an editorial i
 
 ## Color — strategy: Full palette, color-blocked at ground scale
 
+> **Etsy brand skin — Founder directive, 2026-07-23 (pre-pitch).** The pitch positions KOL as a feature built into Etsy, judged by an Etsy panel, so the demo wears Etsy's palette. Only the ACCENT system is re-badged: signal → Etsy Orange, spread grounds → Etsy's Collage family (terracotta / fig / moss / denim). The espresso-ink ground and bone text system are unchanged — the dark editorial world is the product's identity. Every accent pairing is scripted-AA verified; the old→new mapping + ratios live in DECISIONS.md.
+
 Warm-but-vivid. The dominant grounds are **deep warm ink** and **saturated color fields** (Faire's bravery), with warm bone paper as a supporting breathing tier — NOT the dominant ground. Color owns whole regions, never scattered accents.
 
 | Role | Token | Hex | Use |
@@ -19,12 +21,12 @@ Warm-but-vivid. The dominant grounds are **deep warm ink** and **saturated color
 | Ink (primary dark ground) | `--ink` | `#1C1613` | Warm espresso-black. Cinematic film sections, footer, body text on light. |
 | Bone (warm paper) | `--bone` | `#EFE6D6` | Supporting light ground + text on dark. Warmer/greyer than cream, used sparingly. |
 | Bone-dim | `--bone-dim` | `#CDBFA6` | Muted labels/meta on ink (AA-checked). |
-| Plum (spread ground) | `--plum` | `#43223B` | Editorial pull-quote spreads. |
-| Olive (spread ground) | `--olive` | `#4E5A2A` | Craft/values spread. |
-| Clay (spread ground) | `--clay` | `#B4462A` | Warm statement ground. |
-| Sky (spread ground) | `--sky` | `#557E8F` | Cool contrast ground (Kotn pool-blue). |
-| Marigold (through-accent) | `--marigold` | `#E4922C` | THE signal color — active chips, links, CTA, hover underline. Replaces the cliché signal-red. |
-| Marigold-bright | `--marigold-2` | `#F2A93B` | Large display accent on ink. |
+| Fig (spread ground) | `--plum` | `#4C2740` | Editorial pull-quote spreads. Etsy bubblegum/lavender family, darkened. |
+| Moss (spread ground) | `--olive` | `#4E5A2A` | Craft/values spread. Etsy slime-green family, retained dark. |
+| Rust (spread ground) | `--clay` | `#7C2D12` | Warm statement ground. Etsy earth family; kept well below the accent-orange value so the stat spread stays two-colour. |
+| Denim (spread ground) | `--sky` | `#41628C` | Cool contrast ground. Etsy's brand blue (was Kotn pool-blue). |
+| Etsy Orange (through-accent) | `--marigold` | `#F1641E` | THE signal color — active chips, links, CTA, hover underline. |
+| Etsy Orange-bright | `--marigold-2` | `#FF7A3C` | Large display accent on ink + focus ring. |
 
 **Contrast rules (WCAG AA, hard floor):** body text is always bone-on-ink (~13:1) or ink-on-bone. On color-block grounds, only large display type or bone body sit — every color pairing verified AA. Text over film/photo always sits on an ink scrim/gradient (never raw over image). Marigold is a *display/large-text and non-text-accent* color, never small body text on bone.
 
