@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Play, ArrowUpRight, MapPin } from "@phosphor-icons/react";
 import type { Maker, Span, Ground } from "@/lib/fixtures/makers";
 import { CRAFT_ICON } from "@/lib/icons";
-import { rise, calm, inView } from "@/lib/motion";
+import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const SPAN_CLASS: Record<Span, string> = {
@@ -38,10 +39,29 @@ const GROUND_BG: Record<Ground, string> = {
 const SIZES =
   "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw";
 
-export function MakerTile({ maker, index }: { maker: Maker; index: number }) {
+export function MakerTile({
+  maker,
+  index,
+  onOpen,
+}: {
+  maker: Maker;
+  index: number;
+  /** When provided, the tile opens the expanded-video overlay (feed use).
+      Without it the tile is a plain link to the maker's world route. */
+  onOpen?: () => void;
+}) {
   const reduce = useReducedMotion();
   const Icon = CRAFT_ICON[maker.craft];
   const isObject = Boolean(maker.ground);
+
+  const inner = isObject ? (
+    <ObjectTile maker={maker} Icon={Icon} reduce={reduce} />
+  ) : (
+    <EditorialTile maker={maker} Icon={Icon} reduce={reduce} />
+  );
+
+  const ringCls =
+    "block w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink";
 
   return (
     <motion.article
@@ -52,16 +72,15 @@ export function MakerTile({ maker, index }: { maker: Maker; index: number }) {
       transition={{ delay: (index % 6) * 0.05 }}
       className={cn("group", SPAN_CLASS[maker.span])}
     >
-      <a
-        href="#feed"
-        className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-      >
-        {isObject ? (
-          <ObjectTile maker={maker} Icon={Icon} />
-        ) : (
-          <EditorialTile maker={maker} Icon={Icon} reduce={reduce} />
-        )}
-      </a>
+      {onOpen ? (
+        <button type="button" onClick={onOpen} className={ringCls}>
+          {inner}
+        </button>
+      ) : (
+        <Link href={`/m/${maker.id}`} className={ringCls}>
+          {inner}
+        </Link>
+      )}
     </motion.article>
   );
 }
@@ -77,7 +96,9 @@ function EditorialTile({
   reduce: boolean | null;
 }) {
   return (
-    <div
+    <motion.div
+      layoutId={`film-${maker.id}`}
+      transition={{ duration: reduce ? 0.2 : 0.6, ease: easeOut }}
       className={cn(
         "relative w-full overflow-hidden rounded-2xl bg-ink-soft ring-1 ring-line transition-shadow duration-500 group-hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.75)]",
         ASPECT_CLASS[maker.span],
@@ -136,7 +157,7 @@ function EditorialTile({
       <span className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-bone text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         <ArrowUpRight size={18} weight="bold" />
       </span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -146,12 +167,16 @@ function EditorialTile({
 function ObjectTile({
   maker,
   Icon,
+  reduce,
 }: {
   maker: Maker;
   Icon: (typeof CRAFT_ICON)[keyof typeof CRAFT_ICON];
+  reduce: boolean | null;
 }) {
   return (
-    <div
+    <motion.div
+      layoutId={`film-${maker.id}`}
+      transition={{ duration: reduce ? 0.2 : 0.6, ease: easeOut }}
       className={cn(
         "flex w-full flex-col overflow-hidden rounded-2xl ring-1 ring-line transition-shadow duration-500 group-hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.75)]",
         ASPECT_CLASS[maker.span],
@@ -191,6 +216,6 @@ function ObjectTile({
           {maker.place}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
