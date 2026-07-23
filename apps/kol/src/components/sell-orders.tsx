@@ -27,7 +27,7 @@ import {
   type SellerOrder,
 } from "@/lib/fixtures/sell-orders";
 import { rise, stagger, calm, easeOut } from "@/lib/motion";
-import { cn } from "@/lib/utils";
+import { cap, cn } from "@/lib/utils";
 
 type ViewState = "default" | "empty" | "error";
 
@@ -37,6 +37,9 @@ export function SellOrders() {
   const [state, setState] = useState<ViewState>("default");
 
   useEffect(() => {
+    // ?state=empty|error is a DEMO-ONLY affordance for this screens-only pass
+    // (lets the pitch show designed empty/error states). A wired build drives
+    // these from real data, not the query string.
     const s = new URLSearchParams(window.location.search).get("state");
     // Defer state into the reveal beat — no synchronous setState in the effect
     // body (avoids cascading renders), matching the studio pattern.
@@ -74,7 +77,7 @@ export function SellOrders() {
           className="mt-4 font-display font-extrabold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)" }}
         >
-          Work to do.
+          {orders.length === 0 ? "The bench is clear." : "Work to do."}
         </h1>
         <p className="mt-4 max-w-measure font-ui text-lg leading-relaxed text-bone/75">
           {orders.length === 0
@@ -105,7 +108,6 @@ export function SellOrders() {
   );
 }
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 function count(n: number): string {
   const words = ["none", "one", "two", "three", "four", "five", "six"];
   return words[n] ?? String(n);
@@ -175,7 +177,7 @@ function OrderCard({ order, reduce }: { order: SellerOrder; reduce: boolean }) {
         </ul>
 
         {multiMaker && (
-          <p className="mt-3 font-ui text-xs text-bone/50">
+          <p className="mt-3 font-ui text-xs text-bone/70">
             You&#39;re making {mine.length} of {lines.length} pieces in this order —
             {others.map((l) => ` ${l.maker.name}`).join(",")} makes the rest.
           </p>
@@ -184,14 +186,19 @@ function OrderCard({ order, reduce }: { order: SellerOrder; reduce: boolean }) {
         {/* Stage control — the maker sets it, in her own words */}
         <div className="mt-7 border-t border-line pt-6">
           <p className="meta text-bone-dim">Set where it&#39;s at</p>
-          <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Order status">
+          <div
+            className="mt-3 flex flex-wrap gap-2"
+            role="radiogroup"
+            aria-label="Order status"
+          >
             {STAGE_ORDER.map((s) => {
               const active = s === stage;
               return (
                 <button
                   key={s}
                   type="button"
-                  aria-pressed={active}
+                  role="radio"
+                  aria-checked={active}
                   onClick={() => setStage(s)}
                   className={cn(
                     "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-ui text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink-soft",
@@ -241,14 +248,17 @@ function doneHeadline(order: SellerOrder): string {
 }
 
 function LineRow({ line, mine }: { line: ResolvedLine; mine: boolean }) {
+  // A co-maker's piece is signalled by a faded THUMBNAIL only — text stays at
+  // full AA weight (a dimmed <li> would have double-multiplied the opacity and
+  // dropped the sublabel below 4.5:1).
   return (
-    <li
-      className={cn(
-        "flex items-center gap-3.5",
-        !mine && "opacity-55",
-      )}
-    >
-      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg ring-1 ring-line">
+    <li className="flex items-center gap-3.5">
+      <span
+        className={cn(
+          "relative h-12 w-12 shrink-0 overflow-hidden rounded-lg ring-1 ring-line",
+          !mine && "opacity-55",
+        )}
+      >
         <Image
           src={line.product.gallery[0]!}
           alt={line.product.name}
@@ -260,15 +270,13 @@ function LineRow({ line, mine }: { line: ResolvedLine; mine: boolean }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-ui text-sm font-medium text-bone">
           {line.product.name}
-          {line.qty > 1 && (
-            <span className="text-bone/50"> · {line.qty}</span>
-          )}
+          {line.qty > 1 && <span className="text-bone/70"> · {line.qty}</span>}
         </p>
-        <p className="font-ui text-xs text-bone/50">
+        <p className="font-ui text-xs text-bone/70">
           {mine ? "Yours to make" : `Made by ${line.maker.name}`}
         </p>
       </div>
-      <span className="shrink-0 font-mono text-xs text-bone/60">
+      <span className="shrink-0 font-mono text-xs text-bone/70">
         {gbp(line.lineTotal)}
       </span>
     </li>
@@ -332,6 +340,17 @@ function OrdersEmpty({ reduce }: { reduce: boolean }) {
           <ArrowRight size={16} weight="bold" />
         </Link>
       </div>
+      <Link
+        href="/"
+        className="group mt-5 inline-flex items-center gap-1.5 font-ui text-xs text-bone/60 transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink-soft"
+      >
+        Or see yourself in the issue
+        <ArrowRight
+          size={13}
+          weight="bold"
+          className="transition-transform group-hover:translate-x-0.5"
+        />
+      </Link>
     </motion.div>
   );
 }
@@ -365,17 +384,21 @@ function OrdersError({ onRetry }: { onRetry: () => void }) {
 
 function OrdersSkeleton() {
   return (
-    <div className="mx-auto max-w-4xl px-5 pb-28 pt-24 sm:px-8 sm:pt-28" aria-hidden>
-      <div className="h-3 w-24 rounded bg-ink-soft" />
-      <div className="shimmer-sweep mt-5 h-14 w-2/3 max-w-md rounded-2xl bg-ink-soft" />
-      <div className="shimmer-sweep mt-4 h-5 w-3/4 max-w-lg rounded-lg bg-ink-soft" />
-      <div className="mt-12 space-y-5">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="shimmer-sweep h-56 rounded-3xl bg-ink-soft"
-          />
-        ))}
+    <div
+      className="mx-auto max-w-4xl px-5 pb-28 pt-24 sm:px-8 sm:pt-28"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="sr-only">Loading your orders…</span>
+      <div aria-hidden>
+        <div className="h-3 w-24 rounded bg-ink-soft" />
+        <div className="shimmer-sweep mt-5 h-14 w-2/3 max-w-md rounded-2xl bg-ink-soft" />
+        <div className="shimmer-sweep mt-4 h-5 w-3/4 max-w-lg rounded-lg bg-ink-soft" />
+        <div className="mt-12 space-y-5">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="shimmer-sweep h-56 rounded-3xl bg-ink-soft" />
+          ))}
+        </div>
       </div>
     </div>
   );

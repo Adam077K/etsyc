@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -26,7 +26,7 @@ import {
 import { MakerFilm } from "./maker-film";
 import { Magnetic } from "./magnetic";
 import { rise, stagger, calm, easeOut } from "@/lib/motion";
-import { cn } from "@/lib/utils";
+import { cap, cn } from "@/lib/utils";
 
 type HomeState = "default" | "empty" | "error";
 
@@ -42,6 +42,8 @@ export function SellHome() {
   useEffect(() => {
     const h = new Date().getHours();
     const g = h < 12 ? "Morning" : h < 18 ? "Afternoon" : "Evening";
+    // ?state=empty|error is a DEMO-ONLY affordance for this screens-only pass;
+    // a wired build drives these from real data, not the query string.
     const s = new URLSearchParams(window.location.search).get("state");
     // Defer all state into the reveal beat — no synchronous setState in the
     // effect body (avoids cascading renders), matching the studio pattern.
@@ -104,7 +106,6 @@ export function SellHome() {
   );
 }
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 function count(n: number): string {
   const words = ["no", "one", "two", "three", "four", "five", "six"];
   return words[n] ?? String(n);
@@ -259,6 +260,7 @@ function StatLine({
 
 /* A single elegant sparkline — the only dataviz on the page (no chart-junk). */
 function Sparkline({ data, reduce }: { data: readonly number[]; reduce: boolean }) {
+  const fillId = useId();
   const w = 96;
   const h = 44;
   const max = Math.max(...data);
@@ -283,12 +285,12 @@ function Sparkline({ data, reduce }: { data: readonly number[]; reduce: boolean 
       aria-label={`Visits rose to ${max} across the last seven days`}
     >
       <defs>
-        <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#E4922C" stopOpacity="0.24" />
           <stop offset="100%" stopColor="#E4922C" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polygon points={area} fill="url(#spark-fill)" />
+      <polygon points={area} fill={`url(#${fillId})`} />
       <motion.polyline
         points={line}
         fill="none"
@@ -510,23 +512,27 @@ function HomeError({ onRetry }: { onRetry: () => void }) {
 
 function HomeSkeleton() {
   return (
-    <div className="mx-auto max-w-issue px-5 pb-28 pt-24 sm:px-8 sm:pt-28" aria-hidden>
-      <div className="h-3 w-28 rounded bg-ink-soft" />
-      <div className="shimmer-sweep mt-5 h-14 w-3/4 max-w-xl rounded-2xl bg-ink-soft" />
-      <div className="shimmer-sweep mt-4 h-5 w-2/3 max-w-md rounded-lg bg-ink-soft" />
-      <div className="shimmer-sweep mt-10 aspect-[16/10] w-full rounded-3xl bg-ink-soft sm:aspect-[16/7]" />
-      <div className="mt-16 grid gap-4 md:grid-cols-[1.4fr_1fr_1fr]">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="shimmer-sweep h-44 rounded-3xl bg-ink-soft"
-          />
-        ))}
-      </div>
-      <div className="mt-16 space-y-3">
-        {[0, 1].map((i) => (
-          <div key={i} className="shimmer-sweep h-20 rounded-2xl bg-ink-soft" />
-        ))}
+    <div
+      className="mx-auto max-w-issue px-5 pb-28 pt-24 sm:px-8 sm:pt-28"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="sr-only">Loading your studio…</span>
+      <div aria-hidden>
+        <div className="h-3 w-28 rounded bg-ink-soft" />
+        <div className="shimmer-sweep mt-5 h-14 w-3/4 max-w-xl rounded-2xl bg-ink-soft" />
+        <div className="shimmer-sweep mt-4 h-5 w-2/3 max-w-md rounded-lg bg-ink-soft" />
+        <div className="shimmer-sweep mt-10 aspect-[16/10] w-full rounded-3xl bg-ink-soft sm:aspect-[16/7]" />
+        <div className="mt-16 grid gap-4 md:grid-cols-[1.4fr_1fr_1fr]">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="shimmer-sweep h-44 rounded-3xl bg-ink-soft" />
+          ))}
+        </div>
+        <div className="mt-16 space-y-3">
+          {[0, 1].map((i) => (
+            <div key={i} className="shimmer-sweep h-20 rounded-2xl bg-ink-soft" />
+          ))}
+        </div>
       </div>
     </div>
   );

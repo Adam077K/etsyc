@@ -58,7 +58,9 @@ export const STAGE_META: Record<
   new: {
     label: "Just in",
     short: "New",
-    buyerSees: "Lena has your order — she'll start it this week.",
+    // First person — this line sits under an "in your voice" label on the
+    // maker's side and renders verbatim on the buyer's order page.
+    buyerSees: "Your order's with me — I'll start it this week.",
   },
   making: {
     label: "In the making",
