@@ -21,13 +21,13 @@
   }
 
   ::selection {
-    background: #e4922c;
+    background: #f1641e;
     color: #1c1613;
   }
 
-  /* Keyboard focus is a first-class state, marigold on any ground. */
+  /* Keyboard focus is a first-class state, Etsy Orange on any ground. */
   :focus-visible {
-    outline: 2px solid #f2a93b;
+    outline: 2px solid #ff7a3c;
     outline-offset: 3px;
     border-radius: 2px;
   }
