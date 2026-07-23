@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowClockwise } from "@phosphor-icons/react";
 import { MAKERS, CRAFTS, type Maker } from "@/lib/fixtures/makers";
+import { stagger, rise, calm, inView } from "@/lib/motion";
 import { CraftFilter, type Filter } from "./craft-filter";
 import { MakerTile } from "./maker-tile";
 import { QuoteSpread } from "./quote-spread";
@@ -153,6 +154,7 @@ export function Feed() {
     setOpenedId(m.id);
   }
 
+  const reduce = useReducedMotion();
   const isAll = active === "all" && !valueFilter;
   const revisit = visit > 0;
 
@@ -194,22 +196,35 @@ export function Feed() {
 
   return (
     <section id="feed" className="mx-auto max-w-issue px-5 pb-24 pt-20 sm:px-8">
-      {/* Section head. */}
-      <div className="mb-8 flex flex-col gap-6 border-b border-line pb-8 md:flex-row md:items-end md:justify-between">
+      {/* Section head — inks in on a stagger as the issue is reached, so the
+          feed opens as an authored spread rather than snapping in cold. */}
+      <motion.div
+        variants={reduce ? calm : stagger(0.05, 0.1)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={inView}
+        className="mb-8 flex flex-col gap-6 border-b border-line pb-8 md:flex-row md:items-end md:justify-between"
+      >
         <div>
-          <p className="meta text-bone-dim">The issue</p>
-          <h2
+          <motion.p variants={reduce ? calm : rise(14, 0.55)} className="meta text-bone-dim">
+            The issue
+          </motion.p>
+          <motion.h2
+            variants={reduce ? calm : rise(24, 0.8)}
             className="mt-4 max-w-2xl font-display font-bold leading-[0.95] text-bone"
             style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
           >
             Mixed media, reshuffled every visit.
-          </h2>
+          </motion.h2>
         </div>
-        <p className="max-w-xs font-ui text-sm leading-relaxed text-bone/65">
+        <motion.p
+          variants={reduce ? calm : rise(16, 0.7)}
+          className="max-w-xs font-ui text-sm leading-relaxed text-bone/65"
+        >
           Not a grid — a curated spread of makers on film and in frame. Refresh
           and the room changes.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
       {/* Sticky filter rail. */}
       <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-8 bg-ink/85 px-5 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
