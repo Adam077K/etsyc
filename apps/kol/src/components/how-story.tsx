@@ -38,7 +38,9 @@ interface Act {
   body: string;
   image: string;
   alt: string;
-  /** film beats carry a Play affordance + stand-in label (the clip plays live). */
+  /** honest stand-in caption — every still is a placeholder for live footage. */
+  caption: string;
+  /** film beats also carry a Play affordance (the clip plays live). */
   film?: boolean;
 }
 
@@ -50,6 +52,7 @@ const ACTS: Act[] = [
     body: "The feed is a magazine of real people making real things — never a wall of identical thumbnails. Tap anyone and their film grows to fill the room. The sound is yours to turn on.",
     image: "/media/clay-wheel.jpg",
     alt: "Lena Okafor throwing stoneware at the wheel, from her film",
+    caption: "Film still · the clip plays in the live product",
     film: true,
   },
   {
@@ -58,7 +61,8 @@ const ACTS: Act[] = [
     title: "Their whole world opens around the film.",
     body: "Tap again and the maker's shop unfolds around the still-playing video — their pieces, their story, their own colours and type. They walk you through it like a shopkeeper who knows every shelf by heart.",
     image: "/media/clay-shelf.jpg",
-    alt: "A ceramicist's studio shelf lined with finished, glazed vessels",
+    alt: "Wooden cutting boards and ceramic vessels on a studio shelf",
+    caption: "Stand-in still · the maker's real shop in the live product",
   },
   {
     index: "03",
@@ -67,6 +71,7 @@ const ACTS: Act[] = [
     body: "Open a piece and the film tucks into the corner, still narrating — the maker telling you about the exact thing in front of you. What it's made of, how it's cared for, who stands behind it. Then you buy, direct.",
     image: "/media/plates.jpg",
     alt: "A set of handmade stoneware plates, each a slightly different size",
+    caption: "Stand-in still · the maker's real pieces in the live product",
   },
 ];
 
@@ -101,16 +106,20 @@ export function HowStory() {
           <div className="film-drift absolute inset-0">
             <Image
               src="/media/indigo-dye.jpg"
-              alt="A dyer's hands lifting cloth from a deep indigo vat"
+              alt="A swirl of deep indigo dye"
               fill
               priority
               sizes="100vw"
               className="object-cover object-center"
             />
           </div>
-          {/* Ink scrims: bottom-up for legibility, left-in for the statement. */}
+          {/* Ink scrims: bottom-up for legibility, left-in for the statement.
+              Interim fix — the right edge floors at ink/30 (never fully clear)
+              so the least-scrimmed quadrant of the abstract still reads warm and
+              intentional; the proper fix is a real hands/face-in-process shot
+              (see imagery-upgrade manifest, hero slot). */}
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/30" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/25 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/25 to-ink/30" />
         </div>
 
         <motion.div
@@ -234,6 +243,11 @@ export function HowStory() {
             whileInView="visible"
             viewport={inView}
           >
+            {/* Display-scale mono masthead — an entry point into the badge that
+                names the promise before the two layers spell it out. */}
+            <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-marigold">
+              Every maker · Every claim · Real
+            </p>
             <TrustBadge maker={COVER_MAKER} />
           </motion.div>
         </div>
@@ -273,51 +287,55 @@ export function HowStory() {
             viewport={inView}
             className="mt-14 grid gap-8 sm:mt-16 md:grid-cols-2 md:gap-12"
           >
-            <motion.ul
+            <motion.div
               variants={reduce ? calm : rise(22, 0.7)}
-              className="rounded-3xl border border-bone/15 p-7 sm:p-8"
+              className="rounded-3xl border border-bone/20 p-7 sm:p-8"
             >
               <p className="meta mb-6 text-bone/60">The old way</p>
-              {NOT_THIS.map((line) => (
-                <li
-                  key={line}
-                  className="flex items-start gap-3.5 border-t border-bone/10 py-3.5 first:border-t-0 first:pt-0"
-                >
-                  <Prohibit
-                    size={20}
-                    weight="bold"
-                    aria-hidden
-                    className="mt-0.5 shrink-0 text-bone/40"
-                  />
-                  <span className="font-ui text-base leading-snug text-bone/60">
-                    {line}
-                  </span>
-                </li>
-              ))}
-            </motion.ul>
+              <ul>
+                {NOT_THIS.map((line) => (
+                  <li
+                    key={line}
+                    className="flex items-start gap-3.5 border-t border-bone/10 py-3.5 first:border-t-0 first:pt-0"
+                  >
+                    <Prohibit
+                      size={20}
+                      weight="bold"
+                      aria-hidden
+                      className="mt-0.5 shrink-0 text-bone/40"
+                    />
+                    <span className="font-ui text-base leading-snug text-bone/60">
+                      {line}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
-            <motion.ul
+            <motion.div
               variants={reduce ? calm : rise(22, 0.7)}
               className="rounded-3xl border border-marigold/40 bg-ink/25 p-7 sm:p-8"
             >
               <p className="meta mb-6 text-marigold-bright">The KOL way</p>
-              {INSTEAD.map((line) => (
-                <li
-                  key={line}
-                  className="flex items-start gap-3.5 border-t border-bone/10 py-3.5 first:border-t-0 first:pt-0"
-                >
-                  <Check
-                    size={20}
-                    weight="bold"
-                    aria-hidden
-                    className="mt-0.5 shrink-0 text-marigold-bright"
-                  />
-                  <span className="font-ui text-base leading-snug text-bone">
-                    {line}
-                  </span>
-                </li>
-              ))}
-            </motion.ul>
+              <ul>
+                {INSTEAD.map((line) => (
+                  <li
+                    key={line}
+                    className="flex items-start gap-3.5 border-t border-bone/10 py-3.5 first:border-t-0 first:pt-0"
+                  >
+                    <Check
+                      size={20}
+                      weight="bold"
+                      aria-hidden
+                      className="mt-0.5 shrink-0 text-marigold-bright"
+                    />
+                    <span className="font-ui text-base leading-snug text-bone">
+                      {line}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -407,13 +425,19 @@ function Beat({
           <>
             <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-ink/10" />
             <span className="absolute left-1/2 top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-bone/95 text-ink shadow-[0_16px_40px_-16px_rgba(0,0,0,0.7)] transition-transform duration-500 ease-out-expo group-hover:scale-110">
-              <Play size={24} weight="fill" className="translate-x-0.5" />
-            </span>
-            <span className="meta absolute bottom-4 left-5 text-bone/75">
-              Film still · the clip plays in the live product
+              <Play aria-hidden size={24} weight="fill" className="translate-x-0.5" />
             </span>
           </>
         )}
+        {/* Caption scrim + honest stand-in label on every beat (symmetry with
+            the film beat). The scrim floors AA for the label over any photo. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink/75 to-transparent"
+        />
+        <figcaption className="meta absolute bottom-4 left-5 text-bone/75">
+          {act.caption}
+        </figcaption>
       </motion.figure>
 
       <motion.div variants={reduce ? calm : rise(28, 0.9)}>

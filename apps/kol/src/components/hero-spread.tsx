@@ -82,7 +82,7 @@ export function HeroSpread() {
           </Magnetic>
           <a
             href="/how"
-            className="rounded-full border border-bone/30 px-7 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/70 hover:bg-bone/5"
+            className="rounded-full border border-bone/30 px-7 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/70 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             How KOL works
           </a>
