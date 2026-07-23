@@ -54,7 +54,7 @@ export function StatSpread() {
                 to={ISSUE_STATS.makers}
                 className="block font-display font-extrabold leading-none text-bone [font-size:clamp(3.5rem,9vw,7rem)]"
               />
-              <p className="meta mt-3 text-bone/80">makers on film</p>
+              <p className="meta mt-3 text-bone">makers on film</p>
             </div>
             <span className="hidden h-20 w-px bg-bone/25 sm:block" />
             <div>
@@ -62,7 +62,7 @@ export function StatSpread() {
                 to={ISSUE_STATS.countries}
                 className="block font-display font-extrabold leading-none text-bone [font-size:clamp(3.5rem,9vw,7rem)]"
               />
-              <p className="meta mt-3 text-bone/80">countries</p>
+              <p className="meta mt-3 text-bone">countries</p>
             </div>
           </div>
 
