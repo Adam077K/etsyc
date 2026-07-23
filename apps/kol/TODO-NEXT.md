@@ -53,5 +53,19 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
 ## Motion / interaction
 - _(Hover blurb reveal reworked to clip-path/transform — see Applied.)_
 
+## Wave-4 QA-gate carry items (2026-07-23, critic PASS-with-notes)
+- **World page mid-scroll dead zone (`/m/[slug]`, desktop).** At ~600px scroll the
+  left column shows ~400px of empty ink between the hero subtitle and the body
+  bio. The scroll cue is now visible on all viewports (wave 4), but the void
+  itself remains. Options: pull the bio up, add a scroll-triggered pull-quote in
+  the left column, or bridge with an anchored imagery element.
+- **Seller workspace active-chip variant.** Buyer surfaces correctly use marigold
+  active chips; sell/clips "All 9" (and possibly sell/orders, sell/messages)
+  uses an ink-soft/dark fill. Either align seller chips to the marigold fill or
+  document a deliberate seller-workspace chip variant in DESIGN.md (a
+  seller-chip rationale exists in DECISIONS.md — reconcile the two).
+- **Checkout mobile 375px: residual right-edge field clipping (10–15px).**
+  Cosmetic remnant of the P1-A fix; not a blocker.
+
 ## Copy / IA / a11y polish
 - _(All prior items in this section applied — see Applied above.)_
