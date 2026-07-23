@@ -60,16 +60,31 @@ export function MakerFilm({
 
   // Bridge the internal ref to the optional external handle, and seed the
   // playhead when a starting time is supplied (feed→world currentTime carry).
+  // preload="none" means metadata isn't ready at ref-attach, so a seek there is
+  // swallowed — apply the seed on `loadedmetadata` (or now if already ready).
+  const seededRef = useRef(false);
   const setVideoNode = (el: HTMLVideoElement | null) => {
     videoRef.current = el;
     if (externalRef) externalRef.current = el;
-    if (el && initialTime !== undefined && Number.isFinite(initialTime)) {
-      try {
-        el.currentTime = initialTime;
-      } catch {
-        /* seeking before metadata resolves is a no-op; the loop stays seamless. */
-      }
+    if (
+      !el ||
+      initialTime === undefined ||
+      !Number.isFinite(initialTime) ||
+      seededRef.current
+    ) {
+      return;
     }
+    const seek = () => {
+      if (seededRef.current || !videoRef.current) return;
+      try {
+        videoRef.current.currentTime = initialTime;
+        seededRef.current = true;
+      } catch {
+        /* clamped/blocked seek — the muted loop keeps the seam seamless anyway. */
+      }
+    };
+    if (el.readyState >= 1 /* HAVE_METADATA */) seek();
+    else el.addEventListener("loadedmetadata", seek, { once: true });
   };
 
   useEffect(() => {
