@@ -689,7 +689,12 @@ function ContextualFilm({
         </div>
       )}
 
-      {/* Collapsed cue — the film fades to a pill but keeps playing underneath. */}
+      {/* Collapsed cue — the film fades to a pill but keeps playing underneath.
+          On phones the labelled pill is wide enough that, parked bottom-right, it
+          clips the tail of the (left-aligned) product H1; so <sm it shrinks to a
+          compact round play control that clears heading tails, and the labelled
+          pill returns at sm+ (desktop geometry unchanged). The accessible name is
+          identical at every width — the "Now playing" label lives in aria-label. */}
       {!open && (
         <div className="fixed bottom-4 right-4 z-[41] sm:bottom-6 sm:right-6">
           <motion.button
@@ -699,11 +704,14 @@ function ContextualFilm({
             initial={reduce ? false : { opacity: 0, scale: 0.85 }}
             animate={reduce ? undefined : { opacity: 1, scale: 1 }}
             transition={{ duration: 0.35, ease: easeOut }}
-            className="flex items-center gap-2 rounded-full bg-ink-soft py-2 pl-3 pr-2.5 ring-1 ring-line shadow-[0_20px_40px_-16px_rgba(0,0,0,0.8)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
+            className="flex items-center gap-2 rounded-full bg-ink-soft p-3.5 ring-1 ring-line shadow-[0_20px_40px_-16px_rgba(0,0,0,0.8)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold sm:py-2 sm:pl-3 sm:pr-2.5"
           >
-            {liveDot}
-            <span className="meta text-[0.6rem] text-bone">Now playing</span>
-            <CaretUp size={13} weight="bold" className="text-bone-dim" />
+            <Play size={16} weight="fill" className="text-marigold sm:hidden" />
+            <span className="hidden items-center gap-2 sm:flex">
+              {liveDot}
+              <span className="meta text-[0.6rem] text-bone">Now playing</span>
+              <CaretUp size={13} weight="bold" className="text-bone-dim" />
+            </span>
           </motion.button>
         </div>
       )}
