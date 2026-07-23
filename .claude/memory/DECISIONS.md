@@ -412,3 +412,11 @@ crossfade of the label chrome, and the effective `videoSrc` falls back to the ma
 same video node keeps playing world→product.
 **Reversibility:** reversible (additive module under src/components/film/; routes rewired to slots).
 **Owner:** design-lead (Track A) · **Affects:** every buyer route + app shell · **Risk:** full.
+
+## 2026-07-23 — Active-chip color: marigold on buyer surfaces, bone in the seller workspace
+
+**Decision:** Buyer-facing active filter/value chips stay **marigold-filled** (`border-marigold bg-marigold text-ink`) — CraftFilter and ValuesSpread already are, and that is the standard. In the **seller workspace** (sell-messages / sell-clips filter bars) the active chip keeps its **bone fill** (`bg-bone text-ink`), deliberately NOT standardized to marigold.
+
+**Why:** DESIGN.md reserves marigold as the single through-signal, and the buyer feed is the warm/vivid surface where that signal belongs. The seller workspace is KOL's calm "operate" chrome (concept-lock D15, fixed system) — a quiet productivity tool. There, marigold is reserved for the maker's *primary actions* (Publish, "Answer on film"); if a mere filter-state also went marigold it would compete with those CTAs and flatten the signal hierarchy. A calmer bone active-fill reads as tool-state, not call-to-action, which is the right register for the seller side. (Answers the design-critic batch-2 P2-F question; the alternative — standardize everything to marigold — was rejected for this reason.)
+
+**Reversibility:** trivially reversible (one class per seller chip). **Owner:** design-lead · **Affects:** seller workspace chrome only · **Risk:** lite.
