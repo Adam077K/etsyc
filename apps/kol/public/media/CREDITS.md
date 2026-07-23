@@ -108,7 +108,7 @@ face-forward costume portraits (governance — see below).
 | twodots/hero-poster.jpg | Hands + a handmade "MY CAT" matchbox craft (poster for the hero clip) | frame from Hands-on video | none |
 | twodots/materials.jpg | Sewing-materials flat-lay (beads, denim, fabric, scissors, yarn) | photo #47, cropped to remove course-promo text | none |
 | twodots/butterfly-back.jpg | Butterfly costume, child **back-turned** (no face) | photo #39 | none |
-| twodots/devil-back.jpg | Little-devil costume, child **back-turned** (no face) | photo #09 | none |
+| twodots/devil-back.jpg | Little-devil costume (wings, tutu, trident) — **head-cropped** (top 28%) to remove a partial side profile present in the source; only the back of the hair remains | photo #09, cropped | none (cropped) |
 | twodots/tote.jpg | Hand-printed cat-face drawstring bag (product) | photo #55, cropped from brand card to isolate the bag | none |
 | twodots/felt.jpg | Felt-craft characters flat-lay (butterfly, cactus, panda…) | photo #33 | none |
 
@@ -124,6 +124,11 @@ face-forward costume portraits (governance — see below).
   child's **face**. It was NOT processed into the repo or wired to any surface.
   Available in the Founder's Downloads for approval; drop in + set a `filmSrc`
   only after written permission.
+- **Uncropped Little Devil shot** (source photo #09) shows the child's **partial
+  side profile** (head turned left). NOT shipped — the wired `devil-back.jpg` is
+  the head-cropped faceless version. If the Founder prefers the fuller framing
+  (head + felt horns visible), approve #09 and it replaces the crop on the Little
+  Devil card. Governance choice defaults to the faceless crop.
 
 All Two Dots commerce data (prices, reviews, order/booking) is **demo/synthetic**
 as always — only the photos and video are real. Currency shown as demo £ to match
