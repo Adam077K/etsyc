@@ -336,7 +336,7 @@ function WorldFilm({
       // the hero, then SNAP it to the docked corner past the hero so it never
       // covers the world content the buyer needs to read (no per-frame move).
       if (v > 0.6) {
-        snapTo({ scale: docked, x: -20, y: -20, radius: 64, opacity: 1, originX: 100, originY: 100, shadow: 1 });
+        snapTo({ scale: docked, x: -24, y: -24, radius: 64, opacity: 1, originX: 100, originY: 100, shadow: 1 });
       } else {
         snapTo({ ...HERO_TARGET });
       }
@@ -346,8 +346,9 @@ function WorldFilm({
     // The dock LANDS by 72% of the hero scroll (settle in the last 28%).
     const p = ease(Math.min(v / 0.72, 1));
     m.scale.set(1 + (docked - 1) * p);
-    m.x.set(-20 * p);
-    m.y.set(-20 * p);
+    // Inset 24px to match cornerTarget's margin — no seam into the product PiP.
+    m.x.set(-24 * p);
+    m.y.set(-24 * p);
     m.radius.set(64 * ease(Math.min(v / 0.55, 1)));
     // Shadow ramps linearly over [0.5, 0.9] — byte-parity with main.
     m.shadow.set(v <= 0.5 ? 0 : Math.min((v - 0.5) / 0.4, 1));

@@ -84,12 +84,13 @@ export function ThankYou() {
               It&rsquo;s being made for you.
             </h1>
             <figure className="mx-auto mt-8 max-w-2xl">
+              {/* The Quotes glyph is the quotation mark — no doubled entity quotes. */}
               <Quotes size={24} weight="fill" aria-hidden className="mx-auto mb-3 text-marigold/70" />
               <blockquote
                 className="font-serif leading-[1.2] text-bone"
                 style={{ fontSize: "clamp(1.3rem, 3vw, 2.2rem)" }}
               >
-                &ldquo;{primaryNote.line}&rdquo;
+                {primaryNote.line}
               </blockquote>
               <figcaption className="mt-5 font-ui text-sm text-bone/80">
                 <span className="font-semibold text-bone">{primary.name}</span>

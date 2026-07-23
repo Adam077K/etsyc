@@ -143,9 +143,9 @@ export function HeroSpread() {
               </p>
             </div>
           </button>
-          <span className="meta hidden items-center gap-2 text-bone-dim sm:flex">
+          <span className="meta flex items-center gap-2 text-bone-dim">
             {hasWorld ? (
-              <span className="flex items-center gap-2 text-bone transition-colors group-hover:text-marigold">
+              <span className="flex items-center gap-2 text-bone">
                 Enter the world
                 <ArrowRight size={14} weight="bold" />
               </span>
