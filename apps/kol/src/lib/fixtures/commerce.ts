@@ -404,7 +404,7 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     note: "Edition of 40",
     clipLabel: "Juno on the two-colour overlap",
     clipDuration: "0:19",
-    gallery: ["/media/prints-wall.jpg", "/media/indigo-dye.jpg"],
+    gallery: ["/media/prints-wall.jpg", "/media/riso-ink.jpg"],
     description: [
       "The seventh print in a series I keep swearing I'll finish. Fluoro pink laid down first, then a translucent blue on top — and where they cross, a third colour appears that I can't mix in the tin and can't quite predict.",
       "Printed two passes by hand on cotton paper, so every sheet in the edition is a fraction off from the last. That drift is signed into it. Hang it in daylight and the fluoro practically hums.",
@@ -445,7 +445,7 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     note: "Edition of 30",
     clipLabel: "Juno on a single-ink wash",
     clipDuration: "0:15",
-    gallery: ["/media/indigo-dye.jpg", "/media/prints-wall.jpg"],
+    gallery: ["/media/riso-ink.jpg", "/media/prints-wall.jpg"],
     description: [
       "Sometimes one ink is the whole idea. A single flood of riso blue, run through the drum until the roller texture and the paper grain start arguing — and that argument is the image.",
       "No second colour, no type, nowhere to hide. Just the ink doing what riso ink does: sitting proud on the cotton, catching the light, never quite flat. The quietest thing I make and my own favourite.",

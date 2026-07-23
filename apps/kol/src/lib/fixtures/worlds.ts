@@ -276,7 +276,7 @@ export const WORLDS: Record<string, MakerWorld> = {
       "Every print goes through the drum by hand, one colour at a time. The ink sits on top of the paper instead of soaking in, so you can feel it with a fingertip — a little raised, a little imperfect, unmistakably printed by a person and not a laser.",
       "Two inks, cotton paper, a hand-cranked letterpress for the type. That's the whole studio. The limits are the fun — I've made more with two colours than I ever did with a full-colour printer.",
     ],
-    storyImage: "/media/indigo-dye.jpg",
+    storyImage: "/media/riso-ink.jpg",
     processSectionHeader: "Two inks. A hundred happy accidents.",
     process: [
       {
@@ -291,7 +291,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         label: "02",
         title: "Ink you can feel",
         body: "Riso ink sits on top of the paper, never in it. Run a fingertip across a fresh print and you feel the colour — raised, tacky-bright, a little uneven. That texture is the entire point.",
-        image: "/media/indigo-dye.jpg",
+        image: "/media/riso-ink.jpg",
       },
     ],
     products: [
@@ -308,7 +308,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         name: "Ink Field · Riso Print",
         price: "£30",
         blurb: "A single flood of riso blue, run through the drum until the texture does all the talking.",
-        image: "/media/indigo-dye.jpg",
+        image: "/media/riso-ink.jpg",
         note: "Edition of 30",
       },
     ],

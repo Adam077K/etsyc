@@ -53,10 +53,11 @@ change.
 
 ## Worlds expansion — Grain & Groove + Ember & Rue + Risograph Room
 
-No new files were added. These three worlds reuse **existing** local media only, so
-every image is honest stock that already renders. Where an image is reused across
-maker contexts, the content genuinely fits the new craft — the same practice the
-build already uses (e.g. `salt-ceramics.jpg` is both Salt Kiln's feed tile and
+These three worlds reuse **existing** local media, so every image is honest stock
+that already renders. One derived file was added — `riso-ink.jpg`, a reworked crop
+of an existing source (see below), not a new download. Where an image is reused
+across maker contexts, the content genuinely fits the new craft — the same practice
+the build already uses (e.g. `salt-ceramics.jpg` is both Salt Kiln's feed tile and
 Odd Clay's carafe gallery). No portrait is ever reused as a different named maker.
 
 | File | Reused as | In |
@@ -67,7 +68,10 @@ Odd Clay's carafe gallery). No portrait is ever reused as a different named make
 | apothecary.jpg | Dropper + oil bottles (own feed tile) | Ember & Rue — hero, process, studio, Neroli & Cedar Oil |
 | salt-ceramics.jpg | Glazed stoneware vessels Noor decants into (ceramic bottle-vases) | Ember & Rue — story, process, Sealed Vessel |
 | prints-wall.jpg | Wall of finished riso prints (own feed tile) | Risograph Room — hero, process, studio, Overprint Study |
-| indigo-dye.jpg | Riso ink (abstract ink/pigment swirl, reframed from the dye vat) | Risograph Room — story, process, Ink Field |
+| riso-ink.jpg | Riso ink on warm paper — a **derived** asset: a tight lower-left detail crop of `indigo-dye.jpg` with a riso-language treatment (high contrast, hue pushed toward riso blue, warm-paper split-tone). Deliberately distinct framing + colour from Sabine's wide-vat use of the same source, so a viewer touring both worlds gets no déjà-vu. Made locally with ffmpeg from the credited Unsplash source (`photo-1528459801416-a9e53bbf4e17`). | Risograph Room — story, process, Ink Field |
+
+`indigo-dye.jpg` itself stays exclusive to Indigo & Ash's studio; the print world
+only ever shows the reworked `riso-ink.jpg` crop above.
 
 Replace with KOL's own maker footage/photography before any public launch — this is
 the screens-only stock pass, and the reuse above is a placeholder, not the shipped look.
