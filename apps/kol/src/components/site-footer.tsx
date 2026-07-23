@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, InstagramLogo, YoutubeLogo, EnvelopeSimple } from "@phosphor-icons/react";
-import { rise, calm, inView } from "@/lib/motion";
+import { rise, calm } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
 
 const COLUMNS = [
@@ -21,8 +21,7 @@ export function SiteFooter() {
       <motion.div
         variants={v}
         initial="hidden"
-        whileInView="visible"
-        viewport={inView}
+        animate="visible"
         className="mx-auto max-w-issue px-5 py-20 sm:px-8 sm:py-28"
       >
         <p className="meta text-marigold">Next issue, in your inbox</p>
@@ -49,6 +48,7 @@ export function SiteFooter() {
               type="email"
               required
               placeholder="you@example.com"
+              suppressHydrationWarning
               className="w-full bg-transparent font-ui text-base text-bone placeholder:text-bone/40 focus:outline-none"
             />
           </div>

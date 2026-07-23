@@ -113,7 +113,7 @@ export function HeroSpread() {
 
       {/* Scroll cue. */}
       <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-bone/50 md:block">
-        <ArrowDown size={22} className={reduce ? "" : "animate-bounce"} />
+        <ArrowDown size={22} className={reduce ? "" : "animate-float"} />
       </div>
     </section>
   );

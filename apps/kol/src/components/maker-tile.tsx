@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Play, ArrowUpRight, MapPin } from "@phosphor-icons/react";
 import type { Maker, Span, Ground } from "@/lib/fixtures/makers";
 import { CRAFT_ICON } from "@/lib/icons";
-import { rise, calm, inView } from "@/lib/motion";
+import { rise, calm } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const SPAN_CLASS: Record<Span, string> = {
@@ -47,9 +47,8 @@ export function MakerTile({ maker, index }: { maker: Maker; index: number }) {
     <motion.article
       variants={reduce ? calm : rise(30, 0.8)}
       initial="hidden"
-      whileInView="visible"
-      viewport={inView}
-      transition={{ delay: (index % 3) * 0.06 }}
+      animate="visible"
+      transition={{ delay: (index % 6) * 0.05 }}
       className={cn("group", SPAN_CLASS[maker.span])}
     >
       <a href="#feed" className="block focus-visible:outline-none">

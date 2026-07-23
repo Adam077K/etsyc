@@ -53,9 +53,14 @@ const config: Config = {
           "0%,100%": { transform: "translate3d(0,0,0) scale(1)" },
           "50%": { transform: "translate3d(0,-1.5%,0) scale(1.06)" },
         },
+        float: {
+          "0%,100%": { transform: "translateY(0)", opacity: "0.5" },
+          "50%": { transform: "translateY(6px)", opacity: "0.9" },
+        },
       },
       animation: {
         shimmer: "shimmer 1.8s infinite",
+        float: "float 2.4s cubic-bezier(0.16,1,0.3,1) infinite",
       },
     },
   },

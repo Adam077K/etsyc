@@ -1,37 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useReducedMotion,
-  useInView,
-  animate,
-} from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, useReducedMotion, animate } from "framer-motion";
 import { ISSUE_STATS } from "@/lib/fixtures/makers";
-import { rise, calm, inView } from "@/lib/motion";
+import { rise, calm } from "@/lib/motion";
 import { LiquidDivider } from "./liquid";
 
+// Counts up once on mount. Default value is the final figure, so the number is
+// correct even if the animation never runs (reduced-motion / no observer).
 function Counter({ to, className }: { to: number; className?: string }) {
   const reduce = useReducedMotion();
-  const ref = useRef<HTMLSpanElement>(null);
-  const seen = useInView(ref, { once: true, margin: "0px 0px -20% 0px" });
   const [val, setVal] = useState(reduce ? to : 0);
 
   useEffect(() => {
-    if (!seen || reduce) return;
+    if (reduce) return;
+    // animate() schedules onUpdate asynchronously — no sync setState in effect.
     const controls = animate(0, to, {
       duration: 1.6,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (v) => setVal(Math.round(v)),
     });
     return () => controls.stop();
-  }, [seen, to, reduce]);
+  }, [to, reduce]);
 
-  return (
-    <span ref={ref} className={className}>
-      {val}
-    </span>
-  );
+  return <span className={className}>{val}</span>;
 }
 
 export function StatSpread() {
@@ -43,8 +35,7 @@ export function StatSpread() {
       <motion.div
         variants={v}
         initial="hidden"
-        whileInView="visible"
-        viewport={inView}
+        animate="visible"
         className="relative overflow-hidden rounded-3xl bg-clay px-6 py-14 text-center sm:px-12 sm:py-20"
       >
         <LiquidDivider className="pointer-events-none absolute inset-x-0 top-0 opacity-30" />

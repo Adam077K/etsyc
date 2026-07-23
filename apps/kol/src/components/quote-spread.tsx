@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Quotes } from "@phosphor-icons/react";
 import { FEATURED_QUOTE } from "@/lib/fixtures/makers";
-import { rise, calm, inView } from "@/lib/motion";
+import { rise, calm } from "@/lib/motion";
 
 export function QuoteSpread() {
   const reduce = useReducedMotion();
@@ -27,8 +27,7 @@ export function QuoteSpread() {
         <motion.div
           variants={v}
           initial="hidden"
-          whileInView="visible"
-          viewport={inView}
+          animate="visible"
           className="flex flex-col justify-center p-8 sm:p-12 lg:p-16"
         >
           <Quotes size={40} weight="fill" className="mb-6 text-marigold" />
