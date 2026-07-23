@@ -114,10 +114,14 @@ export function HeroSpread() {
         </motion.div>
       </motion.div>
 
-      {/* Scroll cue. */}
-      <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-bone/50 md:block">
-        <ArrowDown size={22} className={reduce ? "" : "animate-float"} />
-      </div>
+      {/* Scroll cue — a real keyboard-navigable link to the feed. */}
+      <a
+        href="#feed"
+        aria-label="Scroll to the feed"
+        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 rounded-full p-1 text-bone/50 transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:block"
+      >
+        <ArrowDown size={22} aria-hidden className={reduce ? "" : "animate-float"} />
+      </a>
     </section>
   );
 }

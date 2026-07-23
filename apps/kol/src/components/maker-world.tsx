@@ -424,7 +424,7 @@ function StorySection({
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl ring-1 ring-line">
             <Image
               src={world.storyImage}
-              alt={`${maker.name}, ${maker.studio}`}
+              alt={world.storyImageAlt ?? `${maker.name}, ${maker.studio}`}
               fill
               sizes="(max-width: 768px) 100vw, 45vw"
               className="object-cover"
