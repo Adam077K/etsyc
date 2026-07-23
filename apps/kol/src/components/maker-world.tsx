@@ -767,8 +767,14 @@ function MakeReel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
-  // Narrate the active frame's label to the corner film.
+  // Narrate the active frame's label to the corner film — but ONLY once the reel
+  // has actually scrolled into view. Without this guard the effect fires on mount
+  // (active=0) and stomps the authored hero narration on cold load, so every world
+  // would open showing process step-1's label instead of its hero line. The Reveal
+  // onView below owns the entry label; this effect owns per-frame updates after.
+  const inViewRef = useRef(false);
   useEffect(() => {
+    if (!inViewRef.current) return;
     const l = steps[active]?.filmLabel ?? world.filmNarration?.process;
     if (l) onLabel(l);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -801,6 +807,7 @@ function MakeReel({
       <Reveal
         reduce={reduce}
         onView={() => {
+          inViewRef.current = true;
           const l = steps[active]?.filmLabel ?? world.filmNarration?.process;
           if (l) onLabel(l);
         }}
@@ -946,7 +953,9 @@ function MakeReel({
                 aria-selected={i === active}
                 aria-label={`Step ${i + 1}: ${step.title}`}
                 onClick={() => goTo(i)}
-                className="press group/seg h-8 flex-1 focus-visible:outline-none"
+                // 44px tall hit area (team tap-target floor) with the visual rail
+                // kept at h-1 and centred — the touch zone grows, the rail doesn't.
+                className="press group/seg flex h-11 flex-1 items-center focus-visible:outline-none"
               >
                 <span
                   className={cn(
