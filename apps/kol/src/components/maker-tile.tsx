@@ -188,7 +188,7 @@ function EditorialTile({
         <span className="mt-3 block h-px w-full origin-left scale-x-0 bg-marigold transition-transform duration-500 ease-out-expo group-hover:scale-x-100 group-focus-within:scale-x-100" />
       </div>
 
-      <span className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-bone text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+      <span className="absolute right-4 top-4 grid h-9 w-9 origin-top-right place-items-center rounded-full bg-bone text-ink opacity-0 [transform:translate(6px,-6px)_scale(0.85)] transition-[opacity,transform] duration-300 ease-out-expo group-hover:opacity-100 group-hover:[transform:translate(0,0)_scale(1)] group-focus-within:opacity-100 group-focus-within:[transform:translate(0,0)_scale(1)]">
         <ArrowUpRight size={18} weight="bold" />
       </span>
     </motion.div>
@@ -247,7 +247,7 @@ function ObjectTile({
             <Icon size={13} weight="fill" className="text-marigold" />
             <span className="meta text-bone">{maker.discipline}</span>
           </span>
-          <span className="absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-full bg-bone text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <span className="absolute right-2.5 top-2.5 grid h-9 w-9 origin-top-right place-items-center rounded-full bg-bone text-ink opacity-0 [transform:translate(6px,-6px)_scale(0.85)] transition-[opacity,transform] duration-300 ease-out-expo group-hover:opacity-100 group-hover:[transform:translate(0,0)_scale(1)] group-focus-within:opacity-100 group-focus-within:[transform:translate(0,0)_scale(1)]">
             <ArrowUpRight size={18} weight="bold" />
           </span>
         </motion.div>
