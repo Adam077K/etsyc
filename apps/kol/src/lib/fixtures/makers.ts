@@ -294,7 +294,7 @@ export const MAKERS: Maker[] = [
     craft: "ceramics",
     discipline: "Matte porcelain",
     blurb: "One shape, refined for six years. Restraint is the hardest thing to throw.",
-    image: "/media/donut-vase.jpg",
+    image: "/media/mono-ceramics.jpg",
     kind: "photo",
     span: "square",
     tone: "light",

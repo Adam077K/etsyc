@@ -25,5 +25,5 @@ Replace with KOL's own maker footage/photography before any public launch.
 | maker-jonah.jpg | Portrait, smiling | Unsplash `photo-1607990281513-2c110a25bd8c` | Unsplash |
 | maker-elin.jpg | Portrait, winter | Unsplash `photo-1487412720507-e7ab37603c6f` | Unsplash |
 | plates.jpg | Assorted ceramic plates | Unsplash `photo-1604014237800-1c9102c219da` | Unsplash |
-| donut-vase.jpg | Minimal ceramic vase | Pexels photo 3094230 | Pexels |
+| mono-ceramics.jpg | Speckled ceramic tumblers | Unsplash `photo-1610701596007-11502861dcfa` | Unsplash |
 | maker-soren.jpg | Portrait, black & white (unused reserve) | Unsplash `photo-1552058544-f2b08422138a` | Unsplash |
