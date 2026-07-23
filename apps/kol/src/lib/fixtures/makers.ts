@@ -373,7 +373,7 @@ export const FEATURED_QUOTE = {
 export const ISSUE_STATS = {
   makers: 312,
   countries: 41,
-  line: "Every piece in this issue was made by a real human hand — and filmed in the room where it happened.",
+  line: "Every piece was made by a real human hand — and filmed in the room where it happened.",
 };
 
 export const ALL_MAKERS: Maker[] = [COVER_MAKER, ...MAKERS];

@@ -196,8 +196,9 @@ export function Feed() {
 
   return (
     <section id="feed" className="mx-auto max-w-issue px-5 pb-24 pt-20 sm:px-8">
-      {/* Section head — inks in on a stagger as the issue is reached, so the
-          feed opens as an authored spread rather than snapping in cold. */}
+      {/* Section head — inks in on a stagger as the feed is reached, so it opens
+          as an authored spread rather than snapping in cold. Copy is caption-
+          level: the tiles are the content, this is the invitation. */}
       <motion.div
         variants={reduce ? calm : stagger(0.05, 0.1)}
         initial="hidden"
@@ -205,24 +206,18 @@ export function Feed() {
         viewport={inView}
         className="mb-8 flex flex-col gap-6 border-b border-line pb-8 md:flex-row md:items-end md:justify-between"
       >
-        <div>
-          <motion.p variants={reduce ? calm : rise(14, 0.55)} className="meta text-bone-dim">
-            The issue
-          </motion.p>
-          <motion.h2
-            variants={reduce ? calm : rise(24, 0.8)}
-            className="mt-4 max-w-2xl font-display font-bold leading-[0.95] text-bone"
-            style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
-          >
-            Mixed media, reshuffled every visit.
-          </motion.h2>
-        </div>
+        <motion.h2
+          variants={reduce ? calm : rise(24, 0.8)}
+          className="max-w-2xl font-display font-bold leading-[0.95] text-bone"
+          style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+        >
+          Meet the people who make it.
+        </motion.h2>
         <motion.p
           variants={reduce ? calm : rise(16, 0.7)}
           className="max-w-xs font-ui text-sm leading-relaxed text-bone/65"
         >
-          Not a grid — a curated spread of makers on film and in frame. Refresh
-          and the room changes.
+          Tap anyone to watch them work.
         </motion.p>
       </motion.div>
 
@@ -253,7 +248,7 @@ export function Feed() {
                 size={19}
                 className="transition-transform duration-500 group-hover:rotate-180"
               />
-              Reshuffle the issue
+              See other makers
             </button>
           </div>
         </>

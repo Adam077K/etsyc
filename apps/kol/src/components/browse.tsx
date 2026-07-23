@@ -89,7 +89,7 @@ export function Browse() {
   const summary = q
     ? `${results.length} ${results.length === 1 ? "maker" : "makers"} matching “${query.trim()}”`
     : active === "all"
-      ? `The full roster · ${results.length} makers in this issue`
+      ? `The full roster · ${results.length} makers`
       : `${results.length} ${craftLabel(active)} ${results.length === 1 ? "maker" : "makers"}`;
 
   return (
@@ -103,7 +103,7 @@ export function Browse() {
         className="mx-auto max-w-issue px-5 pb-8 pt-28 sm:px-8 sm:pt-32"
       >
         <motion.p variants={reduce ? calm : rise(14, 0.55)} className="meta text-bone-dim">
-          Search the issue
+          Find a maker
         </motion.p>
         <motion.h1
           variants={reduce ? calm : rise(26, 0.85)}
@@ -159,7 +159,7 @@ export function Browse() {
 
       <section className="mx-auto max-w-issue px-5 pb-24 pt-8 sm:px-8">
         <p className="meta mb-8 text-bone-dim" aria-live="polite">
-          {loading ? "Turning the pages…" : summary}
+          {loading ? "Finding makers…" : summary}
         </p>
 
         {loading ? (
@@ -246,8 +246,8 @@ function BrowseEmpty({
       </h2>
       <p className="mt-4 max-w-md font-ui text-base leading-relaxed text-bone/70">
         Every maker here was met and filmed by hand, so the roster grows slowly.
-        Try a broader craft, or browse the whole issue &mdash; there&rsquo;s a
-        good chance you&rsquo;ll meet someone you weren&rsquo;t looking for.
+        Try a broader craft, or browse everyone &mdash; you might meet someone
+        you weren&rsquo;t looking for.
       </p>
       <button
         onClick={onReset}
