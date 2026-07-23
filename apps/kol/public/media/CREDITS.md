@@ -84,3 +84,49 @@ while the feed tile stays `prints-wall.jpg` (the feed is not disturbed).
 
 Replace with KOL's own maker footage/photography before any public launch — this is
 the screens-only stock pass, and the reuse above is a placeholder, not the shipped look.
+
+## Two Dots — REAL maker assets (Founder-provided) · INTERNAL-ONLY
+
+> **Governance (standing brand/legal rule).** These are the FIRST real assets on
+> KOL — real video + photography of Sharon's children's-costume studio, provided
+> by the Founder. The imagery includes **children**. This world is **internal-only
+> and its branch is HELD from merge** until Sharon gives written permission for
+> public use. Any asset containing an identifiable child's face is flagged below
+> for specific Founder approval/swap. `feat/kol-twodots` must not merge on a QA
+> PASS alone — Founder clearance is a separate, required gate.
+
+Curation: 182 Wix-export files → 61 deduped candidates (min-dim ≥ 600px, ≥ 40KB) →
+**8 images + 2 videos kept**. Skipped: 121 duplicates/thumbnails/sub-5KB, plus all
+face-forward costume portraits (governance — see below).
+
+### Kept — no identifiable face (safe for hero/tile/process/product cards)
+
+| File | Depicts | Source | Face |
+|---|---|---|---|
+| video/two-dots.mp4 | Top-down: adult hands making a small felt craft (the hero clip) | Founder video "Hands-on video.mp4" — muted H.264, faststart | none |
+| video/product-butterfly-wings.mp4 | Child (fully **hooded** — face covered by the costume) spinning to show butterfly wings | Founder video "Show-coustum.mp4" — re-encoded 30fps, muted | none (hood covers face) |
+| twodots/hero-poster.jpg | Hands + a handmade "MY CAT" matchbox craft (poster for the hero clip) | frame from Hands-on video | none |
+| twodots/materials.jpg | Sewing-materials flat-lay (beads, denim, fabric, scissors, yarn) | photo #47, cropped to remove course-promo text | none |
+| twodots/butterfly-back.jpg | Butterfly costume, child **back-turned** (no face) | photo #39 | none |
+| twodots/devil-back.jpg | Little-devil costume, child **back-turned** (no face) | photo #09 | none |
+| twodots/tote.jpg | Hand-printed cat-face drawstring bag (product) | photo #55, cropped from brand card to isolate the bag | none |
+| twodots/felt.jpg | Felt-craft characters flat-lay (butterfly, cactus, panda…) | photo #33 | none |
+
+### Kept — CONTAINS a child's face → FLAGGED for Founder approval
+
+| File | Depicts | Where used | Flag |
+|---|---|---|---|
+| twodots/workshop.jpg | Two people at sewing machines in the real studio; foreground back-turned, **background minor in side profile** | story image + process step 02 + Workshop product gallery | ⚠ partially-identifiable minor (profile). Founder to approve or swap. |
+
+### NOT shipped — held for Founder decision
+
+- Founder video **"Showing the little girl costume.mp4"** clearly features a
+  child's **face**. It was NOT processed into the repo or wired to any surface.
+  Available in the Founder's Downloads for approval; drop in + set a `filmSrc`
+  only after written permission.
+
+All Two Dots commerce data (prices, reviews, order/booking) is **demo/synthetic**
+as always — only the photos and video are real. Currency shown as demo £ to match
+the app's mock storefront; the real studio prices in ₪. Maker name ("Sharon") and
+place ("Israel") are placeholders pending Founder confirmation — not fabricated
+specifics.
