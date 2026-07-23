@@ -364,3 +364,23 @@ writers import, three mutations verified red). Seventh instance — the `kol_sid
 **Owner:** ceo
 **Affects:** all workers — mutation testing procedure; any change that widens an input domain
 **Status:** Adopted.
+
+## 2026-07-22 — KOL front-end v1 archived; v2 rebuild begins with Discovery Feed
+
+**Decision:** Archive the entire v1 front-end to `.archive/kol-v1-2026-07-22/` (pure `git mv`,
+history preserved) and rebuild `apps/kol` from scratch, screens-first with mock data. First screen —
+the Discovery Feed ("The Maker's Issue") — shipped through the Full-tier QA gate (3 reviewers, one
+fix loop, unanimous PASS) and merged to main at `ee308da`.
+
+**Rationale:** the 2026-07-22 rebuild brief + design-model launch prompt; single design model with
+full creative authority beats incremental patching of v1 for a design-led product.
+**Design contract:** `apps/kol/DESIGN.md` + `PRODUCT.md` are now the locked direction for all
+subsequent screens — palette (espresso ink/marigold/plum/clay), type (Bricolage/Young Serif/Hanken/
+Geist Mono), whileInView motion language, editorial masonry. Do not diverge without a new decision.
+**Known debt:** real autoplay video not wired (build-env CDN block) — Ken-Burns stand-in; backlog in
+`apps/kol/TODO-NEXT.md`.
+**Reversibility:** reversible (v1 fully preserved in `.archive/`)
+**Owner:** ceo
+**Affects:** design-lead, frontend-engineer, product-designer — every future KOL screen builds on
+this scaffold and contract
+**Status:** Merged to main (`ee308da`); next pages queued (expanded-video, maker-world, product, checkout).
