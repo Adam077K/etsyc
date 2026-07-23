@@ -113,6 +113,14 @@ function count(n: number): string {
   return words[n] ?? String(n);
 }
 
+/* "Sharon" · "Sharon and Amara" · "Sharon, Amara and Lena" — an Oxford-free
+   list in the buyer's reading voice. */
+function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
 /* ---- A single order — work-to-do, from the maker's side ---- */
 
 function OrderCard({ order, reduce }: { order: SellerOrder; reduce: boolean }) {
@@ -123,6 +131,11 @@ function OrderCard({ order, reduce }: { order: SellerOrder; reduce: boolean }) {
   const mine = lines.filter((l) => l.product.worldSlug === order.makerSlug);
   const others = lines.filter((l) => l.product.worldSlug !== order.makerSlug);
   const multiMaker = others.length > 0;
+  // One name per co-maker, not one per line item (two pieces by the same maker
+  // must not read "Sharon, Sharon makes the rest"). First names, buyer voice.
+  const otherMakers = [
+    ...new Set(others.map((l) => l.maker.name.split(" ")[0] ?? l.maker.name)),
+  ];
   const shipped = stage === "shipped";
 
   return (
@@ -178,8 +191,9 @@ function OrderCard({ order, reduce }: { order: SellerOrder; reduce: boolean }) {
 
         {multiMaker && (
           <p className="mt-3 font-ui text-xs text-bone/70">
-            You&#39;re making {mine.length} of {lines.length} pieces in this order —
-            {others.map((l) => ` ${l.maker.name}`).join(",")} makes the rest.
+            You&#39;re making {mine.length} of {lines.length} pieces in this order —{" "}
+            {joinNames(otherMakers)} {otherMakers.length === 1 ? "makes" : "make"}{" "}
+            the rest.
           </p>
         )}
 
@@ -201,7 +215,7 @@ function OrderCard({ order, reduce }: { order: SellerOrder; reduce: boolean }) {
                   aria-checked={active}
                   onClick={() => setStage(s)}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-ui text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink-soft",
+                    "press flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-ui text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink-soft",
                     active
                       ? "border-marigold bg-marigold/15 text-bone"
                       : "border-bone/18 text-bone/55 hover:border-bone/40 hover:text-bone",

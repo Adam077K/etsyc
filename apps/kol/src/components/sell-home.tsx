@@ -373,7 +373,7 @@ function NeedRow({
     <motion.li variants={reduce ? calm : rise(14, 0.5)}>
       <Link
         href={href}
-        className="group flex items-center gap-4 rounded-2xl border border-line bg-ink-soft px-5 py-4 transition-colors hover:border-bone/25 hover:bg-ink-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+        className="press group flex items-center gap-4 rounded-2xl border border-line bg-ink-soft px-5 py-4 hover:-translate-y-0.5 hover:border-bone/25 hover:bg-ink-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
       >
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-marigold/12 text-marigold">
           {icon}
@@ -429,7 +429,7 @@ function QuickActions({ reduce }: { reduce: boolean }) {
           <motion.div key={a.href} variants={reduce ? calm : rise(14, 0.5)}>
             <Link
               href={a.href}
-              className="group flex h-full items-center gap-3.5 rounded-2xl border border-line bg-ink-soft px-5 py-4 transition-colors hover:border-marigold/40 hover:bg-ink-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+              className="press group flex h-full items-center gap-3.5 rounded-2xl border border-line bg-ink-soft px-5 py-4 hover:-translate-y-0.5 hover:border-marigold/40 hover:bg-ink-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-bone/15 text-bone transition-colors group-hover:border-marigold/50 group-hover:text-marigold">
                 {a.icon}
