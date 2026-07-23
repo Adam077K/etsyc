@@ -68,7 +68,7 @@ export function MakerFilm({
         loop
         playsInline
         preload="none"
-        aria-label={alt}
+        aria-hidden="true"
         onError={() => setFailed(true)}
         className={cn("absolute inset-0 h-full w-full object-cover", className)}
       />

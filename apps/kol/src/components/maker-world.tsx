@@ -312,11 +312,12 @@ function DockedFilm({
         tabIndex={docked ? 0 : -1}
         aria-label={docked ? "Back to top of the world" : undefined}
         className={cn(
-          "film-drift relative h-full w-full overflow-hidden",
+          "relative h-full w-full overflow-hidden",
           docked &&
             "pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
         )}
       >
+        {/* MakerFilm drifts the still; a real clip never Ken-Burns on itself. */}
         <MakerFilm
           videoSrc={maker.filmSrc}
           poster={maker.image}
@@ -325,7 +326,6 @@ function DockedFilm({
           priority
           sizes="100vw"
           className="object-cover"
-          drift={false}
         />
         <FilmChip maker={maker} />
       </motion.div>

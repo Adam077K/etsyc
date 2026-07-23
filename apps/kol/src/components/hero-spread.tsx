@@ -15,7 +15,9 @@ export function HeroSpread() {
     <section id="top" className="relative min-h-[100svh] w-full overflow-hidden">
       {/* Cover film — a living still (Ken-Burns drift stands in for the clip). */}
       <div className="absolute inset-0">
-        <div className="film-drift absolute inset-0">
+        {/* No wrapper drift — MakerFilm drifts the still, and a real clip must
+            never Ken-Burns on top of its own motion. */}
+        <div className="absolute inset-0">
           <MakerFilm
             videoSrc={COVER_MAKER.filmSrc}
             poster={COVER_MAKER.image}
@@ -24,7 +26,6 @@ export function HeroSpread() {
             priority
             sizes="100vw"
             className="object-cover object-center"
-            drift={false}
           />
         </div>
         {/* Ink scrims: bottom-up for the credit, left-in for the statement. */}

@@ -109,9 +109,10 @@ function EditorialTile({
         className={cn(
           "absolute inset-0 transition-[transform,filter] duration-[900ms] ease-out-expo",
           "saturate-[0.92] brightness-[0.94] group-hover:scale-[1.05] group-hover:saturate-100 group-hover:brightness-100 group-focus-within:scale-[1.05]",
-          maker.kind === "film" && !reduce && "film-drift",
         )}
       >
+        {/* Drift lives on the still (film makers only) — a real clip carries its
+            own motion, so MakerFilm never drifts the video. */}
         <MakerFilm
           videoSrc={maker.kind === "film" ? maker.filmSrc : undefined}
           poster={maker.image}
@@ -119,7 +120,7 @@ function EditorialTile({
           reduce={!!reduce}
           sizes={SIZES}
           className="object-cover"
-          drift={false}
+          drift={maker.kind === "film"}
         />
       </div>
 

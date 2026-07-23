@@ -156,12 +156,13 @@ export function ExpandedVideo({
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={maker.id}
-              className={reduce ? "absolute inset-0" : "film-drift absolute inset-0"}
+              className="absolute inset-0"
               initial={{ opacity: 0, scale: reduce ? 1 : 1.04 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: reduce ? 0.2 : 0.45, ease: easeOut }}
             >
+              {/* MakerFilm drifts the still; a real clip never drifts on itself. */}
               <MakerFilm
                 videoSrc={maker.filmSrc}
                 poster={maker.image}
@@ -170,7 +171,6 @@ export function ExpandedVideo({
                 priority
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
-                drift={false}
               />
             </motion.div>
           </AnimatePresence>

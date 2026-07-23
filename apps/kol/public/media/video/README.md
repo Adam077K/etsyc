@@ -16,13 +16,24 @@ team-produced world clips).
 That's it — the surface starts playing it and every fallback keeps working.
 
 ### Recommended encode
-Muted H.264 MP4, `yuv420p`, `+faststart`, ~2–4 s seamless loop, ≤ ~1.5 MB,
-long edge ≤ 1440. Example (Ken-Burns from a still, silent):
+Muted H.264 MP4, `yuv420p`, `+faststart`, ~2–5 s seamless loop, ≤ ~1.5 MB,
+long edge ≤ 1440.
+
+**Seamless loop.** `<MakerFilm>` plays with `loop`, so the last frame must flow
+back into the first with no snap. Real filmed clips that start and end on a
+matching frame loop naturally — encode those as-is. **Ken-Burns renders from a
+still are monotonic (zoom 1.0 → 1.14) and WILL snap**, so boomerang them
+(forward + reverse concat), which is how the placeholder below was made:
 
 ```
-ffmpeg -y -loop 1 -i still.jpg -t 3 -r 30 \
-  -vf "scale=1400:-2,zoompan=z='min(zoom+0.0012,1.14)':d=90:s=1280x720,format=yuv420p" \
-  -c:v libx264 -preset medium -crf 30 -movflags +faststart -an <file>.mp4
+# 1) forward Ken-Burns pan (silent)
+ffmpeg -y -loop 1 -i still.jpg -t 2.5 -r 30 \
+  -vf "scale=1400:-2,zoompan=z='min(zoom+0.0016,1.14)':d=75:s=1280x720,format=yuv420p" \
+  -c:v libx264 -preset medium -crf 30 -an fwd.mp4
+# 2) reverse it, then 3) concat forward+reverse → seamless palindrome loop
+ffmpeg -y -i fwd.mp4 -vf reverse -an rev.mp4
+ffmpeg -y -i fwd.mp4 -i rev.mp4 -filter_complex "[0:v][1:v]concat=n=2:v=1[v]" \
+  -map "[v]" -an -c:v libx264 -preset medium -crf 30 -movflags +faststart <file>.mp4
 ```
 
 ## Filename → surface → fixture field
