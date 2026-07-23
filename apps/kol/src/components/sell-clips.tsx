@@ -45,6 +45,7 @@ export function SellClips() {
 
   const filmedCount = clips.filter((c) => c.filmed).length;
   const toFilmCount = clips.length - filmedCount;
+  const toFilm = clips.filter((c) => !c.filmed);
 
   const counts: Record<Filter, number> = {
     all: clips.length,
@@ -124,18 +125,43 @@ export function SellClips() {
                   {group.note}
                 </p>
               </div>
-              <div className={groupGridClass(group.id, group.clips.length)}>
-                {group.clips.map((clip, i) => (
-                  <ClipCard
-                    key={clip.id}
-                    clip={clip}
-                    index={i}
-                    reduce={!!reduce}
-                    onFilmed={markFilmed}
-                    onReRecorded={bumpDuration}
-                  />
-                ))}
-              </div>
+              {/* The lone cover otherwise strands the right half of the first
+                  viewport; pair it with a compact "still to film" overview so the
+                  remaining slots are visible immediately (the full, actionable
+                  ghost cards still live in their surface sections below). */}
+              {group.id === "cover" &&
+              group.clips.length === 1 &&
+              filter === "all" &&
+              toFilm.length > 0 ? (
+                <div className="mt-5 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+                  <div className="grid grid-cols-1">
+                    {group.clips.map((clip, i) => (
+                      <ClipCard
+                        key={clip.id}
+                        clip={clip}
+                        index={i}
+                        reduce={!!reduce}
+                        onFilmed={markFilmed}
+                        onReRecorded={bumpDuration}
+                      />
+                    ))}
+                  </div>
+                  <StillToFilm clips={toFilm} />
+                </div>
+              ) : (
+                <div className={groupGridClass(group.id, group.clips.length)}>
+                  {group.clips.map((clip, i) => (
+                    <ClipCard
+                      key={clip.id}
+                      clip={clip}
+                      index={i}
+                      reduce={!!reduce}
+                      onFilmed={markFilmed}
+                      onReRecorded={bumpDuration}
+                    />
+                  ))}
+                </div>
+              )}
             </section>
           ))}
         </div>
@@ -161,6 +187,36 @@ function groupGridClass(surface: ClipSurface, count: number): string {
     default:
       return "mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
   }
+}
+
+/* An at-a-glance overview of the un-filmed slots, shown beside the lone cover so
+   the first viewport isn't half-empty. Not a substitute for the actionable ghost
+   cards below — it's the summary that gets the maker oriented. */
+function StillToFilm({ clips }: { clips: Clip[] }) {
+  return (
+    <aside className="flex flex-col rounded-3xl border border-dashed border-bone/20 bg-ink-soft/30 p-5 sm:p-6">
+      <p className="meta text-bone-dim">Still to film</p>
+      <p className="mt-2 font-serif text-lg leading-snug text-bone/80">
+        {clips.length} {clips.length === 1 ? "slot is" : "slots are"} waiting —
+        each one plays somewhere a buyer will see it.
+      </p>
+      <ul className="mt-4 space-y-2">
+        {clips.map((clip) => (
+          <li
+            key={clip.id}
+            className="flex items-center gap-2.5 rounded-2xl border border-dashed border-bone/15 bg-ink/40 px-3 py-2.5"
+          >
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-soft text-marigold">
+              <VideoCamera size={13} weight="fill" />
+            </span>
+            <span className="min-w-0 flex-1 truncate font-ui text-sm text-bone/85">
+              {clip.title}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
 }
 
 /* ------------------------------------------------------------------ */
