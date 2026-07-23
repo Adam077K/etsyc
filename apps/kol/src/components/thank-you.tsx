@@ -26,7 +26,7 @@ import {
 import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, inView, easeOut } from "@/lib/motion";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockAnchor, dockClip } from "./film/film-geometry";
 
 /**
  * Thank-you — buyer journey step 8, and the payoff of the continuous film. The
@@ -195,7 +195,11 @@ export function ThankYou() {
 
         {/* Saved to account. */}
         <Reveal reduce={!!reduce}>
-          <div className="mt-5 flex flex-col items-start gap-4 rounded-3xl border border-olive/40 bg-olive/10 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+          {/* xl right clearance: the bottom-right dock overlaps this last card at
+              full scroll — pull the "Back to the feed" CTA in from the dock's
+              x-band so it's never occluded (the dock floats over the empty right
+              of the olive panel instead). */}
+          <div className="mt-5 flex flex-col items-start gap-4 rounded-3xl border border-olive/40 bg-olive/10 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7 xl:pr-56">
             <div className="flex items-center gap-3">
               <CheckCircle size={26} weight="fill" className="shrink-0 text-olive" />
               <div>
@@ -263,7 +267,9 @@ function ThankYouFilm({
     isMobileRef.current = window.matchMedia("(max-width: 767px)").matches;
     // Grow from the arriving BOTTOM-RIGHT checkout corner into the full-bleed
     // payoff (origin matches the arriving corner so the growth is continuous).
-    snapTo({ originX: 100, originY: 100 });
+    // Read the corner from the single source rather than re-declaring it inline.
+    const { originX, originY } = dockAnchor("bottom-right");
+    snapTo({ originX, originY });
     driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.8 });
     const t = setTimeout(() => (enteredRef.current = true), prefersReduced ? 0 : 820);
     return () => clearTimeout(t);

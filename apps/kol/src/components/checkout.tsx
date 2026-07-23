@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,13 @@ import type { Maker } from "@/lib/fixtures/makers";
 import { rise, calm, stagger, inView } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { cornerTarget, dockAspect } from "./film/film-geometry";
+import { cornerTarget, dockAnchor, dockAspect } from "./film/film-geometry";
+
+/** Run the corner anchoring BEFORE first paint on the client (so a film arriving
+    from a top-left route never paints over the "Checkout" H1 for a frame), while
+    staying a plain effect during SSR. */
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const ERR = "text-error";
 const NUM = ["", "One", "Two", "Three", "Four", "Five"];
@@ -390,8 +396,18 @@ export function Checkout() {
    entry it fades in. KOL chrome stays plain (D15) — the maker is simply present,
    not selling. */
 function CheckoutFilm({ maker, reduce }: { maker: Maker; reduce: boolean }) {
-  const { present, driveTo } = useFilm();
+  const { present, driveTo, snapTo } = useFilm();
   const [card, setCard] = useState({ width: 176, margin: 24, ratio: 16 / 10 });
+
+  // Anchor the dock to the BOTTOM-RIGHT corner before the first paint, so a film
+  // that arrives still positioned top-left (from a store route where it was
+  // docked/full-bleed) is already sliding away from the bottom-right the moment
+  // checkout renders — it never paints over the "Checkout" H1 for a frame. The
+  // scroll-free settle then finishes in the effect below.
+  useIsoLayoutEffect(() => {
+    const { originX, originY } = dockAnchor("bottom-right");
+    snapTo({ originX, originY });
+  }, [snapTo]);
 
   // Runs once per maker; the film controls are stable. Checkout keeps the
   // pre-directive BOTTOM-RIGHT dock (the top-left store directive never covered
