@@ -528,7 +528,7 @@ export const PRODUCT_DETAILS: Record<string, ProductDetail> = {
     note: "Made to measure",
     clipLabel: "Sharon on soft horns",
     clipDuration: "0:14",
-    gallery: ["/media/twodots/devil-back.jpg", "/media/twodots/materials.jpg"],
+    gallery: ["/media/twodots/devil-back.jpg", "/media/twodots/quilt.jpg", "/media/twodots/materials.jpg"],
     description: [
       "All the mischief, none of the menace. Soft felt horns on a comfortable band, a red tulle skirt with real body to it, and a trident that's cut from foam so the only thing it can poke is the sofa.",
       "I make this one for the kids who want to be a little bit naughty for a night. It photographs like trouble and feels like a pyjama.",
