@@ -258,7 +258,7 @@ function LetterRow({
             </span>
           </span>
           <span className="mt-0.5 flex items-center gap-1.5">
-            <span className="truncate font-ui text-xs text-marigold">
+            <span className="truncate font-ui text-xs text-bone-dim">
               {letter.subject}
             </span>
           </span>
@@ -332,7 +332,7 @@ function OpenLetter({
             {answered ? "You've answered" : "Waiting on you"}
           </p>
           {/* On mobile the About chip is hidden, so name the piece here. */}
-          <p className="mt-1 font-ui text-xs text-marigold sm:hidden">
+          <p className="mt-1 font-ui text-xs text-bone-dim sm:hidden">
             About · {letter.subject}
           </p>
         </div>
