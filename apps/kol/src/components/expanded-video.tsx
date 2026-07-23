@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -15,6 +15,18 @@ import {
 import type { Maker } from "@/lib/fixtures/makers";
 import { WORLDS } from "@/lib/fixtures/worlds";
 import { easeOut } from "@/lib/motion";
+import { cn } from "@/lib/utils";
+
+// Faint echo of the maker's world accent — ties the film (step 2) to the world
+// it opens into (step 3). Only for makers whose world is built.
+const ACCENT_GRAD: Record<string, string> = {
+  clay: "from-clay",
+  sky: "from-sky",
+  plum: "from-plum",
+  olive: "from-olive",
+  bone: "from-bone",
+  ink: "from-ink",
+};
 
 /**
  * expanded-video — the feed tile grows into a focused film view (buyer journey
@@ -42,16 +54,35 @@ export function ExpandedVideo({
   const router = useRouter();
   const maker = list[index];
   const hasWorld = maker ? maker.id in WORLDS : false;
+  const accent = maker ? WORLDS[maker.id]?.accent : undefined;
+
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const next = () => onIndex((index + 1) % list.length);
   const prev = () => onIndex((index - 1 + list.length) % list.length);
 
-  // Keyboard: Esc closes, up/down page. Lock body scroll while open.
+  // Keyboard: Esc closes, up/down page, Tab is trapped inside the dialog.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       else if (e.key === "ArrowDown" || e.key === "ArrowRight") next();
       else if (e.key === "ArrowUp" || e.key === "ArrowLeft") prev();
+      else if (e.key === "Tab" && overlayRef.current) {
+        const f = overlayRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])',
+        );
+        if (f.length === 0) return;
+        const first = f[0]!;
+        const last = f[f.length - 1]!;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     const prevOverflow = document.body.style.overflow;
@@ -63,6 +94,14 @@ export function ExpandedVideo({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, list.length]);
 
+  // Move focus into the dialog on open; restore it to the triggering tile on
+  // close (WCAG 2.1.2 / 2.4.3). openedId is fixed for the overlay's life.
+  useEffect(() => {
+    const prevFocused = document.activeElement as HTMLElement | null;
+    closeBtnRef.current?.focus();
+    return () => prevFocused?.focus?.();
+  }, [openedId]);
+
   if (!maker) return null;
 
   function enterWorld() {
@@ -71,6 +110,7 @@ export function ExpandedVideo({
 
   return (
     <motion.div
+      ref={overlayRef}
       className="fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-ink/92 backdrop-blur-xl lg:flex-row lg:overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -80,12 +120,24 @@ export function ExpandedVideo({
       aria-modal="true"
       aria-label={`${maker.studio} — expanded film`}
     >
+      {/* Faint accent echo of the world this film opens into. */}
+      {accent && (
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-soft-light bg-gradient-to-tr to-transparent",
+            ACCENT_GRAD[accent],
+          )}
+        />
+      )}
+
       {/* Close + counter chrome */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between p-5 sm:p-7">
         <span className="meta pointer-events-auto text-bone-dim">
           {String(index + 1).padStart(2, "0")} / {String(list.length).padStart(2, "0")}
         </span>
         <button
+          ref={closeBtnRef}
           onClick={onClose}
           aria-label="Back to the feed"
           className="pointer-events-auto grid h-11 w-11 place-items-center rounded-full bg-bone text-ink transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
@@ -105,10 +157,10 @@ export function ExpandedVideo({
             <motion.div
               key={maker.id}
               className={reduce ? "absolute inset-0" : "film-drift absolute inset-0"}
-              initial={{ opacity: 0, scale: 1.04 }}
+              initial={{ opacity: 0, scale: reduce ? 1 : 1.04 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.45, ease: easeOut }}
+              transition={{ duration: reduce ? 0.2 : 0.45, ease: easeOut }}
             >
               <Image
                 src={maker.image}
@@ -124,7 +176,7 @@ export function ExpandedVideo({
           <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm">
             <Play size={13} weight="fill" className="text-marigold" />
             <span className="meta text-bone">
-              {maker.kind === "film" ? `Watch ${maker.duration}` : "On film"}
+              {maker.kind === "film" ? `Watch · ${maker.duration}` : "On film"}
             </span>
           </div>
         </motion.div>

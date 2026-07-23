@@ -1,13 +1,15 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   motion,
   useScroll,
   useTransform,
+  useMotionValueEvent,
   useReducedMotion,
+  cubicBezier,
 } from "framer-motion";
 import {
   ArrowLeft,
@@ -47,7 +49,7 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
 
   return (
     <div className="relative bg-ink">
-      <WorldChrome maker={maker} />
+      <WorldChrome />
       <DockedFilm maker={maker} heroRef={heroRef} reduce={!!reduce} />
 
       {/* Hero — the film plays full-bleed behind (fixed, z-40); the scrim + text
@@ -108,8 +110,11 @@ export function MakerWorld({ maker, world }: { maker: Maker; world: World }) {
                 sizes="100vw"
                 className="object-cover opacity-90 mix-blend-multiply"
               />
+              {/* Locked scrim rule — caption never sits raw over the image
+                  (illegible over the near-white indigo vat otherwise). */}
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink/75 to-transparent" />
               <div className="absolute inset-0 flex items-end p-6 sm:p-12">
-                <p className={cn("meta", textOnAccent)}>{world.studioCaption}</p>
+                <p className="meta text-bone">{world.studioCaption}</p>
               </div>
             </div>
           </section>
@@ -170,10 +175,25 @@ function accentGrad(accent: Ground): string {
   return map[accent];
 }
 
-/* Slim world chrome — back to the feed, wordmark, bag. */
-function WorldChrome({ maker }: { maker: Maker }) {
+/* Slim world chrome — back to the feed, wordmark, bag. Gains a solid ground on
+   scroll so the story headline never collides with the pills (esp. mobile). */
+function WorldChrome() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 24);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-gradient-to-b from-ink/80 to-transparent">
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-500",
+        scrolled
+          ? "border-b border-line bg-ink/80 backdrop-blur-md"
+          : "bg-gradient-to-b from-ink/90 via-ink/45 to-transparent",
+      )}
+    >
       <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
         <Link
           href="/#feed"
@@ -211,15 +231,39 @@ function DockedFilm({
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.26]);
-  const x = useTransform(scrollYProgress, [0, 1], [0, -24]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, -24]);
-  const radius = useTransform(scrollYProgress, [0, 0.6], [0, 64]);
+  const ease = cubicBezier(0.16, 1, 0.3, 1);
+  // The dock LANDS: it reaches docked size by 72% of the hero scroll (settle in
+  // the last 28%) on the locked ease curve. Mobile caps smaller so it never
+  // occludes the Add-to-bag corner (read via ref so scroll frames see current).
+  const isMobileRef = useRef(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const on = () => {
+      isMobileRef.current = mq.matches;
+    };
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  const scale = useTransform(scrollYProgress, (v) => {
+    const p = ease(Math.min(v / 0.72, 1));
+    const target = isMobileRef.current ? 0.2 : 0.26;
+    return 1 + (target - 1) * p;
+  });
+  const x = useTransform(scrollYProgress, [0, 0.72], [0, -20], { ease });
+  const y = useTransform(scrollYProgress, [0, 0.72], [0, -20], { ease });
+  const radius = useTransform(scrollYProgress, [0, 0.55], [0, 64], { ease });
   const shadow = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
+    [0, 0.5, 0.9],
     ["0 0 0 rgba(0,0,0,0)", "0 0 0 rgba(0,0,0,0)", "0 30px 60px -20px rgba(0,0,0,0.8)"],
   );
+
+  // When docked, the film becomes a tap-to-top control (pays off persistence).
+  const [docked, setDocked] = useState(false);
+  useMotionValueEvent(scrollYProgress, "change", (v) => setDocked(v > 0.88));
+  const toTop = () =>
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
 
   // Reduced motion: a static in-flow hero film, no docking.
   if (reduce) {
@@ -251,7 +295,25 @@ function DockedFilm({
           boxShadow: shadow,
           transformOrigin: "100% 100%",
         }}
-        className="film-drift relative h-full w-full overflow-hidden"
+        onClick={docked ? toTop : undefined}
+        onKeyDown={
+          docked
+            ? (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  toTop();
+                }
+              }
+            : undefined
+        }
+        role={docked ? "button" : undefined}
+        tabIndex={docked ? 0 : -1}
+        aria-label={docked ? "Back to top of the world" : undefined}
+        className={cn(
+          "film-drift relative h-full w-full overflow-hidden",
+          docked &&
+            "pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+        )}
       >
         <Image
           src={maker.image}
@@ -354,7 +416,7 @@ function ProcessSection({ world, reduce }: { world: World; reduce: boolean }) {
           className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
         >
-          Nothing here is rushed.
+          {world.processSectionHeader}
         </h2>
       </Reveal>
       <div
@@ -374,7 +436,7 @@ function ProcessSection({ world, reduce }: { world: World; reduce: boolean }) {
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover transition-transform duration-[900ms] ease-out-expo group-hover:scale-105"
                 />
-                <span className="absolute left-4 top-4 font-mono text-sm text-bone/80">
+                <span className="meta absolute left-4 top-4 text-bone/80">
                   {step.label}
                 </span>
               </div>
@@ -409,7 +471,7 @@ function ProductsSection({
           className="mb-12 max-w-2xl font-display font-bold leading-[0.95] text-bone"
           style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}
         >
-          A few pieces, made to keep.
+          {world.shopSectionHeader}
         </h2>
       </Reveal>
       <div className="space-y-5 sm:space-y-6">
@@ -463,7 +525,7 @@ function ProductsSection({
                     <ArrowUpRight size={20} weight="bold" />
                   </button>
                 </div>
-                <p className="font-ui text-xs text-bone/45">
+                <p className="font-ui text-xs text-bone-dim">
                   Made by {maker.name} · {maker.place}
                 </p>
               </div>

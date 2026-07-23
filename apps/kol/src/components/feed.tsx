@@ -67,8 +67,10 @@ export function Feed() {
   }
 
   function openAt(i: number) {
+    const m = display[i];
+    if (!m) return;
     setBrowseIndex(i);
-    setOpenedId(display[i]!.id);
+    setOpenedId(m.id);
   }
 
   const isAll = active === "all";

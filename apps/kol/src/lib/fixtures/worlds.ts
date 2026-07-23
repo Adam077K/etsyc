@@ -40,7 +40,10 @@ export interface MakerWorld {
   /** 2-3 short paragraphs — the maker's own story */
   story: string[];
   storyImage: string;
+  /** section headers authored per-maker, in their own voice (no flattening) */
+  processSectionHeader: string;
   process: WorldProcessStep[];
+  shopSectionHeader: string;
   products: WorldProduct[];
   studioImage: string;
   studioCaption: string;
@@ -58,6 +61,7 @@ export const WORLDS: Record<string, MakerWorld> = {
       "Everything here is thrown by hand, one at a time, in the low morning light. No two pieces match, because no two mornings do. That is not a flaw I tolerate — it is the whole reason I make.",
     ],
     storyImage: "/media/clay-shape.jpg",
+    processSectionHeader: "Nothing here is rushed.",
     process: [
       {
         id: "center",
@@ -107,6 +111,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         note: "Set of 4",
       },
     ],
+    shopSectionHeader: "A few pieces, made to keep.",
     studioImage: "/media/clay-shelf.jpg",
     studioCaption: "The drying shelf, Alfama studio — Lisbon",
     voice: "If a pot ends up on your table for thirty years, I have done my job. — Lena",
@@ -120,6 +125,7 @@ export const WORLDS: Record<string, MakerWorld> = {
       "Each length is dipped by hand, again and again, oxidising blue between every dip. The depth you see is the number of times I chose to go back in.",
     ],
     storyImage: "/media/sabine.jpg",
+    processSectionHeader: "The vat sets the pace.",
     process: [
       {
         id: "ferment",
@@ -154,6 +160,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         note: "Made to order",
       },
     ],
+    shopSectionHeader: "Cloth worth the wait.",
     studioImage: "/media/indigo-dye.jpg",
     studioCaption: "The living vat — Médina, Dakar",
     voice: "The blue remembers every hand that made it. — Sabine",

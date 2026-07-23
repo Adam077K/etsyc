@@ -125,7 +125,7 @@ function EditorialTile({
       {maker.kind === "film" && (
         <div className="absolute right-3 top-3 flex items-center gap-2 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm">
           <Play size={13} weight="fill" className="text-marigold" />
-          <span className="meta text-bone">Watch {maker.duration}</span>
+          <span className="meta text-bone">Watch · {maker.duration}</span>
         </div>
       )}
 
@@ -174,9 +174,7 @@ function ObjectTile({
   reduce: boolean | null;
 }) {
   return (
-    <motion.div
-      layoutId={`film-${maker.id}`}
-      transition={{ duration: reduce ? 0.2 : 0.6, ease: easeOut }}
+    <div
       className={cn(
         "flex w-full flex-col overflow-hidden rounded-2xl ring-1 ring-line transition-shadow duration-500 group-hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.75)]",
         ASPECT_CLASS[maker.span],
@@ -188,7 +186,13 @@ function ObjectTile({
           GROUND_BG[maker.ground as Ground],
         )}
       >
-        <div className="relative h-full w-full overflow-hidden rounded-xl">
+        {/* layoutId sits on the IMAGE only, so the mat + caption strip don't
+            flash inside the expanding overlay frame (clean morph). */}
+        <motion.div
+          layoutId={`film-${maker.id}`}
+          transition={{ duration: reduce ? 0.2 : 0.6, ease: easeOut }}
+          className="relative h-full w-full overflow-hidden rounded-xl"
+        >
           <Image
             src={maker.image}
             alt={`${maker.name} — ${maker.discipline}, ${maker.studio}`}
@@ -203,7 +207,7 @@ function ObjectTile({
           <span className="absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-full bg-bone text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <ArrowUpRight size={18} weight="bold" />
           </span>
-        </div>
+        </motion.div>
       </div>
 
       <div className="bg-ink px-4 py-3.5">
@@ -216,6 +220,6 @@ function ObjectTile({
           {maker.place}
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
