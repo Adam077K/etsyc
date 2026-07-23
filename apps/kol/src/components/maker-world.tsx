@@ -330,16 +330,27 @@ function WorldFilm({
     } else {
       setInteraction(null);
     }
-    if (reduce || !enteredRef.current) return;
+    const docked = isMobileRef.current ? 0.2 : 0.26;
+    if (reduce) {
+      // Reduced motion: presence WITHOUT motion. Hold the film full-bleed over
+      // the hero, then SNAP it to the docked corner past the hero so it never
+      // covers the world content the buyer needs to read (no per-frame move).
+      if (v > 0.6) {
+        snapTo({ scale: docked, x: -20, y: -20, radius: 64, opacity: 1, originX: 100, originY: 100, shadow: 1 });
+      } else {
+        snapTo({ ...HERO_TARGET });
+      }
+      return;
+    }
+    if (!enteredRef.current) return;
     // The dock LANDS by 72% of the hero scroll (settle in the last 28%).
     const p = ease(Math.min(v / 0.72, 1));
-    const target = isMobileRef.current ? 0.2 : 0.26;
-    m.scale.set(1 + (target - 1) * p);
-    const pos = ease(Math.min(v / 0.72, 1));
-    m.x.set(-20 * pos);
-    m.y.set(-20 * pos);
+    m.scale.set(1 + (docked - 1) * p);
+    m.x.set(-20 * p);
+    m.y.set(-20 * p);
     m.radius.set(64 * ease(Math.min(v / 0.55, 1)));
-    m.shadow.set(v <= 0.5 ? 0 : ease(Math.min((v - 0.5) / 0.4, 1)));
+    // Shadow ramps linearly over [0.5, 0.9] — byte-parity with main.
+    m.shadow.set(v <= 0.5 ? 0 : Math.min((v - 0.5) / 0.4, 1));
   });
 
   return null;

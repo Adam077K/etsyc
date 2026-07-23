@@ -77,6 +77,21 @@ test.describe("reduced motion", () => {
     await expect(stage(page).locator("img")).toBeVisible({ timeout: 10_000 });
     await expect(stage(page).locator("video")).toHaveCount(0);
 
+    // Mid-scroll: past the hero the film MUST dock to the corner and NOT cover
+    // the world content (the reduced-motion occlusion regression this guards).
+    const story = page.getByText("The maker", { exact: true }).first();
+    await story.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    await expect(story).toBeVisible();
+    const vw = page.viewportSize()!.width;
+    const box = await stage(page).boundingBox();
+    expect(box, "stage has a box").not.toBeNull();
+    // Docked (~0.26 of the viewport), not full-bleed — the content is uncovered.
+    expect(box!.width).toBeLessThan(vw * 0.5);
+    await page.screenshot({ path: `${SHOTS}/6-reduced-motion-world-midscroll.png` });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(300);
+
     const token = `rm-${Date.now()}`;
     await stage(page).evaluate((el, t) => el.setAttribute("data-proof", t), token);
     await page.locator('a[href="/m/odd-clay/p/carafe"]').first().click();
