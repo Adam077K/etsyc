@@ -320,3 +320,8 @@ export const ISSUE_STATS = {
 };
 
 export const ALL_MAKERS: Maker[] = [COVER_MAKER, ...MAKERS];
+
+/** Look up a maker by id (id doubles as the /m/[slug] route slug). */
+export function getMaker(id: string): Maker | undefined {
+  return ALL_MAKERS.find((m) => m.id === id);
+}

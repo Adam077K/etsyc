@@ -27,3 +27,16 @@ Replace with KOL's own maker footage/photography before any public launch.
 | plates.jpg | Assorted ceramic plates | Unsplash `photo-1604014237800-1c9102c219da` | Unsplash |
 | mono-ceramics.jpg | Speckled ceramic tumblers | Unsplash `photo-1610701596007-11502861dcfa` | Unsplash |
 | maker-soren.jpg | Portrait, black & white (unused reserve) | Unsplash `photo-1552058544-f2b08422138a` | Unsplash |
+
+## Arc 1 — maker worlds (Odd Clay + Indigo & Ash)
+
+| File | Depicts | Source | License |
+|---|---|---|---|
+| clay-shape.jpg | Hands finishing a clay bowl on a wheel | Pexels photo 2166456 | Pexels |
+| clay-drying.jpg | Rows of unglazed pots drying | Pexels photo 2162938 | Pexels |
+| clay-shelf.jpg | Finished ceramics on a studio shelf | Unsplash `photo-1610701596061-2ecf227e85b2` | Unsplash |
+| sabine.jpg | Portrait, wax-print, terracotta wall | Unsplash `photo-1531123897727-8f129e1688ce` | Unsplash |
+| indigo-dye.jpg | Indigo/ink swirl (dye vat) | Unsplash `photo-1528459801416-a9e53bbf4e17` | Unsplash |
+| textile-fold.jpg | Folded lengths of cloth | Pexels photo 4614226 | Pexels |
+| textile-machine.jpg | Thread spools + sewing machine | Pexels photo 4614225 | Pexels |
+| textile-scarf.jpg | Worn scarf, moody light | Unsplash `photo-1520903920243-00d872a2d1c9` | Unsplash |
