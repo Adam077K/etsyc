@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,11 +28,12 @@ import { TrustBadge } from "./trust-badge";
 import { ReviewStory } from "./review-story";
 import { cn } from "@/lib/utils";
 
+// AA-safe accent text/icon tints (small meta kickers need ≥4.5:1 on ink).
 const ACCENT_TEXT: Record<Ground, string> = {
-  clay: "text-clay",
-  sky: "text-sky",
-  plum: "text-plum",
-  olive: "text-olive",
+  clay: "text-clay-bright",
+  sky: "text-sky-bright",
+  plum: "text-bone-dim",
+  olive: "text-bone-dim",
   bone: "text-bone",
   ink: "text-bone",
 };
@@ -57,14 +58,48 @@ export function ProductPage({
   const reduce = useReducedMotion();
   const [active, setActive] = useState(0);
   const [added, setAdded] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [show3d, setShow3d] = useState(false);
+  const [pipOpen, setPipOpen] = useState(true);
+  const trustRef = useRef<HTMLDivElement>(null);
   const hero = product.gallery[active] ?? product.gallery[0]!;
   const accentText = ACCENT_TEXT[world.accent];
+
+  // The PiP must never trap the content beneath it. Start collapsed on small
+  // screens (it would cover a gallery thumbnail), and auto-collapse once the
+  // trust badge — the D7 proof — scrolls into view on any width.
+  useEffect(() => {
+    // Defer the mobile check a frame so it isn't a synchronous setState.
+    const raf = requestAnimationFrame(() => {
+      if (window.matchMedia("(max-width: 639px)").matches) setPipOpen(false);
+    });
+    const el = trustRef.current;
+    let io: IntersectionObserver | undefined;
+    if (el && typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry && entry.intersectionRatio >= 0.4) setPipOpen(false);
+        },
+        { threshold: [0.4] },
+      );
+      io.observe(el);
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      io?.disconnect();
+    };
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-ink">
       <ProductChrome maker={maker} />
-      <ContextualFilm maker={maker} product={product} reduce={!!reduce} />
+      <ContextualFilm
+        maker={maker}
+        product={product}
+        reduce={!!reduce}
+        open={pipOpen}
+        onOpenChange={setPipOpen}
+      />
 
       <main className="mx-auto max-w-issue px-5 pb-24 pt-24 sm:px-8 sm:pt-28">
         {/* Where you are — back into the maker's world. */}
@@ -143,14 +178,34 @@ export function ProductPage({
                 className="flex items-center gap-2 rounded-full border border-bone/25 px-5 py-2.5 font-ui text-sm font-medium text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
               >
                 <ChatCircle size={18} weight="fill" className={accentText} />
-                Ask {maker.name.split(" ")[0]}
+                Ask {maker.name.split(" ").at(0) ?? maker.name}
               </Link>
             </div>
             {show3d && (
-              <p className="mt-3 font-ui text-xs text-bone-dim">
-                A rotatable 3D model of this piece is on the way — makers upload
-                one per product in the next issue.
-              </p>
+              <div className="mt-4 overflow-hidden rounded-3xl border border-line bg-ink-soft">
+                <div className="relative grid aspect-[16/10] place-items-center overflow-hidden">
+                  <Image
+                    src={product.gallery[0]!}
+                    alt=""
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 45vw"
+                    className="object-cover opacity-30 blur-[1px]"
+                  />
+                  <div className="absolute inset-6 rounded-2xl border border-dashed border-bone/25" />
+                  <div className="relative flex flex-col items-center gap-3 text-center">
+                    <span className="grid h-14 w-14 place-items-center rounded-full bg-ink/70 backdrop-blur-sm">
+                      <Cube size={26} weight="light" className={accentText} />
+                    </span>
+                    <p className="font-ui text-sm font-semibold text-bone">
+                      3D preview coming soon
+                    </p>
+                    <p className="max-w-xs px-6 font-ui text-xs leading-relaxed text-bone-dim">
+                      Makers upload a rotatable model per piece — you&rsquo;ll turn
+                      it in the light before you buy.
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Buy */}
@@ -188,20 +243,27 @@ export function ProductPage({
                 </Link>
               ) : (
                 <button
-                  aria-label={`Save ${product.name}`}
-                  className="grid h-12 w-12 place-items-center rounded-full border border-bone/25 text-bone transition-colors hover:border-bone/60 hover:bg-bone/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                  onClick={() => setSaved((v) => !v)}
+                  aria-pressed={saved}
+                  aria-label={saved ? `Saved ${product.name}` : `Save ${product.name}`}
+                  className={cn(
+                    "grid h-12 w-12 place-items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+                    saved
+                      ? "border-marigold/60 bg-marigold/10 text-marigold"
+                      : "border-bone/25 text-bone hover:border-bone/60 hover:bg-bone/5",
+                  )}
                 >
-                  <Heart size={20} />
+                  <Heart size={20} weight={saved ? "fill" : "regular"} />
                 </button>
               )}
             </div>
             <p className="mt-4 flex items-center gap-2 font-ui text-sm text-bone-dim">
               <MapPin size={15} className="shrink-0" />
-              Made by {maker.name} in {maker.place.split(" → ").pop()}
+              Made by {maker.name} in {maker.place.split(" → ").at(-1) ?? maker.place}
             </p>
 
             {/* Trust — concept-locked. */}
-            <div className="mt-8">
+            <div ref={trustRef} className="mt-8">
               <TrustBadge maker={maker} />
             </div>
 
@@ -380,13 +442,16 @@ function ContextualFilm({
   maker,
   product,
   reduce,
+  open,
+  onOpenChange,
 }: {
   maker: Maker;
   product: ProductDetail;
   reduce: boolean;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(true);
 
   const liveDot = (
     <span
@@ -443,18 +508,20 @@ function ContextualFilm({
             </button>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange(false)}
               aria-label="Minimise the film"
-              className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-ink/75 text-bone backdrop-blur-sm transition-colors hover:bg-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
+              className="group/min absolute right-0 top-0 grid h-11 w-11 place-items-center focus-visible:outline-none"
             >
-              <Minus size={13} weight="bold" />
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-ink/75 text-bone backdrop-blur-sm transition-colors group-hover/min:bg-ink group-focus-visible/min:ring-2 group-focus-visible/min:ring-marigold">
+                <Minus size={13} weight="bold" />
+              </span>
             </button>
           </motion.div>
         ) : (
           <motion.button
             key="collapsed"
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => onOpenChange(true)}
             aria-label={`Expand the film — now playing ${product.clipLabel}`}
             initial={reduce ? false : { opacity: 0, scale: 0.85 }}
             animate={reduce ? undefined : { opacity: 1, scale: 1 }}
