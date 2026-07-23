@@ -30,9 +30,10 @@ const config: Config = {
         // Moss — Etsy slime-green family, kept dark for the craft/values spread.
         olive: "#4E5A2A",
         clay: {
-          // Terracotta — Etsy Brick family (near-identity; darkened a step so bone
-          // body text clears AA on the stat spread).
-          DEFAULT: "#AE4328",
+          // Rust/sienna — Etsy earth family. Deepened well below the accent
+          // orange's value so the stat spread reads two-colour (blobs separate
+          // from the ground) instead of monochrome; also lifts bone body to ~7.6:1.
+          DEFAULT: "#7C2D12",
           // AA-safe (~6.5:1 on ink) tint for small accent text on dark grounds.
           bright: "#E08462",
         },

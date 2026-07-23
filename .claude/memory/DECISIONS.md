@@ -433,7 +433,7 @@ same video node keeps playing world→product.
 | " | " | " | " | orange text/link on ink | 5.61:1 | 4.5 | ✅ |
 | marigold bright | `#F2A93B` | **`#FF7A3C`** | Etsy Orange (light) | bright display accent on ink ("on film.") | 6.90:1 | 3.0 | ✅ |
 | " | " | " | " | ink on bright (CTA hover) / focus ring | 6.90:1 | 4.5 | ✅ |
-| clay DEFAULT | `#B4462A` | **`#AE4328`** | Terracotta / Brick | bone body on clay (stat spread) | 4.67:1 | 4.5 | ✅ |
+| clay DEFAULT | `#B4462A` | **`#7C2D12`** | Rust / earth | bone body on clay (stat spread) | 7.57:1 | 4.5 | ✅ |
 | clay bright | `#E08462` | `#E08462` (kept) | " | clay-bright kicker on ink | 6.52:1 | 4.5 | ✅ |
 | plum | `#43223B` | **`#4C2740`** | Fig (bubblegum/lavender dk) | bone on plum / bone-dim on plum | 10.15 / 6.94 | 4.5 | ✅ |
 | olive | `#4E5A2A` | `#4E5A2A` (kept) | Moss (slime-green dk) | bone on olive / bone/70 eyebrow¹ | 6.01 / 6.01 | 4.5 | ✅ |
@@ -445,6 +445,6 @@ same video node keeps playing world→product.
 
 **Why:** Etsy Orange is darker/redder than the old golden marigold, so ink-on-accent dropped from 7.5:1 to 5.61:1 and orange-on-ink from 7.2:1 to 5.61:1 — both still AA. Where a pairing failed, the DERIVED tone was adjusted (clay darkened a step, sky→denim which actually *improved* bone contrast 3.5→5.06), never the pairing structure. Literals swept: globals.css selection/focus, liquid.tsx blob fills, sell-preview accent map + fallback, sell-home chart, sell-publish ACCENT, sell.ts palette picker.
 
-**Honest regressions (flagged for the Founder/critic):** (1) the golden "premium golden-hour" glow of the old marigold is gone — Etsy Orange reads louder/more commercial (on-brand for Etsy, but less editorial-premium). (2) Terracotta `#AE4328` is now a near-cousin of Etsy Orange `#F1641E`, so the clay stat-spread ground and the accent read as the same warm-orange family — the old marigold(gold)-vs-clay(red) distinction is softened.
+**Honest regressions (flagged for the Founder/critic):** (1) the golden "premium golden-hour" glow of the old marigold is gone — Etsy Orange reads louder/more commercial (on-brand for Etsy, but less editorial-premium). (2) ~~Terracotta `#AE4328` is a near-cousin of Etsy Orange~~ **RESOLVED** at critic review: clay deepened to rust `#7C2D12`, well below the accent's value, so the stat spread reads two-colour again (clay-vs-orange luminance contrast 1.81→2.94) — blob separation restored. Ripple: `border-clay/40` decorative hairlines on ink get fainter (full-strength clay-on-ink 3.10→1.91:1; at /40 opacity 1.46→1.23:1) — see the Sharon-world note.
 
 **Reversibility:** fully reversible (token values on a dedicated branch `feat/kol-etsy-colors`). A later full LIGHT Etsy theme was explicitly NOT preempted. **Owner:** design-lead · **Affects:** every surface (accent only) · **Risk:** lite (values only, no structure).

@@ -347,7 +347,7 @@ function VoiceTag({ show }: { show: boolean }) {
 /* Lighten an accent for small legible text on ink (keeps it readable at AA). */
 function lightAccent(hex: string): string {
   const map: Record<string, string> = {
-    "#AE4328": "#E08462", // clay -> AA tint
+    "#7C2D12": "#E08462", // clay -> AA tint
     "#4C2740": "#C79ABE", // plum -> soft mauve
     "#4E5A2A": "#A8B673", // olive -> pale olive
     "#41628C": "#7FA6C8", // sky -> AA tint

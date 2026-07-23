@@ -31,11 +31,11 @@ export function GooDefs() {
 export function LiquidDivider({ className = "" }: { className?: string }) {
   const reduce = useReducedMotion();
   const blobs = [
-    { id: "clay-l", cx: 22, r: 30, fill: "#AE4328", dur: 9, cyKeys: [20, 12, 24, 20] },
+    { id: "clay-l", cx: 22, r: 30, fill: "#7C2D12", dur: 9, cyKeys: [20, 12, 24, 20] },
     // Orange blobs run the inverted cy phase so the seam pinches/billows from
     // frame one instead of waiting for duration drift (design-critic polish).
     { id: "gold-l", cx: 40, r: 38, fill: "#F1641E", dur: 11, cyKeys: [20, 27, 14, 20] },
-    { id: "clay-r", cx: 58, r: 30, fill: "#AE4328", dur: 8, cyKeys: [20, 12, 24, 20] },
+    { id: "clay-r", cx: 58, r: 30, fill: "#7C2D12", dur: 8, cyKeys: [20, 12, 24, 20] },
     { id: "gold-r", cx: 76, r: 40, fill: "#F1641E", dur: 12, cyKeys: [20, 27, 14, 20] },
   ];
   return (

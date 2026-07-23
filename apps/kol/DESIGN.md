@@ -23,7 +23,7 @@ Warm-but-vivid. The dominant grounds are **deep warm ink** and **saturated color
 | Bone-dim | `--bone-dim` | `#CDBFA6` | Muted labels/meta on ink (AA-checked). |
 | Fig (spread ground) | `--plum` | `#4C2740` | Editorial pull-quote spreads. Etsy bubblegum/lavender family, darkened. |
 | Moss (spread ground) | `--olive` | `#4E5A2A` | Craft/values spread. Etsy slime-green family, retained dark. |
-| Terracotta (spread ground) | `--clay` | `#AE4328` | Warm statement ground. Etsy Brick family. |
+| Rust (spread ground) | `--clay` | `#7C2D12` | Warm statement ground. Etsy earth family; kept well below the accent-orange value so the stat spread stays two-colour. |
 | Denim (spread ground) | `--sky` | `#41628C` | Cool contrast ground. Etsy's brand blue (was Kotn pool-blue). |
 | Etsy Orange (through-accent) | `--marigold` | `#F1641E` | THE signal color — active chips, links, CTA, hover underline. |
 | Etsy Orange-bright | `--marigold-2` | `#FF7A3C` | Large display accent on ink + focus ring. |
