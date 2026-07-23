@@ -63,7 +63,12 @@ export function SellMasthead({
           : "bg-gradient-to-b from-ink/70 to-transparent",
       )}
     >
-      <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-4 sm:px-8">
+      <div
+        className={cn(
+          "mx-auto flex max-w-issue items-center justify-between px-5 py-4 sm:px-8",
+          nav ? "gap-2 sm:gap-4" : "gap-4",
+        )}
+      >
         <div className="flex items-baseline gap-3">
           <Link
             href="/"
@@ -95,11 +100,11 @@ export function SellMasthead({
           {nav ? (
             <Link
               href={HQ_WORLD_HREF}
-              className="flex items-center gap-2 rounded-full border border-bone/25 px-4 py-2 font-ui text-sm text-bone/85 transition-colors hover:border-bone/60 hover:text-bone"
+              aria-label="View your world"
+              className="flex shrink-0 items-center gap-2 rounded-full border border-bone/25 px-2.5 py-2 font-ui text-sm text-bone/85 transition-colors hover:border-bone/60 hover:text-bone sm:px-4"
             >
               <ArrowUpRight size={16} weight="bold" />
               <span className="hidden sm:inline">View your world</span>
-              <span className="sm:hidden">World</span>
             </Link>
           ) : current ? (
             <Link
@@ -139,7 +144,7 @@ export function SellMasthead({
 function SellerNav({ active }: { active: SellNavId }) {
   return (
     <nav aria-label="Seller sections" className="min-w-0">
-      <ul className="flex items-center gap-1 sm:gap-2">
+      <ul className="flex items-center gap-0.5 sm:gap-2">
         {SELL_NAV.map((item) => {
           const isActive = item.id === active;
           return (
@@ -148,7 +153,7 @@ function SellerNav({ active }: { active: SellNavId }) {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "relative block rounded-full px-2.5 py-1.5 font-ui text-[0.82rem] transition-colors sm:px-3.5 sm:text-sm",
+                  "relative block rounded-full px-2 py-1.5 font-ui text-[0.75rem] transition-colors sm:px-3.5 sm:text-sm",
                   isActive
                     ? "text-bone"
                     : "text-bone/55 hover:text-bone",
@@ -158,7 +163,7 @@ function SellerNav({ active }: { active: SellNavId }) {
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute inset-x-2.5 -bottom-0.5 h-px origin-left bg-marigold transition-transform duration-300 sm:inset-x-3.5",
+                    "absolute inset-x-2 -bottom-0.5 h-px origin-left bg-marigold transition-transform duration-300 sm:inset-x-3.5",
                     isActive ? "scale-x-100" : "scale-x-0",
                   )}
                 />
