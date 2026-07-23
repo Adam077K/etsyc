@@ -5,20 +5,21 @@
  * pitch, extending the Odd Clay Studio maker (Lena Okafor) whose world buyers
  * already meet at /m/odd-clay and whose seller journey ends at /sell/publish.
  *
- * This file is strictly ADDITIVE — it READ-ONLY reuses `resolveBag`,
- * `bagTotals`, `gbp` and `MOCK_BAG` from commerce.ts and never mutates them.
- * The buyer's £137 order (carafe + wrap) is the same MOCK_BAG the buyer sees at
- * checkout / thank-you; here it is shown from the MAKER's side as work-to-do.
+ * Order 1 mirrors a real buyer order (carafe + wrap = £137) shown from the
+ * MAKER's side as work-to-do. It is an EXPLICIT bag, not the buyer's MOCK_BAG:
+ * MOCK_BAG is now the Two Dots buyer-journey bag (Sharon's Butterfly Wings + Cat
+ * Tote), and this seller HQ is LENA's — so binding order 1 to MOCK_BAG would show
+ * Sharon's pieces as Lena's work ("making 0 of 2"). Kept decoupled so the whole
+ * Lena workspace (home / orders / studio / clips / messages / publish) stays one
+ * coherent maker.
  *
- * The maker-voiced status lines are deliberately the mirror of the buyer's
- * order-status voice: what Lena types here is literally what her buyer reads
- * (the thank-you note THANK_YOU_NOTES["odd-clay"] — "on the drying shelf now").
- * Engagement numbers are labelled synthetic demo figures; no real sales,
- * ratings or review counts are ever fabricated.
+ * The maker-voiced status lines mirror the buyer's order-status voice: what Lena
+ * types here is what her buyer reads (the making line echoes the odd-clay
+ * thank-you — "on the drying shelf now"). Engagement numbers are labelled
+ * synthetic demo figures; no real sales/ratings are fabricated.
  */
 
 import type { BagLine } from "./commerce";
-import { MOCK_BAG } from "./commerce";
 
 /* ------------------------------------------------------------------ *
  * Orders — the maker's fulfilment queue.
@@ -77,9 +78,10 @@ export const STAGE_META: Record<
 export const STAGE_ORDER: OrderStage[] = ["new", "making", "shipped"];
 
 /**
- * Three demo orders. Order 1 is the canonical MOCK_BAG (£137, carafe + wrap) —
- * a two-maker order where Lena makes only the carafe; the wrap is Sabine's.
- * Orders 2 & 3 are additive single-maker bags (her own pieces only).
+ * Three demo orders. Order 1 is a two-maker order (£137) where Lena makes only
+ * the carafe; the wrap is Sabine's — it drives the "you make 1 of N, [other]
+ * makes the rest" split. Orders 2 & 3 are additive single-maker bags (her own
+ * pieces only).
  */
 export const SELLER_ORDERS: SellerOrder[] = [
   {
@@ -88,7 +90,12 @@ export const SELLER_ORDERS: SellerOrder[] = [
     buyerName: "Marianne T.",
     buyerPlace: "Porto",
     placed: "2 days ago",
-    bag: MOCK_BAG, // carafe (yours) + wrap (Sabine's) = £137
+    // Explicit (NOT MOCK_BAG — that's now Two Dots' bag): carafe (yours) +
+    // wrap (Sabine's) = £137.
+    bag: [
+      { productId: "carafe", qty: 1 },
+      { productId: "wrap", qty: 1 },
+    ],
     makerSlug: "odd-clay",
     stage: "making",
     todo: "Glaze & pack the Salt-Fired Carafe",
