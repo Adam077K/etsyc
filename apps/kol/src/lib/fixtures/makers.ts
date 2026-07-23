@@ -4,6 +4,8 @@
  * with real Unsplash/Pexels stock of real people making real things (see
  * apps/kol/CREDITS.md). Nothing here is a real business; prices, review
  * counts and sales figures are deliberately absent (never fabricated).
+ * Exception: Two Dots is a REAL business (real Founder-provided assets, synthetic
+ * commerce data) — see apps/kol/CREDITS.md.
  */
 
 export type CraftId =
