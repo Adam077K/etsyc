@@ -601,7 +601,12 @@ const WALL_RATIO: Record<
 function GalleryWall({ world, reduce }: { world: World; reduce: boolean }) {
   const wall = world.wall!;
   return (
-    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
+    // Mobile: drop the whole wall (divider + kicker/H2) below the portrait dock
+    // band so the taller card never sits on the section header. Section-level so
+    // the border-t↔heading spacing is preserved. Desktop clears already.
+    // (No current maker.wall routes here — TwoDots uses its own WallSection —
+    // but wall makers on the shared template inherit the fix.)
+    <section className="mx-auto max-w-issue px-5 pb-24 pt-[15rem] sm:px-8 sm:pb-32 sm:pt-0">
       <Reveal reduce={reduce}>
         <div className="mb-10 border-t border-clay-bright/30 pt-8">
           {world.wallSectionKicker && (
@@ -804,7 +809,11 @@ function MakeReel({
           if (l) onLabel(l);
         }}
       >
-        <div className="mb-8 flex items-end justify-between gap-4">
+        {/* Mobile: the taller portrait dock overlaps the top-left, where the
+            "How it's made" kicker + H2 start. Drop the header below the dock
+            band at mobile only (the narrow card already clears on desktop) —
+            same clearance pattern as StorySection. */}
+        <div className="mb-8 flex items-end justify-between gap-4 pt-[15rem] sm:pt-0">
           <div>
             <p className={cn("meta mb-3", accentBright)}>How it&#39;s made</p>
             <h2

@@ -545,7 +545,11 @@ const WALL_RATIO: Record<DeepWallItem["ratio"], string> = {
 function WallSection({ reduce, onView }: { reduce: boolean; onView: () => void }) {
   const d = TWODOTS_DEEP;
   return (
-    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
+    // Mobile: drop the whole wall (divider + kicker/H2) below the portrait dock
+    // band so the taller card never sits on "The whole room" header. Section-level
+    // so the border-t↔heading spacing is preserved; desktop clears already —
+    // same clearance pattern as the idea section.
+    <section className="mx-auto max-w-issue px-5 pb-24 pt-[15rem] sm:px-8 sm:pb-32 sm:pt-0">
       <Reveal reduce={reduce} onView={onView}>
         <div className="mb-10 border-t border-clay-bright/30 pt-8">
           <p className="meta mb-3 text-clay-bright">{d.wallKicker}</p>
