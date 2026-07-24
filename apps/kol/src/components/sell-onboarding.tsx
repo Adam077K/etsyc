@@ -11,17 +11,22 @@ import {
 import {
   Play,
   ArrowRight,
+  ArrowDown,
   X,
+  Eye,
+  MapPin,
   VideoCamera,
   MagicWand,
   SlidersHorizontal,
   Rocket,
-  Quotes,
   type Icon,
 } from "@phosphor-icons/react";
 import { JOURNEY_STEPS, type JourneyIcon } from "@/lib/fixtures/sell";
+import { COVER_MAKER } from "@/lib/fixtures/makers";
+import { CRAFT_ICON } from "@/lib/icons";
 import { rise, stagger, calm, inView } from "@/lib/motion";
 import { Magnetic } from "./magnetic";
+import { MakerFilm } from "./maker-film";
 
 const STEP_ICON: Record<JourneyIcon, Icon> = {
   interview: VideoCamera,
@@ -37,98 +42,128 @@ export function SellOnboarding() {
 
   return (
     <>
-      {/* ---- Hero: the pitch to makers ---- */}
+      {/* ---- Hero: THE MIRROR — show the maker what a buyer sees. The argument
+              sits left; an honest miniature of her page in the issue (the real
+              buyer-surface film primitive, real fixture, labelled demo) is the
+              evidence on the right. Shown, not told. ---- */}
       <section
         id="top"
-        className="relative flex min-h-[100svh] w-full items-end overflow-hidden"
+        className="relative flex min-h-[100svh] w-full items-center overflow-hidden"
       >
+        {/* Cinematic ground, dialled well down so the cover card is the focal
+            point — this is the same clay-shape still, now atmosphere not subject. */}
         <div className="absolute inset-0">
           <div className="film-drift absolute inset-0">
             <Image
               src="/media/clay-shape.jpg"
-              alt="A maker's hands finishing a bowl on the wheel"
+              alt=""
+              aria-hidden
               fill
               priority
               sizes="100vw"
-              className="object-cover object-center"
+              className="object-cover object-center opacity-40"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/30" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/25 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/70 to-ink/40" />
         </div>
 
-        <motion.div
-          variants={stagger(0.15, 0.12)}
-          initial="hidden"
-          animate="visible"
-          className="relative mx-auto w-full max-w-issue px-5 pb-16 pt-32 sm:px-8 sm:pb-24"
-        >
-          <motion.p variants={item} className="meta mb-6 text-bone-dim">
-            For makers · The Maker&#39;s Issue
-          </motion.p>
-
-          <motion.h1
-            variants={item}
-            className="max-w-5xl font-display font-extrabold leading-[0.9] text-bone"
-            style={{ fontSize: "clamp(2.75rem, 8vw, 6.75rem)" }}
-          >
-            Your world, built
-            <br />
-            from{" "}
-            <span className="font-serif font-normal italic text-marigold-bright">
-              your&nbsp;story.
-            </span>
-          </motion.h1>
-
-          <motion.p
-            variants={item}
-            className="mt-7 max-w-measure font-ui text-lg leading-relaxed text-bone/85 sm:text-xl"
-          >
-            Talk to us for ten minutes about what you make and why. We&#39;ll turn
-            it into a whole shop — on film, in your words, in colours drawn from
-            your own work. You stay the author. We take the slack.
-          </motion.p>
-
+        <div className="relative mx-auto grid w-full max-w-issue items-center gap-12 px-5 pb-20 pt-32 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-24">
+          {/* The argument */}
           <motion.div
-            variants={item}
-            className="mt-9 flex flex-wrap items-center gap-3"
+            variants={stagger(0.13, 0.12)}
+            initial="hidden"
+            animate="visible"
           >
-            <Magnetic>
-              <Link
-                href="/sell/interview"
-                className="group flex items-center gap-2.5 rounded-full bg-marigold px-7 py-3.5 font-ui text-base font-semibold text-ink transition-colors hover:bg-marigold-bright"
-              >
-                Start your interview
-                <ArrowRight
-                  size={20}
-                  weight="bold"
-                  className="transition-transform group-hover:translate-x-1"
-                />
-              </Link>
-            </Magnetic>
-            <button
-              type="button"
-              onClick={() => setWatching(true)}
-              className="group flex items-center gap-2.5 rounded-full border border-bone/30 px-6 py-3.5 font-ui text-base font-medium text-bone transition-colors hover:border-bone/70 hover:bg-bone/5"
+            <motion.p variants={item} className="meta mb-6 text-bone-dim">
+              For makers · The Maker&#39;s Issue
+            </motion.p>
+
+            <motion.h1
+              variants={item}
+              className="font-display font-extrabold leading-[0.9] text-bone"
+              style={{ fontSize: "clamp(2.75rem, 7vw, 6rem)" }}
             >
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-bone/10 text-bone transition-colors group-hover:bg-marigold group-hover:text-ink">
-                <Play size={13} weight="fill" />
+              You&#39;re the
+              <br />
+              <span className="font-serif font-normal italic text-marigold-bright">
+                cover&nbsp;story.
               </span>
-              Watch how it works
-            </button>
+            </motion.h1>
+
+            <motion.p
+              variants={item}
+              className="mt-7 max-w-measure font-ui text-lg leading-relaxed text-bone/85 sm:text-xl"
+            >
+              On KOL a buyer meets the maker before the thing. This is your page in
+              the issue — on film, in your words, in colours pulled from your own
+              work. Talk to us for ten minutes; we build the rest.
+            </motion.p>
+
+            <motion.div
+              variants={item}
+              className="mt-9 flex flex-wrap items-center gap-3"
+            >
+              <Magnetic>
+                <Link
+                  href="/sell/interview"
+                  className="press group flex items-center gap-2.5 rounded-full bg-marigold px-7 py-3.5 font-ui text-base font-semibold text-ink hover:bg-marigold-bright focus-visible:outline-none"
+                >
+                  Put yourself on film
+                  <ArrowRight
+                    size={20}
+                    weight="bold"
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </Link>
+              </Magnetic>
+              <button
+                type="button"
+                onClick={() => setWatching(true)}
+                className="press group flex items-center gap-2.5 rounded-full border border-bone/30 px-6 py-3.5 font-ui text-base font-medium text-bone hover:border-bone/70 hover:bg-bone/5 focus-visible:outline-none"
+              >
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-bone/10 text-bone transition-colors group-hover:bg-marigold group-hover:text-ink">
+                  <Play size={13} weight="fill" />
+                </span>
+                Watch how it works
+              </button>
+            </motion.div>
+
+            <motion.p
+              variants={item}
+              className="mt-8 font-ui text-sm text-bone/60"
+            >
+              On film or by voice · your story, your words.
+            </motion.p>
           </motion.div>
 
-          <motion.p
-            variants={item}
-            className="mt-12 flex items-center gap-2 font-ui text-sm text-bone/60"
+          {/* The evidence — an honest miniature of her page in the buyer's issue. */}
+          <motion.div
+            variants={reduce ? calm : rise(40, 1)}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: reduce ? 0 : 0.35 }}
+            className="mx-auto w-full max-w-sm lg:mx-0 lg:ml-auto"
           >
-            No design skills. No templates. No two shops alike.
-          </motion.p>
-        </motion.div>
+            <CoverEvidence reduce={!!reduce} />
+          </motion.div>
+        </div>
+
+        {/* Scroll cue to the journey. */}
+        <a
+          href="#how"
+          aria-label="See how a world gets made"
+          className="press absolute bottom-6 left-1/2 hidden -translate-x-1/2 rounded-full p-1 text-bone/50 hover:text-bone focus-visible:outline-none md:block"
+        >
+          <ArrowDown size={22} aria-hidden className="animate-float" />
+        </a>
       </section>
 
-      {/* ---- The four-step journey ---- */}
-      <section className="border-t border-line bg-ink">
+      {/* ---- How a world gets made — the maker's own part leads, then the work
+              hands to KOL. Not four identical cards: one prominent "your part"
+              and a receding spine of "then we take it from here", each rung
+              anchored to the piece of HER world it assembles. ---- */}
+      <section id="how" className="border-t border-line bg-ink scroll-mt-24">
         <div className="mx-auto max-w-issue px-5 py-24 sm:px-8 sm:py-32">
           <motion.div
             variants={reduce ? calm : rise(28, 0.9)}
@@ -137,67 +172,74 @@ export function SellOnboarding() {
             viewport={inView}
             className="max-w-3xl"
           >
-            <p className="meta mb-4 text-bone-dim">How a world gets made</p>
+            <p className="meta mb-4 text-bone-dim">How your world gets made</p>
             <h2
               className="font-display font-extrabold leading-[0.95] text-bone"
               style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}
             >
-              Four steps. You do the first
-              <br className="hidden sm:block" /> one — we do the rest.
+              You do one thing.
+              <br className="hidden sm:block" /> We assemble the rest.
             </h2>
           </motion.div>
 
-          <motion.ol
-            variants={stagger(0.05, 0.12)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={inView}
-            className="mt-16 space-y-4"
-          >
-            {JOURNEY_STEPS.map((step) => {
-              const StepIcon = STEP_ICON[step.icon];
-              return (
-                <motion.li
-                  key={step.id}
-                  variants={reduce ? calm : rise(24, 0.7)}
-                  className="group grid gap-6 rounded-3xl border border-line bg-ink-soft p-7 transition-colors hover:border-bone/25 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-10 sm:p-9"
-                >
-                  <div className="flex items-center gap-5">
-                    <span className="font-mono text-sm text-bone-dim">
-                      {step.index}
-                    </span>
-                    <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-ink-raise text-marigold transition-colors group-hover:bg-marigold group-hover:text-ink">
-                      <StepIcon size={26} />
-                    </span>
-                  </div>
+          <div className="mt-16 grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+            {/* Step 01 — the maker's part, given full weight. */}
+            <YourPart reduce={!!reduce} step={JOURNEY_STEPS[0]!} />
 
-                  <div>
-                    <h3 className="font-display text-2xl font-bold text-bone sm:text-3xl">
-                      {step.title}
-                    </h3>
-                    <p className="mt-2 max-w-xl font-ui text-base leading-relaxed text-bone/70">
-                      {step.body}
-                    </p>
-                  </div>
-
-                  <dl className="flex shrink-0 gap-8 border-t border-line pt-5 sm:border-l sm:border-t-0 sm:pl-10 sm:pt-0">
-                    <div>
-                      <dt className="meta text-bone-dim">You</dt>
-                      <dd className="mt-2 max-w-[9rem] font-ui text-sm leading-snug text-bone">
-                        {step.makerDoes}
-                      </dd>
+            {/* Steps 02–04 — the work handed to KOL, on a quiet spine. */}
+            <motion.ol
+              variants={stagger(0.06, 0.12)}
+              initial="hidden"
+              whileInView="visible"
+              viewport={inView}
+              className="relative"
+            >
+              <p className="meta mb-6 text-bone-dim">Then, from what you said…</p>
+              {JOURNEY_STEPS.slice(1).map((step, i, arr) => {
+                const StepIcon = STEP_ICON[step.icon];
+                const last = i === arr.length - 1;
+                return (
+                  <motion.li
+                    key={step.id}
+                    variants={reduce ? calm : rise(20, 0.6)}
+                    className="group relative grid grid-cols-[auto_1fr] gap-5 pb-8 last:pb-0"
+                  >
+                    {/* Spine: dot + connector so the steps read as one assembling. */}
+                    <div className="flex flex-col items-center">
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-ink-soft text-marigold transition-colors group-hover:border-marigold/50">
+                        <StepIcon size={20} />
+                      </span>
+                      {!last && (
+                        <span aria-hidden className="mt-1 w-px flex-1 bg-line" />
+                      )}
                     </div>
-                    <div>
-                      <dt className="meta text-bone-dim">KOL</dt>
-                      <dd className="mt-2 max-w-[9rem] font-ui text-sm leading-snug text-bone/80">
-                        {step.kolDoes}
-                      </dd>
+                    <div className="pb-1">
+                      <div className="flex items-baseline gap-2.5">
+                        <span className="font-mono text-xs text-bone/45">
+                          {step.index}
+                        </span>
+                        <h3 className="font-display text-xl font-bold text-bone sm:text-2xl">
+                          {step.title}
+                        </h3>
+                      </div>
+                      <p className="mt-1.5 max-w-md font-ui text-[0.95rem] leading-relaxed text-bone/65">
+                        {step.body}
+                      </p>
+                      <p className="mt-3 flex items-center gap-2 font-ui text-sm text-bone/80">
+                        <ArrowRight
+                          size={14}
+                          weight="bold"
+                          className="shrink-0 text-marigold"
+                        />
+                        <span className="text-bone-dim">Becomes</span>{" "}
+                        {step.becomes}
+                      </p>
                     </div>
-                  </dl>
-                </motion.li>
-              );
-            })}
-          </motion.ol>
+                  </motion.li>
+                );
+              })}
+            </motion.ol>
+          </div>
         </div>
       </section>
 
@@ -300,6 +342,134 @@ export function SellOnboarding() {
 
       <ExplainerLightbox open={watching} onClose={() => setWatching(false)} />
     </>
+  );
+}
+
+/* The hero evidence — the maker's own tile as a buyer meets it in the issue.
+   Built from the SAME film primitive and fixture the buyer feed uses (COVER_MAKER
+   / Lena), framed in the "what your buyer sees" honesty-inset house style and
+   labelled a demo. Not interactive — it is proof, not navigation. */
+function CoverEvidence({ reduce }: { reduce: boolean }) {
+  const Icon = CRAFT_ICON[COVER_MAKER.craft];
+  return (
+    <figure className="overflow-hidden rounded-[1.75rem] border border-line bg-ink-soft/80 p-2.5 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.85)] backdrop-blur-sm">
+      {/* Mirror label — the argument, stated on the frame itself. */}
+      <figcaption className="flex items-center justify-between gap-3 px-3 pb-2.5 pt-1.5">
+        <span className="flex items-center gap-1.5 meta text-bone-dim">
+          <Eye size={13} weight="fill" />
+          What a buyer sees
+        </span>
+        <span className="meta text-bone/45">Issue 07 · Your page</span>
+      </figcaption>
+
+      {/* The tile — mirrors the buyer feed's EditorialTile treatment. */}
+      <div className="group relative aspect-[4/5] w-full overflow-hidden rounded-[1.25rem] ring-1 ring-line">
+        <div className="absolute inset-0 saturate-[0.94] brightness-[0.96] transition-[filter] duration-500 ease-out-expo group-hover:saturate-100 group-hover:brightness-[1.05]">
+          <MakerFilm
+            videoSrc={COVER_MAKER.filmSrc}
+            poster={COVER_MAKER.image}
+            alt={`${COVER_MAKER.name} — ${COVER_MAKER.discipline}, ${COVER_MAKER.studio}`}
+            reduce={reduce}
+            sizes="(max-width: 1024px) 24rem, 22rem"
+            className="object-cover"
+            priority
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-transparent" />
+
+        {/* Watch chip — the film affordance a buyer taps. */}
+        <div className="absolute right-3 top-3 flex items-center gap-2 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm">
+          <Play size={12} weight="fill" className="text-marigold" />
+          <span className="meta text-bone">Watch · {COVER_MAKER.duration}</span>
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 p-5">
+          <p className="meta mb-2 flex items-center gap-1.5 text-bone-dim">
+            <Icon size={14} weight="fill" />
+            {COVER_MAKER.discipline}
+          </p>
+          <h3 className="font-display text-2xl font-bold leading-none text-bone">
+            {COVER_MAKER.studio}
+          </h3>
+          <p className="mt-2 flex items-center gap-1.5 font-ui text-sm text-bone/75">
+            <span className="font-medium text-bone">{COVER_MAKER.name}</span>
+            <span aria-hidden>·</span>
+            <MapPin size={13} className="shrink-0" />
+            {COVER_MAKER.place}
+          </p>
+          {/* The signature marigold underline — wipes in once so the still card
+              reads as living even without hover (it is proof, not a link). */}
+          <motion.span
+            aria-hidden
+            className="mt-3 block h-px w-full origin-left bg-marigold"
+            initial={reduce ? { scaleX: 1 } : { scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: reduce ? 0 : 0.9, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
+      </div>
+
+      {/* Honest provenance — never pass demo material off as a real seller. */}
+      <p className="px-3 pb-1.5 pt-3 font-ui text-xs leading-relaxed text-bone/55">
+        A demo maker&#39;s page — your real film and words land right here.
+      </p>
+    </figure>
+  );
+}
+
+/* Step 01 — the maker's single job, given the weight of the whole left column so
+   "you do one thing" is felt, not just claimed. Marigold signals it's the active,
+   human step; the three that follow recede onto the spine. */
+function YourPart({
+  reduce,
+  step,
+}: {
+  reduce: boolean;
+  step: (typeof JOURNEY_STEPS)[number];
+}) {
+  const StepIcon = STEP_ICON[step.icon];
+  return (
+    <motion.div
+      variants={reduce ? calm : rise(24, 0.8)}
+      initial="hidden"
+      whileInView="visible"
+      viewport={inView}
+      className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-marigold/35 bg-marigold/[0.06] p-7 sm:p-9"
+    >
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-marigold text-ink">
+            <StepIcon size={26} weight="fill" />
+          </span>
+          <span className="rounded-full border border-marigold/40 px-3 py-1 meta text-marigold-bright">
+            The only step that&#39;s yours
+          </span>
+        </div>
+        <h3 className="mt-7 font-display text-3xl font-bold leading-[1.02] text-bone sm:text-4xl">
+          {step.title}
+        </h3>
+        <p className="mt-3 max-w-md font-ui text-base leading-relaxed text-bone/75">
+          {step.body}
+        </p>
+      </div>
+
+      <div className="mt-8 border-t border-marigold/20 pt-6">
+        <p className="meta text-marigold-bright">You</p>
+        <p className="mt-2 font-display text-xl font-bold text-bone">
+          {step.makerDoes}.
+        </p>
+        <p className="mt-4 flex items-start gap-2 font-ui text-sm text-bone/70">
+          <ArrowRight
+            size={14}
+            weight="bold"
+            className="mt-1 shrink-0 text-marigold"
+          />
+          <span>
+            <span className="text-bone-dim">Becomes</span> {step.becomes}
+          </span>
+        </p>
+      </div>
+    </motion.div>
   );
 }
 
