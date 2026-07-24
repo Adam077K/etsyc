@@ -10,23 +10,23 @@
   svg{width:100%;height:100%;display:block}
 </style>
 <div class="card">
-<svg viewBox="0 0 1000 562" role="img" aria-label="KOL revenue scales with adoption from 18 to 90 million dollars">
+<svg viewBox="0 0 1000 562" role="img" aria-label="KOL revenue scales with adoption from 9 to 45 million dollars">
   <rect width="1000" height="562" fill="#141110"/>
 
   <!-- LEFT: title + caption -->
   <g fill="#EDE6DB" font-weight="800" letter-spacing="-1">
     <text x="55" y="188" font-size="60">The path from</text>
-    <text x="55" y="256" font-size="60">$18M to $90M</text>
+    <text x="55" y="256" font-size="60">$9M to $45M</text>
     <text x="55" y="324" font-size="60" fill="#D9723F">ARR.</text>
   </g>
-  <g fill="#9A9082" font-family="var(--grotesk)">
-    <text x="57" y="384" font-size="17" fill="#EDE6DB" font-weight="600">KOL keeps 10% of the GMS it creates.</text>
-    <text x="57" y="414" font-size="14.5">+15% lift &amp; 10% take = our model.</text>
-    <text x="57" y="436" font-size="14.5">$11.9B Etsy GMS sourced (10-K FY2025).</text>
+  <g fill="#9A9082">
+    <text x="57" y="382" font-size="16.5" fill="#EDE6DB" font-weight="600">KOL keeps ~20% of the new revenue it</text>
+    <text x="57" y="406" font-size="16.5" fill="#EDE6DB" font-weight="600">creates for Etsy. Etsy keeps ~80%.</text>
+    <text x="57" y="434" font-size="13.5">+15% lift · ~20% of the incremental take = our model.</text>
+    <text x="57" y="454" font-size="13.5">$11.9B Etsy GMS sourced (10-K FY2025).</text>
   </g>
 
   <!-- RIGHT: chart -->
-  <!-- gridlines -->
   <g stroke="#332C25" stroke-width="1">
     <line x1="580" y1="100" x2="950" y2="100"/>
     <line x1="580" y1="174" x2="950" y2="174"/>
@@ -35,19 +35,17 @@
     <line x1="580" y1="396" x2="950" y2="396"/>
   </g>
   <g font-size="13" fill="#9A9082" text-anchor="end" font-variant-numeric="tabular-nums">
-    <text x="568" y="105">$90M</text>
-    <text x="568" y="179">$72M</text>
-    <text x="568" y="253">$54M</text>
-    <text x="568" y="327">$36M</text>
-    <text x="568" y="401">$18M</text>
+    <text x="568" y="105">$45M</text>
+    <text x="568" y="179">$36M</text>
+    <text x="568" y="253">$27M</text>
+    <text x="568" y="327">$18M</text>
+    <text x="568" y="401">$9M</text>
     <text x="568" y="475">$0</text>
   </g>
 
-  <!-- axes -->
   <line x1="580" y1="100" x2="580" y2="470" stroke="#6B6156" stroke-width="1.5"/>
   <line x1="580" y1="470" x2="950" y2="470" stroke="#6B6156" stroke-width="1.5"/>
 
-  <!-- x labels -->
   <g font-size="13" fill="#9A9082" text-anchor="middle" font-variant-numeric="tabular-nums">
     <text x="580" y="492">0</text>
     <text x="654" y="492">20%</text>
@@ -57,23 +55,20 @@
     <text x="950" y="492">100%</text>
   </g>
 
-  <!-- area + straight line to exactly $90M -->
+  <!-- area + straight line to exactly $45M -->
   <path d="M580,470 L950,100 L950,470 Z" fill="#D9723F" fill-opacity="0.14"/>
   <line x1="580" y1="470" x2="950" y2="100" stroke="#D9723F" stroke-width="3.5" stroke-linecap="round"/>
 
-  <!-- pilot guide + marker -->
   <line x1="654" y1="396" x2="654" y2="470" stroke="#D9723F" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.5"/>
   <circle cx="654" cy="396" r="7.5" fill="#D9723F"/>
   <circle cx="654" cy="396" r="14" fill="none" stroke="#D9723F" stroke-opacity="0.35" stroke-width="2"/>
-  <text x="674" y="368" font-size="24" font-weight="800" fill="#D9723F">~$18M</text>
+  <text x="674" y="368" font-size="24" font-weight="800" fill="#D9723F">~$9M</text>
   <text x="674" y="387" font-size="13" fill="#9A9082">Pilot · 20% adoption</text>
 
-  <!-- full-adoption marker -->
   <circle cx="950" cy="100" r="8.5" fill="#D9723F" stroke="#141110" stroke-width="2"/>
-  <text x="936" y="136" font-size="27" font-weight="800" fill="#D9723F" text-anchor="end">~$90M</text>
+  <text x="936" y="136" font-size="27" font-weight="800" fill="#D9723F" text-anchor="end">~$45M</text>
   <text x="936" y="157" font-size="13" fill="#9A9082" text-anchor="end">Full adoption</text>
 
-  <!-- axis title -->
   <text x="765" y="524" font-size="13.5" fill="#9A9082" text-anchor="middle" font-weight="600">Adoption — share of story-rich categories on KOL</text>
 </svg>
 </div>
