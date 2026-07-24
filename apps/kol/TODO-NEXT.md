@@ -77,6 +77,18 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
 - **Checkout mobile 375px: residual right-edge field clipping (10–15px).**
   Cosmetic remnant of the P1-A fix; not a blocker.
 
+## Integration carry items (2026-07-24)
+- **LiquidDivider still renders on journal-index + how-story.** The Founder's blob
+  removal was scoped to home (`/`) + the feed only; `journal-index.tsx` and
+  `how-story.tsx` still render `LiquidDivider` (defined in `liquid.tsx`). Left
+  intentionally — post-pitch call on whether to strip it site-wide or keep it as
+  a journal/how accent. No action now.
+- **Make-reel first card image passes under the portrait dock.** The persistent
+  corner film overlaps the leftmost reel card's *image* corner as the strip
+  scrolls (copy clears). Confirmed HOLD by the critic delta-pass (imagery-under-
+  fixed-film is the established behavior, narrower than the old landscape card).
+  Reopen with a desktop reel left-inset only if the Founder reads it wrong.
+
 ## Copy / IA / a11y polish
 - **[Etsy skin, a11y] Focus ring on bone grounds is under the 3:1 floor.** The
   `#FF7A3C` (Etsy Orange-bright) focus outline measures ~2.09:1 on bone (improved
