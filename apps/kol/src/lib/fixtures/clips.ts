@@ -64,6 +64,12 @@ export interface Clip {
    * under the honesty bar; mirrors the interview's KOL voice.
    */
   frame?: string;
+  /**
+   * The rolling-state line — quieter than `frame`: reassurance while the take
+   * runs, not fresh direction (the maker's hands are busy). Present-tense, calm,
+   * same voice bar. Falls back to a gentle default when unset.
+   */
+  keepGoing?: string;
 }
 
 export const CLIPS: Clip[] = [
@@ -78,6 +84,8 @@ export const CLIPS: Clip[] = [
     duration: "1:12",
     filmSrc: "/media/video/odd-clay.mp4",
     why: "The first frame a buyer meets. It decides whether they stop scrolling for you.",
+    frame: "Get in close to the work, not to you — the craft is the cover, not the maker.",
+    keepGoing: "Stay on the work. Let it carry the frame.",
   },
   // --- Process ---
   {
@@ -89,6 +97,7 @@ export const CLIPS: Clip[] = [
     hint: "/media/clay-wheel.jpg",
     why: "The step buyers replay most — the one that turns a browser into a believer.",
     frame: "Get in close and let the wheel fill the frame. We only need your hands and the clay finding its centre — not your face.",
+    keepGoing: "That's it — stay low, let the wheel do the talking.",
   },
   {
     id: "process-raise",
@@ -99,6 +108,7 @@ export const CLIPS: Clip[] = [
     hint: "/media/clay-shape.jpg",
     why: "Shows the skill living in your fingers — it's what makes a plain mug feel worth its price.",
     frame: "Rest the phone on the shelf and follow the walls up in one slow pull. Let your hands do the moving, not the camera.",
+    keepGoing: "Keep the pull slow. We've got all the time in the world.",
   },
   {
     id: "process-salt-fire",
@@ -110,6 +120,7 @@ export const CLIPS: Clip[] = [
     duration: "0:31",
     why: "The bit no factory can fake. Buyers feel the risk in it, and trust you more for it.",
     frame: "Catch the moment you open the kiln — the surprise on your face is the shot. A few seconds is plenty.",
+    keepGoing: "Let it open in its own time. We're rolling.",
   },
   // --- Shop (contextual product clips) ---
   {
@@ -122,6 +133,7 @@ export const CLIPS: Clip[] = [
     duration: "0:24",
     why: "Plays beside the buy button on your carafe — your voice is the last thing they hear before they decide.",
     frame: "Hold the carafe and tell one true thing about how it came to be. Talk to the lens like it's a regular at the market.",
+    keepGoing: "Just talk to it like a regular. No rush.",
   },
   {
     id: "shop-plates",
@@ -132,6 +144,7 @@ export const CLIPS: Clip[] = [
     hint: "/media/plates.jpg",
     why: "Docks right beside the buy button on your Everyday Plates — the gentle nudge before they add to bag.",
     frame: "Hold one plate up to the light and turn it. Say why you love this glaze the way you'd tell a friend.",
+    keepGoing: "Turn it slow in the light. Lovely.",
   },
   {
     id: "shop-tumblers",
@@ -142,6 +155,7 @@ export const CLIPS: Clip[] = [
     hint: "/media/mono-ceramics.jpg",
     why: "Answers the question buyers ask most: what's it actually like to hold in the morning?",
     frame: "Pour a coffee into one and let the speckle catch the light. Ten unhurried seconds, no script.",
+    keepGoing: "Let the steam and the speckle do the work.",
   },
   // --- Studio ---
   {
@@ -153,6 +167,7 @@ export const CLIPS: Clip[] = [
     hint: "/media/clay-shelf.jpg",
     why: "Where trust is built. Buyers who've seen your studio are the ones who come back.",
     frame: "Walk us in the way you arrive each morning — the south light, the drying shelf, the salt kiln out in the yard.",
+    keepGoing: "Wander like it's any morning. We'll follow.",
   },
   // --- After a sale ---
   {
@@ -165,6 +180,7 @@ export const CLIPS: Clip[] = [
     duration: "0:22",
     why: "The first moment after someone trusts you with an order. It's how a sale becomes a regular.",
     frame: "Look down the lens and say thank you like you mean it — because you do. Short, warm, unrehearsed.",
+    keepGoing: "Straight down the lens. Mean it — that's all.",
   },
 ];
 

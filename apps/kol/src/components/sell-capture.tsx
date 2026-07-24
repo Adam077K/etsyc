@@ -173,12 +173,17 @@ export function fmt(s: number): string {
  *  live action, and the recording state is announced.
  * ================================================================== */
 
+/** The gentle rolling-state fallback when a clip authors no `keepGoing` line. */
+const DEFAULT_KEEP_GOING = "Keep the wheel in frame. Take your time.";
+
 export type RitualClip = {
   title: string;
   /** buyer-facing destination — the WHERE-IT-PLAYS line */
   playsOn: string;
-  /** KOL's framing guidance for the viewfinder */
+  /** KOL's framing guidance for the viewfinder (set-up state) */
   frame?: string;
+  /** the rolling-state line — reassurance mid-take, not fresh direction */
+  keepGoing?: string;
   /** the effort→payoff line */
   why?: string;
   /** honest still shown in the viewfinder (poster or hint) */
@@ -434,9 +439,13 @@ export function CaptureRitual({
               </AnimatePresence>
             </div>
 
-            {/* Framing guidance — KOL directing, over the scrim. */}
+            {/* Guidance over the scrim — KOL's voice, split by state:
+                framing = set-up direction, rolling = quiet reassurance mid-take,
+                review = the tone-standard reflection line. */}
             <AnimatePresence>
-              {state !== "saving" && clip.frame && (
+              {(state === "review" ||
+                state === "rolling" ||
+                (state === "framing" && clip.frame)) && (
                 <motion.div
                   key={state}
                   initial={reduce ? { opacity: 0 } : { opacity: 0, y: 8 }}
@@ -455,7 +464,9 @@ export function CaptureRitual({
                         {state === "rolling" ? "Keep going" : "Framing"}
                       </span>
                       <p className="max-w-xl font-ui text-sm leading-snug text-bone/95">
-                        {clip.frame}
+                        {state === "rolling"
+                          ? clip.keepGoing ?? DEFAULT_KEEP_GOING
+                          : clip.frame}
                       </p>
                     </div>
                   )}

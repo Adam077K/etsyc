@@ -41,6 +41,7 @@ function toRitual(clip: Clip): RitualClip {
     title: clip.title,
     playsOn: clip.playsOn,
     frame: clip.frame,
+    keepGoing: clip.keepGoing,
     why: clip.why,
     still: clip.poster ?? clip.hint,
     scene: n ? `Scene ${String(n).padStart(2, "0")} · ${surfaceLabel(clip.surface)}` : undefined,
