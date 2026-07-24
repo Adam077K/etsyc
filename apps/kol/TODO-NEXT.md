@@ -74,3 +74,10 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
   On ink grounds it passes comfortably; only bone-ground focus states are affected.
   Fix: give `:focus-visible` a darker/denser ring token (or an ink outline) when
   the ground is bone. Non-blocking (finish-reviewer advisory).
+
+## Perf
+- **[deep world] Code-split TwoDotsWorld.** `src/components/twodots-world.tsx` is
+  imported statically by the shared `/m/[slug]` route, so its bespoke weight ships
+  in every maker world's chunk. Wrap it in `next/dynamic` (client component, no
+  SSR concerns for the film driver) so only `/m/two-dots` loads it. Reviewer
+  suggestion on feat/kol-sharon-world-deep; non-blocking.
