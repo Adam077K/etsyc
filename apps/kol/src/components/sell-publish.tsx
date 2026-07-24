@@ -33,7 +33,7 @@ type Phase = "ready" | "publishing" | "live";
 const ACCENT = "#7C2D12";
 const ODD_CLAY = WORLDS["odd-clay"]!;
 
-export function SellPublish() {
+export function SellPublish({ onPublished }: { onPublished?: () => void } = {}) {
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<Phase>("ready");
 
@@ -46,7 +46,14 @@ export function SellPublish() {
 
   function publish() {
     setPhase("publishing");
-    window.setTimeout(() => setPhase("live"), reduce ? 300 : 1900);
+    window.setTimeout(
+      () => {
+        setPhase("live");
+        // Let the chrome mark the final stop done once the world is live.
+        onPublished?.();
+      },
+      reduce ? 300 : 1900,
+    );
   }
 
   return (
