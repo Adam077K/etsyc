@@ -144,6 +144,13 @@ export function HeroSpread() {
                   priority
                   sizes="(max-width: 1024px) 100vw, 440px"
                   className="object-cover"
+                  // The 4/5 (sm: 3/4) cover panel is NARROWER than her near-square
+                  // 540×606 clip, so object-cover crops horizontally (full height
+                  // shown) and object-position can't lift her — she sits low with
+                  // the felt shoes above. Zoom about the bottom to crop the shoes
+                  // and make her face the subject (undefined for other makers).
+                  focal={HERO_MAKER.filmFocal}
+                  coverScale={HERO_MAKER.filmCoverScale}
                   videoRef={coverVideoRef}
                   // First video frame matches the poster still (0:06), so the
                   // panel opens on her mid-expression, not a between-words frame.

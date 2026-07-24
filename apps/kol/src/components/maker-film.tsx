@@ -28,6 +28,18 @@ export function MakerFilm({
   className,
   /** Ken-Burns drift on the STILL. Set false when an ancestor already drifts. */
   drift = true,
+  /** Optional CSS object-position (e.g. "50% 66%") biasing the framing onto the
+      maker's face on a LANDSCAPE cover, where the portrait clip overflows
+      vertically and object-position can pick the face band. Inert on a portrait
+      cover (see coverScale). Applied to BOTH the <video> and the poster still. */
+  focal,
+  /** Optional cover ZOOM for a subject framed LOW in a near-square/portrait clip
+      inside a portrait cover, where object-cover crops horizontally (full height
+      shown) so object-position can't lift the face. Scales the media about its
+      BOTTOM edge, cropping the headroom off the top and enlarging the subject.
+      Applied identically to <video> + poster (they must agree). Undefined =
+      unchanged (and the still keeps its Ken-Burns drift). */
+  coverScale,
   /** Optional external handle on the <video> — the continuous film layer uses
       it to seed currentTime for a seamless feed→world handoff. */
   videoRef: externalRef,
@@ -50,7 +62,21 @@ export function MakerFilm({
   videoRef?: React.MutableRefObject<HTMLVideoElement | null>;
   initialTime?: number;
   muted?: boolean;
+  focal?: string;
+  coverScale?: number;
 }) {
+  // Shared cover framing: object-position (landscape face band) + an optional
+  // bottom-anchored zoom (portrait low-subject crop). Both undefined → no style,
+  // so the poster keeps its .film-drift and every other maker is untouched.
+  const mediaStyle =
+    focal || coverScale
+      ? {
+          ...(focal ? { objectPosition: focal } : {}),
+          ...(coverScale
+            ? { transform: `scale(${coverScale})`, transformOrigin: "50% 100%" }
+            : {}),
+        }
+      : undefined;
   const [failed, setFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   // `useReducedMotion()` is false on the server and true on the reduced-motion
@@ -129,6 +155,9 @@ export function MakerFilm({
         preload="none"
         aria-hidden="true"
         onError={() => setFailed(true)}
+        // Cover framing (object-position and/or bottom-anchored zoom). Inline so it
+        // overrides any object-* in className; undefined leaves the cover untouched.
+        style={mediaStyle}
         className={cn("absolute inset-0 h-full w-full object-cover", className)}
       />
     );
@@ -141,6 +170,9 @@ export function MakerFilm({
       fill
       priority={priority}
       sizes={sizes}
+      // Poster carries the SAME cover framing as the video so the still→clip
+      // handoff never jumps to a different band/zoom of the frame.
+      style={mediaStyle}
       // No `!reduce` gate: `useReducedMotion()` is false on the server and true
       // on the reduced-motion client, so gating the class here mismatches at
       // hydration (React #418). globals.css already disables `.film-drift` under
