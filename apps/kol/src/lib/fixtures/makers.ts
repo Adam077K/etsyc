@@ -69,6 +69,22 @@ export interface Maker {
    */
   filmSeed?: number;
   /**
+   * CSS object-position (e.g. "50% 66%") biasing the cover framing onto the
+   * maker's face where the surface is TALLER than the source clip (phone hero
+   * cover panel, feed tile, expanded overlay) and object-cover would otherwise
+   * crop to the headroom-framed top. Wired into <MakerFilm focal> at those
+   * call-sites. Omit for centered framing (every other maker unchanged).
+   */
+  filmFocal?: string;
+  /**
+   * Cover ZOOM for a maker framed LOW in a near-square/portrait clip. In a
+   * portrait cover (hero panel, feed tile, expanded overlay) object-cover crops
+   * horizontally — the full height shows, so object-position can't lift the face;
+   * this scales the media about its bottom edge to crop the headroom and bring the
+   * face up. Wired into <MakerFilm coverScale> at those call-sites. Omit = no zoom.
+   */
+  filmCoverScale?: number;
+  /**
    * The clip carries an audio track (the maker narrating). Most clips are silent
    * (video-only), so this is off by default; when true, the persistent FilmStage
    * offers a sound control and a world-entry gesture can arm audio.
@@ -363,6 +379,18 @@ export const MAKERS: Maker[] = [
     // Seed to 0:06 to match feed-poster.jpg, so the still→video handoff is seamless
     // and the tile opens on her mid-expression rather than a between-words frame.
     filmSeed: 6,
+    // Face band for any LANDSCAPE cover of her clip (matches the FilmStage's
+    // object-[50%_66%]) — biases the crop down onto her face where the container
+    // is wider than the clip and there's vertical slack to pick.
+    filmFocal: "50% 66%",
+    // The store surfaces that showed the bug are PORTRAIT covers (hero panel, feed
+    // tile, expanded overlay — all 4/5→3/4). Her clip is 540×606 (near-square), so
+    // object-cover there crops HORIZONTALLY (full height shown) and object-position
+    // can't lift her face — she sits low with the felt shoes hung above her, so the
+    // crop reads shoes + hair, face cut at the bottom. Zoom the cover 1.4× about the
+    // BOTTOM edge to crop the shoes' headroom and make her face the subject.
+    // Verified @390/430/1440; poster (same frame family) carries the same zoom.
+    filmCoverScale: 1.4,
     // Sharon's discovery cut carries her narration (AAC) — the one audible clip;
     // enables the FilmStage sound control + arm-on-enter. Audio pending Founder
     // attestation (see CREDITS).

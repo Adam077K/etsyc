@@ -198,6 +198,12 @@ export function ExpandedVideo({
                 priority
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
+                // Face framing for this portrait (4/5→3/4) overlay: her near-square
+                // clip crops horizontally, so object-position is inert — the
+                // bottom-anchored zoom crops the shoes' headroom and lifts her face.
+                // Both undefined = unchanged for other makers.
+                focal={maker.filmFocal}
+                coverScale={maker.filmCoverScale}
                 videoRef={filmVideoRef}
                 // Match the first video frame to the poster still (no jump as the
                 // overlay opens); the enter-world handoff carries from here on.

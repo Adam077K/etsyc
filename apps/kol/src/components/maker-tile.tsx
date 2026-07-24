@@ -146,6 +146,12 @@ function EditorialTile({
             reduce={!!reduce}
             sizes={SIZES}
             className="object-cover"
+            // Face framing: object-position for a landscape crop, plus a
+            // bottom-anchored zoom for a low-framed subject in this portrait tile
+            // (her near-square clip crops horizontally, so the zoom lifts the
+            // face). Both undefined = centered + drift for every other maker.
+            focal={maker.filmFocal}
+            coverScale={maker.filmCoverScale}
             drift
             // Seed the clip to the frame the poster still was cut from, so the
             // first painted video frame matches the poster — no jump on autoload
