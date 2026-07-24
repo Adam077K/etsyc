@@ -85,15 +85,19 @@ while the feed tile stays `prints-wall.jpg` (the feed is not disturbed).
 Replace with KOL's own maker footage/photography before any public launch — this is
 the screens-only stock pass, and the reuse above is a placeholder, not the shipped look.
 
-## Two Dots — REAL maker assets (Founder-provided) · INTERNAL-ONLY
+## Two Dots — REAL maker assets (Founder-provided) · PUBLIC DEMO CLEARED
 
-> **Governance (standing brand/legal rule).** These are the FIRST real assets on
-> KOL — real video + photography of Sharon's children's-costume studio, provided
-> by the Founder. The imagery includes **children**. This world is **internal-only
-> and its branch is HELD from merge** until Sharon gives written permission for
-> public use. Any asset containing an identifiable child's face is flagged below
-> for specific Founder approval/swap. `feat/kol-twodots` must not merge on a QA
-> PASS alone — Founder clearance is a separate, required gate.
+> **Governance — PUBLIC DEMO CLEARED, 2026-07-24 (recorded by the Founder).**
+> Founder (Adam) directed publication of the Two Dots world for the KOL demo,
+> under Sharon's on-record permission as KOL's first customer and deck hero
+> (Day 9, pitch plan). Constraint enforced: **faceless framing only** (backs,
+> hands, products). **workshop.jpg** (partially identifiable minor) is held at
+> `internal-assets/` and excluded from the deploy bundle pending Sharon's
+> explicit written OK for that image. The little-girl-face video was **never
+> ingested and remains never-ingest**. Founder to archive Sharon's written
+> confirmation covering the children's faceless imagery. Any NEW real-footage
+> asset still requires a CREDITS row + Founder clearance before entering
+> `public/`.
 
 Curation: 182 Wix-export files → 61 deduped candidates (min-dim ≥ 600px, ≥ 40KB) →
 **8 images + 2 videos kept** — of which **7 images + 2 videos deploy** from
