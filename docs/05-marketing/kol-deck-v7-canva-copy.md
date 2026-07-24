@@ -157,11 +157,23 @@ of the 83 people we surveyed said KOL sounds better than how they shop now.
 
 ## 16 · Market map
 **ON SLIDE**
-Story and shopping have never lived in the same place.
+Story and shopping have never lived in the same place — until KOL.
 
-**[VISUAL]** 2×2 map. X-axis: social reach → durable maker-trust. Y-axis: live/transient → evergreen story. KOL alone in the top-right. Others placed honestly: TikTok Shop, Instagram, Whatnot, Bambuser.
+**[VISUAL — new axes]** 2×2 map, KOL alone top-right in a soft terracotta glow (the open corner); Etsy is NOT on the map (we pitch to them).
+- **X-axis (horizontal):** left = "shopping bolted-on" → right = "real shopping, built-in"
+- **Y-axis (vertical):** bottom = "just a listing / a feed" → top = "the maker's story is the store"
+- **Nodes** (logos grayscale, KOL the only one in color + larger):
+  · TikTok Shop — upper-left (strong story, shopping bolted on)
+  · Instagram Shop — left, mid (story, weak shopping)
+  · Whatnot — right, mid-low (real live shopping, but story is transient)
+  · Bambuser — lower-right (shopping tech, no story)
+  · Firework — lower-right (shopping tech, no story)
+  · **KOL — top-right, alone** (deep story + real shopping)
+- One line, bottom-left: "Story and shopping have never lived in the same place — until KOL."
 
-**NOTES:** Story lives on TikTok and Whatnot. Trust and craft live where the makers are. Nobody has put an evergreen, human-made story at the center of the store. That corner is open.
+**Why these axes:** the chart proves its own headline. X = can you actually shop it; Y = is there a real maker story. Everyone else is high on one; only KOL is high on both. (Replaces the old "Community Connection × Video Verification" — vague axis + a feature, not a market dimension.)
+
+**NOTES:** Story lives on TikTok and Instagram — but you can't really shop it. Real shopping lives on the video-commerce tools — but there's no story. Nobody has put the maker's story and real shopping in the same place. That corner is open. That's KOL.
 
 ---
 
