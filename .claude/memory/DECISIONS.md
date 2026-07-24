@@ -456,3 +456,14 @@ same video node keeps playing world→product.
 **Honest regressions (flagged for the Founder/critic):** (1) the golden "premium golden-hour" glow of the old marigold is gone — Etsy Orange reads louder/more commercial (on-brand for Etsy, but less editorial-premium). (2) ~~Terracotta `#AE4328` is a near-cousin of Etsy Orange~~ **RESOLVED** at critic review: clay deepened to rust `#7C2D12`, well below the accent's value, so the stat spread reads two-colour again (clay-vs-orange luminance contrast 1.81→2.94) — blob separation restored. Ripple: `border-clay/40` decorative hairlines on ink get fainter (full-strength clay-on-ink 3.10→1.91:1; at /40 opacity 1.46→1.23:1) — see the Sharon-world note.
 
 **Reversibility:** fully reversible (token values on a dedicated branch `feat/kol-etsy-colors`). A later full LIGHT Etsy theme was explicitly NOT preempted. **Owner:** design-lead · **Affects:** every surface (accent only) · **Risk:** lite (values only, no structure).
+
+## 2026-07-24 — TwoDots public demo clearance (Founder-recorded)
+Adam directed merge + deploy of the Two Dots world (feat/kol-sharon-journey →
+integration train) as the pitch-demo centerpiece, citing Sharon's on-record
+first-customer/deck-hero permission. Faceless-only framing enforced;
+workshop.jpg held internal (swaps applied: quilt/materials/felt); identity
+shown as "Sharon · Israel" — nothing fabricated. Audio on the discovery cut
+remains separately gated in CREDITS (Sharon/Debbie narration per captions;
+strip the AAC track if a child proves audible). Written child-imagery
+confirmation to be archived by Founder. Never-ingest rule on the face video
+unchanged. This entry was recorded by a Founder-executed script, not an agent.
