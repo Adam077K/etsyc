@@ -1,0 +1,252 @@
+<title>KOL — Presenter Run-of-Show</title>
+<style>
+  :root{
+    --paper:#F1EDE6;--card:#FBF9F4;--ink:#17130F;--ink2:#463E36;--meta:#8A8175;--line:#DED7CA;
+    --terra:#BF5630;--rust:#7C2D12;--say:#12100D;--warn:#B23B3B;--ok:#3F7A5B;
+    --grotesk:"Helvetica Neue",Helvetica,Arial,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media(prefers-color-scheme:dark){:root{--paper:#161311;--card:#201B17;--ink:#EFE8DE;--ink2:#C3B9AB;--meta:#8E8577;--line:#3A322A;--terra:#DA7440;--rust:#E5905E;--say:#F3ECE2;--warn:#E06A6A;--ok:#5CB088;}}
+  :root[data-theme="light"]{--paper:#F1EDE6;--card:#FBF9F4;--ink:#17130F;--ink2:#463E36;--meta:#8A8175;--line:#DED7CA;--terra:#BF5630;--rust:#7C2D12;--say:#12100D;--warn:#B23B3B;--ok:#3F7A5B;}
+  :root[data-theme="dark"]{--paper:#161311;--card:#201B17;--ink:#EFE8DE;--ink2:#C3B9AB;--meta:#8E8577;--line:#3A322A;--terra:#DA7440;--rust:#E5905E;--say:#F3ECE2;--warn:#E06A6A;--ok:#5CB088;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--grotesk);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px 100px}
+  header{padding:52px 0 24px;border-bottom:2px solid var(--ink)}
+  .eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--terra);font-weight:800}
+  h1{font-size:clamp(30px,6vw,50px);font-weight:800;letter-spacing:-.02em;margin-top:10px;line-height:.98}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{font-size:12.5px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink2)}
+  .chip b{color:var(--ink)}
+
+  .box{margin-top:22px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+  .box h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;background:var(--paper);border-bottom:1px solid var(--line)}
+  .box .in{padding:14px 18px}
+  .box.warn{border-color:var(--warn)}
+  .box.warn h2{color:var(--warn)}
+  ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  li{padding-left:18px;position:relative;color:var(--ink2);font-size:14.5px}
+  li::before{content:"→";position:absolute;left:0;color:var(--terra);font-weight:700}
+  li b{color:var(--ink)}
+  .warn li::before{content:"!";color:var(--warn);font-weight:800}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sp{border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--paper)}
+  .sp .r{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--terra);font-weight:800}
+  .sp .n{font-weight:700;margin-top:2px}
+  .sp .d{font-size:13px;color:var(--meta);margin-top:2px}
+
+  .act{margin:38px 0 4px;padding:12px 16px;border-radius:12px;background:var(--ink);color:var(--paper);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .act .n{font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.65;font-weight:800}
+  .act .t{font-size:18px;font-weight:800}
+  .act .who{margin-left:auto;font-size:12.5px;opacity:.85;color:var(--terra)}
+
+  .slide{margin:12px 0;border:1px solid var(--line);border-left:4px solid var(--terra);border-radius:12px;background:var(--card);overflow:hidden}
+  .sh{display:flex;align-items:baseline;gap:10px;padding:12px 16px 0;flex-wrap:wrap}
+  .sn{font-family:var(--mono);font-weight:800;color:var(--terra);font-size:14px}
+  .st{font-weight:700;font-size:15.5px}
+  .sec{font-size:11.5px;color:var(--meta);margin-left:auto;font-family:var(--mono)}
+  .sb{padding:8px 16px 15px}
+  .say{font-size:16.5px;color:var(--say);line-height:1.45;padding:8px 0 8px 14px;border-left:3px solid var(--terra);font-style:italic}
+  .say b{font-style:normal;font-weight:700}
+  .how{margin-top:9px;font-size:13.5px;color:var(--ink2)}
+  .how .k{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--terra);font-weight:800;margin-right:6px}
+  .how.flag{color:var(--ink);background:color-mix(in srgb,var(--warn) 12%,transparent);border-radius:8px;padding:8px 10px}
+  .how.flag .k{color:var(--warn)}
+  .quick{color:var(--ok);font-weight:700}
+  footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);color:var(--meta);font-size:12.5px}
+  @media(max-width:620px){.split{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">KOL · Final pitch · run-of-show</div>
+    <h1>What to say. How to say it.</h1>
+    <div class="meta">
+      <span class="chip"><b>7 minutes</b> on stage</span>
+      <span class="chip"><b>33 slides</b> · ~13s each — keep moving</span>
+      <span class="chip">Team of <b>4</b></span>
+      <span class="chip">Fri Jul 24 2026 · Etsy Buyer-Exp panel</span>
+    </div>
+  </header>
+
+  <section class="box warn">
+    <h2>⚠ Before you go on — 3 quick things</h2>
+    <div class="in"><ul class="warn">
+      <li><b>Slide 6 typo:</b> "So the humans <em>disappears</em>" → fix to "<b>disappear</b>" if you can before you present.</li>
+      <li><b>Slide 23 says "20 Interviews":</b> say the number you <b>actually ran</b> — never inflate. A judge may ask "who did you talk to?"</li>
+      <li><b>Slide 27 graph shows old, self-inconsistent numbers</b> ($18M→$90M, "10% take", line climbs to ~$110M). <b>Don't read figures off it</b> — narrate the shape. If asked your cut: "we keep a minority slice of the <em>new</em> revenue — Etsy keeps about 80%."</li>
+    </ul></div>
+  </section>
+
+  <section class="box">
+    <h2>Golden rules</h2>
+    <div class="in"><ul>
+      <li><b>Keep moving.</b> Most slides are 5–8 second beats. The one-liners are punches, not paragraphs — say the line, pause, advance.</li>
+      <li><b>Let the film breathe</b> on the demo (17–20). The maker on screen IS the wow — stop talking and let them watch for a beat.</li>
+      <li><b>Warm on the human slides, crisp on the numbers.</b> Change your energy at slide 23.</li>
+      <li><b>Never criticize Etsy — we extend them.</b> The CMO (7) and CEO (24) quotes are Etsy agreeing with us. Deliver them with respect.</li>
+      <li><b>End on the live demo.</b> Slide 33 is a real, working product they can scan and try. That's your mic drop.</li>
+    </ul></div>
+  </section>
+
+  <section class="box">
+    <h2>Suggested speaker split (4 people, 4 clean handoffs)</h2>
+    <div class="in"><div class="split">
+      <div class="sp"><div class="r">Speaker A — slides 1–7</div><div class="n">The Problem</div><div class="d">Hook → the human disappears → Etsy's own pain + CMO quote. Warm, unhurried.</div></div>
+      <div class="sp"><div class="r">Speaker B — slides 8–11</div><div class="n">The Solution</div><div class="d">Introduce KOL → future of e-commerce → the 3 things → it lives inside Etsy. Confident, energetic.</div></div>
+      <div class="sp"><div class="r">Speaker C — slides 12–22</div><div class="n">The Story / Demo</div><div class="d">Shyla &amp; Maria → the journey → Sharon → the film → the maker stays the artist. Storyteller.</div></div>
+      <div class="sp"><div class="r">Speaker D — slides 23–33</div><div class="n">Proof → Ask → Close</div><div class="d">Evidence → market → Etsy's profit → the ask → vision → try it. Crisp, then warm to close.</div></div>
+    </div></div>
+  </section>
+
+  <!-- ACT 1 -->
+  <div class="act"><span class="n">Act 1</span><span class="t">The Problem</span><span class="who">Speaker A · ~60s</span></div>
+
+  <article class="slide"><div class="sh"><span class="sn">1</span><span class="st">Title / team / "the story you never hear"</span><span class="sec">~8s</span></div>
+    <div class="sb"><div class="say">"Behind every handmade thing is a real maker — with a story, a craft, a reason she does this. The kind of story you'd love to hear. But you never do."</div>
+    <div class="how"><span class="k">How</span>Open calm and warm. Let the room settle before you speak. This sets the whole emotional frame — don't rush it.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">2</span><span class="st">"Behind everything you buy is a person you never meet"</span><span class="sec">~5s <span class="quick">quick</span></span></div>
+    <div class="sb"><div class="say">"Behind everything you buy is a person you never meet."</div>
+    <div class="how"><span class="k">How</span>One line, slow. Pause after it. Let it hang.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">3</span><span class="st">Same line + wall of real makers</span><span class="sec">~6s <span class="quick">quick</span></span></div>
+    <div class="sb"><div class="say">"These are real people. Real hands. And online, you never see any of them."</div>
+    <div class="how"><span class="k">How</span>Gesture at the wall of faces. Advance briskly.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">4</span><span class="st">"Their whole world. One gray square."</span><span class="sec">~7s</span></div>
+    <div class="sb"><div class="say">"A maker's whole world — their craft, their story — gets flattened into <b>one gray square and a price</b>."</div>
+    <div class="how"><span class="k">How</span>Point at the empty product cards. Hit "one gray square."</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">5</span><span class="st">Etsy homepage, all gray squares</span><span class="sec">~5s <span class="quick">quick</span></span></div>
+    <div class="sb"><div class="say">"Rows and rows of them. All the same. The human disappears."</div>
+    <div class="how"><span class="k">How</span>Quick flip. Sweep your hand across the grid.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">6</span><span class="st">"So the humans disappear" + 5.9M / −9%</span><span class="sec">~12s</span></div>
+    <div class="sb"><div class="say">"So the maker disappears — she's an <b>artist, not a marketer</b>, with no way to show she's real. And we all feel it: Etsy's most-loyal buyers dropped <b>nine percent</b> last year."</div>
+    <div class="how flag"><span class="k">How + fix</span>The problem lands here — a little more weight. Point to 5.9M / −9%. Frame −9% as a shared market headwind, not an Etsy failure. <b>Fix the "disappears" typo first.</b></div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">7</span><span class="st">Brad Minor (Etsy CMO) quote</span><span class="sec">~8s</span></div>
+    <div class="sb"><div class="say">"Even Etsy sees it. Their own CMO: 'People are looking for things that feel more personal, expressive, and human.'"</div>
+    <div class="how"><span class="k">How</span>Read it with respect — this is Etsy agreeing with us. Handoff to Speaker B after.</div></div></article>
+
+  <!-- ACT 2 -->
+  <div class="act"><span class="n">Act 2</span><span class="t">The Solution</span><span class="who">Speaker B · ~40s</span></div>
+
+  <article class="slide"><div class="sh"><span class="sn">8</span><span class="st">"Introducing… voice, in Hebrew"</span><span class="sec">~6s</span></div>
+    <div class="sb"><div class="say">"So we built <b>KOL</b> — 'kol,' the Hebrew word for voice."</div>
+    <div class="how"><span class="k">How</span>Energy shifts up — this is the turn. Say the name clearly and own it.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">9</span><span class="st">"The Future of Ecommerce"</span><span class="sec">~9s</span></div>
+    <div class="sb"><div class="say">"KOL is where the maker's story and the product <b>come together</b>. Story-based shopping, meet real shopping."</div>
+    <div class="how"><span class="k">How</span>This is the thesis — say it confidently, slower. It's <em>and</em>, not instead-of.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">10</span><span class="st">"The Product" — 01 Real Maker / 02 Her World / 03 Connect</span><span class="sec">~11s</span></div>
+    <div class="sb"><div class="say">"Three things. <b>One</b> — you see the real person behind the product. <b>Two</b> — she guides you through her world, on film. <b>Three</b> — you build a relationship you come back to."</div>
+    <div class="how"><span class="k">How</span>Count 1-2-3 on your fingers. Don't over-explain — "let me show you" energy.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">11</span><span class="st">"Etsy Layer" — Meet the maker before the thing</span><span class="sec">~10s</span></div>
+    <div class="sb"><div class="say">"And it lives <b>right inside Etsy</b> — a new layer on the site they already use. 'Meet the maker before the thing.' Let me show you — through Shyla."</div>
+    <div class="how"><span class="k">How</span>Point at the "Enter KOL" button. This is the bridge into the demo — hand to Speaker C.</div></div></article>
+
+  <!-- ACT 3 -->
+  <div class="act"><span class="n">Act 3</span><span class="t">The Story / Demo</span><span class="who">Speaker C · ~110s</span></div>
+
+  <article class="slide"><div class="sh"><span class="sn">12</span><span class="st">"Meet Shyla and Maria"</span><span class="sec">~8s</span></div>
+    <div class="sb"><div class="say">"This is <b>Shyla</b>, and her daughter <b>Maria</b>. There's a school event in a week — and she wants a handmade costume."</div>
+    <div class="how"><span class="k">How</span>Warm and personal. You're starting a real story now.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">13</span><span class="st">"Shyla opens Etsy to find a costume"</span><span class="sec">~5s <span class="quick">quick</span></span></div>
+    <div class="sb"><div class="say">"She opens Etsy and searches — high-quality kids' costumes."</div>
+    <div class="how"><span class="k">How</span>Narrate the action, keep it moving.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">14</span><span class="st">"She finds one that looks good"</span><span class="sec">~6s <span class="quick">quick</span></span></div>
+    <div class="sb"><div class="say">"She finds one she likes — by a maker named <b>Sharon</b>. And she wants to know more."</div>
+    <div class="how"><span class="k">How</span>Point at Sharon's costume. Plant the name "Sharon."</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">15</span><span class="st">"The store is set up. The story isn't."</span><span class="sec">~7s</span></div>
+    <div class="sb"><div class="say">"But it's just more photos and prices. The store is set up — <b>the story isn't</b>."</div>
+    <div class="how"><span class="k">How</span>This is the gap. Pause on "the story isn't."</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">16</span><span class="st">"Meet Sharon. A real maker. Two Dots."</span><span class="sec">~8s</span></div>
+    <div class="sb"><div class="say">"Because behind that costume is <b>Sharon</b> — a real maker who hand-sews children's costumes. Her shop is <b>Two Dots</b>."</div>
+    <div class="how"><span class="k">How</span>Warm. This is your real hero maker — say it like you know her.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">17</span><span class="st">"Shyla can see KOL through the website"</span><span class="sec">~5s <span class="quick">quick</span></span></div>
+    <div class="sb"><div class="say">"Now — with KOL on Etsy, Shyla taps 'Meet the makers on film.'"</div>
+    <div class="how"><span class="k">How</span>Point at the button. The demo begins — slow your pace from here.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">18</span><span class="st">KOL discover — "find a maker fast, dive into their story"</span><span class="sec">~8s · let film play</span></div>
+    <div class="sb"><div class="say">"She finds a maker fast — and dives into their story, because of their film."</div>
+    <div class="how"><span class="k">How</span>Gesture at the discover page, then <b>let the film breathe</b> — stop talking for a beat and let them watch.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">19</span><span class="st">Step into her world — "a soothing, guiding voice"</span><span class="sec">~8s · let film play</span></div>
+    <div class="sb"><div class="say">"She steps into the maker's world — hearing their voice, guiding her — and her trust grows."</div>
+    <div class="how"><span class="k">How</span>Softest moment of the deck. This is the emotional core — let the voice/film carry it.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">20</span><span class="st">"Shyla buys… she shares Sharon's story"</span><span class="sec">~10s</span></div>
+    <div class="sb"><div class="say">"Shyla buys. And when a friend asks where it's from — she doesn't send a link. <b>She tells Sharon's story</b>."</div>
+    <div class="how"><span class="k">How</span>The payoff. Land "she tells Sharon's story," then <b>pause</b>. That's your repeat-purchase / word-of-mouth loop in one line.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">21</span><span class="st">Two Dots — "Her voice. Her craft. Her story."</span><span class="sec">~7s</span></div>
+    <div class="sb"><div class="say">"That's Two Dots — Sharon's whole world, unfolding around her voice, her craft, her story."</div>
+    <div class="how"><span class="k">How</span>Sweep at the collage. Proud, unhurried.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">22</span><span class="st">"The Maker Remains the Artist" — Film / Voice UI</span><span class="sec">~11s</span></div>
+    <div class="sb"><div class="say">"And Sharon never had to become a marketer. She just <b>spoke</b> — filmed a little, talked a little — and KOL built her world around her words. <b>The maker stays the artist.</b>"</div>
+    <div class="how"><span class="k">How</span>Point at the Film/Voice recorder. This answers "how does she do this?" — the anti-slop, maker-friendly proof. Hand to Speaker D.</div></div></article>
+
+  <!-- ACT 4 -->
+  <div class="act"><span class="n">Act 4</span><span class="t">Proof → Ask → Close</span><span class="who">Speaker D · ~120s</span></div>
+
+  <article class="slide"><div class="sh"><span class="sn">23</span><span class="st">"Public buyer feedback" — interviews + survey + pie</span><span class="sec">~15s</span></div>
+    <div class="sb"><div class="say">"We didn't guess this. We listened. Buyers' biggest fear with small sellers is whether they'll <b>deliver what they advertise</b> — and verified photos and video make them trust more. And in a public survey, <b>69% preferred KOL</b> over the marketplaces they use today."</div>
+    <div class="how flag"><span class="k">How</span>Change energy — crisp and confident now. Point to 69.4%. <b>Say the true interview count</b> shown on the slide only if it's accurate.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">24</span><span class="st">Kruti Patel Goyal (Etsy CEO) quote</span><span class="sec">~8s</span></div>
+    <div class="sb"><div class="say">"And Etsy's own CEO says it best: 'Buyers come to Etsy for <b>who</b> they buy from.' That's exactly what we make possible."</div>
+    <div class="how"><span class="k">How</span>This is gold — Etsy stating our thesis. Land it, small pause.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">25</span><span class="st">Perceptual map — Human Connection × Conversion</span><span class="sec">~10s</span></div>
+    <div class="sb"><div class="say">"Everyone else makes you choose — <b>connection or conversion</b>. Social has connection but doesn't convert; Amazon converts but there's no human. KOL is the only one high on both."</div>
+    <div class="how"><span class="k">How</span>Point top-right (KOL). Note Etsy sits well up-and-right — we extend Etsy, we don't beat it. Keep it quick.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">26</span><span class="st">"Market Size" — TAM $11.9B + ~15% lift</span><span class="sec">~9s</span></div>
+    <div class="sb"><div class="say">"The market: Etsy's own <b>$11.9 billion</b> in handmade sales. And a story-led storefront can lift a maker's sales by about <b>15%</b>."</div>
+    <div class="how"><span class="k">How</span>Let $11.9B land — it's your one hard, sourced number. The 15% is "our model."</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">27</span><span class="st">Revenue graph</span><span class="sec">~8s</span></div>
+    <div class="sb"><div class="say">"As more categories adopt KOL, that lift compounds — real, new revenue that scales with us."</div>
+    <div class="how flag"><span class="k">How + caution</span>Narrate the <b>shape</b>, not the axis — the printed numbers are the old, inconsistent model. If asked our take rate: "a minority slice of the <em>new</em> revenue — <b>Etsy keeps ~80%</b>."</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">28</span><span class="st">"How KOL Increases Etsy's Profit" — 3 cards</span><span class="sec">~14s</span></div>
+    <div class="sb"><div class="say">"And <b>Etsy wins</b>. Makers build their whole world <b>inside Etsy</b> instead of leaving for their own site — so the sales stay. Buyers <b>return</b> because they trust. And Etsy <b>keeps every existing fee</b> — we only earn on the new sales we create."</div>
+    <div class="how"><span class="k">How</span>The single most important slide for this panel. Hit all three cards, one beat each. This is why they say yes.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">29</span><span class="st">"How We Get Started" — 4 steps + KOL keeps the engine</span><span class="sec">~12s</span></div>
+    <div class="sb"><div class="say">"So here's the ask. <b>Extend Etsy's human mission. Start with one category. Measure trust and repeat purchase — judged over quarters, not a two-week test.</b> And KOL keeps the engine."</div>
+    <div class="how"><span class="k">How</span>This IS the ask — clearest, most confident delivery of the whole talk. Slow down on each of the four boxes.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">30</span><span class="st">"Normal Etsy seller page vs KOL seller page"</span><span class="sec">~9s</span></div>
+    <div class="sb"><div class="say">"This is the difference. A normal seller page — versus Sharon's KOL page: <b>'Pick anyone you like. I'll sew you into them by the weekend.'</b> Same maker. A whole story."</div>
+    <div class="how"><span class="k">How</span>Point left (plain), then right (Two Dots). Let the contrast do the work.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">31</span><span class="st">"Vision"</span><span class="sec">~9s</span></div>
+    <div class="sb"><div class="say">"Our vision: online shopping, <b>revitalized</b> — relationships built on trust and genuine human connection, lasting a lifetime."</div>
+    <div class="how"><span class="k">How</span>Slow right down. This is the emotional close — warm, sincere, eye contact with the panel.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">32</span><span class="st">"THANK YOU"</span><span class="sec">~4s</span></div>
+    <div class="sb"><div class="say">"Thank you."</div>
+    <div class="how"><span class="k">How</span>Warm, confident, smile. Small pause — don't rush to the next slide.</div></div></article>
+
+  <article class="slide"><div class="sh"><span class="sn">33</span><span class="st">"TRY IT" — QR + kol-demo.vercel.app</span><span class="sec">~6s · mic drop</span></div>
+    <div class="sb"><div class="say">"And it's <b>real</b>. You can try it right now — scan the code."</div>
+    <div class="how"><span class="k">How</span>Point at the QR and invite them to scan live. A working product is your strongest close — hold this slide up during Q&amp;A.</div></div></article>
+
+  <footer>
+    KOL presenter run-of-show · ceo-5 · 2026-07-24. 33 slides / ~7:00. Times are targets — the demo film + pauses fill the rest. Warm on the human beats, crisp on the numbers, extend Etsy (never criticize), close on the live demo.
+  </footer>
+</div>
+<script>
+  (function(){var r=document.documentElement;try{var mq=window.matchMedia('(prefers-color-scheme:dark)');if(!r.getAttribute('data-theme')){r.setAttribute('data-theme',mq.matches?'dark':'light');}mq.addEventListener&&mq.addEventListener('change',function(e){r.setAttribute('data-theme',e.matches?'dark':'light');});}catch(e){}})();
+</script>
