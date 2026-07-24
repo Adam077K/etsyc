@@ -13,8 +13,10 @@ import {
   ArrowUpRight,
   Sparkle,
   Clock,
+  Eye,
 } from "@phosphor-icons/react";
 import { COVER_MAKER } from "@/lib/fixtures/makers";
+import { WORLDS } from "@/lib/fixtures/worlds";
 import {
   PUBLISH_SECTIONS,
   PUBLISH_HANDLE,
@@ -29,6 +31,7 @@ type Phase = "ready" | "publishing" | "live";
 // pass must read the maker's accent selection from the studio state / store
 // config instead of hardcoding it here.
 const ACCENT = "#7C2D12";
+const ODD_CLAY = WORLDS["odd-clay"]!;
 
 export function SellPublish() {
   const reduce = useReducedMotion();
@@ -76,65 +79,81 @@ export function SellPublish() {
               once more, then publish when you&#39;re ready.
             </p>
 
-            {/* Approval summary */}
-            <motion.ol
-              variants={stagger(0.05, 0.07)}
-              initial="hidden"
-              animate="visible"
-              className="mt-10 space-y-2.5"
-            >
-              {PUBLISH_SECTIONS.map((s) => (
-                <motion.li
-                  key={s.id}
-                  variants={reduce ? calm : rise(16, 0.5)}
-                  className={cn(
-                    "flex items-center gap-4 rounded-2xl border px-4 py-3.5",
-                    s.approved
-                      ? "border-line bg-ink-soft"
-                      : "border-dashed border-bone/20 bg-ink-soft/50",
-                  )}
-                >
-                  <span
+            {/* What goes live — a printed contents page, not a checklist. Mono
+                indices, hairline rules, the maker's own edit note in her voice;
+                the one section left for later sits set-apart, never blocking. */}
+            <div className="mt-10 overflow-hidden rounded-3xl border border-line bg-ink-soft">
+              <p className="flex items-center justify-between border-b border-line px-5 py-3.5 sm:px-6">
+                <span className="meta text-bone-dim">What goes live</span>
+                <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-bone/45">
+                  {PUBLISH_HANDLE}
+                </span>
+              </p>
+              <motion.ol
+                variants={stagger(0.04, 0.06)}
+                initial="hidden"
+                animate="visible"
+              >
+                {PUBLISH_SECTIONS.map((s, i) => (
+                  <motion.li
+                    key={s.id}
+                    variants={reduce ? calm : rise(12, 0.45)}
                     className={cn(
-                      "grid h-8 w-8 shrink-0 place-items-center rounded-full",
-                      s.approved
-                        ? "bg-marigold text-ink"
-                        : "border border-bone/25 text-bone/55",
+                      "flex items-baseline gap-4 px-5 py-4 sm:px-6",
+                      i > 0 && "border-t border-line",
+                      !s.approved && "bg-ink/40",
                     )}
                   >
-                    {s.approved ? (
-                      <Check size={16} weight="bold" />
-                    ) : (
-                      <Clock size={15} />
-                    )}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 font-ui text-sm font-semibold text-bone">
-                      {s.section}
-                      {s.optional && !s.approved && (
-                        <span className="rounded-full bg-bone/10 px-1.5 py-0.5 font-ui text-[0.6rem] font-normal text-bone/50">
-                          optional
-                        </span>
+                    <span
+                      className={cn(
+                        "shrink-0 font-mono text-xs tabular-nums",
+                        s.approved ? "text-marigold" : "text-bone/60",
                       )}
-                    </p>
-                    <p className="truncate font-ui text-xs text-bone/55">{s.edit}</p>
-                  </div>
-                  <span
-                    className={cn(
-                      "shrink-0 font-ui text-xs font-medium",
-                      s.approved ? "text-marigold" : "text-bone/55",
-                    )}
-                  >
-                    {s.approved ? "Approved" : "Later"}
-                  </span>
-                </motion.li>
-              ))}
-            </motion.ol>
+                    >
+                      {(i + 1).toString().padStart(2, "0")}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="flex items-center gap-2 font-ui text-sm font-semibold text-bone">
+                        {s.section}
+                        {s.optional && !s.approved && (
+                          <span className="rounded-full bg-bone/10 px-1.5 py-0.5 font-ui text-[0.6rem] font-normal text-bone/50">
+                            optional
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-0.5 font-ui text-xs leading-snug text-bone/55">
+                        {s.edit}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "flex shrink-0 items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.14em]",
+                        s.approved ? "text-marigold" : "text-bone/60",
+                      )}
+                    >
+                      {s.approved ? (
+                        <>
+                          <Check size={12} weight="bold" />
+                          Yours
+                        </>
+                      ) : (
+                        <>
+                          <Clock size={11} />
+                          Later
+                        </>
+                      )}
+                    </span>
+                  </motion.li>
+                ))}
+              </motion.ol>
+            </div>
 
             {/* Publish moment */}
             <div className="mt-12 rounded-3xl border border-marigold/25 bg-marigold/[0.06] p-7 text-center sm:p-10">
-              <p className="font-ui text-sm text-bone/70">
-                Your world will be live at
+              <p className="meta text-bone-dim">Opening day</p>
+              <p className="mx-auto mt-3 max-w-sm font-ui text-sm leading-relaxed text-bone/70">
+                Press publish and your world goes live in the issue, where buyers
+                will meet you at
               </p>
               <p className="mt-2 font-mono text-lg text-bone sm:text-xl">
                 {PUBLISH_HANDLE}
@@ -213,12 +232,17 @@ function LiveState({ reduce }: { reduce: boolean }) {
       transition={{ duration: reduce ? 0.01 : 0.4 }}
       className="flex flex-col items-center text-center"
     >
+      <p className="flex items-center gap-1.5 meta text-bone-dim">
+        <Eye size={13} weight="fill" />
+        This is how buyers meet you
+      </p>
+
       {/* World card blooms in */}
       <motion.div
         initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: reduce ? 0.01 : 0.7, ease: easeOut }}
-        className="relative w-full max-w-md overflow-hidden rounded-3xl ring-1 ring-line"
+        className="relative mt-5 w-full max-w-md overflow-hidden rounded-3xl ring-1 ring-line"
       >
         <div className="relative aspect-[4/3]">
           <Image
@@ -259,6 +283,9 @@ function LiveState({ reduce }: { reduce: boolean }) {
             </p>
             <p className="font-display text-2xl font-extrabold leading-none text-bone">
               {PUBLISH_MAKER}
+            </p>
+            <p className="mt-1.5 font-serif text-sm italic text-bone/90">
+              {ODD_CLAY.tagline}
             </p>
           </div>
         </div>
@@ -329,6 +356,23 @@ function LiveState({ reduce }: { reduce: boolean }) {
             Add the closing line
             <ArrowUpRight size={17} weight="bold" />
           </Link>
+        </div>
+
+        {/* The echo — the same "this is what they see" inset the maker knows from
+            her orders page. Here it's the first line a buyer will read in your
+            voice, so publishing ends on the buyer's side of the glass. */}
+        <div className="mx-auto mt-10 max-w-md rounded-2xl border border-line bg-ink/60 p-5 text-left">
+          <p className="flex items-center gap-1.5 meta text-bone-dim">
+            <Eye size={13} weight="fill" />
+            The first thing a buyer reads
+          </p>
+          <p className="mt-2 font-serif text-lg leading-snug text-bone">
+            &ldquo;{ODD_CLAY.voice}&rdquo;
+          </p>
+          <p className="mt-2 font-ui text-xs text-bone/45">
+            In your own words, on your world&#39;s closing line — exactly as you
+            approved it.
+          </p>
         </div>
 
         <p className="mt-8 font-ui text-sm text-bone/50">

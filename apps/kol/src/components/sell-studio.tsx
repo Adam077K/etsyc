@@ -26,7 +26,7 @@ import {
 import type { Ground } from "@/lib/fixtures/makers";
 import { SellPreview } from "./sell-preview";
 import { rise, calm, easeOut } from "@/lib/motion";
-import { cn } from "@/lib/utils";
+import { cap, cn } from "@/lib/utils";
 
 const REQUIRED = DRAFT_BLOCKS.filter((b) => !b.optional).length;
 const OPTIONAL = DRAFT_BLOCKS.filter((b) => b.optional).length;
@@ -121,11 +121,19 @@ export function SellStudio() {
     variants,
     voiceovers,
     selectedId,
+    approved,
     onSelect: (id: string) => {
       setSelectedId(id);
       if (clip) setClip(null);
     },
   };
+
+  const settledLabel =
+    approvedRequired === 0
+      ? "Nothing settled yet — start with any section."
+      : approvedRequired === REQUIRED
+        ? "Every section is yours. Your world is ready."
+        : `${cap(count(approvedRequired))} ${approvedRequired === 1 ? "section is" : "sections are"} yours. ${cap(count(REQUIRED - approvedRequired))} still in draft.`;
 
   return (
     <div className="mx-auto flex min-h-[100svh] max-w-issue flex-col px-4 pb-28 pt-24 sm:px-6 sm:pt-28">
@@ -137,19 +145,34 @@ export function SellStudio() {
         className="mb-5"
       >
         <p className="meta text-bone-dim">Your studio · draft</p>
-        <h1 className="mt-2 font-display text-2xl font-bold leading-tight text-bone sm:text-3xl">
-          Here&#39;s your world. Make it yours.
-        </h1>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+          <h1 className="font-display text-2xl font-bold leading-tight text-bone sm:text-3xl">
+            Here&#39;s your world. Make it yours.
+          </h1>
+          <p
+            className="font-ui text-sm text-bone/70"
+            role="status"
+            aria-live="polite"
+          >
+            {settledLabel}
+          </p>
+        </div>
         <p className="mt-2 max-w-2xl font-ui text-sm leading-relaxed text-bone/65">
-          KOL drafted every section from your interview. Review each one, change
-          anything, and approve what you love. Nothing goes live until you publish.
+          KOL built this first draft from your interview — every section, in your
+          own words. Change anything, and it becomes yours the moment you approve
+          it. Nothing goes live until you publish.
         </p>
       </motion.div>
 
       <div className="grid flex-1 gap-4 lg:grid-cols-[17rem_1fr_20rem]">
         {/* ---- Section list ---- */}
         <aside className="lg:sticky lg:top-24 lg:h-fit">
-          <p className="meta mb-3 px-1 text-bone-dim">Sections</p>
+          <p className="meta mb-3 flex items-center justify-between gap-2 px-1 text-bone-dim">
+            <span>Your world</span>
+            <span className="tabular-nums text-bone/45">
+              {approvedRequired}/{REQUIRED} yours
+            </span>
+          </p>
           <ol className="space-y-1.5">
             {DRAFT_BLOCKS.map((block, i) => (
               <li key={block.id}>
@@ -168,11 +191,23 @@ export function SellStudio() {
 
         {/* ---- Live preview ---- */}
         <div className="min-w-0">
-          <BrowserFrame handle={PUBLISH_HANDLE}>
+          <p className="meta mb-3 flex items-center gap-2 px-1 text-bone-dim">
+            <span
+              className="h-2 w-2 rounded-full ring-1 ring-inset ring-bone/25"
+              style={{ backgroundColor: accentOpt.hex }}
+              aria-hidden
+            />
+            Live preview · in {accentOpt.label}
+          </p>
+          <BrowserFrame handle={PUBLISH_HANDLE} accentHex={accentOpt.hex}>
             <div className="max-h-[72vh] overflow-y-auto">
               <SellPreview {...previewState} />
             </div>
           </BrowserFrame>
+          <p className="mt-3 px-1 font-ui text-xs leading-relaxed text-bone/50">
+            This is your world exactly as a buyer will meet it. Tap any section to
+            edit it — draft sections settle as you approve them.
+          </p>
         </div>
 
         {/* ---- Edit panel ---- */}
@@ -211,31 +246,50 @@ export function SellStudio() {
       </div>
 
       {/* ---- Publish action bar ---- */}
+      {/* Progress reads as craft, not a percent meter: one mark per section, each
+          inking to the accent as the maker settles it — her world binding
+          together. */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-ink/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-issue items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
-          <div className="flex items-center gap-4">
-            <div className="hidden h-2 w-40 overflow-hidden rounded-full bg-ink-raise sm:block">
-              <motion.div
-                className="h-full rounded-full bg-marigold"
-                initial={false}
-                animate={{ width: `${(approvedRequired / REQUIRED) * 100}%` }}
-                transition={{ duration: reduce ? 0.01 : 0.5, ease: easeOut }}
-              />
+          <div className="flex min-w-0 items-center gap-3.5">
+            <div className="hidden items-center gap-1.5 sm:flex" aria-hidden>
+              {DRAFT_BLOCKS.filter((b) => !b.optional).map((b) => (
+                <motion.span
+                  key={b.id}
+                  className="h-1.5 rounded-full"
+                  initial={false}
+                  animate={{
+                    width: approved[b.id] ? 22 : 12,
+                    backgroundColor: approved[b.id] ? "#F1641E" : "#2E241E",
+                  }}
+                  transition={{ duration: reduce ? 0.01 : 0.45, ease: easeOut }}
+                />
+              ))}
             </div>
+            {/* Compact on mobile so the craft label never truncates behind the CTA. */}
             <p className="font-ui text-sm text-bone/80">
-              <span className="font-semibold text-bone">
-                {approvedRequired} of {REQUIRED}
-              </span>{" "}
-              sections approved
-              {OPTIONAL > 0 && (
-                <span className="text-bone/55"> · {OPTIONAL} optional</span>
-              )}
+              <span className="sm:hidden">
+                <span className="font-semibold text-bone tabular-nums">
+                  {approvedRequired}/{REQUIRED}
+                </span>{" "}
+                yours
+              </span>
+              <span className="hidden sm:inline">
+                <span className="font-semibold text-bone">
+                  {cap(count(approvedRequired))}
+                </span>{" "}
+                of {REQUIRED}{" "}
+                {approvedRequired === 1 ? "section is" : "sections are"} yours
+                {OPTIONAL > 0 && (
+                  <span className="text-bone/55"> · {OPTIONAL} optional</span>
+                )}
+              </span>
             </p>
           </div>
           <Link
             href="/sell/publish"
             className={cn(
-              "group flex items-center gap-2 rounded-full px-6 py-3 font-ui text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+              "press group flex shrink-0 items-center gap-2 rounded-full px-6 py-3 font-ui text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
               allRequired
                 ? "bg-marigold text-ink hover:bg-marigold-bright focus-visible:ring-marigold"
                 : "border border-bone/25 text-bone hover:border-bone/50 focus-visible:ring-bone",
@@ -300,8 +354,12 @@ function SectionRow({
               </span>
             )}
           </span>
-          <span className="block truncate font-ui text-[0.7rem] text-bone/55">
-            Drawn from {beat?.label.toLowerCase()}
+          <span className="block truncate font-mono text-[0.6rem] uppercase tracking-[0.12em]">
+            {approved ? (
+              <span className="text-marigold">Yours</span>
+            ) : (
+              <span className="text-bone/60">Draft · from {beat?.label.toLowerCase()}</span>
+            )}
           </span>
         </span>
       </button>
@@ -571,9 +629,11 @@ function Control({
 
 function BrowserFrame({
   handle,
+  accentHex,
   children,
 }: {
   handle: string;
+  accentHex: string;
   children: React.ReactNode;
 }) {
   return (
@@ -586,6 +646,14 @@ function BrowserFrame({
         </div>
         <div className="flex flex-1 items-center justify-center">
           <span className="flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 font-mono text-[0.65rem] text-bone/55">
+            {/* the address favicon carries the accent she picked — her world's
+                signature, right where a browser shows a site's mark. A hairline
+                ring keeps even dark accents perceptible (non-text contrast). */}
+            <span
+              className="h-2 w-2 rounded-full ring-1 ring-inset ring-bone/25"
+              style={{ backgroundColor: accentHex }}
+              aria-hidden
+            />
             {handle}
           </span>
         </div>
@@ -596,27 +664,91 @@ function BrowserFrame({
   );
 }
 
+/* The composing beat — made intentional. KOL is genuinely assembling her world
+   from the interview, so the skeleton mirrors the finished layout (a section
+   rail, the world taking shape in the frame, an editor forming) and ticks
+   through the sections it is drafting, one at a time, as the maker watches. */
 function StudioSkeleton() {
+  const reduce = useReducedMotion();
+  const [drafting, setDrafting] = useState(0);
+
+  useEffect(() => {
+    if (reduce) return;
+    const t = setInterval(
+      () => setDrafting((d) => Math.min(d + 1, DRAFT_BLOCKS.length)),
+      220,
+    );
+    return () => clearInterval(t);
+  }, [reduce]);
+
+  const now = DRAFT_BLOCKS[Math.min(drafting, DRAFT_BLOCKS.length - 1)];
+
   return (
-    <div className="mx-auto max-w-issue px-4 pb-28 pt-24 sm:px-6 sm:pt-28">
-      <div className="mb-5 flex items-center gap-3">
-        <span className="h-2 w-2 animate-pulse rounded-full bg-marigold" />
-        <p className="font-ui text-sm text-bone/70">Composing your world from the interview…</p>
+    <div
+      className="mx-auto max-w-issue px-4 pb-28 pt-24 sm:px-6 sm:pt-28"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="sr-only">Composing your world from the interview…</span>
+      <div className="mb-6" aria-hidden>
+        <p className="meta text-bone-dim">Your studio · draft</p>
+        <div className="mt-2 flex items-center gap-3">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-marigold/60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-marigold" />
+          </span>
+          <p className="font-display text-2xl font-bold leading-tight text-bone sm:text-3xl">
+            Building your world&#8230;
+          </p>
+        </div>
+        <p className="mt-2 font-ui text-sm text-bone/60">
+          Drafting{" "}
+          <span className="font-medium text-marigold">
+            {now?.section.toLowerCase()}
+          </span>{" "}
+          from your interview.
+        </p>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[17rem_1fr_20rem]">
+      <div className="grid gap-4 lg:grid-cols-[17rem_1fr_20rem]" aria-hidden>
         <div className="space-y-1.5">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {DRAFT_BLOCKS.map((b, i) => (
             <div
-              key={i}
-              className="shimmer-sweep h-14 rounded-2xl bg-[#3A2E26] ring-1 ring-line"
-            />
+              key={b.id}
+              className={cn(
+                "flex h-14 items-center gap-3 rounded-2xl border px-3 transition-colors duration-500",
+                i < drafting
+                  ? "border-marigold/25 bg-marigold/[0.05]"
+                  : "border-line bg-ink-soft",
+              )}
+            >
+              <span className="font-mono text-xs tabular-nums text-bone/40">
+                {(i + 1).toString().padStart(2, "0")}
+              </span>
+              {i < drafting ? (
+                <span className="min-w-0">
+                  <span className="block truncate font-ui text-sm font-medium text-bone/80">
+                    {b.section}
+                  </span>
+                  <span className="block font-mono text-[0.6rem] uppercase tracking-[0.12em] text-marigold">
+                    Drafted
+                  </span>
+                </span>
+              ) : (
+                <span className="shimmer-sweep h-3 w-24 rounded bg-ink-raise" />
+              )}
+            </div>
           ))}
         </div>
-        <div className="shimmer-sweep h-[60vh] rounded-3xl bg-[#3A2E26] ring-1 ring-line" />
-        <div className="shimmer-sweep h-[28rem] rounded-3xl bg-[#3A2E26] ring-1 ring-line" />
+        <div className="shimmer-sweep h-[60vh] rounded-3xl bg-ink-soft ring-1 ring-line" />
+        <div className="shimmer-sweep h-[28rem] rounded-3xl bg-ink-soft ring-1 ring-line" />
       </div>
     </div>
   );
+}
+
+function count(n: number): string {
+  const words = ["none", "one", "two", "three", "four", "five", "six"];
+  return words[n] ?? String(n);
 }
 
 function fmt(s: number): string {
