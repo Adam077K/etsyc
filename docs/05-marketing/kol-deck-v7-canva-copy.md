@@ -1,5 +1,5 @@
 # KOL Final Pitch — Canva copy-paste sheet (v7)
-*23 slides. Copy the ON-SLIDE text onto the slide; NOTES go in Canva's speaker-notes field. `[VISUAL]` = where a mockup/image drops in.*
+*24 slides. Copy the ON-SLIDE text onto the slide; NOTES go in Canva's speaker-notes field. `[VISUAL]` = where a mockup/image drops in.*
 
 ---
 
@@ -165,17 +165,17 @@ Story and shopping have never lived in the same place.
 
 ---
 
-## 17 · Story is margin
+## 17 · The opportunity — the sales a story unlocks
 **ON SLIDE**
-Without a story, a maker competes on price alone.
-$11.9B — Etsy GMS (consolidated, FY2025)
-Directional — our estimate:
-• A told story lets a maker hold ~20–40% more of their price
-• Shops with short-form video sell markedly more
-• …and lean less on paid reach
-*Story isn't decoration — it's margin. (Source: Etsy 10-K FY2025 · 5.6M marketplace sellers)*
+A story doesn't just hold price. It grows the sale.
+$11.9B — Etsy handmade GMS (FY2025)
+Our model:
+• A told story lets a maker hold ~20–40% more on price, and sell more units with video.
+• A few points of lift across the story-rich categories = $100M+ in new GMS.
+• That's the pie KOL grows with Etsy — and shares.
+*TAM Etsy's $11.9B GMS → SAM story-rich categories (apparel, jewelry, pottery, home) → SOM the pilot category. (Source: Etsy 10-K FY2025 · 5.6M sellers · lift figures our estimate.)*
 
-**NOTES:** On Etsy's own $11.9 billion in sales, our estimate is a maker with a told story can hold twenty-to-forty percent more of their price. Story isn't decoration — it's margin.
+**NOTES:** On Etsy's own $11.9 billion, a story doesn't just help a maker hold their price — it grows the sale. Capture even a small lift across the story-rich categories and you're talking a hundred million-plus in new GMS. That's the pie we grow with Etsy, and share — which is exactly how we make money.
 
 ---
 
@@ -205,7 +205,19 @@ In a category doing ~$[X], a [L]% sales lift → ~$[Y]/yr to KOL.
 
 ---
 
-## 20 · The moat
+## 20 · Go-to-market — Etsy already has both sides
+**ON SLIDE**
+No cold start. We ride Etsy's 5.6M makers + 86.6M buyers.
+• Wedge — start in ONE story-rich category (Sharon's world), prove the lift, expand category by category.
+• Makers opt in fast — the AI interview means "talk, don't design." Near-zero effort to go live.
+• Buyers arrive free — the add-on button on Etsy's home + the discovery feed.
+• The loop — a story people retell → word of mouth + repeat → more makers want in.
+
+**NOTES:** Most marketplaces die at the cold start — no buyers without sellers, no sellers without buyers. We skip it. Etsy already has both. We start in one story-rich category, prove makers sell more, and expand one category at a time. Makers join because it's just talking; buyers are already there.
+
+---
+
+## 21 · The moat
 **ON SLIDE**
 The magic is a conversation. The moat is what it leaves behind.
 conversation → her words → her living world
@@ -216,7 +228,7 @@ verified makers + real stories + buyer-trust data → compounding moat
 
 ---
 
-## 21 · The ask
+## 22 · The ask
 **ON SLIDE**
 You already stand for celebrating the human. Let us deliver it to the buyer.
 Primary metric (what Buyer-Exp owns): "Not as described" ↓ · Repeat-purchase ↑
@@ -227,7 +239,7 @@ Secondary: Conversion · Add-to-basket
 
 ---
 
-## 22 · Vision
+## 23 · Vision
 **ON SLIDE**
 For anything a human stands behind, the story should come first.
 
@@ -235,7 +247,7 @@ For anything a human stands behind, the story should come first.
 
 ---
 
-## 23 · Close
+## 24 · Close
 **ON SLIDE**
 KOL. Every maker, finally heard — starting with Sharon.
 *Because everyone behind everything you love has a story worth stepping into. Thank you.*
