@@ -133,7 +133,7 @@ export function SellOnboarding() {
               variants={item}
               className="mt-8 font-ui text-sm text-bone/60"
             >
-              On film or by voice · nothing goes live until you say so.
+              On film or by voice · your story, your words.
             </motion.p>
           </motion.div>
 
@@ -364,7 +364,7 @@ function CoverEvidence({ reduce }: { reduce: boolean }) {
 
       {/* The tile — mirrors the buyer feed's EditorialTile treatment. */}
       <div className="group relative aspect-[4/5] w-full overflow-hidden rounded-[1.25rem] ring-1 ring-line">
-        <div className="absolute inset-0 saturate-[0.94] brightness-[0.96]">
+        <div className="absolute inset-0 saturate-[0.94] brightness-[0.96] transition-[filter] duration-500 ease-out-expo group-hover:saturate-100 group-hover:brightness-[1.05]">
           <MakerFilm
             videoSrc={COVER_MAKER.filmSrc}
             poster={COVER_MAKER.image}

@@ -182,6 +182,9 @@ function WorldPreview({ reduce }: { reduce: boolean }) {
           <p className="mt-1.5 font-serif text-base leading-snug text-bone sm:text-lg">
             {HQ_MIRROR.line}
           </p>
+          <p className="mt-1.5 font-ui text-xs text-bone/55">
+            Example moment — your real buyer activity lands here.
+          </p>
         </div>
       </div>
     </motion.section>

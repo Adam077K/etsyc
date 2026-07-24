@@ -64,7 +64,7 @@ export function SellMasthead({
           </>
         ) : (
           <span className="meta hidden text-bone-dim md:inline">
-            Your world, built from your story
+            For makers · The Maker&#39;s Issue
           </span>
         )}
 
