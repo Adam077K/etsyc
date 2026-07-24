@@ -2,8 +2,10 @@
  * Mock data for the Discovery Feed. SCREENS-ONLY pass — every maker below is
  * SYNTHETIC demo material (names, studios, blurbs authored for the mock), paired
  * with real Unsplash/Pexels stock of real people making real things (see
- * public/media/CREDITS.md). Nothing here is a real business; prices, review
+ * apps/kol/CREDITS.md). Nothing here is a real business; prices, review
  * counts and sales figures are deliberately absent (never fabricated).
+ * Exception: Two Dots is a REAL business (real Founder-provided assets, synthetic
+ * commerce data) — see apps/kol/CREDITS.md.
  */
 
 export type CraftId =
@@ -16,7 +18,8 @@ export type CraftId =
   | "print"
   | "leather"
   | "metal"
-  | "glass";
+  | "glass"
+  | "costume";
 
 export interface Craft {
   id: CraftId;
@@ -57,6 +60,20 @@ export interface Maker {
    * public/media/video/README.md for the filename → surface map.
    */
   filmSrc?: string;
+  /**
+   * Playhead (seconds) to seed the hero clip on its first/cold mount, so a
+   * portrait clip whose action sits low in frame doesn't open on the empty
+   * centre band a full-bleed landscape hero crops to. Only applied once on the
+   * persistent film node's first mount (via <MakerFilm initialTime>), so it
+   * never fights the feed→world currentTime carry. Omit to open at 0:00.
+   */
+  filmSeed?: number;
+  /**
+   * The clip carries an audio track (the maker narrating). Most clips are silent
+   * (video-only), so this is off by default; when true, the persistent FilmStage
+   * offers a sound control and a world-entry gesture can arm audio.
+   */
+  hasAudio?: boolean;
 }
 
 export const CRAFTS: Craft[] = [
@@ -70,6 +87,7 @@ export const CRAFTS: Craft[] = [
   { id: "leather", label: "Leather" },
   { id: "metal", label: "Metal" },
   { id: "glass", label: "Glass" },
+  { id: "costume", label: "Costumes" },
 ];
 
 /** The hero — the issue's cover maker, on film. */
@@ -313,6 +331,43 @@ export const MAKERS: Maker[] = [
     values: ["Small-batch"],
     ground: "bone",
   },
+  {
+    // Two Dots — the FIRST real-maker world (real video + photography, Founder-
+    // provided). Sharon's children's-costume studio. Name/place are placeholders
+    // pending Founder confirmation (real business; do not fabricate specifics).
+    id: "two-dots",
+    name: "Sharon",
+    studio: "Two Dots",
+    place: "Israel",
+    craft: "costume",
+    discipline: "Hand-sewn children's costumes",
+    blurb: "A costume isn't clothes — it's permission. For one afternoon they get to be the whole story.",
+    image: "/media/twodots/feed-poster.jpg",
+    kind: "film",
+    duration: "0:19",
+    // Portrait (tall) footprint — she is the issue's FEATURED maker, pinned first
+    // (see Feed). Her discovery film is a 9:16 talking-head; a portrait tile frames
+    // her face head-to-shoulders (a full-width 16/9 hero tile crops a portrait clip
+    // to a tight forehead-cut band). Still prominent as the lead, and col-span-5
+    // leaves 7 cols so a neighbour tile packs beside it (no orphaned gutter).
+    span: "tall",
+    tone: "light",
+    values: ["Hand-sewn", "Parent & child"],
+    // Sharon's talking-head intro (Founder-provided promo, compliant faceless cut
+    // — child-face b-roll excluded; see CREDITS). This is the DISCOVERY film: it
+    // plays in the feed tile AND carries via the FilmStage into her world, where
+    // it docks to the corner as you scroll (Founder: "Sharon video in discovery,
+    // shown in the side of the store when scrolling"). The atmospheric hands-on-
+    // felt clip (two-dots.mp4) still leads the world wall's "In the studio" tile.
+    filmSrc: "/media/video/two-dots-feed.mp4",
+    // Seed to 0:06 to match feed-poster.jpg, so the still→video handoff is seamless
+    // and the tile opens on her mid-expression rather than a between-words frame.
+    filmSeed: 6,
+    // Sharon's discovery cut carries her narration (AAC) — the one audible clip;
+    // enables the FilmStage sound control + arm-on-enter. Audio pending Founder
+    // attestation (see CREDITS).
+    hasAudio: true,
+  },
 ];
 
 /** The color-drenched pull-quote spread (Faire-style founder voice). */
@@ -328,10 +383,20 @@ export const FEATURED_QUOTE = {
 export const ISSUE_STATS = {
   makers: 312,
   countries: 41,
-  line: "Every piece in this issue was made by a real human hand — and filmed in the room where it happened.",
+  line: "Every piece was made by a real human hand — and filmed in the room where it happened.",
 };
 
 export const ALL_MAKERS: Maker[] = [COVER_MAKER, ...MAKERS];
+
+/**
+ * The homepage hero features Sharon (Two Dots) in person — a face-to-camera
+ * portrait talking-head — per Founder directive (2026-07-23). Deliberately
+ * distinct from COVER_MAKER (odd-clay), which still anchors the seller/how
+ * example surfaces and is the film-continuity journey's other entry. The `??`
+ * is a type-safe guard: two-dots is a permanent fixture in MAKERS.
+ */
+export const HERO_MAKER: Maker =
+  MAKERS.find((m) => m.id === "two-dots") ?? COVER_MAKER;
 
 /** Look up a maker by id (id doubles as the /m/[slug] route slug). */
 export function getMaker(id: string): Maker | undefined {

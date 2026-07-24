@@ -23,16 +23,16 @@ export function FeedEmpty({
       <span className="mb-6 grid h-16 w-16 place-items-center rounded-full bg-ink-raise text-marigold">
         <Compass size={30} />
       </span>
-      <p className="meta text-bone-dim">No {craftLabel} in this issue — yet</p>
+      <p className="meta text-bone-dim">No {craftLabel} yet</p>
       <h3
         className="mt-4 max-w-xl font-display font-bold leading-tight text-bone"
         style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
       >
-        This shelf is between issues.
+        This shelf is still filling up.
       </h3>
       <p className="mt-4 max-w-md font-ui text-base leading-relaxed text-bone/70">
         We&#39;re still filming {craftLabel.toLowerCase()} makers worth your time.
-        New faces are added every week — meanwhile, the whole issue is waiting.
+        New faces arrive every week — meanwhile, everyone else is waiting.
       </p>
       <button
         onClick={onReset}

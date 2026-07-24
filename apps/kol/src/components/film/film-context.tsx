@@ -53,6 +53,15 @@ export interface FilmIntent {
   /** show the stage's own chip (legible on large films; hidden on the tiny PiP,
       where the route renders its own contextual label). Defaults to true. */
   stageChip?: boolean;
+  /** which corner the film docks to — drives the FilmStage crop direction so a
+      bottom-right dock crops its surplus off the TOP (flush at the bottom) while
+      the top-left store dock crops off the BOTTOM. Defaults to "top-left". */
+  dockCorner?: "top-left" | "bottom-right";
+  /** dock card shape. STORE routes (world/product) dock as a "portrait" vertical
+      card (shows the maker's portrait frame); checkout/thank-you stay "landscape"
+      (a middle-band card that clears the form). Defaults to "landscape". Drives
+      the FilmStage clip axis. */
+  dockOrientation?: "portrait" | "landscape";
 }
 
 /** The shared transform of the persistent film — all transform/opacity. */
@@ -111,6 +120,13 @@ interface FilmController {
   beginHandoff: () => void;
   /** Read-and-reset the handoff flag. True => a caller owns the entrance. */
   consumeHandoff: () => boolean;
+  /** Audio state for the persistent film. Muted by default on every fresh load
+      (browser + contract compliance); a user gesture arms it, and because the
+      FilmStage <video> node survives every route, sound then continues through
+      feed→world→product→checkout without a re-mount. */
+  audioArmed: boolean;
+  /** Toggle audio on/off from a user gesture (the on-film sound control). */
+  toggleAudio: () => void;
 }
 
 const FilmCtx = createContext<FilmController | null>(null);
@@ -124,6 +140,11 @@ export function useFilm(): FilmController {
 export function FilmProvider({ children }: { children: React.ReactNode }) {
   const [intent, setIntent] = useState<FilmIntent | null>(null);
   const [interaction, setInteraction] = useState<FilmInteraction | null>(null);
+  // Muted by default on every fresh load; a user gesture arms it and it then
+  // rides the persistent <video> node across routes (the "hear her while you
+  // scroll" moment). Not reset on clear() so the choice survives within a
+  // session; a page reload re-inits the provider back to muted.
+  const [audioArmed, setAudioArmed] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const scale = useMotionValue(1);
@@ -157,7 +178,9 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
         prev.poster === next.poster &&
         prev.clipLabel === next.clipLabel &&
         prev.clipMeta === next.clipMeta &&
-        prev.chip === next.chip
+        prev.chip === next.chip &&
+        prev.dockCorner === next.dockCorner &&
+        prev.dockOrientation === next.dockOrientation
       ) {
         return prev;
       }
@@ -177,6 +200,22 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
 
   const beginHandoff = useCallback(() => {
     handoffRef.current = true;
+  }, []);
+
+  // Toggle audio. We poke the <video> DOM node directly (muted + play) so the
+  // unmute happens inside the user-gesture task the browser requires, and also
+  // set React state so the declarative `muted` prop + the control icon stay in
+  // sync across every route (the node persists, so the sound rides along).
+  const toggleAudio = useCallback(() => {
+    setAudioArmed((prev) => {
+      const next = !prev;
+      const v = videoRef.current;
+      if (v) {
+        v.muted = !next;
+        if (next) void v.play().catch(() => {});
+      }
+      return next;
+    });
   }, []);
 
   const consumeHandoff = useCallback(() => {
@@ -244,8 +283,10 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
       snapTo,
       beginHandoff,
       consumeHandoff,
+      audioArmed,
+      toggleAudio,
     }),
-    [intent, m, interaction, present, clear, driveTo, snapTo, beginHandoff, consumeHandoff],
+    [intent, m, interaction, present, clear, driveTo, snapTo, beginHandoff, consumeHandoff, audioArmed, toggleAudio],
   );
 
   return <FilmCtx.Provider value={value}>{children}</FilmCtx.Provider>;

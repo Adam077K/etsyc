@@ -99,7 +99,7 @@ export function ValuesSpread({
               onClick={() => onSelect(active)}
               className="press mt-6 inline-flex items-center font-ui text-sm text-bone/75 underline decoration-bone/30 underline-offset-4 hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bone focus-visible:ring-offset-2 focus-visible:ring-offset-olive"
             >
-              Clear filter — show the whole issue
+              Clear filter — show all makers
             </motion.button>
           )}
         </div>

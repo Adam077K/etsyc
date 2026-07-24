@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowClockwise } from "@phosphor-icons/react";
 import { MAKERS, CRAFTS, type Maker } from "@/lib/fixtures/makers";
+import { stagger, rise, calm, inView } from "@/lib/motion";
 import { CraftFilter, type Filter } from "./craft-filter";
 import { MakerTile } from "./maker-tile";
 import { QuoteSpread } from "./quote-spread";
@@ -52,6 +53,19 @@ function hashStr(s: string): number {
 
 const craftLabel = (f: Filter) =>
   f === "all" ? "makers" : CRAFTS.find((c) => c.id === f)?.label ?? "makers";
+
+// The featured maker of this issue — pinned to the front of the UNFILTERED feed
+// so the demo reliably opens by meeting her (she still reshuffles among her peers
+// inside a craft/value filter, where a fixed pin would be dishonest). Editorial
+// pinning, not a broken shuffle: magazines lead with a featured spread.
+const FEATURED_ID = "two-dots";
+
+function pinFeatured(list: Maker[]): Maker[] {
+  const i = list.findIndex((m) => m.id === FEATURED_ID);
+  if (i <= 0) return list;
+  const featured = list[i]!;
+  return [featured, ...list.slice(0, i), ...list.slice(i + 1)];
+}
 
 export function Feed() {
   const [active, setActive] = useState<Filter>("all");
@@ -103,7 +117,11 @@ export function Feed() {
         (visitRef.current + 1) * 9301 +
         nonce * 49297 +
         hashStr(valueFilter ?? active);
-      setDisplay(seededShuffle(pool, seed));
+      const shuffled = seededShuffle(pool, seed);
+      // Unfiltered issue → lead with the featured maker; filtered views keep the
+      // honest reshuffle (no pin) so a craft/value filter is never gamed.
+      const unfiltered = active === "all" && !valueFilter;
+      setDisplay(unfiltered ? pinFeatured(shuffled) : shuffled);
       setLoading(false);
     }, 460);
     return () => clearTimeout(t);
@@ -136,6 +154,7 @@ export function Feed() {
     setOpenedId(m.id);
   }
 
+  const reduce = useReducedMotion();
   const isAll = active === "all" && !valueFilter;
   const revisit = visit > 0;
 
@@ -177,22 +196,30 @@ export function Feed() {
 
   return (
     <section id="feed" className="mx-auto max-w-issue px-5 pb-24 pt-20 sm:px-8">
-      {/* Section head. */}
-      <div className="mb-8 flex flex-col gap-6 border-b border-line pb-8 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="meta text-bone-dim">The issue</p>
-          <h2
-            className="mt-4 max-w-2xl font-display font-bold leading-[0.95] text-bone"
-            style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
-          >
-            Mixed media, reshuffled every visit.
-          </h2>
-        </div>
-        <p className="max-w-xs font-ui text-sm leading-relaxed text-bone/65">
-          Not a grid — a curated spread of makers on film and in frame. Refresh
-          and the room changes.
-        </p>
-      </div>
+      {/* Section head — inks in on a stagger as the feed is reached, so it opens
+          as an authored spread rather than snapping in cold. Copy is caption-
+          level: the tiles are the content, this is the invitation. */}
+      <motion.div
+        variants={reduce ? calm : stagger(0.05, 0.1)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={inView}
+        className="mb-8 flex flex-col gap-6 border-b border-line pb-8 md:flex-row md:items-end md:justify-between"
+      >
+        <motion.h2
+          variants={reduce ? calm : rise(24, 0.8)}
+          className="max-w-2xl font-display font-bold leading-[0.95] text-bone"
+          style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+        >
+          Meet the people who make it.
+        </motion.h2>
+        <motion.p
+          variants={reduce ? calm : rise(16, 0.7)}
+          className="max-w-xs font-ui text-sm leading-relaxed text-bone/65"
+        >
+          Click anyone to watch them work.
+        </motion.p>
+      </motion.div>
 
       {/* Sticky filter rail. */}
       <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-8 bg-ink/85 px-5 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
@@ -221,7 +248,7 @@ export function Feed() {
                 size={19}
                 className="transition-transform duration-500 group-hover:rotate-180"
               />
-              Reshuffle the issue
+              See other makers
             </button>
           </div>
         </>

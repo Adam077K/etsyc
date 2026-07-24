@@ -10,6 +10,7 @@ import {
   Wine,
   Coffee,
   Sparkle,
+  MaskHappy,
   type Icon,
 } from "@phosphor-icons/react";
 import type { CraftId } from "./fixtures/makers";
@@ -29,6 +30,7 @@ export const CRAFT_ICON: Record<CraftId, Icon> = {
   leather: Handbag,
   metal: Flame,
   glass: Wine,
+  costume: MaskHappy,
 };
 
 export const VALUE_ICON = Sparkle;

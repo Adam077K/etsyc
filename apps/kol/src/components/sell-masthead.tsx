@@ -16,10 +16,13 @@ export function SellMasthead({
   current,
   exitHref = "/sell",
   exitLabel = "Save & exit",
+  published = false,
 }: {
   current?: SellStopId;
   exitHref?: string;
   exitLabel?: string;
+  /** Once the world is live, the final stop reads done rather than active. */
+  published?: boolean;
 }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -55,7 +58,7 @@ export function SellMasthead({
 
         {current ? (
           <>
-            <Stepper currentIndex={currentIndex} />
+            <Stepper currentIndex={currentIndex} published={published} />
             {/* Condensed orientation below md, where the full rail is hidden. */}
             <span className="font-mono text-xs text-bone-dim md:hidden">
               Step {currentIndex + 1} of {SELL_STOPS.length}
@@ -64,7 +67,7 @@ export function SellMasthead({
           </>
         ) : (
           <span className="meta hidden text-bone-dim md:inline">
-            Your world, built from your story
+            For makers · The Maker&#39;s Issue
           </span>
         )}
 
@@ -102,14 +105,21 @@ export function SellMasthead({
   );
 }
 
-/* The three-stop progress rail — done / current / upcoming. */
-function Stepper({ currentIndex }: { currentIndex: number }) {
+/* The three-stop progress rail — done / current / upcoming. Once published, the
+   final stop flips from active to done (same treatment as earlier stops). */
+function Stepper({
+  currentIndex,
+  published = false,
+}: {
+  currentIndex: number;
+  published?: boolean;
+}) {
   return (
     <nav aria-label="Progress" className="hidden items-center gap-1.5 md:flex">
       <ol className="flex items-center gap-1.5">
         {SELL_STOPS.map((stop, i) => {
-          const done = i < currentIndex;
-          const active = i === currentIndex;
+          const done = i < currentIndex || (published && i === currentIndex);
+          const active = i === currentIndex && !published;
           const inner = (
             <span
               className={cn(

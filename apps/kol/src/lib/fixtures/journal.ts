@@ -3,7 +3,7 @@
  * byline, pull-quote and dateline below is SYNTHETIC demo material authored for
  * the mock, in the established fixture voice of each maker (see makers.ts).
  * Film stills are real Unsplash/Pexels stock of real people making real things
- * (see public/media/CREDITS.md) standing in for the maker footage that comes
+ * (see apps/kol/CREDITS.md) standing in for the maker footage that comes
  * later. Nothing here is a real publication; issue counts describe the mock
  * issue only and no real people are depicted as the named makers.
  */

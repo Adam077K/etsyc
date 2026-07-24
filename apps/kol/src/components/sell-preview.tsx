@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { SpeakerHigh, Play, Lock } from "@phosphor-icons/react";
+import { SpeakerHigh, Play, Lock, Check, PencilSimple } from "@phosphor-icons/react";
 import { COVER_MAKER } from "@/lib/fixtures/makers";
 import { WORLDS } from "@/lib/fixtures/worlds";
 import { cn } from "@/lib/utils";
@@ -30,20 +30,30 @@ export interface PreviewState {
   voiceovers: Set<string>;
   selectedId: string;
   onSelect: (id: string) => void;
+  /** When present, each section shows its build state — draft vs. settled — so
+   *  the maker watches her world set, section by section, as she approves. */
+  approved?: Record<string, boolean>;
 }
 
 export function SellPreview(state: PreviewState) {
   const { selectedId, onSelect } = state;
   const textOnAccent = state.accentOn === "light" ? "#EFE6D6" : "#1C1613";
+  const showState = !!state.approved;
 
   const sectionCls = (id: string) =>
     cn(
-      "relative block w-full text-left transition-all focus-visible:outline-none",
+      "group/section relative block w-full text-left transition-all focus-visible:outline-none",
       "focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-inset",
       selectedId === id
         ? "ring-2 ring-inset ring-marigold"
         : "ring-0 hover:ring-2 hover:ring-inset hover:ring-marigold/40",
+      // A section still in draft is faintly unfinished until the maker settles it —
+      // it lifts to full presence the moment she approves.
+      showState && !state.approved?.[id] && selectedId !== id && "opacity-[0.82]",
     );
+
+  const seal = (id: string) =>
+    showState ? <SectionSeal settled={!!state.approved?.[id]} /> : null;
 
   return (
     <div className="overflow-hidden rounded-2xl bg-ink">
@@ -54,6 +64,7 @@ export function SellPreview(state: PreviewState) {
         aria-label="Edit cover film"
         className={sectionCls("hero")}
       >
+        {seal("hero")}
         <div className="relative aspect-[16/10] w-full overflow-hidden">
           <Image
             src={maker.image}
@@ -105,6 +116,7 @@ export function SellPreview(state: PreviewState) {
         aria-label="Edit your story"
         className={cn(sectionCls("story"), "bg-ink")}
       >
+        {seal("story")}
         <div
           className={cn(
             "grid gap-4 p-5",
@@ -142,6 +154,7 @@ export function SellPreview(state: PreviewState) {
         aria-label="Edit how it's made"
         className={cn(sectionCls("process"), "bg-ink")}
       >
+        {seal("process")}
         <div className="p-5">
           <p
             className="mb-1 font-mono text-[0.6rem] uppercase tracking-[0.16em]"
@@ -190,6 +203,7 @@ export function SellPreview(state: PreviewState) {
         aria-label="Edit the shop"
         className={cn(sectionCls("shop"), "bg-ink")}
       >
+        {seal("shop")}
         <div className="p-5">
           <p
             className="mb-1 font-mono text-[0.6rem] uppercase tracking-[0.16em]"
@@ -270,6 +284,7 @@ export function SellPreview(state: PreviewState) {
         className={sectionCls("studio")}
         style={{ backgroundColor: state.accentHex }}
       >
+        {seal("studio")}
         <div
           className={cn(
             "gap-2 p-2",
@@ -314,6 +329,7 @@ export function SellPreview(state: PreviewState) {
         className={sectionCls("voice")}
         style={{ backgroundColor: state.accentHex }}
       >
+        {seal("voice")}
         <div className="px-6 py-9 text-center">
           <p
             className="mx-auto max-w-sm font-serif leading-[1.2]"
@@ -329,6 +345,35 @@ export function SellPreview(state: PreviewState) {
         </div>
       </button>
     </div>
+  );
+}
+
+/* The per-section build seal — KOL chrome (solid ink chip) that rides over the
+   maker's brand to show whether a section is still in draft or settled as hers.
+   Draft is quiet and provisional; settled inks marigold so the world visibly
+   sets, section by section, as she approves. Kept off the D15 brand layer. */
+function SectionSeal({ settled }: { settled: boolean }) {
+  return (
+    <span
+      className={cn(
+        "pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-[0.14em] backdrop-blur-sm transition-colors",
+        settled
+          ? "bg-marigold text-ink"
+          : "bg-ink/80 text-bone-dim ring-1 ring-inset ring-bone/15",
+      )}
+    >
+      {settled ? (
+        <>
+          <Check size={10} weight="bold" />
+          Yours
+        </>
+      ) : (
+        <>
+          <PencilSimple size={10} weight="fill" />
+          Draft
+        </>
+      )}
+    </span>
   );
 }
 

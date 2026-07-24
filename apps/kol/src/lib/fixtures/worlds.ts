@@ -1,7 +1,7 @@
 /**
  * Per-maker WORLD data for the maker-world route (/m/[slug]).
  * SCREENS-ONLY, all synthetic demo content paired with verified stock (see
- * public/media/CREDITS.md). Prices are demo figures for the mock storefront,
+ * apps/kol/CREDITS.md). Prices are demo figures for the mock storefront,
  * not real commercial claims.
  *
  * Per concept-lock D15 + DESIGN.md: KOL's own UI keeps the fixed system. Maker
@@ -30,6 +30,31 @@ export interface WorldProcessStep {
   title: string;
   body: string;
   image: string;
+  /** optional real clip, played muted/looped (MakerFilm) inside the make-reel. */
+  filmSrc?: string;
+  /** contextual label the corner film narrates while this frame is the active one
+      in the draggable make-reel. Authored short, in the maker's register. */
+  filmLabel?: string;
+}
+
+/**
+ * A single tile in a world's optional "wall" — a dense, editorial masonry of the
+ * maker's own room (images + woven films). OPTIONAL per world: only a maker with
+ * a deep real-media library (currently Two Dots) fills one, which is exactly why
+ * her world reads as the most obviously-hers in the build. A tile is a film when
+ * `filmSrc` is set (played muted/looped via <MakerFilm>), otherwise a still.
+ * `ratio` is the tile's own aspect (Tailwind aspect-* value) so the wall packs
+ * with real editorial variety, never a uniform grid.
+ */
+export interface WorldWallItem {
+  src: string;
+  /** optional real clip; when set the tile is a muted, looped film (src = poster). */
+  filmSrc?: string;
+  alt: string;
+  /** the tile's aspect ratio — drives the masonry rhythm. */
+  ratio: "square" | "portrait" | "tall" | "landscape" | "video";
+  /** optional overlaid label, in the maker's register. */
+  caption?: string;
 }
 
 export interface MakerWorld {
@@ -58,12 +83,43 @@ export interface MakerWorld {
   /** section headers authored per-maker, in their own voice (no flattening) */
   processSectionHeader: string;
   process: WorldProcessStep[];
+  /** OPTIONAL dense gallery wall — the maker's whole room, images + woven films.
+      Present only for makers with a deep real-media library (Two Dots). */
+  wallSectionHeader?: string;
+  wallSectionKicker?: string;
+  wall?: WorldWallItem[];
   shopSectionHeader: string;
   products: WorldProduct[];
   studioImage: string;
   studioCaption: string;
   /** a closing line from the maker */
   voice: string;
+  /**
+   * OPTIONAL film-led narration — the contextual labels the corner-docked film
+   * narrates as each beat scrolls into view. This is the mechanism that makes
+   * the bespoke Two Dots world feel film-led ("It starts with an idea" →
+   * "…and become it"); generalized here so every world's film narrates its own
+   * story. Authored short and in the maker's own register, never mechanical.
+   * Absent → the film keeps its default "Now playing" chip (graceful).
+   */
+  filmNarration?: {
+    hero?: string;
+    story?: string;
+    process?: string;
+    interlude?: string;
+    products?: string;
+    studio?: string;
+  };
+  /**
+   * OPTIONAL cinematic interlude — one line pulled from the maker's OWN story
+   * prose (never newly fabricated), set full-bleed as the persistent film blooms
+   * back behind it and then re-docks. The beat that breaks the stacked-section
+   * rhythm and lets the film lead. Absent → no interlude (graceful).
+   */
+  interlude?: {
+    /** a sentence lifted verbatim from this world's `story`, pulled as a quote. */
+    quote: string;
+  };
 }
 
 export const WORLDS: Record<string, MakerWorld> = {
@@ -84,6 +140,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Center",
         body: "Every pot begins with a fight to get the clay dead-centre. Get this wrong and nothing that follows can be saved.",
         image: "/media/clay-wheel.jpg",
+        filmLabel: "Centre, or nothing",
       },
       {
         id: "raise",
@@ -91,6 +148,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Raise",
         body: "The walls come up in three slow pulls. You can feel the moment the form decides what it wants to be.",
         image: "/media/clay-shape.jpg",
+        filmLabel: "The walls come up",
       },
       {
         id: "fire",
@@ -98,6 +156,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Salt-fire",
         body: "Bisque, glaze, then sea salt thrown into the kiln at peak heat. The vapour writes the surface — I only get a vote.",
         image: "/media/clay-drying.jpg",
+        filmLabel: "The salt writes it",
       },
     ],
     products: [
@@ -130,6 +189,17 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/clay-shelf.jpg",
     studioCaption: "The drying shelf, Alfama studio — Lisbon",
     voice: "If a pot ends up on your table for thirty years, I have done my job. — Lena",
+    filmNarration: {
+      hero: "Now on the wheel",
+      story: "In the low morning light",
+      process: "Nothing here is rushed",
+      interlude: "No two mornings",
+      products: "A few, made to keep",
+      studio: "The drying shelf",
+    },
+    interlude: {
+      quote: "No two pieces match, because no two mornings do.",
+    },
   },
   "indigo-ash": {
     slug: "indigo-ash",
@@ -148,6 +218,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Ferment the vat",
         body: "Indigo, wood ash, a week of patience. The vat has to be coaxed alive before a single thread goes in.",
         image: "/media/indigo-dye.jpg",
+        filmLabel: "A week of patience",
       },
       {
         id: "finish",
@@ -155,6 +226,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Cut & finish by hand",
         body: "Every hem is turned and stitched on a machine older than me. It softens with every wash and never lets go of the blue.",
         image: "/media/textile-machine.jpg",
+        filmLabel: "Turned by hand",
       },
     ],
     products: [
@@ -179,6 +251,17 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/indigo-dye.jpg",
     studioCaption: "The living vat — Médina, Dakar",
     voice: "The blue remembers every hand that made it. — Sabine",
+    filmNarration: {
+      hero: "At the vat",
+      story: "Reading the vat's mood",
+      process: "The vat sets the pace",
+      interlude: "Depth is a decision",
+      products: "Cloth worth the wait",
+      studio: "The living vat",
+    },
+    interlude: {
+      quote: "The depth you see is the number of times I chose to go back in.",
+    },
   },
   "grain-groove": {
     slug: "grain-groove",
@@ -198,6 +281,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Read the board",
         body: "I don't cut until I know which way the grain wants to run. Fight it and it splits on you inside a year. Follow it and it holds for a lifetime.",
         image: "/media/woodwork.jpg",
+        filmLabel: "Read the board first",
       },
       {
         id: "joint",
@@ -205,6 +289,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "One clean joint",
         body: "Everything locks together with hand-cut joinery — no screws to work loose, no glue doing the real job. If it wobbles on my floor, it never sees yours.",
         image: "/media/wood-joint.jpg",
+        filmLabel: "One clean joint",
       },
     ],
     products: [
@@ -229,6 +314,17 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/woodwork.jpg",
     studioCaption: "The bench, under the tin roof — Oaxaca",
     voice: "A chair should outlast the argument about who gets to sit in it. — Tomás",
+    filmNarration: {
+      hero: "At the bench",
+      story: "Hands that stopped arguing",
+      process: "The wood gets the last word",
+      interlude: "Twenty years of honest",
+      products: "Made to be handed down",
+      studio: "Under the tin roof",
+    },
+    interlude: {
+      quote: "When a joint comes out wrong I burn the board.",
+    },
   },
   "ember-rue": {
     slug: "ember-rue",
@@ -249,6 +345,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Draw it off by hand",
         body: "Every oil is drawn and blended a few millilitres at a time — by pipette, by nose. No blend leaves this bench until I've worn it on my own wrist for a full day and it hasn't turned on me by midnight.",
         image: "/media/apothecary.jpg",
+        filmLabel: "A few millilitres at a time",
       },
       {
         id: "seal",
@@ -256,6 +353,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Bottle & seal",
         body: "It's decanted into glazed stoneware, waxed, and dated. Stone keeps the light out and the scent in far better than the clear glass everyone expects — so the last drop smells like the first.",
         image: "/media/salt-ceramics.jpg",
+        filmLabel: "Bottled and sealed",
       },
     ],
     products: [
@@ -280,6 +378,18 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/apothecary.jpg",
     studioCaption: "The distilling bench — the Mellah, Marrakesh",
     voice: "A scent should follow you out the door and still be arguing with you at midnight. — Noor",
+    filmNarration: {
+      hero: "At the still",
+      story: "A week told by smell",
+      process: "I work by nose, not by clock",
+      interlude: "The honest exchange",
+      products: "Small bottles, long afternoons",
+      studio: "The distilling bench",
+    },
+    interlude: {
+      quote:
+        "Three drops of oil for an armful of petals — that is the honest exchange, and I won't cheat it.",
+    },
   },
   "risograph-room": {
     slug: "risograph-room",
@@ -303,6 +413,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "The wall decides",
         body: "Nothing leaves until it's pinned to this wall for a week. If a print still stops me on the way to the kettle, it's good. If I walk straight past it, it goes back in the ink-test pile.",
         image: "/media/prints-wall.jpg",
+        filmLabel: "Pinned for a week",
       },
       {
         id: "feel",
@@ -310,6 +421,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Ink you can feel",
         body: "Riso ink sits on top of the paper, never in it. Run a fingertip across a fresh print and you feel the colour — raised, tacky-bright, a little uneven. That texture is the entire point.",
         image: "/media/riso-ink.jpg",
+        filmLabel: "Raised, tacky-bright",
       },
     ],
     products: [
@@ -334,6 +446,154 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/prints-wall.jpg",
     studioCaption: "The drying wall — Euljiro, Seoul",
     voice: "A print you can feel with your eyes shut is worth ten you scroll past. — Juno",
+    filmNarration: {
+      hero: "Ink on the drum",
+      story: "Two inks, one collision",
+      process: "A hundred happy accidents",
+      interlude: "The third colour",
+      products: "Two colours at a time",
+      studio: "The drying wall",
+    },
+    interlude: {
+      quote:
+        "The overlap glows in a third colour you didn't ask for and couldn't mix if you tried.",
+    },
+  },
+  "two-dots": {
+    slug: "two-dots",
+    // Clay — stage-red / theatrical curtain register; the truest fit for a
+    // dress-up costume world and keeps cross-world differentiation load-bearing
+    // (plum stays sole to Grain & Groove). CEO-approved reassignment.
+    accent: "clay",
+    tagline: "Pick anyone you like. I'll sew you into them by the weekend.",
+    story: [
+      "I started making costumes because my own kids kept asking to be things the shops didn't sell. A specific dragon. A very specific swan. So I learned to sew the exact one in their head, not the nearest one on a shelf.",
+      "Everything here is cut and stitched by hand, in a small room that is always covered in felt. Parents come and make alongside me — that's half the point. The child leaves wearing something, and the grown-up leaves having made it.",
+      "I care most about the five seconds after they put it on, when they stop being shy and start being the thing. You can't buy that off a rack. You have to sew it in.",
+    ],
+    // Governance fallback applied pre-deploy: workshop.jpg (background minor in
+    // profile) is swapped out of the deploy path → the faceless quilt-detail still
+    // (fabric close-up suits the story beat). One-line revert to workshop.jpg if
+    // the Founder later approves the original.
+    storyImage: "/media/twodots/quilt.jpg",
+    storyImageAlt: "A patchwork-quilt detail — eyelet lace, tartan and floral cotton patches with a dusty-rose binding, from the Two Dots studio",
+    processSectionHeader: "Made the slow way, on purpose.",
+    process: [
+      {
+        id: "gather",
+        label: "01",
+        title: "A pile of nothing",
+        body: "Every costume starts as offcuts, felt, and a child's very firm opinion about exactly which animal they are this month. No pattern survives first contact with a four-year-old.",
+        image: "/media/twodots/materials.jpg",
+      },
+      {
+        id: "sew",
+        label: "02",
+        title: "Cut and sewn here, by hand",
+        body: "It's all made in the room, often with the parent at the next machine. Real seams, real hems — built to be run in, sat in, and slept in if it comes to that.",
+        // Governance fallback: workshop.jpg swapped out. Critic mapped this to
+        // materials.jpg, but step 01 already uses materials.jpg — side by side the
+        // two cards render an identical photo (reads as a bug, not before/during
+        // continuity). Held at felt.jpg (CREDITS-named alt, faceless, fits "cut and
+        // sewn here") to keep the process trio distinct; awaiting critic confirm.
+        image: "/media/twodots/felt.jpg",
+      },
+      {
+        id: "become",
+        label: "03",
+        title: "Then they disappear into it",
+        body: "The last step isn't mine. It's the moment they turn around in the mirror and the shy kid is gone and the dragon is standing there instead.",
+        image: "/media/twodots/butterfly-back.jpg",
+      },
+    ],
+    wallSectionKicker: "The whole room",
+    wallSectionHeader: "This is the studio — pinned to the wall.",
+    // Two Dots' real-media library is deep enough to fill a wall: her hero clip,
+    // the wings-that-spin film, and the felt, materials, quilting and printed
+    // pieces around them. Every asset is Founder-provided and CREDITS-cleared;
+    // no identifiable child face appears (the flagged workshop.jpg is kept OUT of
+    // the wall on purpose). This is what makes her world unmistakably hers.
+    wall: [
+      {
+        src: "/media/twodots/hero-poster.jpg",
+        filmSrc: "/media/video/two-dots.mp4",
+        alt: "Sharon's hands making a small felt craft, filmed top-down in the studio",
+        ratio: "video",
+        caption: "In the studio, on film",
+      },
+      {
+        src: "/media/twodots/felt.jpg",
+        alt: "The felt drawer — butterfly, cactus, panda and other felt characters laid out",
+        ratio: "portrait",
+        caption: "The felt drawer",
+      },
+      {
+        src: "/media/twodots/materials.jpg",
+        alt: "Beads, denim, fabric, scissors and yarn laid out ready to cut",
+        ratio: "landscape",
+      },
+      {
+        src: "/media/twodots/butterfly-back.jpg",
+        filmSrc: "/media/video/product-butterfly-wings.mp4",
+        alt: "A child seen from behind, curly hair showing, spinning to lift handmade felt butterfly wings",
+        ratio: "tall",
+        caption: "Wings that spin",
+      },
+      {
+        src: "/media/twodots/quilt.jpg",
+        alt: "Patchwork-quilt detail — eyelet lace, tartan and floral cotton with a dusty-rose binding",
+        ratio: "square",
+      },
+      {
+        src: "/media/twodots/tote.jpg",
+        alt: "A hand-printed cat-face cotton drawstring bag",
+        ratio: "portrait",
+        caption: "Studio-printed by the kids",
+      },
+      {
+        src: "/media/twodots/devil-back.jpg",
+        alt: "The little-devil costume seen from behind — felt wings and a tutu",
+        ratio: "tall",
+      },
+    ],
+    shopSectionHeader: "A few to become.",
+    products: [
+      {
+        id: "butterfly-wings",
+        name: "Butterfly Wings",
+        price: "£58",
+        blurb: "Felt wings on a hidden harness, cut so they lift when she spins. Made to be spun in.",
+        image: "/media/twodots/butterfly-back.jpg",
+        note: "Made to measure",
+      },
+      {
+        id: "little-devil",
+        name: "The Little Devil",
+        price: "£64",
+        blurb: "Soft felt horns, a tulle skirt with real body, and a trident that's all foam — mischief, no sharp edges.",
+        image: "/media/twodots/devil-back.jpg",
+        note: "Made to measure",
+      },
+      {
+        id: "cat-tote",
+        name: "The Cat Tote",
+        price: "£18",
+        blurb: "A cotton drawstring bag, every little cat face hand-printed by a kid in the studio. No two the same.",
+        image: "/media/twodots/tote.jpg",
+        note: "Studio-printed",
+      },
+      {
+        id: "costume-workshop",
+        name: "Parent & Child Workshop",
+        price: "£45",
+        blurb: "Two hours, two people, one costume you make together and take home the same day.",
+        image: "/media/twodots/materials.jpg",
+        note: "Per pair · booked by date",
+      },
+    ],
+    studioImage: "/media/twodots/felt.jpg",
+    studioCaption: "The felt drawer — Two Dots studio",
+    voice: "The shops sell what a child should want. I make the one they already dreamed up. — Sharon",
   },
 };
 

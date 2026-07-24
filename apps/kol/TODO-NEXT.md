@@ -49,6 +49,16 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
   system rather than its execution. Resolve with real per-maker footage/portraits
   when they arrive, or a from-scratch dual-frame ObjectTile variant — not by
   borrowing another maker's face.
+- **Feed media enrichment (more clips/images).** _[wave 5, 2026-07-23] Deferred by
+  ruling C._ Network egress is blocked (no stock downloads), every image in
+  `public/media/` is already referenced (no unused assets), and the v1 archive
+  seed videos have no license/provenance record so they cannot be CREDITS'd
+  honestly. The only clean local option was derived crops of already-used images
+  (cross-context déjà-vu risk the CREDITS ledger guards against) — judged not
+  worth it for marginal density. Resolve with the Founder's own footage drop
+  (per the "replace with KOL's own footage before launch" note in
+  `public/media/CREDITS.md`) or a Founder-supplied licensed stock batch with
+  source URLs → then a clean additive pass with full CREDITS rows.
 
 ## Motion / interaction
 - _(Hover blurb reveal reworked to clip-path/transform — see Applied.)_
@@ -67,6 +77,18 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
 - **Checkout mobile 375px: residual right-edge field clipping (10–15px).**
   Cosmetic remnant of the P1-A fix; not a blocker.
 
+## Integration carry items (2026-07-24)
+- **LiquidDivider still renders on journal-index + how-story.** The Founder's blob
+  removal was scoped to home (`/`) + the feed only; `journal-index.tsx` and
+  `how-story.tsx` still render `LiquidDivider` (defined in `liquid.tsx`). Left
+  intentionally — post-pitch call on whether to strip it site-wide or keep it as
+  a journal/how accent. No action now.
+- **Make-reel first card image passes under the portrait dock.** The persistent
+  corner film overlaps the leftmost reel card's *image* corner as the strip
+  scrolls (copy clears). Confirmed HOLD by the critic delta-pass (imagery-under-
+  fixed-film is the established behavior, narrower than the old landscape card).
+  Reopen with a desktop reel left-inset only if the Founder reads it wrong.
+
 ## Copy / IA / a11y polish
 - **[Etsy skin, a11y] Focus ring on bone grounds is under the 3:1 floor.** The
   `#FF7A3C` (Etsy Orange-bright) focus outline measures ~2.09:1 on bone (improved
@@ -74,3 +96,10 @@ gate (design-critic + impeccable-finish-reviewer) unless noted otherwise.
   On ink grounds it passes comfortably; only bone-ground focus states are affected.
   Fix: give `:focus-visible` a darker/denser ring token (or an ink outline) when
   the ground is bone. Non-blocking (finish-reviewer advisory).
+
+## Perf
+- **[deep world] Code-split TwoDotsWorld.** `src/components/twodots-world.tsx` is
+  imported statically by the shared `/m/[slug]` route, so its bespoke weight ships
+  in every maker world's chunk. Wrap it in `next/dynamic` (client component, no
+  SSR concerns for the film driver) so only `/m/two-dots` loads it. Reviewer
+  suggestion on feat/kol-sharon-world-deep; non-blocking.

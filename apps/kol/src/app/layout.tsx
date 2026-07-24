@@ -55,6 +55,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${display.variable} ${serif.variable} ${ui.variable} ${mono.variable}`}
+      // Explicit dark register on the KOL root so the /etsy light colorScheme
+      // can't leak a light paint frame on soft-nav back into the ink feed.
+      style={{ colorScheme: "dark" }}
     >
       <body className="min-h-screen bg-ink text-bone">
         {/* The continuous film layer lives in the app shell so the maker's film

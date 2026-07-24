@@ -33,6 +33,11 @@ export function MakerFilm({
   videoRef: externalRef,
   /** Seed the clip's playhead on mount (currentTime continuity across a seam). */
   initialTime,
+  /** Audio state. Defaults to MUTED — every feed tile, hero and overlay film
+      stays muted (browser + contract compliance). Only the persistent FilmStage
+      passes `muted={false}`, once the user arms sound, so the SAME clip node
+      becomes audible without a re-mount. */
+  muted = true,
 }: {
   videoSrc?: string;
   poster: string;
@@ -44,6 +49,7 @@ export function MakerFilm({
   drift?: boolean;
   videoRef?: React.MutableRefObject<HTMLVideoElement | null>;
   initialTime?: number;
+  muted?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -103,13 +109,21 @@ export function MakerFilm({
     return () => io.disconnect();
   }, [useVideo]);
 
+  // React's `muted` JSX attribute is unreliable (a long-standing quirk where the
+  // property doesn't reflect), so mirror the desired state onto the DOM property
+  // directly whenever it changes. The FilmStage's own gesture handler also sets
+  // this within the user-gesture task so the browser permits the unmute.
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted;
+  }, [muted, useVideo]);
+
   if (useVideo) {
     return (
       <video
         ref={setVideoNode}
         src={videoSrc}
         poster={poster}
-        muted
+        muted={muted}
         loop
         playsInline
         preload="none"

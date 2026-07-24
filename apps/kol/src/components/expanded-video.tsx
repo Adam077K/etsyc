@@ -13,7 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import type { Maker } from "@/lib/fixtures/makers";
 import { WORLDS } from "@/lib/fixtures/worlds";
-import { easeOut } from "@/lib/motion";
+import { easeOut, stagger, rise, calm } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { MakerFilm } from "./maker-film";
 import { useFilm } from "./film/film-context";
@@ -138,7 +138,7 @@ export function ExpandedVideo({
   return (
     <motion.div
       ref={overlayRef}
-      className="fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-ink/92 backdrop-blur-xl lg:flex-row lg:overflow-hidden"
+      className="fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-ink/92 backdrop-blur-lg lg:flex-row lg:overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -199,6 +199,9 @@ export function ExpandedVideo({
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
                 videoRef={filmVideoRef}
+                // Match the first video frame to the poster still (no jump as the
+                // overlay opens); the enter-world handoff carries from here on.
+                initialTime={maker.filmSeed}
               />
             </motion.div>
           </AnimatePresence>
@@ -212,32 +215,47 @@ export function ExpandedVideo({
         </motion.div>
       </div>
 
-      {/* Meta + actions */}
+      {/* Meta + actions — the reveal is authored, not a single fade: the frame
+          grows (layoutId film) and the credits ink in one line after another,
+          so the first film-grow the panel sees reads as a title sequence. Keyed
+          per maker so paging next/prev re-runs the cascade for each one. */}
       <div className="flex flex-1 flex-col justify-center gap-8 px-6 pb-16 sm:px-10 lg:pb-8 lg:pr-16">
         <motion.div
           key={`meta-${maker.id}`}
-          initial={{ opacity: 0, y: reduce ? 0 : 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: easeOut, delay: 0.05 }}
+          variants={reduce ? calm : stagger(0.22, 0.07)}
+          initial="hidden"
+          animate="visible"
         >
-          <p className="meta mb-4 text-bone-dim">{maker.discipline}</p>
-          <h2
+          <motion.p variants={reduce ? calm : rise(14, 0.5)} className="meta mb-4 text-bone-dim">
+            {maker.discipline}
+          </motion.p>
+          <motion.h2
+            variants={reduce ? calm : rise(20, 0.6)}
             className="font-display font-extrabold leading-[0.95] text-bone"
             style={{ fontSize: "clamp(2.5rem, 5vw, 4.25rem)" }}
           >
             {maker.studio}
-          </h2>
-          <p className="mt-4 flex items-center gap-2 font-ui text-base text-bone/80">
+          </motion.h2>
+          <motion.p
+            variants={reduce ? calm : rise(14, 0.5)}
+            className="mt-4 flex items-center gap-2 font-ui text-base text-bone/80"
+          >
             <span className="font-semibold text-bone">{maker.name}</span>
             <span aria-hidden>·</span>
             <MapPin size={15} className="shrink-0" />
             {maker.place}
-          </p>
-          <p className="mt-6 max-w-md font-serif text-xl italic leading-snug text-bone/90">
+          </motion.p>
+          <motion.p
+            variants={reduce ? calm : rise(14, 0.5)}
+            className="mt-6 max-w-md font-serif text-xl italic leading-snug text-bone/90"
+          >
             “{maker.blurb}”
-          </p>
+          </motion.p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <motion.div
+            variants={reduce ? calm : rise(14, 0.5)}
+            className="mt-9 flex flex-wrap items-center gap-3"
+          >
             <button
               onClick={enterWorld}
               disabled={!hasWorld}
@@ -254,7 +272,7 @@ export function ExpandedVideo({
             >
               Back to the feed
             </button>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Page through other films */}

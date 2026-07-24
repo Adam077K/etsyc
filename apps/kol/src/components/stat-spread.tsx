@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useInView, animate } from "framer-motion";
 import { ISSUE_STATS } from "@/lib/fixtures/makers";
-import { rise, calm, inView } from "@/lib/motion";
-import { LiquidDivider } from "./liquid";
+import { rise, calm, inView, stagger } from "@/lib/motion";
 
 // Counts up when it scrolls into view, so the visitor watches the number climb.
 function Counter({ to, className }: { to: number; className?: string }) {
@@ -45,31 +44,40 @@ export function StatSpread() {
         viewport={inView}
         className="relative overflow-hidden bg-clay px-6 py-14 text-center sm:px-12 sm:py-20"
       >
-        <LiquidDivider className="pointer-events-none absolute inset-x-0 top-0 opacity-[0.55]" />
-
-        <div className="relative">
+        {/* Inner stagger: the two figures arrive one after the other, then the
+            closing line — an authored count-in on top of each number's climb. */}
+        <motion.div
+          variants={reduce ? calm : stagger(0.15, 0.14)}
+          initial="hidden"
+          whileInView="visible"
+          viewport={inView}
+          className="relative"
+        >
           <div className="flex flex-wrap items-baseline justify-center gap-x-10 gap-y-6">
-            <div>
+            <motion.div variants={reduce ? calm : rise(22, 0.7)}>
               <Counter
                 to={ISSUE_STATS.makers}
                 className="block font-display font-extrabold leading-none text-bone [font-size:clamp(3.5rem,9vw,7rem)]"
               />
               <p className="meta mt-3 text-bone">makers on film</p>
-            </div>
+            </motion.div>
             <span className="hidden h-20 w-px bg-bone/25 sm:block" />
-            <div>
+            <motion.div variants={reduce ? calm : rise(22, 0.7)}>
               <Counter
                 to={ISSUE_STATS.countries}
                 className="block font-display font-extrabold leading-none text-bone [font-size:clamp(3.5rem,9vw,7rem)]"
               />
               <p className="meta mt-3 text-bone">countries</p>
-            </div>
+            </motion.div>
           </div>
 
-          <p className="mx-auto mt-10 max-w-2xl font-serif text-xl leading-snug text-bone sm:text-2xl">
+          <motion.p
+            variants={reduce ? calm : rise(16, 0.7)}
+            className="mx-auto mt-10 max-w-2xl font-serif text-xl leading-snug text-bone sm:text-2xl"
+          >
             {ISSUE_STATS.line}
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
       </motion.div>
     </section>
   );

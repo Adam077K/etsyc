@@ -31,6 +31,10 @@ export interface JourneyStep {
   /** the maker's effort vs. what KOL takes off their plate */
   makerDoes: string;
   kolDoes: string;
+  /** the piece of the maker's OWN world this step assembles — anchors each step
+   *  to where it lands in her page, so onboarding reads as her world coming
+   *  together, not a generic form wizard. */
+  becomes: string;
 }
 
 export const JOURNEY_STEPS: JourneyStep[] = [
@@ -42,6 +46,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     body: "A warm, adaptive interview — on film if you like, by voice if you don't. Fixed beats, smart follow-ups. It feels like coffee with someone who's genuinely curious about your craft.",
     makerDoes: "Talk for ten minutes",
     kolDoes: "Listens, transcribes, remembers",
+    becomes: "Your cover film and the story a buyer reads first",
   },
   {
     id: "draft",
@@ -51,6 +56,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     body: "KOL turns what you said into a whole shop — layout, colours drawn from your work, your words kept in your voice. Not a template. A first draft built only from you.",
     makerDoes: "Nothing — go make a cup of tea",
     kolDoes: "Designs the entire first draft",
+    becomes: "Your whole page — laid out, coloured, written in your voice",
   },
   {
     id: "co-edit",
@@ -60,6 +66,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     body: "Review it section by section in a simple studio. Swap a block, nudge a colour, re-record a clip, add a tap-to-hear voiceover. Change anything. Keep everything you love.",
     makerDoes: "Tweak, approve, or redo",
     kolDoes: "Handles every pixel and line of code",
+    becomes: "Every section, sitting exactly where you want it",
   },
   {
     id: "publish",
@@ -69,8 +76,28 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     body: "Approve the sections you're happy with and publish. Your world is live at your own address, ready for buyers to meet the human before they meet the thing.",
     makerDoes: "Press publish",
     kolDoes: "Ships it, hosts it, keeps it fast",
+    becomes: "Your own address in the issue, open to buyers",
   },
 ];
+
+/* ------------------------------------------------------------------ *
+ * Seller HQ — the "mirror" moment on the home desk. What a buyer saw in
+ * the maker's world today, phrased in KOL's editorial voice and shown in the
+ * same honesty-inset house style as the orders "this is what your buyer sees"
+ * box. Synthetic demo material; the place ties to a demo order (Aiko, Kyoto).
+ * ------------------------------------------------------------------ */
+
+export interface HqMirror {
+  /** where the buyer was — grounds the moment in a real place, not a metric */
+  place: string;
+  /** the moment, in KOL's warm editorial voice (what the buyer actually did) */
+  line: string;
+}
+
+export const HQ_MIRROR: HqMirror = {
+  place: "Kyoto",
+  line: "Someone in Kyoto watched your wheel film to the very end this morning — then saved you for later.",
+};
 
 /* ------------------------------------------------------------------ *
  * Chrome stepper — the three routed tool stops.
