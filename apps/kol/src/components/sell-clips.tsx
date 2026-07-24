@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   FilmSlate,
   MonitorPlay,
@@ -12,6 +12,7 @@ import {
   Play,
   Plus,
   Check,
+  ArrowRight,
 } from "@phosphor-icons/react";
 import { MakerFilm } from "@/components/maker-film";
 import {
@@ -20,9 +21,31 @@ import {
   type Clip,
   type ClipSurface,
 } from "@/lib/fixtures/clips";
-import { CaptureStage, CaptureSaving, fmt } from "@/components/sell-capture";
+import {
+  CaptureRitual,
+  FramingTicks,
+  type RitualClip,
+} from "@/components/sell-capture";
 import { easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+
+/* Stable scene numbers — the call sheet reads top to bottom in shooting order,
+   so each clip carries the same scene number wherever it appears. */
+const SCENE_NO = new Map(CLIPS.map((c, i) => [c.id, i + 1]));
+const surfaceLabel = (s: ClipSurface) =>
+  CLIP_GROUPS.find((g) => g.id === s)?.label ?? "";
+
+function toRitual(clip: Clip): RitualClip {
+  const n = SCENE_NO.get(clip.id);
+  return {
+    title: clip.title,
+    playsOn: clip.playsOn,
+    frame: clip.frame,
+    why: clip.why,
+    still: clip.poster ?? clip.hint,
+    scene: n ? `Scene ${String(n).padStart(2, "0")} · ${surfaceLabel(clip.surface)}` : undefined,
+  };
+}
 
 type Filter = "all" | "filmed" | "to-film";
 
@@ -32,11 +55,14 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "to-film", label: "To film" },
 ];
 
+type ActiveShot = { clip: Clip; re: boolean };
+
 export function SellClips() {
   const reduce = useReducedMotion();
   const [loading, setLoading] = useState(true);
   const [clips, setClips] = useState<Clip[]>(CLIPS);
   const [filter, setFilter] = useState<Filter>("all");
+  const [active, setActive] = useState<ActiveShot | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), reduce ? 0 : 500);
@@ -70,25 +96,28 @@ export function SellClips() {
     clips: shown.filter((c) => c.surface === g.id),
   })).filter((g) => g.clips.length > 0);
 
-  function markFilmed(id: string, duration: string) {
+  function openShot(clip: Clip, re: boolean) {
+    setActive({ clip, re });
+  }
+
+  function keepTake(duration: string) {
+    if (!active) return;
+    const { clip, re } = active;
     setClips((prev) =>
       prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              filmed: true,
-              duration,
-              poster: c.poster ?? c.hint ?? "/media/clay-shape.jpg",
-            }
+        c.id === clip.id
+          ? re
+            ? { ...c, duration }
+            : {
+                ...c,
+                filmed: true,
+                duration,
+                poster: c.poster ?? c.hint ?? "/media/clay-shape.jpg",
+              }
           : c,
       ),
     );
-  }
-
-  function bumpDuration(id: string, duration: string) {
-    setClips((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, duration } : c)),
-    );
+    setActive(null);
   }
 
   return (
@@ -117,18 +146,11 @@ export function SellClips() {
         <div className="mt-10 space-y-14">
           {groups.map((group) => (
             <section key={group.id} aria-label={group.label}>
-              <div className="max-w-measure">
-                <h2 className="font-display text-2xl font-bold text-bone">
-                  {group.label}
-                </h2>
-                <p className="mt-1.5 font-serif text-[0.98rem] leading-snug text-bone/60">
-                  {group.note}
-                </p>
-              </div>
+              <SceneHeading group={group} />
               {/* The lone cover otherwise strands the right half of the first
-                  viewport; pair it with a compact "still to film" overview so the
-                  remaining slots are visible immediately (the full, actionable
-                  ghost cards still live in their surface sections below). */}
+                  viewport; pair it with a compact "still to film" call sheet so
+                  the remaining slots are visible immediately (the full, actionable
+                  shot cards still live in their surface sections below). */}
               {group.id === "cover" &&
               group.clips.length === 1 &&
               filter === "all" &&
@@ -141,12 +163,11 @@ export function SellClips() {
                         clip={clip}
                         index={i}
                         reduce={!!reduce}
-                        onFilmed={markFilmed}
-                        onReRecorded={bumpDuration}
+                        onOpen={openShot}
                       />
                     ))}
                   </div>
-                  <StillToFilm clips={toFilm} />
+                  <StillToFilm clips={toFilm} onOpen={openShot} />
                 </div>
               ) : (
                 <div className={groupGridClass(group.id, group.clips.length)}>
@@ -156,8 +177,7 @@ export function SellClips() {
                       clip={clip}
                       index={i}
                       reduce={!!reduce}
-                      onFilmed={markFilmed}
-                      onReRecorded={bumpDuration}
+                      onOpen={openShot}
                     />
                   ))}
                 </div>
@@ -166,6 +186,41 @@ export function SellClips() {
           ))}
         </div>
       )}
+
+      <AnimatePresence>
+        {active && (
+          <CaptureRitual
+            key={active.clip.id}
+            clip={toRitual(active.clip)}
+            onKeep={(_mode, duration) => keepTake(duration)}
+            onClose={() => setActive(null)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* The call-sheet scene heading for each surface group. */
+function SceneHeading({
+  group,
+}: {
+  group: { id: ClipSurface; label: string; note: string; clips: Clip[] };
+}) {
+  const filmed = group.clips.filter((c) => c.filmed).length;
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1 border-b border-line pb-3">
+      <div className="max-w-measure">
+        <h2 className="font-display text-2xl font-bold text-bone">
+          {group.label}
+        </h2>
+        <p className="mt-1.5 font-serif text-[0.98rem] leading-snug text-bone/60">
+          {group.note}
+        </p>
+      </div>
+      <p className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-bone-dim">
+        {filmed}/{group.clips.length} in the can
+      </p>
     </div>
   );
 }
@@ -189,29 +244,53 @@ function groupGridClass(surface: ClipSurface, count: number): string {
   }
 }
 
-/* An at-a-glance overview of the un-filmed slots, shown beside the lone cover so
-   the first viewport isn't half-empty. Not a substitute for the actionable ghost
-   cards below — it's the summary that gets the maker oriented. */
-function StillToFilm({ clips }: { clips: Clip[] }) {
+/* The call sheet, in miniature — the un-filmed shots as a numbered shooting
+   list beside the lone cover so the first viewport reads as a plan, not a
+   half-empty grid. Each row jumps straight into the viewfinder ritual. */
+function StillToFilm({
+  clips,
+  onOpen,
+}: {
+  clips: Clip[];
+  onOpen: (clip: Clip, re: boolean) => void;
+}) {
   return (
     <aside className="flex flex-col rounded-3xl border border-dashed border-bone/20 bg-ink-soft/30 p-5 sm:p-6">
-      <p className="meta text-bone-dim">Still to film</p>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="meta text-bone-dim">Call sheet</p>
+        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-marigold">
+          {clips.length} to shoot
+        </span>
+      </div>
       <p className="mt-2 font-serif text-lg leading-snug text-bone/80">
-        {clips.length} {clips.length === 1 ? "slot is" : "slots are"} waiting —
-        each one plays somewhere a buyer will see it.
+        Every shot below plays somewhere a buyer will see it. Pick one and step
+        into the frame.
       </p>
-      <ul className="mt-4 space-y-2">
+      <ul className="mt-4 space-y-1.5">
         {clips.map((clip) => (
-          <li
-            key={clip.id}
-            className="flex items-center gap-2.5 rounded-2xl border border-dashed border-bone/15 bg-ink/40 px-3 py-2.5"
-          >
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-soft text-marigold">
-              <VideoCamera size={13} weight="fill" />
-            </span>
-            <span className="min-w-0 flex-1 truncate font-ui text-sm text-bone/85">
-              {clip.title}
-            </span>
+          <li key={clip.id}>
+            <button
+              type="button"
+              onClick={() => onOpen(clip, false)}
+              className="group flex w-full items-center gap-3 rounded-2xl border border-dashed border-bone/15 bg-ink/40 px-3 py-2.5 text-left transition-colors hover:border-marigold/40 hover:bg-ink/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            >
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-soft font-mono text-[0.7rem] font-semibold tabular-nums text-marigold">
+                {String(SCENE_NO.get(clip.id) ?? 0).padStart(2, "0")}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-ui text-sm font-medium text-bone/90">
+                  {clip.title}
+                </span>
+                <span className="block truncate font-ui text-xs text-bone/50">
+                  {clip.playsOn}
+                </span>
+              </span>
+              <ArrowRight
+                size={15}
+                weight="bold"
+                className="shrink-0 text-bone/30 transition-[color,transform] group-hover:translate-x-0.5 group-hover:text-marigold"
+              />
+            </button>
           </li>
         ))}
       </ul>
@@ -230,21 +309,41 @@ function Header({
   toFilm: number;
   loading: boolean;
 }) {
+  const total = filmed + toFilm;
+  const pct = total ? Math.round((filmed / total) * 100) : 0;
   return (
-    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+    <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
       <div>
-        <p className="meta text-bone-dim">Your films</p>
+        <p className="meta text-marigold">Call sheet · Odd Clay Studio</p>
         <h1 className="mt-3 font-display text-4xl font-bold leading-[0.95] text-bone sm:text-5xl">
           The film library
         </h1>
+        <p className="mt-3 max-w-md font-serif text-lg leading-snug text-bone/70">
+          {loading
+            ? "Rounding up your footage…"
+            : toFilm > 0
+              ? `${filmed} in the can, ${toFilm} still to shoot. Every clip here plays somewhere a buyer will see it.`
+              : `All ${filmed} shots are in the can. Your world is fully on film.`}
+        </p>
       </div>
-      <p className="max-w-sm font-serif text-lg leading-snug text-bone/70">
-        {loading
-          ? "Rounding up your footage…"
-          : toFilm > 0
-            ? `${filmed} filmed, ${toFilm} still to shoot. Every clip below plays somewhere a buyer will see it.`
-            : `All ${filmed} clips are filmed. Your world is fully on film.`}
-      </p>
+
+      {/* Progress — the reel filling up, effort made legible. */}
+      {!loading && (
+        <div className="w-full max-w-[15rem]">
+          <div className="flex items-baseline justify-between font-mono text-[0.7rem] uppercase tracking-[0.14em] text-bone-dim">
+            <span>In the can</span>
+            <span className="text-bone">
+              {filmed}<span className="text-bone/40"> / {total}</span>
+            </span>
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-raise">
+            <div
+              className="h-full rounded-full bg-marigold transition-[width] duration-700"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -290,88 +389,54 @@ function FilterBar({
 
 /* ------------------------------------------------------------------ */
 
-type CardCapture =
-  | { kind: "idle" }
-  | { kind: "recording"; mode: "film" | "voice"; re: boolean }
-  | { kind: "saving"; re: boolean };
-
 function ClipCard({
   clip,
   index,
   reduce,
-  onFilmed,
-  onReRecorded,
+  onOpen,
 }: {
   clip: Clip;
   index: number;
   reduce: boolean;
-  onFilmed: (id: string, duration: string) => void;
-  onReRecorded: (id: string, duration: string) => void;
+  onOpen: (clip: Clip, re: boolean) => void;
 }) {
-  const [cap, setCap] = useState<CardCapture>({ kind: "idle" });
-  const [seconds, setSeconds] = useState(0);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (cap.kind !== "recording") return;
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, [cap.kind]);
-
-  // Cancel a pending save if the card unmounts mid-save (e.g. filter change).
-  useEffect(
-    () => () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    },
-    [],
-  );
-
-  function start(mode: "film" | "voice", re: boolean) {
-    setSeconds(0);
-    setCap({ kind: "recording", mode, re });
-  }
-
-  function stop() {
-    if (cap.kind !== "recording") return;
-    const wasRe = cap.re;
-    setCap({ kind: "saving", re: wasRe });
-    saveTimer.current = setTimeout(
-      () => {
-        const dur = fmt(Math.max(seconds, 4));
-        if (wasRe) onReRecorded(clip.id, dur);
-        else onFilmed(clip.id, dur);
-        setCap({ kind: "idle" });
-      },
-      reduce ? 150 : 1200,
-    );
-  }
-
   return (
     <motion.div
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduce ? 0.01 : 0.5, delay: index * 0.05, ease: easeOut }}
+      className="h-full"
     >
-      {cap.kind !== "idle" ? (
-        <div className="rounded-2xl border border-marigold/30 bg-ink-soft p-3">
-          {cap.kind === "recording" ? (
-            <CaptureStage
-              mode={cap.mode}
-              seconds={seconds}
-              onStop={stop}
-              stopLabel="Use this take"
-              hint={`${clip.title} — talk to the lens`}
-            />
-          ) : (
-            <CaptureSaving label={cap.re ? "Refreshing your clip…" : "Saving your clip…"} />
-          )}
-        </div>
-      ) : clip.filmed ? (
-        <FilmedCard clip={clip} reduce={reduce} onReRecord={(m) => start(m, true)} />
+      {clip.filmed ? (
+        <FilmedCard clip={clip} reduce={reduce} onReRecord={() => onOpen(clip, true)} />
       ) : (
-        <SlotCard clip={clip} onFilm={(m) => start(m, false)} />
+        <SlotCard clip={clip} onFilm={() => onOpen(clip, false)} />
       )}
     </motion.div>
+  );
+}
+
+/* The scene-number slate — a small clapperboard chip shared by every card so
+   the library reads as one ordered shooting plan. */
+function SceneSlate({ clip, tone }: { clip: Clip; tone: "filmed" | "slot" }) {
+  const n = SCENE_NO.get(clip.id);
+  if (!n) return null;
+  return (
+    <span
+      className={cn(
+        "flex items-center gap-1.5 rounded-full px-2 py-0.5 font-mono text-[0.65rem] font-semibold uppercase tracking-[0.12em] backdrop-blur-sm",
+        tone === "filmed"
+          ? "bg-marigold/90 text-ink"
+          : "bg-ink/75 text-marigold ring-1 ring-marigold/30",
+      )}
+    >
+      {tone === "filmed" ? (
+        <Check size={11} weight="bold" />
+      ) : (
+        <FilmSlate size={11} weight="fill" />
+      )}
+      Scene {String(n).padStart(2, "0")}
+    </span>
   );
 }
 
@@ -382,10 +447,10 @@ function FilmedCard({
 }: {
   clip: Clip;
   reduce: boolean;
-  onReRecord: (mode: "film" | "voice") => void;
+  onReRecord: () => void;
 }) {
   return (
-    <div className="group overflow-hidden rounded-2xl bg-ink-soft ring-1 ring-line transition-colors hover:ring-marigold/30">
+    <div className="group flex h-full flex-col overflow-hidden rounded-2xl bg-ink-soft ring-1 ring-line transition-colors hover:ring-marigold/30">
       <div className="relative aspect-[4/3] overflow-hidden">
         <MakerFilm
           videoSrc={clip.filmSrc}
@@ -396,6 +461,14 @@ function FilmedCard({
           drift={!clip.filmSrc}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
+        {/* Framing ticks bloom marigold on hover — the viewfinder signature,
+            carried quietly onto the finished shot (subtle at rest). */}
+        <div className="opacity-40 transition-opacity duration-500 group-hover:opacity-0">
+          <FramingTicks inset="inset-2.5" />
+        </div>
+        <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <FramingTicks inset="inset-2.5" active />
+        </div>
         {!clip.filmSrc && (
           <span className="pointer-events-none absolute inset-0 grid place-items-center">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-bone/90 text-ink transition-transform group-hover:scale-105">
@@ -409,12 +482,11 @@ function FilmedCard({
             {clip.duration}
           </span>
         </span>
-        <span className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-full bg-marigold/90 px-2 py-0.5 font-ui text-[0.65rem] font-semibold text-ink">
-          <Check size={11} weight="bold" />
-          Filmed
+        <span className="absolute left-2.5 top-2.5">
+          <SceneSlate clip={clip} tone="filmed" />
         </span>
       </div>
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <h3 className="font-ui text-[0.95rem] font-semibold text-bone">
           {clip.title}
         </h3>
@@ -422,14 +494,19 @@ function FilmedCard({
           <MonitorPlay size={14} className="shrink-0 text-marigold" />
           <span>Plays on: {clip.playsOn}</span>
         </p>
-        <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
+        {clip.why && (
+          <p className="mt-2 font-serif text-[0.9rem] leading-snug text-bone/55">
+            {clip.why}
+          </p>
+        )}
+        <div className="mt-auto flex items-center gap-2 border-t border-line pt-3">
           <button
             type="button"
-            onClick={() => onReRecord("film")}
+            onClick={onReRecord}
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1 font-ui text-xs font-medium text-marigold transition-colors hover:bg-marigold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             <ArrowClockwise size={13} weight="bold" />
-            Re-record
+            Film another take
           </button>
         </div>
       </div>
@@ -442,31 +519,47 @@ function SlotCard({
   onFilm,
 }: {
   clip: Clip;
-  onFilm: (mode: "film" | "voice") => void;
+  onFilm: () => void;
 }) {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-dashed border-bone/20 bg-ink-soft/40 transition-colors hover:border-marigold/40">
-      <div className="relative aspect-[4/3] overflow-hidden">
+    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-dashed border-bone/20 bg-ink-soft/40 transition-colors hover:border-marigold/40">
+      <button
+        type="button"
+        onClick={onFilm}
+        aria-label={`Film ${clip.title}`}
+        className="relative block aspect-[4/3] w-full overflow-hidden text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-marigold"
+      >
         {clip.hint && (
           <Image
             src={clip.hint}
             alt=""
             fill
             sizes="(max-width: 640px) 100vw, 28rem"
-            className="object-cover opacity-20 grayscale"
+            className="object-cover opacity-20 grayscale transition-opacity duration-500 group-hover:opacity-30"
           />
         )}
         <div className="absolute inset-0 bg-ink/40" />
+        {/* The empty slot wears the viewfinder ticks — an invitation to frame,
+            not an error. Marigold on hover as the frame "arms". */}
+        <div className="opacity-60 transition-opacity duration-500 group-hover:opacity-0">
+          <FramingTicks inset="inset-3" />
+        </div>
+        <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <FramingTicks inset="inset-3" active />
+        </div>
+        <span className="absolute left-2.5 top-2.5">
+          <SceneSlate clip={clip} tone="slot" />
+        </span>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center">
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-ink/70 text-marigold ring-1 ring-marigold/25">
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-ink/70 text-marigold ring-1 ring-marigold/25 transition-transform duration-500 group-hover:scale-105">
             <VideoCamera size={20} weight="light" />
           </span>
-          <p className="font-ui text-sm font-semibold text-bone">Not filmed yet</p>
+          <p className="font-ui text-sm font-semibold text-bone">Ready when you are</p>
           <p className="max-w-[15rem] font-ui text-xs leading-snug text-bone/60">
-            Two minutes with your phone is all it takes.
+            Step into the frame — two minutes with your phone is all it takes.
           </p>
         </div>
-      </div>
+      </button>
       <div className="flex flex-1 flex-col p-4">
         <h3 className="font-ui text-[0.95rem] font-semibold text-bone">
           {clip.title}
@@ -475,14 +568,19 @@ function SlotCard({
           <MonitorPlay size={14} className="shrink-0 text-marigold" />
           <span>Plays on: {clip.playsOn}</span>
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
+        {clip.why && (
+          <p className="mt-2 font-serif text-[0.9rem] leading-snug text-bone/70">
+            {clip.why}
+          </p>
+        )}
+        <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-line pt-3">
           <button
             type="button"
-            onClick={() => onFilm("film")}
+            onClick={onFilm}
             className="flex items-center gap-1.5 rounded-full bg-marigold px-3 py-1.5 font-ui text-xs font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             <VideoCamera size={14} weight="fill" />
-            Film it
+            Step into the frame
           </button>
           <button
             type="button"
