@@ -7,9 +7,10 @@ import {
   useReducedMotion,
   useTransform,
 } from "framer-motion";
-import { Play } from "@phosphor-icons/react";
+import { Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { MakerFilm } from "../maker-film";
 import { cn } from "@/lib/utils";
+import { getMaker } from "@/lib/fixtures/makers";
 import { useFilm } from "./film-context";
 
 /**
@@ -26,8 +27,11 @@ import { useFilm } from "./film-context";
  * `interaction`, the stage frame becomes a keyboard-operable control.
  */
 export function FilmStage() {
-  const { intent, m, videoRef, interaction } = useFilm();
+  const { intent, m, videoRef, interaction, audioArmed, toggleAudio } = useFilm();
   const reduce = useReducedMotion();
+  // Derive "carries audio" from the maker fixture via makerId (not the intent),
+  // so it stays stable across the world route's idempotent re-present() calls.
+  const hasAudio = Boolean(intent && getMaker(intent.makerId)?.hasAudio);
 
   const boxShadow = useTransform(
     m.shadow,
@@ -63,6 +67,12 @@ export function FilmStage() {
   // The stage chip is anchored top-left for the full-bleed hero; fade it out as
   // the film docks so the landscape top-crop never severs it mid-word.
   const chipOpacity = useTransform(m.clip, [0, 0.12], [1, 0]);
+  // The sound control lives in a higher stacking context than the film (so it
+  // clears the world's z-45 hero), so it can't inherit the film's opacity — fold
+  // both the film's presence (m.opacity) and the dock fade (m.clip) into one.
+  const controlOpacity = useTransform([m.opacity, m.clip], ([o, c]: number[]) =>
+    (o ?? 0) * ((c ?? 0) <= 0.0001 ? 1 : Math.max(0, 1 - (c ?? 0) / 0.12)),
+  );
 
   if (!intent) return null;
 
@@ -75,6 +85,7 @@ export function FilmStage() {
         : "On film";
 
   return (
+    <>
     <div className="pointer-events-none fixed inset-0 z-40">
       <motion.div style={{ opacity: m.opacity }} className="absolute inset-0">
         <motion.div
@@ -121,6 +132,7 @@ export function FilmStage() {
             className="object-cover"
             videoRef={videoRef}
             initialTime={intent.seedTime}
+            muted={!(hasAudio && audioArmed)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
 
@@ -153,5 +165,42 @@ export function FilmStage() {
         </motion.div>
       </motion.div>
     </div>
+
+    {/* Sound control — the explicit affordance that arms audio on the persistent
+        film node, so it keeps playing (with sound) across every route. Rendered
+        as a SEPARATE top-level fixed layer at z-50 — above the world's z-45 hero
+        so the click lands, and NOT inside the film frame (which is aria-hidden
+        when non-interactive; an interactive control must never sit in an
+        aria-hidden subtree). The wrapper is pointer-events-none so it never
+        blocks the page; only the button captures events. Fades out as the film
+        docks (clip>0) — the viewer arms it on the full-bleed hero. Shown only
+        for clips that carry audio. */}
+    {hasAudio && (
+      <motion.div
+        style={{ opacity: controlOpacity }}
+        className="pointer-events-none fixed right-4 top-20 z-50 sm:right-8"
+      >
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleAudio();
+          }}
+          aria-pressed={audioArmed}
+          aria-label={audioArmed ? "Mute the film" : "Turn on sound"}
+          className="press pointer-events-auto flex min-h-[44px] items-center gap-2 rounded-full bg-ink/85 px-3 py-2 backdrop-blur-sm transition-colors hover:bg-ink/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+        >
+          {audioArmed ? (
+            <SpeakerHigh size={16} weight="fill" className="text-marigold" />
+          ) : (
+            <SpeakerSlash size={16} weight="regular" className="text-bone" />
+          )}
+          <span className="meta text-bone">
+            {audioArmed ? "Sound on" : "Sound off"}
+          </span>
+        </button>
+      </motion.div>
+    )}
+    </>
   );
 }
