@@ -34,7 +34,12 @@ import { Magnetic } from "./magnetic";
 import { TrustBadge } from "./trust-badge";
 import { ReviewStory } from "./review-story";
 import { useFilm } from "./film/film-context";
-import { cornerTarget, dockAspect, dockTop } from "./film/film-geometry";
+import {
+  portraitDockTarget,
+  portraitWidth,
+  dockTop,
+  DOCK_PORTRAIT_ASPECT,
+} from "./film/film-geometry";
 import { cn } from "@/lib/utils";
 
 // AA-safe accent text/icon tints (small meta kickers need ≥4.5:1 on ink).
@@ -574,9 +579,14 @@ function ContextualFilm({
 }) {
   const router = useRouter();
   const { present, driveTo, setInteraction } = useFilm();
-  // The card footprint — matches the stage's uniform-scaled corner film so the
-  // chrome overlays it exactly. Recomputed on mount + resize.
-  const [card, setCard] = useState({ width: 200, margin: 24, ratio: 16 / 10, top: 96 });
+  // The card footprint — matches the stage's uniform-scaled PORTRAIT corner film
+  // so the chrome overlays it exactly. Recomputed on mount + resize.
+  const [card, setCard] = useState({
+    width: 165,
+    margin: 24,
+    ratio: DOCK_PORTRAIT_ASPECT,
+    top: 96,
+  });
 
   // Present the product's contextual clip. videoSrc falls back to the maker's
   // clip so the SAME video node keeps playing across the world→product seam.
@@ -590,6 +600,7 @@ function ContextualFilm({
       clipLabel: product.clipLabel,
       chip: "now-playing",
       stageChip: false,
+      dockOrientation: "portrait",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maker.id, product.id]);
@@ -604,12 +615,15 @@ function ContextualFilm({
       ).matches;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const width = mobile ? 148 : 208;
       const margin = mobile ? 16 : 24;
+      // Portrait store card (Founder): the on-screen footprint is width
+      // `portraitWidth(vw)` at the portrait aspect, flush at (margin, dockTop),
+      // matching portraitDockTarget's transform exactly so the chrome overlays it.
+      const width = portraitWidth(vw);
       const top = dockTop(margin);
-      setCard({ width, margin, ratio: dockAspect(vw, vh), top });
+      setCard({ width, margin, ratio: DOCK_PORTRAIT_ASPECT, top });
       if (open) {
-        driveTo(cornerTarget(vw, vh, { width, margin, radius: 18 }), {
+        driveTo(portraitDockTarget(vw, vh, "top-left", margin), {
           reduce: prefersReduced,
           duration: 0.55,
         });

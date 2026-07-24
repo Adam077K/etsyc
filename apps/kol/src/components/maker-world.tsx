@@ -528,8 +528,14 @@ function StorySection({
       className="mx-auto max-w-issue px-5 py-24 sm:px-8 sm:py-32"
     >
       <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16">
+        {/* The pinned top-left PORTRAIT dock overlaps the top of this column as
+            the section scrolls past (taller than the old landscape card). A top
+            clearance on the whole "The maker" kicker → prose stack drops the
+            reading block below the dock's band — same fix as Two Dots' idea
+            section. Clearance only; the prose + internal composition are
+            untouched. */}
         <motion.div
-          className="flex flex-col justify-center"
+          className="flex flex-col justify-center pt-[15rem] sm:pt-[17rem] xl:pt-56"
           variants={reduce ? calm : stagger(0.05, 0.12)}
           initial="hidden"
           whileInView="visible"

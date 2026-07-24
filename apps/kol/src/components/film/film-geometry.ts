@@ -254,8 +254,11 @@ export function cornerTarget(
 /** Displayed aspect (w/h) of the vertical store card. */
 export const DOCK_PORTRAIT_ASPECT = 9 / 16;
 
-/** Target card width for the vertical store dock (px), by viewport. */
-function portraitWidth(vw: number): number {
+/** Target card width for the vertical store dock (px), by viewport. Exported so
+    a route with DOM chrome over the film (the product PiP) can size its overlay
+    to the exact on-screen card footprint — width `portraitWidth(vw)` at aspect
+    `DOCK_PORTRAIT_ASPECT`, flush at (`margin`, `dockTop(margin)`). */
+export function portraitWidth(vw: number): number {
   return vw < 640 ? 124 : 165;
 }
 
