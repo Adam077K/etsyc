@@ -199,10 +199,10 @@ An add-on, not another middleman.
 ## 18B · How KOL increases Etsy's profit *(Etsy-hero reframe — pairs with or replaces the "how KOL makes money" card)*
 **ON SLIDE**
 How KOL increases Etsy's profit.
-**Makers stay on Etsy** — the tools to build their whole branded world *inside Etsy*, free to start, no upsell games. They stay; their customers stay. → more sales, more commissions.
-**Buyers return & trust** — story earns trust; trust brings buyers back. → reverses the habitual-buyer decline.
-**Etsy keeps every fee** — KOL takes no commission on Etsy's existing business; we earn only on the *new* sales storytelling creates. → pure, aligned upside.
-*Etsy becomes the destination every maker builds on — not the stepping stone they outgrow.*
+**Makers stay on Etsy** — Makers build their whole branded world inside Etsy, not on an outside site. Their sales stay with Etsy.
+**Buyers return & trust** — Story earns trust, and trust brings buyers back. Repeat purchases climb.
+**Etsy keeps every fee** — KOL takes no cut of Etsy's existing business. We earn only on the new sales we create.
+*Etsy becomes the destination makers build on — not the stepping stone they outgrow.*
 
 **NOTES:** This is why Etsy wins. Makers who'd leave for their own site stay and build on Etsy — so those sales stay too. Buyers come back because they trust. Etsy keeps every existing fee; we only earn on the new sales we create. Etsy becomes the place makers build for good, not the stepping stone they outgrow.
 
