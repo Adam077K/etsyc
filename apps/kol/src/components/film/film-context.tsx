@@ -57,6 +57,11 @@ export interface FilmIntent {
       bottom-right dock crops its surplus off the TOP (flush at the bottom) while
       the top-left store dock crops off the BOTTOM. Defaults to "top-left". */
   dockCorner?: "top-left" | "bottom-right";
+  /** dock card shape. STORE routes (world/product) dock as a "portrait" vertical
+      card (shows the maker's portrait frame); checkout/thank-you stay "landscape"
+      (a middle-band card that clears the form). Defaults to "landscape". Drives
+      the FilmStage clip axis. */
+  dockOrientation?: "portrait" | "landscape";
 }
 
 /** The shared transform of the persistent film — all transform/opacity. */
@@ -174,7 +179,8 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
         prev.clipLabel === next.clipLabel &&
         prev.clipMeta === next.clipMeta &&
         prev.chip === next.chip &&
-        prev.dockCorner === next.dockCorner
+        prev.dockCorner === next.dockCorner &&
+        prev.dockOrientation === next.dockOrientation
       ) {
         return prev;
       }

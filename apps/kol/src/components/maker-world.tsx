@@ -32,7 +32,7 @@ import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip, dockTarget } from "./film/film-geometry";
+import { HERO_TARGET, applyPortraitDockFrame, portraitDockTarget } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -352,6 +352,7 @@ function WorldFilm({
       alt: `${maker.name} — ${maker.discipline}, ${maker.studio}`,
       clipLabel: label,
       chip: "now-playing",
+      dockOrientation: "portrait",
       // Cold/direct entry only: open a low-framed portrait clip on its action
       // (applied once on the film node's first mount; the feed→world carry wins
       // when arriving via a handoff). Omitted makers open at 0:00 as before.
@@ -381,6 +382,7 @@ function WorldFilm({
       alt: `${maker.name} — ${maker.discipline}, ${maker.studio}`,
       clipLabel: label,
       chip: "now-playing",
+      dockOrientation: "portrait",
       seedTime: maker.filmSeed,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -427,8 +429,7 @@ function WorldFilm({
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const docked = isMobileRef.current ? 0.2 : 0.26;
-      driveTo(dockTarget(docked, dockClip(vw, vh)), {
+      driveTo(portraitDockTarget(vw, vh), {
         reduce: prefersReduced,
         duration: 0.6,
       });
@@ -453,28 +454,22 @@ function WorldFilm({
     } else {
       setInteraction(null);
     }
-    const docked = isMobileRef.current ? 0.2 : 0.26;
     if (reduce) {
       // Reduced motion: presence WITHOUT motion. Hold the film full-bleed over
       // the hero, then SNAP it to the docked corner past the hero so it never
       // covers the world content the buyer needs to read (no per-frame move).
       if (v > 0.6) {
-        snapTo(dockTarget(docked, dockClip(window.innerWidth, window.innerHeight)));
+        snapTo(portraitDockTarget(window.innerWidth, window.innerHeight));
       } else {
         snapTo({ ...HERO_TARGET });
       }
       return;
     }
     if (!enteredRef.current) return;
-    // Shared hero→dock settle (lands by 72%, insets top-left below the masthead,
-    // linear shadow); the clip crops the dock to a landscape card on portrait
-    // phones so it never buries the world copy it scrolls past.
-    applyDockFrame(
-      m,
-      v,
-      docked,
-      dockClip(window.innerWidth, window.innerHeight),
-    );
+    // Hero→PORTRAIT dock settle (Founder: the store dock is a vertical card of
+    // the maker). Lands top-left below the masthead; the clip crops to the
+    // portrait aspect on the excess axis so the card reads as a companion.
+    applyPortraitDockFrame(m, v, window.innerWidth, window.innerHeight);
   });
 
   return null;

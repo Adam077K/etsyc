@@ -239,3 +239,113 @@ export function cornerTarget(
     clip,
   };
 }
+
+/* ---------------------------------------------------------------------------
+ * VERTICAL store dock (Founder): world + product dock as a PORTRAIT card that
+ * shows the maker's frame (face + hands), not a landscape strip. The film node
+ * object-covers the full viewport, so a portrait card is a clip of that box to
+ * the portrait aspect — cropping the excess dimension (WIDTH on a landscape
+ * desktop, HEIGHT on a portrait phone) and compensating the translate so the
+ * card sits flush at the corner. On a portrait phone this shows nearly the whole
+ * frame; on desktop it is a portrait window centered on her (object-position in
+ * FilmStage carries the face). Checkout/thank-you keep the landscape helpers.
+ * ------------------------------------------------------------------------- */
+
+/** Displayed aspect (w/h) of the vertical store card. */
+export const DOCK_PORTRAIT_ASPECT = 9 / 16;
+
+/** Target card width for the vertical store dock (px), by viewport. */
+function portraitWidth(vw: number): number {
+  return vw < 640 ? 124 : 165;
+}
+
+/** Resolve the portrait card's transform for a viewport + corner: uniform scale,
+    the single-axis crop fraction to reach the portrait aspect, and the flush
+    compensation. `cropX` tells FilmStage which axis to clip. */
+function portraitParams(
+  vw: number,
+  vh: number,
+  corner: DockCorner,
+  margin: number,
+): { scale: number; clip: number; cropX: boolean; x: number; y: number; originX: number; originY: number } {
+  const A = DOCK_PORTRAIT_ASPECT;
+  const W = portraitWidth(vw);
+  const boxA = vw > 0 && vh > 0 ? vw / vh : 1;
+  let scale: number;
+  let clip: number;
+  let cropX: boolean;
+  if (boxA > A) {
+    // Landscape viewport → crop WIDTH; card height is the full scaled box height.
+    scale = vh > 0 ? W / (A * vh) : 0.14;
+    clip = Math.max(0, 1 - (A * vh) / vw); // L/R total
+    cropX = true;
+  } else {
+    // Portrait viewport → crop HEIGHT; card width is the full scaled box width.
+    scale = vw > 0 ? W / vw : 0.14;
+    clip = Math.max(0, 1 - boxA / A); // T/B total
+    cropX = false;
+  }
+  const a = dockAnchor(corner, margin);
+  const insetX = cropX ? (clip / 2) * vw * scale : 0;
+  const insetY = cropX ? 0 : (clip / 2) * vh * scale;
+  return {
+    scale,
+    clip,
+    cropX,
+    x: corner === "bottom-right" ? a.x + insetX : a.x - insetX,
+    y: corner === "bottom-right" ? a.y + insetY : a.y - insetY,
+    originX: a.originX,
+    originY: a.originY,
+  };
+}
+
+/** One-shot portrait store card (product dock, reduced-motion snap, interlude
+    re-dock). Radius reads ~16px after the box shrinks. */
+export function portraitDockTarget(
+  vw: number,
+  vh: number,
+  corner: DockCorner = "top-left",
+  margin = DOCK_MARGIN,
+): FilmTarget {
+  const p = portraitParams(vw, vh, corner, margin);
+  return {
+    scale: p.scale,
+    x: p.x,
+    y: p.y,
+    radius: p.scale > 0 ? 16 / p.scale : 16,
+    opacity: 1,
+    originX: p.originX,
+    originY: p.originY,
+    shadow: 1,
+    clip: p.clip,
+  };
+}
+
+/** Scroll-linked hero→PORTRAIT dock settle (maker world / twodots). Like
+    applyDockFrame but lands on the vertical card: scale + single-axis clip + the
+    flush compensation all ramp with the hero scroll `v`. Top-left store corner. */
+export function applyPortraitDockFrame(
+  m: FilmMotion,
+  v: number,
+  vw: number,
+  vh: number,
+  corner: DockCorner = "top-left",
+  margin = DOCK_MARGIN,
+): void {
+  const t = portraitParams(vw, vh, corner, margin);
+  const p = DOCK_EASE(Math.min(v / 0.72, 1));
+  const scaleNow = 1 + (t.scale - 1) * p;
+  const clipNow = t.clip * p;
+  m.originX.set(t.originX);
+  m.originY.set(t.originY);
+  m.scale.set(scaleNow);
+  // The flush compensation rides on clipNow + scaleNow, so it ramps with p.
+  const insetX = t.cropX ? (clipNow / 2) * vw * scaleNow : 0;
+  const insetY = t.cropX ? 0 : (clipNow / 2) * vh * scaleNow;
+  const a = dockAnchor(corner, margin);
+  m.x.set(a.x * p + (corner === "bottom-right" ? insetX : -insetX));
+  m.y.set(a.y * p + (corner === "bottom-right" ? insetY : -insetY));
+  m.radius.set((16 / (t.scale || 1)) * DOCK_EASE(Math.min(v / 0.55, 1)));
+  m.shadow.set(v <= 0.5 ? 0 : Math.min((v - 0.5) / 0.4, 1));
+  m.clip.set(clipNow);
+}

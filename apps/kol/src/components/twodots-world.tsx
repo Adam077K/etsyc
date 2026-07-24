@@ -29,9 +29,8 @@ import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
 import {
   HERO_TARGET,
-  applyDockFrame,
-  dockClip,
-  dockTarget,
+  applyPortraitDockFrame,
+  portraitDockTarget,
 } from "./film/film-geometry";
 
 /**
@@ -175,6 +174,7 @@ function TwoDotsFilm({
       clipLabel: label,
       chip: "now-playing",
       seedTime: maker.filmSeed,
+      dockOrientation: "portrait",
     });
     const prefersReduced =
       typeof window !== "undefined" &&
@@ -197,6 +197,7 @@ function TwoDotsFilm({
       clipLabel: label,
       chip: "now-playing",
       seedTime: maker.filmSeed,
+      dockOrientation: "portrait",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [label]);
@@ -234,8 +235,7 @@ function TwoDotsFilm({
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const docked = isMobileRef.current ? 0.2 : 0.26;
-      driveTo(dockTarget(docked, dockClip(vw, vh)), {
+      driveTo(portraitDockTarget(vw, vh), {
         reduce: prefersReduced,
         duration: 0.6,
       });
@@ -259,16 +259,15 @@ function TwoDotsFilm({
     } else {
       setInteraction(null);
     }
-    const docked = isMobileRef.current ? 0.2 : 0.26;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     if (reduce) {
-      if (v > 0.6) snapTo(dockTarget(docked, dockClip(vw, vh)));
+      if (v > 0.6) snapTo(portraitDockTarget(vw, vh));
       else snapTo({ ...HERO_TARGET });
       return;
     }
     if (!enteredRef.current) return;
-    applyDockFrame(m, v, docked, dockClip(vw, vh));
+    applyPortraitDockFrame(m, v, vw, vh);
   });
 
   return null;
@@ -356,7 +355,7 @@ function IdeaSection({ reduce, onView }: { reduce: boolean; onView: () => void }
               stack (kicker → h2 → prose shift down as one) drops the reading
               block below the dock's band. Clearance only — the internal
               composition and prose are untouched. */}
-          <div className="flex flex-col justify-center xl:pt-56">
+          <div className="flex flex-col justify-center pt-[15rem] sm:pt-[17rem] xl:pt-56">
             <p className="meta mb-5 text-clay-bright">{d.ideaKicker}</p>
             <h2
               className="mb-6 font-display font-bold leading-[0.95] text-bone"

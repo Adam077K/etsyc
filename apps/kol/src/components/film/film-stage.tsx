@@ -12,7 +12,7 @@ import { MakerFilm } from "../maker-film";
 import { cn } from "@/lib/utils";
 import { getMaker } from "@/lib/fixtures/makers";
 import { useFilm } from "./film-context";
-import { bandDrop } from "./film-geometry";
+import { bandDrop, DOCK_PORTRAIT_ASPECT } from "./film-geometry";
 
 /**
  * FilmStage — the ONE persistent film element for the buyer journey. Mounted
@@ -51,10 +51,26 @@ export function FilmStage() {
   // clip===0, because even inset(0%) clips the element's box-shadow at the border
   // box — so the hero/desktop dock keeps its shadow untouched, and only the
   // cropped mobile card is clipped.
+  const orientation = intent?.dockOrientation ?? "landscape";
   const clipPath = useTransform([m.clip, m.radius], ([clip, radius]: number[]) => {
     const c = clip ?? 0;
     if (c <= 0.0001) return "none";
     const r = radius ?? 0;
+    if (orientation === "portrait") {
+      // Vertical store card: crop the excess axis to the portrait aspect —
+      // WIDTH on a landscape viewport, HEIGHT on a portrait phone (matches the
+      // route's portraitParams). Centered (no face-band drop; the portrait card
+      // already shows her, and object-position carries the face on desktop).
+      const half = (c / 2) * 100;
+      const landscapeVP =
+        typeof window !== "undefined" &&
+        window.innerHeight > 0 &&
+        window.innerWidth / window.innerHeight > DOCK_PORTRAIT_ASPECT;
+      return landscapeVP
+        ? `inset(0px ${half}% 0px ${half}% round ${r}px)`
+        : `inset(${half}% 0px ${half}% 0px round ${r}px)`;
+    }
+    // Landscape endpoint dock: face band (bias down onto the face).
     const drop = bandDrop(c);
     const top = (c / 2 + drop) * 100;
     const bottom = (c / 2 - drop) * 100;
