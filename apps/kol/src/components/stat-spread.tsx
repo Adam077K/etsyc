@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useInView, animate } from "framer-motion";
 import { ISSUE_STATS } from "@/lib/fixtures/makers";
 import { rise, calm, inView, stagger } from "@/lib/motion";
-import { LiquidDivider } from "./liquid";
 
 // Counts up when it scrolls into view, so the visitor watches the number climb.
 function Counter({ to, className }: { to: number; className?: string }) {
@@ -45,8 +44,6 @@ export function StatSpread() {
         viewport={inView}
         className="relative overflow-hidden bg-clay px-6 py-14 text-center sm:px-12 sm:py-20"
       >
-        <LiquidDivider className="pointer-events-none absolute inset-x-0 top-0 opacity-[0.55]" />
-
         {/* Inner stagger: the two figures arrive one after the other, then the
             closing line — an authored count-in on top of each number's climb. */}
         <motion.div
