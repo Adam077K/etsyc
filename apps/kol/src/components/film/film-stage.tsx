@@ -12,6 +12,7 @@ import { MakerFilm } from "../maker-film";
 import { cn } from "@/lib/utils";
 import { getMaker } from "@/lib/fixtures/makers";
 import { useFilm } from "./film-context";
+import { bandDrop } from "./film-geometry";
 
 /**
  * FilmStage — the ONE persistent film element for the buyer journey. Mounted
@@ -41,21 +42,23 @@ export function FilmStage() {
   const transformOrigin = useMotionTemplate`${m.originX}% ${m.originY}%`;
   // Crop the surplus height off the (uniformly-scaled, undistorted) film so the
   // corner dock reads as a landscape card instead of a viewport-aspect column on
-  // portrait phones. Crop AWAY FROM the dock's live vertical edge so the card
-  // sits flush at its corner: a TOP-LEFT dock keeps its top strip (crop the
-  // bottom); a BOTTOM-RIGHT dock keeps its bottom strip (crop the top). `round`
+  // portrait phones. FACE band — trim `clip/2 + drop` off the top and
+  // `clip/2 - drop` off the bottom, biasing the shown band DOWN onto the maker's
+  // face (Founder: her face, not the top of frame — the clips are shot with
+  // headroom). The corner-aware y compensation lives in film-geometry's bandShift,
+  // which shifts the box so this band still sits flush at its anchor. `round`
   // keeps all four corners on the radius. CRITICAL: clip-path is "none" whenever
   // clip===0, because even inset(0%) clips the element's box-shadow at the border
   // box — so the hero/desktop dock keeps its shadow untouched, and only the
   // cropped mobile card is clipped.
-  const cropTop = (intent?.dockCorner ?? "top-left") === "bottom-right";
   const clipPath = useTransform([m.clip, m.radius], ([clip, radius]: number[]) => {
     const c = clip ?? 0;
     if (c <= 0.0001) return "none";
     const r = radius ?? 0;
-    return cropTop
-      ? `inset(${c * 100}% 0px 0px 0px round ${r}px)`
-      : `inset(0px 0px ${c * 100}% 0px round ${r}px)`;
+    const drop = bandDrop(c);
+    const top = (c / 2 + drop) * 100;
+    const bottom = (c / 2 - drop) * 100;
+    return `inset(${top}% 0px ${bottom}% 0px round ${r}px)`;
   });
   // While clipped, the box-shadow is severed by the clip, so restore depth with a
   // contract-allowed drop-shadow (follows the cropped card shape). "none" at
@@ -129,7 +132,12 @@ export function FilmStage() {
             reduce={!!reduce}
             priority
             sizes="100vw"
-            className="object-cover"
+            // Bias the framing DOWN onto the maker's face. Portrait clips overflow
+            // vertically on a landscape dock (where clip is 0 and can't reframe),
+            // so object-position carries the face there; on portrait phones the
+            // face band (clip) does it. Only the persistent stage film is biased —
+            // feed tiles keep their own framing.
+            className="object-cover object-[50%_66%]"
             videoRef={videoRef}
             initialTime={intent.seedTime}
             muted={!(hasAudio && audioArmed)}
