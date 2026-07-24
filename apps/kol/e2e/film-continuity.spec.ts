@@ -156,3 +156,43 @@ test("product→back-to-world restores the full-bleed hero (not frozen in corner
   expect(box!.width).toBeGreaterThan(vw * 0.9);
   await page.screenshot({ path: `${SHOTS}/7-back-nav-hero.png` });
 });
+
+test("sound arms on gesture and rides the persistent node into the product", async ({
+  page,
+}) => {
+  // Audio must NOT change mount/persistence semantics: the same <video> node
+  // survives, and once armed it stays unmuted across the route (the "hear her
+  // while the world unfolds" moment).
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
+
+  await page.goto("/m/two-dots");
+  const video = page.locator('[data-film-node="stage"] video');
+  await expect(video).toHaveCount(1);
+  // Muted by default on a fresh load (browser + contract compliance).
+  expect(await video.evaluate((v: HTMLVideoElement) => v.muted)).toBe(true);
+
+  // Stamp the node so we can prove it's the SAME element after navigation.
+  await video.evaluate((v) => v.setAttribute("data-proof-a", "A"));
+
+  // Arm sound via the on-film control (a real user gesture).
+  await page.getByRole("button", { name: /Turn on sound/i }).click();
+  await expect(page.getByRole("button", { name: /Mute the film/i })).toBeVisible();
+  await expect
+    .poll(() => video.evaluate((v: HTMLVideoElement) => v.muted))
+    .toBe(false);
+
+  // Into the product — the SAME node survives and is STILL unmuted (continuous).
+  await page.locator('a[href="/m/two-dots/p/butterfly-wings"]').first().click();
+  await page.waitForURL("**/p/butterfly-wings");
+  const sameNode = page.locator(
+    '[data-film-node="stage"] video[data-proof-a="A"]',
+  );
+  await expect(sameNode).toHaveCount(1); // not re-mounted
+  expect(await sameNode.evaluate((v: HTMLVideoElement) => v.muted)).toBe(false);
+
+  expect(errors, `console errors:\n${errors.join("\n")}`).toEqual([]);
+});
