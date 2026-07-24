@@ -336,20 +336,26 @@ export const MAKERS: Maker[] = [
     craft: "costume",
     discipline: "Hand-sewn children's costumes",
     blurb: "A costume isn't clothes — it's permission. For one afternoon they get to be the whole story.",
-    image: "/media/twodots/hero-poster.jpg",
+    image: "/media/twodots/feed-poster.jpg",
     kind: "film",
-    duration: "0:45",
-    // Full-bleed hero footprint — she is the issue's FEATURED maker (pinned to
-    // the front of the feed in the unfiltered view; see Feed), so the demo opens
-    // the issue on a big film of her, not a small square. A hero span (col-span-12)
-    // also packs cleanly as a lead tile: no orphaned gutter beside a 7-col tile.
-    span: "hero",
+    duration: "0:24",
+    // Portrait (tall) footprint — she is the issue's FEATURED maker, pinned first
+    // (see Feed). Her discovery film is a 9:16 talking-head; a portrait tile frames
+    // her face head-to-shoulders (a full-width 16/9 hero tile crops a portrait clip
+    // to a tight forehead-cut band). Still prominent as the lead, and col-span-5
+    // leaves 7 cols so a neighbour tile packs beside it (no orphaned gutter).
+    span: "tall",
     tone: "light",
     values: ["Hand-sewn", "Parent & child"],
-    filmSrc: "/media/video/two-dots.mp4",
-    // Portrait clip; the hands-on-felt proof moment sits low in frame. Seed to
-    // 0:06 so the full-bleed hero opens on a hand smoothing felt, not the empty
-    // white centre band the crop otherwise lands on at 0:00.
+    // Sharon's talking-head intro (Founder-provided promo, compliant faceless cut
+    // — child-face b-roll excluded; see CREDITS). This is the DISCOVERY film: it
+    // plays in the feed tile AND carries via the FilmStage into her world, where
+    // it docks to the corner as you scroll (Founder: "Sharon video in discovery,
+    // shown in the side of the store when scrolling"). The atmospheric hands-on-
+    // felt clip (two-dots.mp4) still leads the world wall's "In the studio" tile.
+    filmSrc: "/media/video/two-dots-feed.mp4",
+    // Seed to 0:06 to match feed-poster.jpg, so the still→video handoff is seamless
+    // and the tile opens on her mid-expression rather than a between-words frame.
     filmSeed: 6,
   },
 ];
