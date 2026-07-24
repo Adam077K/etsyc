@@ -68,6 +68,12 @@ export interface Maker {
    * never fights the feed→world currentTime carry. Omit to open at 0:00.
    */
   filmSeed?: number;
+  /**
+   * The clip carries an audio track (the maker narrating). Most clips are silent
+   * (video-only), so this is off by default; when true, the persistent FilmStage
+   * offers a sound control and a world-entry gesture can arm audio.
+   */
+  hasAudio?: boolean;
 }
 
 export const CRAFTS: Craft[] = [
@@ -338,7 +344,7 @@ export const MAKERS: Maker[] = [
     blurb: "A costume isn't clothes — it's permission. For one afternoon they get to be the whole story.",
     image: "/media/twodots/feed-poster.jpg",
     kind: "film",
-    duration: "0:24",
+    duration: "0:19",
     // Portrait (tall) footprint — she is the issue's FEATURED maker, pinned first
     // (see Feed). Her discovery film is a 9:16 talking-head; a portrait tile frames
     // her face head-to-shoulders (a full-width 16/9 hero tile crops a portrait clip
@@ -357,6 +363,10 @@ export const MAKERS: Maker[] = [
     // Seed to 0:06 to match feed-poster.jpg, so the still→video handoff is seamless
     // and the tile opens on her mid-expression rather than a between-words frame.
     filmSeed: 6,
+    // Sharon's discovery cut carries her narration (AAC) — the one audible clip;
+    // enables the FilmStage sound control + arm-on-enter. Audio pending Founder
+    // attestation (see CREDITS).
+    hasAudio: true,
   },
 ];
 
