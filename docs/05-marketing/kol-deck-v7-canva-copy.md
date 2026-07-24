@@ -176,19 +176,19 @@ Story and shopping have never lived in the same place — until KOL.
 The sales a story unlocks.
 $11.9B — Etsy handmade GMS *(sourced, FY2025)*
 +15% — the lift a story adds to a maker's sales *(our est.)*
-~$18M → ~$90M/yr — KOL's 10% of the GMS we create
+~$9M → ~$45M/yr — KOL's share of the new revenue *(Etsy keeps ~80%)*
 *Full model in appendix. We only earn on sales we create for Etsy.*
 
-**NOTES:** Etsy's own $11.9 billion — say half is story-rich. Lift those makers just 15%, get one in five to adopt, and that's $180 million in new GMS. We keep ten percent of what we create — $18 million a year, scaling to ninety. We only make money by growing Etsy's.
+**NOTES:** Etsy's own $11.9 billion — say half is story-rich. Lift those makers just 15%, get one in five to adopt, and that's $180 million in new GMS — about $43 million of new revenue for Etsy. We keep a minority slice of that new money — roughly $9 million a year, scaling to forty-five. Etsy keeps the other eighty percent. We only make money by growing Etsy's.
 
-*(Appendix has the full 6-step chain: $11.9B → ~$6B SAM → +15% → ~$180M incremental → ~10% take → ~$18M → ~$90M.)*
+*(Appendix has the full chain: $11.9B → ~$6B SAM → +15% → ~$180M incremental GMS → Etsy's ~24% take = ~$43M new revenue → KOL keeps ~20% → ~$9M → ~$45M.)*
 
 ---
 
 ## 18 · How KOL makes money (add-on to Etsy)
 **ON SLIDE**
 An add-on, not another middleman.
-• Share of the lift — a cut only of the *extra* sales we drive. Etsy keeps its fees; makers pay nothing new.
+• Share of the new revenue — a *minority slice* of the extra sales we drive. Etsy keeps ~80% and all its existing fees.
 • Maker tools — free, then $13.99/mo.
 • Engine licensing.
 
@@ -211,12 +211,12 @@ How KOL increases Etsy's profit.
 ## 19 · The economics — tied to the lift
 **ON SLIDE**
 Tied to the lift.
-Free · $13.99/mo · ~10% of the GMS we drive.
-Per maker: $30K GMV, +15% = ~$450/yr to KOL.
-At scale: 20% of story-rich Etsy → ~$18M/yr → ~$90M.
+Free · $13.99/mo · KOL keeps ~20% of the *new revenue* (Etsy keeps ~80%).
+Per maker: $30K GMV, +15% = +$4.5K new sales → ~$215/yr to KOL.
+At scale: 20% of story-rich Etsy → ~$9M/yr → ~$45M.
 *Take, lift & adoption = our model; $13.99 = our price.*
 
-**NOTES:** Free tools, $13.99 premium. But the model is the lift. A $30K maker lifted 15% is $4,500 in new sales — we keep about $450. Across the story-rich categories, that's an $18-to-90-million business — money we made for Etsy first.
+**NOTES:** Free tools, $13.99 premium. But the model is the lift. A $30K maker lifted 15% is $4,500 in new sales; Etsy earns its take on that, and we keep a minority slice — about $215, plus tools. Across the story-rich categories, that's a $9-to-45-million business — and every dollar is new money we made for Etsy first.
 
 ---
 
