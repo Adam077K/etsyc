@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -64,11 +64,36 @@ export function SellClips() {
   const [clips, setClips] = useState<Clip[]>(CLIPS);
   const [filter, setFilter] = useState<Filter>("all");
   const [active, setActive] = useState<ActiveShot | null>(null);
+  // Focus restoration: remember the control that opened the ritual so focus
+  // returns to it (or its equivalent) on exit — the card may have swapped
+  // slot→filmed while the ritual was open, so we fall back to a stable trigger.
+  const invokerRef = useRef<HTMLElement | null>(null);
+  const restoreIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), reduce ? 0 : 500);
     return () => clearTimeout(t);
   }, [reduce]);
+
+  // When the ritual closes, return focus to the invoking control if it's still
+  // in the DOM, else re-query the equivalent trigger for that clip.
+  useEffect(() => {
+    if (active) return;
+    const id = restoreIdRef.current;
+    if (!id) return;
+    restoreIdRef.current = null;
+    const invoker = invokerRef.current;
+    invokerRef.current = null;
+    requestAnimationFrame(() => {
+      if (invoker?.isConnected) {
+        invoker.focus();
+        return;
+      }
+      document
+        .querySelector<HTMLElement>(`[data-shot-trigger="${id}"]`)
+        ?.focus();
+    });
+  }, [active]);
 
   const filmedCount = clips.filter((c) => c.filmed).length;
   const toFilmCount = clips.length - filmedCount;
@@ -98,6 +123,11 @@ export function SellClips() {
   })).filter((g) => g.clips.length > 0);
 
   function openShot(clip: Clip, re: boolean) {
+    invokerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    restoreIdRef.current = clip.id;
     setActive({ clip, re });
   }
 
@@ -282,7 +312,7 @@ function StillToFilm({
                 <span className="block truncate font-ui text-sm font-medium text-bone/90">
                   {clip.title}
                 </span>
-                <span className="block truncate font-ui text-xs text-bone/50">
+                <span className="block truncate font-ui text-xs text-bone/55">
                   {clip.playsOn}
                 </span>
               </span>
@@ -504,6 +534,7 @@ function FilmedCard({
           <button
             type="button"
             onClick={onReRecord}
+            data-shot-trigger={clip.id}
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1 font-ui text-xs font-medium text-marigold transition-colors hover:bg-marigold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             <ArrowClockwise size={13} weight="bold" />
@@ -578,6 +609,7 @@ function SlotCard({
           <button
             type="button"
             onClick={onFilm}
+            data-shot-trigger={clip.id}
             className="flex items-center gap-1.5 rounded-full bg-marigold px-3 py-1.5 font-ui text-xs font-semibold text-ink transition-colors hover:bg-marigold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold-bright focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             <VideoCamera size={14} weight="fill" />
