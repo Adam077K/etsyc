@@ -89,3 +89,4 @@
 
 ## Vendor lock-ins (accepted)
 <!-- Each entry: vendor · why · review trigger date · export-path commitment -->
+- **06:30 FINAL: integration payload frozen — `feat/kol-integration` @ 6a13da4** (.worktrees/kol-integration, live :3030): the 14-car train assembled (one pre-agreed conflict resolved) + Founder live-walkthrough directives (vertical portrait store dock everywhere incl. product PiP chrome, face-band crops on endpoint docks, hero face reframe, blob divider off home+feed, mobile header clearances). Gate 16 delta pass: PASS-with-notes, all fixed. Build/e2e 5-5/detect green. MERGE PLAN: on Founder clearance → clearance commit on kol-sharon-journey → merge feat/kol-integration into main (--no-ff, one train merge) → Vercel. Audio attestation still gated in CREDITS (strip AAC if child audible).
