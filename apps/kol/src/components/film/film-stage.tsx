@@ -181,7 +181,7 @@ export function FilmStage() {
           }}
           aria-pressed={audioArmed}
           aria-label={audioArmed ? "Mute the film" : "Turn on sound"}
-          className="press pointer-events-auto flex items-center gap-2 rounded-full bg-ink/85 px-3 py-2 backdrop-blur-sm transition-colors hover:bg-ink/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="press pointer-events-auto flex min-h-[44px] items-center gap-2 rounded-full bg-ink/85 px-3 py-2 backdrop-blur-sm transition-colors hover:bg-ink/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           {audioArmed ? (
             <SpeakerHigh size={16} weight="fill" className="text-marigold" />
