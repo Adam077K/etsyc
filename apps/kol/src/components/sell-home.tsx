@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   BookmarkSimple,
   ChatCircle,
+  Eye,
   PaintBrushBroad,
   Package,
   Play,
@@ -23,6 +24,7 @@ import {
   SELLER_ORDERS,
   type SellerOrder,
 } from "@/lib/fixtures/sell-orders";
+import { HQ_MIRROR } from "@/lib/fixtures/sell";
 import { MakerFilm } from "./maker-film";
 import { Magnetic } from "./magnetic";
 import { rise, stagger, calm, easeOut } from "@/lib/motion";
@@ -166,6 +168,22 @@ function WorldPreview({ reduce }: { reduce: boolean }) {
           </Magnetic>
         </div>
       </div>
+
+      {/* The mirror — what a buyer actually did in your world today, in the same
+          honesty voice the orders screen uses ("this is what your buyer sees").
+          It closes the loop: your world isn't a dashboard, it's a room people
+          are walking through right now. */}
+      <div className="flex items-start gap-3 border-t border-line bg-ink-soft px-5 py-4 sm:px-7">
+        <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-marigold/12 text-marigold">
+          <Eye size={16} weight="fill" />
+        </span>
+        <div className="min-w-0">
+          <p className="meta text-bone-dim">What a buyer saw today</p>
+          <p className="mt-1.5 font-serif text-base leading-snug text-bone sm:text-lg">
+            {HQ_MIRROR.line}
+          </p>
+        </div>
+      </div>
     </motion.section>
   );
 }
@@ -177,84 +195,81 @@ function Pulse({ reduce }: { reduce: boolean }) {
     <section className="mt-16" aria-label="Your week">
       <p className="meta text-bone-dim">This week in your world</p>
 
+      {/* One ledger, not three tiles: the lead number leads, the rest are entries
+          read off the same page — a workshop's week, not a metrics dashboard. */}
       <motion.div
-        variants={stagger(0.05, 0.09)}
+        variants={reduce ? calm : rise(18, 0.6)}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-60px" }}
-        className="mt-6 grid gap-4 md:grid-cols-[1.4fr_1fr_1fr]"
+        className="mt-6 rounded-3xl border border-line bg-ink-soft p-6 sm:p-8"
       >
-        {/* Lead stat carries the single sparkline. */}
-        <motion.div
-          variants={reduce ? calm : rise(16, 0.5)}
-          className="flex flex-col justify-between rounded-3xl border border-line bg-ink-soft p-6 sm:p-7"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="font-display text-5xl font-extrabold leading-none text-bone sm:text-6xl">
-                {HQ_PULSE.metThisWeek}
-              </p>
-              <p className="mt-3 flex items-center gap-2 font-ui text-sm text-bone/70">
-                <UsersThree size={16} weight="fill" className="text-marigold" />
-                people met your world
-              </p>
-            </div>
-            <Sparkline data={HQ_PULSE.visits} reduce={reduce} />
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <p className="font-display text-6xl font-extrabold leading-none text-bone sm:text-7xl">
+              {HQ_PULSE.metThisWeek}
+            </p>
+            <p className="mt-3 flex items-center gap-2 font-ui text-base text-bone/75">
+              <UsersThree size={17} weight="fill" className="text-marigold" />
+              people met your world this week
+            </p>
           </div>
-          <p className="mt-6 font-ui text-sm leading-relaxed text-bone/55">
-            Up from a quiet start on Monday — the issue put you in front of
-            more rooms as the week went on.
-          </p>
-        </motion.div>
+          <Sparkline data={HQ_PULSE.visits} reduce={reduce} />
+        </div>
+        <p className="mt-5 max-w-measure font-ui text-sm leading-relaxed text-bone/55">
+          Up from a quiet start on Monday — the issue put you in front of more
+          rooms as the week went on.
+        </p>
 
-        <StatLine
-          reduce={reduce}
-          value={HQ_PULSE.watchedFilm}
-          icon={<Play size={16} weight="fill" className="text-marigold" />}
-          label="watched your film to the end"
-          voice="They stayed for the whole minute — that's the part that turns into trust."
-        />
-        <StatLine
-          reduce={reduce}
-          value={HQ_PULSE.savedYou}
-          icon={<BookmarkSimple size={16} weight="fill" className="text-marigold" />}
-          label="saved you for later"
-          voice="Quietly kept, to come back to when the shelf has space."
-        />
+        <dl className="mt-7 grid gap-x-8 gap-y-5 border-t border-line pt-6 sm:grid-cols-2">
+          <LedgerEntry
+            icon={<Play size={15} weight="fill" className="text-marigold" />}
+            value={HQ_PULSE.watchedFilm}
+            label="watched your film to the end"
+            voice="They stayed for the whole minute — the part that turns into trust."
+          />
+          <LedgerEntry
+            icon={
+              <BookmarkSimple size={15} weight="fill" className="text-marigold" />
+            }
+            value={HQ_PULSE.savedYou}
+            label="saved you for later"
+            voice="Quietly kept, to come back to when the shelf has space."
+          />
+        </dl>
       </motion.div>
     </section>
   );
 }
 
-function StatLine({
-  reduce,
-  value,
+/* A single ledger line within the week panel — number, plain-language label, and
+   the human read on it. Deliberately not a boxed stat tile. */
+function LedgerEntry({
   icon,
+  value,
   label,
   voice,
 }: {
-  reduce: boolean;
-  value: number;
   icon: React.ReactNode;
+  value: number;
   label: string;
   voice: string;
 }) {
   return (
-    <motion.div
-      variants={reduce ? calm : rise(16, 0.5)}
-      className="flex flex-col justify-between rounded-3xl border border-line bg-ink-soft p-6 sm:p-7"
-    >
-      <div>
-        <p className="font-display text-5xl font-extrabold leading-none text-bone sm:text-6xl">
+    <div>
+      <dt className="flex items-baseline gap-2.5">
+        <span className="font-display text-3xl font-bold leading-none text-bone">
           {value}
-        </p>
-        <p className="mt-3 flex items-center gap-2 font-ui text-sm text-bone/70">
+        </span>
+        <span className="flex items-center gap-1.5 font-ui text-sm text-bone/75">
           {icon}
           {label}
-        </p>
-      </div>
-      <p className="mt-6 font-ui text-sm leading-relaxed text-bone/55">{voice}</p>
-    </motion.div>
+        </span>
+      </dt>
+      <dd className="mt-2 font-ui text-sm leading-relaxed text-bone/55">
+        {voice}
+      </dd>
+    </div>
   );
 }
 
@@ -320,8 +335,8 @@ function NeedsYou({
   soonest?: SellerOrder;
 }) {
   return (
-    <section className="mt-16" aria-label="What needs you">
-      <p className="meta text-bone-dim">What needs you</p>
+    <section className="mt-16" aria-label="On your bench">
+      <p className="meta text-bone-dim">On your bench</p>
       <motion.ul
         variants={stagger(0.04, 0.08)}
         initial="hidden"
