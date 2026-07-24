@@ -30,6 +30,11 @@ export interface WorldProcessStep {
   title: string;
   body: string;
   image: string;
+  /** optional real clip, played muted/looped (MakerFilm) inside the make-reel. */
+  filmSrc?: string;
+  /** contextual label the corner film narrates while this frame is the active one
+      in the draggable make-reel. Authored short, in the maker's register. */
+  filmLabel?: string;
 }
 
 /**
@@ -89,6 +94,32 @@ export interface MakerWorld {
   studioCaption: string;
   /** a closing line from the maker */
   voice: string;
+  /**
+   * OPTIONAL film-led narration — the contextual labels the corner-docked film
+   * narrates as each beat scrolls into view. This is the mechanism that makes
+   * the bespoke Two Dots world feel film-led ("It starts with an idea" →
+   * "…and become it"); generalized here so every world's film narrates its own
+   * story. Authored short and in the maker's own register, never mechanical.
+   * Absent → the film keeps its default "Now playing" chip (graceful).
+   */
+  filmNarration?: {
+    hero?: string;
+    story?: string;
+    process?: string;
+    interlude?: string;
+    products?: string;
+    studio?: string;
+  };
+  /**
+   * OPTIONAL cinematic interlude — one line pulled from the maker's OWN story
+   * prose (never newly fabricated), set full-bleed as the persistent film blooms
+   * back behind it and then re-docks. The beat that breaks the stacked-section
+   * rhythm and lets the film lead. Absent → no interlude (graceful).
+   */
+  interlude?: {
+    /** a sentence lifted verbatim from this world's `story`, pulled as a quote. */
+    quote: string;
+  };
 }
 
 export const WORLDS: Record<string, MakerWorld> = {
@@ -109,6 +140,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Center",
         body: "Every pot begins with a fight to get the clay dead-centre. Get this wrong and nothing that follows can be saved.",
         image: "/media/clay-wheel.jpg",
+        filmLabel: "Centre, or nothing",
       },
       {
         id: "raise",
@@ -116,6 +148,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Raise",
         body: "The walls come up in three slow pulls. You can feel the moment the form decides what it wants to be.",
         image: "/media/clay-shape.jpg",
+        filmLabel: "The walls come up",
       },
       {
         id: "fire",
@@ -123,6 +156,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Salt-fire",
         body: "Bisque, glaze, then sea salt thrown into the kiln at peak heat. The vapour writes the surface — I only get a vote.",
         image: "/media/clay-drying.jpg",
+        filmLabel: "The salt writes it",
       },
     ],
     products: [
@@ -155,6 +189,17 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/clay-shelf.jpg",
     studioCaption: "The drying shelf, Alfama studio — Lisbon",
     voice: "If a pot ends up on your table for thirty years, I have done my job. — Lena",
+    filmNarration: {
+      hero: "Now on the wheel",
+      story: "In the low morning light",
+      process: "Nothing here is rushed",
+      interlude: "No two mornings",
+      products: "A few, made to keep",
+      studio: "The drying shelf",
+    },
+    interlude: {
+      quote: "No two pieces match, because no two mornings do.",
+    },
   },
   "indigo-ash": {
     slug: "indigo-ash",
@@ -173,6 +218,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Ferment the vat",
         body: "Indigo, wood ash, a week of patience. The vat has to be coaxed alive before a single thread goes in.",
         image: "/media/indigo-dye.jpg",
+        filmLabel: "A week of patience",
       },
       {
         id: "finish",
@@ -180,6 +226,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Cut & finish by hand",
         body: "Every hem is turned and stitched on a machine older than me. It softens with every wash and never lets go of the blue.",
         image: "/media/textile-machine.jpg",
+        filmLabel: "Turned by hand",
       },
     ],
     products: [
@@ -204,6 +251,17 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/indigo-dye.jpg",
     studioCaption: "The living vat — Médina, Dakar",
     voice: "The blue remembers every hand that made it. — Sabine",
+    filmNarration: {
+      hero: "At the vat",
+      story: "Reading the vat's mood",
+      process: "The vat sets the pace",
+      interlude: "Depth is a decision",
+      products: "Cloth worth the wait",
+      studio: "The living vat",
+    },
+    interlude: {
+      quote: "The depth you see is the number of times I chose to go back in.",
+    },
   },
   "grain-groove": {
     slug: "grain-groove",
@@ -223,6 +281,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Read the board",
         body: "I don't cut until I know which way the grain wants to run. Fight it and it splits on you inside a year. Follow it and it holds for a lifetime.",
         image: "/media/woodwork.jpg",
+        filmLabel: "Read the board first",
       },
       {
         id: "joint",
@@ -230,6 +289,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "One clean joint",
         body: "Everything locks together with hand-cut joinery — no screws to work loose, no glue doing the real job. If it wobbles on my floor, it never sees yours.",
         image: "/media/wood-joint.jpg",
+        filmLabel: "One clean joint",
       },
     ],
     products: [
@@ -254,6 +314,17 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/woodwork.jpg",
     studioCaption: "The bench, under the tin roof — Oaxaca",
     voice: "A chair should outlast the argument about who gets to sit in it. — Tomás",
+    filmNarration: {
+      hero: "At the bench",
+      story: "Hands that stopped arguing",
+      process: "The wood gets the last word",
+      interlude: "Twenty years of honest",
+      products: "Made to be handed down",
+      studio: "Under the tin roof",
+    },
+    interlude: {
+      quote: "When a joint comes out wrong I burn the board.",
+    },
   },
   "ember-rue": {
     slug: "ember-rue",
@@ -274,6 +345,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Draw it off by hand",
         body: "Every oil is drawn and blended a few millilitres at a time — by pipette, by nose. No blend leaves this bench until I've worn it on my own wrist for a full day and it hasn't turned on me by midnight.",
         image: "/media/apothecary.jpg",
+        filmLabel: "A few millilitres at a time",
       },
       {
         id: "seal",
@@ -281,6 +353,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Bottle & seal",
         body: "It's decanted into glazed stoneware, waxed, and dated. Stone keeps the light out and the scent in far better than the clear glass everyone expects — so the last drop smells like the first.",
         image: "/media/salt-ceramics.jpg",
+        filmLabel: "Bottled and sealed",
       },
     ],
     products: [
@@ -305,6 +378,18 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/apothecary.jpg",
     studioCaption: "The distilling bench — the Mellah, Marrakesh",
     voice: "A scent should follow you out the door and still be arguing with you at midnight. — Noor",
+    filmNarration: {
+      hero: "At the still",
+      story: "A week told by smell",
+      process: "I work by nose, not by clock",
+      interlude: "The honest exchange",
+      products: "Small bottles, long afternoons",
+      studio: "The distilling bench",
+    },
+    interlude: {
+      quote:
+        "Three drops of oil for an armful of petals — that is the honest exchange, and I won't cheat it.",
+    },
   },
   "risograph-room": {
     slug: "risograph-room",
@@ -328,6 +413,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "The wall decides",
         body: "Nothing leaves until it's pinned to this wall for a week. If a print still stops me on the way to the kettle, it's good. If I walk straight past it, it goes back in the ink-test pile.",
         image: "/media/prints-wall.jpg",
+        filmLabel: "Pinned for a week",
       },
       {
         id: "feel",
@@ -335,6 +421,7 @@ export const WORLDS: Record<string, MakerWorld> = {
         title: "Ink you can feel",
         body: "Riso ink sits on top of the paper, never in it. Run a fingertip across a fresh print and you feel the colour — raised, tacky-bright, a little uneven. That texture is the entire point.",
         image: "/media/riso-ink.jpg",
+        filmLabel: "Raised, tacky-bright",
       },
     ],
     products: [
@@ -359,6 +446,18 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/prints-wall.jpg",
     studioCaption: "The drying wall — Euljiro, Seoul",
     voice: "A print you can feel with your eyes shut is worth ten you scroll past. — Juno",
+    filmNarration: {
+      hero: "Ink on the drum",
+      story: "Two inks, one collision",
+      process: "A hundred happy accidents",
+      interlude: "The third colour",
+      products: "Two colours at a time",
+      studio: "The drying wall",
+    },
+    interlude: {
+      quote:
+        "The overlap glows in a third colour you didn't ask for and couldn't mix if you tried.",
+    },
   },
   "two-dots": {
     slug: "two-dots",
