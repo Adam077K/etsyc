@@ -1,0 +1,183 @@
+<title>KOL — 100-Day Pilot Plan</title>
+<style>
+  :root{
+    --paper:#ECE8E1; --paper2:#E3DED5; --card:#F4F1EA; --ink:#17130F; --ink2:#4A423A;
+    --meta:#877E71; --line:#D6CFC2; --terra:#BF5630; --rust:#7C2D12; --gold:#B98A34; --green:#3F7A5B;
+    --shadow:0 1px 2px rgba(23,19,15,.06),0 8px 30px rgba(23,19,15,.05);
+    --grotesk:"Helvetica Neue",Helvetica,Arial,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#1A1613;--paper2:#221D19;--card:#241F1A;--ink:#EDE6DB;--ink2:#B7AC9E;--meta:#8E8577;
+    --line:#3A322A;--terra:#D9723F;--rust:#E08A5A;--gold:#D8A94E;--green:#5CB088;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 34px rgba(0,0,0,.35);}}
+  :root[data-theme="light"]{--paper:#ECE8E1;--paper2:#E3DED5;--card:#F4F1EA;--ink:#17130F;--ink2:#4A423A;--meta:#877E71;--line:#D6CFC2;--terra:#BF5630;--rust:#7C2D12;--gold:#B98A34;--green:#3F7A5B;--shadow:0 1px 2px rgba(23,19,15,.06),0 8px 30px rgba(23,19,15,.05);}
+  :root[data-theme="dark"]{--paper:#1A1613;--paper2:#221D19;--card:#241F1A;--ink:#EDE6DB;--ink2:#B7AC9E;--meta:#8E8577;--line:#3A322A;--terra:#D9723F;--rust:#E08A5A;--gold:#D8A94E;--green:#5CB088;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 34px rgba(0,0,0,.35);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--grotesk);line-height:1.5;-webkit-font-smoothing:antialiased;background-image:radial-gradient(rgba(120,110,95,.05) 1px,transparent 1px);background-size:4px 4px}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px 100px}
+  .eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--meta);font-weight:700}
+  header{padding:60px 0 30px;border-bottom:2px solid var(--ink)}
+  h1{font-size:clamp(34px,6vw,60px);font-weight:800;letter-spacing:-.03em;line-height:.95;margin-top:12px}
+  h1 .t{color:var(--terra)}
+  .frame{margin-top:18px;max-width:70ch;font-size:17px;color:var(--ink2)}
+  .frame b{color:var(--ink)}
+  .metarow{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:20px}
+  .chip{font-size:12.5px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink2)}
+  .chip b{color:var(--ink)}
+
+  h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--terra);font-weight:800;margin:44px 0 14px}
+  .wedge{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:4px}
+  .wcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+  .wcard .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--meta);font-weight:700}
+  .wcard .v{font-size:16px;font-weight:700;margin-top:6px;line-height:1.25}
+  .wcard .v span{color:var(--terra)}
+
+  .phases{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .phase{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--terra);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+  .phase .days{font-family:var(--mono);font-size:12.5px;color:var(--terra);font-weight:700}
+  .phase h3{font-size:20px;font-weight:800;letter-spacing:-.01em;margin:4px 0 4px}
+  .phase .goal{font-size:13.5px;color:var(--meta);margin-bottom:12px}
+  .phase ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .phase li{font-size:14px;color:var(--ink2);padding-left:16px;position:relative;line-height:1.4}
+  .phase li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--terra)}
+  .phase li b{color:var(--ink)}
+  .phase .tag{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--meta)}
+
+  .gates{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+  .gate{display:grid;grid-template-columns:90px 1fr;gap:16px;padding:14px 18px;border-top:1px solid var(--line)}
+  .gate:first-child{border-top:none}
+  .gate .d{font-family:var(--mono);font-weight:800;color:var(--terra);font-size:15px}
+  .gate .g b{color:var(--ink)}
+  .gate .g{color:var(--ink2);font-size:14.5px}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);font-size:14px}
+  th,td{text-align:left;padding:12px 16px;border-top:1px solid var(--line)}
+  th{background:var(--paper2);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--meta);font-weight:700;border-top:none}
+  td b{color:var(--ink)} td{color:var(--ink2)}
+  .lead{color:var(--terra);font-weight:700;font-size:11px}
+  .lag{color:var(--gold);font-weight:700;font-size:11px}
+  tr .metric{font-weight:700;color:var(--ink)}
+  .num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+  .box h3{font-size:15px;margin-bottom:10px}
+  .box ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .box li{font-size:14px;color:var(--ink2);padding-left:16px;position:relative;line-height:1.4}
+  .box li::before{content:"→";position:absolute;left:0;color:var(--terra);font-weight:700}
+  .box li b{color:var(--ink)}
+  .risk li::before{content:"⚠";color:var(--rust)}
+
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--meta);font-size:12.5px}
+  @media (max-width:820px){.phases{grid-template-columns:1fr}.wedge{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">KOL · pilot execution plan</div>
+    <h1>The first <span class="t">100 days</span>.</h1>
+    <div class="frame">One story-rich category. Sharon plus a first cohort of makers. We prove the <b>leading indicators</b> — conversion, add-to-basket, and fewer "not as described" disputes — in 100 days, and stand up the <b>lagging one</b> (repeat-purchase → LTV) to be judged over the quarters after. Honest by design: trust and lifetime value take longer than 100 days, so we prove the signals now and the payoff next.</div>
+    <div class="metarow">
+      <span class="chip">Start <b>~Jul 25 2026</b> → Day 100 <b>~Nov 1 2026</b></span>
+      <span class="chip">Wedge: <b>one story-rich category</b></span>
+      <span class="chip">Anchor maker: <b>Sharon / Two Dots</b></span>
+      <span class="chip">Model: <b>add-on to Etsy · share of the lift</b></span>
+    </div>
+  </header>
+
+  <h2>The wedge — kept deliberately small</h2>
+  <div class="wedge">
+    <div class="wcard"><div class="l">Where</div><div class="v"><span>One</span> story-rich Etsy category (Sharon's world — handmade kids' apparel)</div></div>
+    <div class="wcard"><div class="l">Supply</div><div class="v"><span>10–15</span> makers onboarded via the AI interview</div></div>
+    <div class="wcard"><div class="l">Demand</div><div class="v">Real buyers via the <span>add-on entry</span> + seeded traffic</div></div>
+    <div class="wcard"><div class="l">Proof</div><div class="v">KOL storefront vs. a <span>matched control</span> listing</div></div>
+  </div>
+
+  <h2>Three phases</h2>
+  <div class="phases">
+    <div class="phase">
+      <div class="days">DAYS 0–30 · ~Aug</div>
+      <h3>Prove the engine repeats.</h3>
+      <div class="goal">Not hand-crafted for Sharon. It works for any maker who talks.</div>
+      <ul>
+        <li><b>Ship the KOL UI kit</b> — video-panel, story blocks, product shelf, cards (unblocks every mockup + the live build).</li>
+        <li><b>Second + third maker worlds live</b> from the AI interview — the #1 conviction proof (engine repeats, voice stays theirs).</li>
+        <li><b>Interview engine to first usable state</b> — talk → world, unpolished words preserved.</li>
+        <li><b>Verification live</b> — Real-Maker check + verified reviews on pilot stores.</li>
+        <li><b>Instrumentation in place</b> — capture conversion, add-to-basket, INAD/returns, repeat flags from day one.</li>
+        <li class="tag">Gate → Day 14 &amp; Day 30 below</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="days">DAYS 31–60 · ~Sep</div>
+      <h3>Pilot goes live.</h3>
+      <div class="goal">Real buyers meet real makers in one category, measured against control.</div>
+      <ul>
+        <li><b>10–15 makers onboarded</b> in the wedge category, each with a full KOL world.</li>
+        <li><b>Add-on entry live</b> — the discovery-feed door drives buyers to pilot stores.</li>
+        <li><b>Matched control set</b> — same makers' standard listings, so every delta is attributable.</li>
+        <li><b>Click-to-narrate shipped</b> — the signature interaction in the real product.</li>
+        <li><b>Weekly read</b> on conversion + add-to-basket vs. control; fix the drop-offs.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="days">DAYS 61–100 · ~Oct</div>
+      <h3>Prove the lift.</h3>
+      <div class="goal">Show the leading indicators moved — and set up the quarters-long trust proof.</div>
+      <ul>
+        <li><b>Report the deltas</b> — conversion, add-to-basket, INAD/returns vs. control, with confidence caveats.</li>
+        <li><b>First repeat-purchase signals</b> — early cohort returns; the LTV read is framed as ongoing.</li>
+        <li><b>Maker economics</b> — actual incremental GMS per maker → validate/adjust the 15% lift assumption.</li>
+        <li><b>Expansion plan</b> — second category + the makers ready to onboard next.</li>
+        <li><b>Decision pack</b> for Etsy / next raise.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Milestones &amp; go/no-go gates</h2>
+  <div class="gates">
+    <div class="gate"><div class="d">Day 14</div><div class="g"><b>Engine repeats.</b> A second, non-Sharon maker world is live from the interview and reads as authentically hers. <span style="color:var(--meta)">No-go → the moat is hand-craft, not product. Fix before onboarding a cohort.</span></div></div>
+    <div class="gate"><div class="d">Day 30</div><div class="g"><b>Pilot-ready.</b> UI kit shipped, verification live, instrumentation capturing all four metrics, 3+ maker worlds. <span style="color:var(--meta)">Gate to open the cohort.</span></div></div>
+    <div class="gate"><div class="d">Day 60</div><div class="g"><b>Signal or pivot.</b> First conversion + add-to-basket deltas vs. control are directionally positive. <span style="color:var(--meta)">Flat → diagnose (discovery? trust? UX?) before scaling spend.</span></div></div>
+    <div class="gate"><div class="d">Day 100</div><div class="g"><b>Verdict.</b> Leading indicators reported with confidence bounds; repeat-purchase trend established; lift assumption validated or revised; expansion + funding decision.</div></div>
+  </div>
+
+  <h2>What we measure</h2>
+  <table>
+    <tr><th>Metric</th><th>Type</th><th>Baseline</th><th>100-day target</th><th>Note</th></tr>
+    <tr><td class="metric">Conversion (visit→buy)</td><td><span class="lead">Leading</span></td><td class="num">control</td><td><b>+ vs. control</b></td><td>KOL store vs. matched listing</td></tr>
+    <tr><td class="metric">Add-to-basket</td><td><span class="lead">Leading</span></td><td class="num">control</td><td><b>+ vs. control</b></td><td>early intent signal</td></tr>
+    <tr><td class="metric">"Not as described" / returns</td><td><span class="lead">Leading</span></td><td class="num">control</td><td><b>↓ vs. control</b></td><td>the buyer-trust metric Etsy owns</td></tr>
+    <tr><td class="metric">Repeat-purchase</td><td><span class="lag">Lagging</span></td><td class="num">—</td><td><b>early trend</b></td><td>full read = quarters, not 100 days</td></tr>
+    <tr><td class="metric">Incremental GMS / maker</td><td><span class="lag">Lagging</span></td><td class="num">—</td><td><b>validate ~15%</b></td><td>feeds the revenue model</td></tr>
+  </table>
+
+  <div class="two" style="margin-top:16px">
+    <div class="box">
+      <h3>What we'd need from Etsy (if the pilot runs inside)</h3>
+      <ul>
+        <li>One <b>story-rich category</b> and a homepage <b>entry point</b> for the add-on.</li>
+        <li>A <b>matched control</b> and read access to conversion / return / repeat data for the cohort.</li>
+        <li>A <b>data-share window</b> — KOL keeps the engine + verified-maker/trust data.</li>
+        <li>Judged on <b>trust + repeat-purchase over 2–3 quarters</b>, not a two-week test.</li>
+      </ul>
+    </div>
+    <div class="box risk">
+      <h3>Top risks &amp; how we de-risk</h3>
+      <ul>
+        <li><b>Engine doesn't repeat</b> → Day-14 gate catches it before we scale.</li>
+        <li><b>Makers won't be on camera</b> → audio-from-interview + hands-only film; onboard camera-comfortable makers first.</li>
+        <li><b>Buyers skip the video</b> → video is opt-in; lead with trust + ship-date, film is the invitation.</li>
+        <li><b>Too little traffic to read</b> → matched control + seeded demand so deltas are attributable at small N.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    KOL 100-day pilot plan · ceo-5 · 2026-07-24. Frame: prove leading indicators in 100 days, prove repeat-purchase/LTV over the quarters after. Model = add-on to Etsy, share of the lift. Every target is vs. a matched control; the +15% lift is our model until the pilot validates it.
+  </footer>
+</div>
+<script>
+  (function(){var r=document.documentElement;try{var mq=window.matchMedia('(prefers-color-scheme:dark)');if(!r.getAttribute('data-theme')){r.setAttribute('data-theme',mq.matches?'dark':'light');}mq.addEventListener&&mq.addEventListener('change',function(e){r.setAttribute('data-theme',e.matches?'dark':'light');});}catch(e){}})();
+</script>
