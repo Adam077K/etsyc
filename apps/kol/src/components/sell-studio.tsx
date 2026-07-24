@@ -192,6 +192,9 @@ export function SellStudio() {
         {/* ---- Live preview ---- */}
         <div className="min-w-0">
           <p className="meta mb-3 flex items-center gap-2 px-1 text-bone-dim">
+            {/* Decorative accent dot, aria-hidden beside the "in {accent}" label —
+                WCAG-exempt; the hairline ring is for perceptibility, not a 3:1
+                non-text target. */}
             <span
               className="h-2 w-2 rounded-full ring-1 ring-inset ring-bone/25"
               style={{ backgroundColor: accentOpt.hex }}
@@ -647,8 +650,10 @@ function BrowserFrame({
         <div className="flex flex-1 items-center justify-center">
           <span className="flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 font-mono text-[0.65rem] text-bone/55">
             {/* the address favicon carries the accent she picked — her world's
-                signature, right where a browser shows a site's mark. A hairline
-                ring keeps even dark accents perceptible (non-text contrast). */}
+                signature, right where a browser shows a site's mark. Decorative
+                and aria-hidden beside the legible handle, so it's WCAG-exempt
+                (not a 3:1 non-text target); the hairline ring only improves
+                perceptibility of dark accents, it doesn't confer compliance. */}
             <span
               className="h-2 w-2 rounded-full ring-1 ring-inset ring-bone/25"
               style={{ backgroundColor: accentHex }}
