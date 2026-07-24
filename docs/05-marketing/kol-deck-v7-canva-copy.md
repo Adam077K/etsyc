@@ -230,11 +230,14 @@ verified makers + real stories + buyer-trust data → compounding.
 
 ## 22 · The ask
 **ON SLIDE**
-You already celebrate the human. Let us deliver it to the buyer.
-Measure: "not as described" ↓ · repeat-purchase ↑.
-One category. Judge it over quarters. KOL keeps the engine.
+The ask: one category. 100 days.
+*You already celebrate the human — let us deliver it to the buyer.*
+• Run KOL in one story-rich category — Sharon + a first cohort of makers.
+• Measure what you own: "not as described" ↓ · repeat-purchase ↑.
+• Judge it over quarters, not a two-week test.
+• KOL keeps the engine and the trust data.
 
-**NOTES:** Etsy already stands for the human. KOL delivers it to the buyer — fewer "not as described" disputes, more buyers who come back. Instrument it like any launch; judge it over quarters, not a two-week test.
+**NOTES:** Here's the ask. Give us one story-rich category for 100 days — Sharon and a first cohort of makers. Measure it where it counts for you: fewer "not as described" disputes, more buyers who come back. Instrument it like any launch — but judge it over quarters. We keep the engine. You already stand for the human; let us prove it to the buyer.
 
 ---
 
