@@ -57,6 +57,9 @@ export function HeroSpread() {
             sizes="100vw"
             className="object-cover object-center"
             videoRef={coverVideoRef}
+            // Keep the first video frame matched to the poster — undefined today
+            // (the cover poster is frame 0), wired so a future cover seed is safe.
+            initialTime={COVER_MAKER.filmSeed}
           />
         </div>
         {/* Ink scrims: bottom-up for the credit, left-in for the statement. */}
