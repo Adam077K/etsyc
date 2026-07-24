@@ -27,7 +27,12 @@ import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
+import {
+  HERO_TARGET,
+  applyDockFrame,
+  dockClip,
+  dockTarget,
+} from "./film/film-geometry";
 
 /**
  * TwoDotsWorld — Sharon's BESPOKE maker world (/m/two-dots only).
@@ -135,20 +140,6 @@ export function TwoDotsWorld({ maker, world }: { maker: Maker; world: World }) {
 
 /* ---------- Film driver: hero dock + interlude bloom + per-beat label ---------- */
 
-function dockedTarget(docked: number, clipAmt: number) {
-  return {
-    scale: docked,
-    x: -24,
-    y: -24,
-    radius: 64,
-    opacity: 1,
-    originX: 100,
-    originY: 100,
-    shadow: 1,
-    clip: clipAmt,
-  };
-}
-
 function TwoDotsFilm({
   maker,
   heroSrc,
@@ -188,7 +179,7 @@ function TwoDotsFilm({
     const prefersReduced =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    snapTo({ originX: 100, originY: 100 });
+    snapTo({ originX: 0, originY: 0 });
     if (!consumeHandoff()) {
       driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.55 });
     }
@@ -244,7 +235,7 @@ function TwoDotsFilm({
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const docked = isMobileRef.current ? 0.2 : 0.26;
-      driveTo(dockedTarget(docked, dockClip(vw, vh)), {
+      driveTo(dockTarget(docked, dockClip(vw, vh)), {
         reduce: prefersReduced,
         duration: 0.6,
       });
@@ -272,7 +263,7 @@ function TwoDotsFilm({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     if (reduce) {
-      if (v > 0.6) snapTo(dockedTarget(docked, dockClip(vw, vh)));
+      if (v > 0.6) snapTo(dockTarget(docked, dockClip(vw, vh)));
       else snapTo({ ...HERO_TARGET });
       return;
     }
@@ -360,7 +351,12 @@ function IdeaSection({ reduce, onView }: { reduce: boolean; onView: () => void }
     <section className="mx-auto max-w-issue px-5 py-24 sm:px-8 sm:py-32">
       <Reveal reduce={reduce} onView={onView}>
         <div className="grid gap-10 md:grid-cols-[1fr_1.05fr] md:gap-16">
-          <div className="flex flex-col justify-center">
+          {/* At xl the pinned top-left dock overlaps the top of this column as
+              the section scrolls; a top clearance on the whole heading+prose
+              stack (kicker → h2 → prose shift down as one) drops the reading
+              block below the dock's band. Clearance only — the internal
+              composition and prose are untouched. */}
+          <div className="flex flex-col justify-center xl:pt-56">
             <p className="meta mb-5 text-clay-bright">{d.ideaKicker}</p>
             <h2
               className="mb-6 font-display font-bold leading-[0.95] text-bone"

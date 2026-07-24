@@ -34,7 +34,7 @@ import { Magnetic } from "./magnetic";
 import { TrustBadge } from "./trust-badge";
 import { ReviewStory } from "./review-story";
 import { useFilm } from "./film/film-context";
-import { cornerTarget, dockAspect } from "./film/film-geometry";
+import { cornerTarget, dockAspect, dockTop } from "./film/film-geometry";
 import { cn } from "@/lib/utils";
 
 // AA-safe accent text/icon tints (small meta kickers need ≥4.5:1 on ink).
@@ -576,7 +576,7 @@ function ContextualFilm({
   const { present, driveTo, setInteraction } = useFilm();
   // The card footprint — matches the stage's uniform-scaled corner film so the
   // chrome overlays it exactly. Recomputed on mount + resize.
-  const [card, setCard] = useState({ width: 200, margin: 24, ratio: 16 / 10 });
+  const [card, setCard] = useState({ width: 200, margin: 24, ratio: 16 / 10, top: 96 });
 
   // Present the product's contextual clip. videoSrc falls back to the maker's
   // clip so the SAME video node keeps playing across the world→product seam.
@@ -606,7 +606,8 @@ function ContextualFilm({
       const vh = window.innerHeight;
       const width = mobile ? 148 : 208;
       const margin = mobile ? 16 : 24;
-      setCard({ width, margin, ratio: dockAspect(vw, vh) });
+      const top = dockTop(margin);
+      setCard({ width, margin, ratio: dockAspect(vw, vh), top });
       if (open) {
         driveTo(cornerTarget(vw, vh, { width, margin, radius: 18 }), {
           reduce: prefersReduced,
@@ -643,8 +644,8 @@ function ContextualFilm({
         <div
           className="pointer-events-none fixed z-[41]"
           style={{
-            right: card.margin,
-            bottom: card.margin,
+            left: card.margin,
+            top: card.top,
             width: card.width,
             aspectRatio: String(card.ratio),
           }}
@@ -690,13 +691,12 @@ function ContextualFilm({
       )}
 
       {/* Collapsed cue — the film fades to a pill but keeps playing underneath.
-          On phones the labelled pill is wide enough that, parked bottom-right, it
-          clips the tail of the (left-aligned) product H1; so <sm it shrinks to a
-          compact round play control that clears heading tails, and the labelled
-          pill returns at sm+ (desktop geometry unchanged). The accessible name is
-          identical at every width — the "Now playing" label lives in aria-label. */}
+          Parked TOP-LEFT (below the masthead via --header-h), following the dock.
+          <sm it shrinks to a compact round play control; the labelled pill returns
+          at sm+. The accessible name is identical at every width — the "Now
+          playing" label lives in aria-label. */}
       {!open && (
-        <div className="fixed bottom-4 right-4 z-[41] sm:bottom-6 sm:right-6">
+        <div className="fixed left-4 top-[calc(var(--header-h)+3.25rem)] z-[41] sm:left-6 sm:top-[calc(var(--header-h)+3.5rem)]">
           <motion.button
             type="button"
             onClick={() => onOpenChange(true)}

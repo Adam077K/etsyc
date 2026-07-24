@@ -53,6 +53,10 @@ export interface FilmIntent {
   /** show the stage's own chip (legible on large films; hidden on the tiny PiP,
       where the route renders its own contextual label). Defaults to true. */
   stageChip?: boolean;
+  /** which corner the film docks to — drives the FilmStage crop direction so a
+      bottom-right dock crops its surplus off the TOP (flush at the bottom) while
+      the top-left store dock crops off the BOTTOM. Defaults to "top-left". */
+  dockCorner?: "top-left" | "bottom-right";
 }
 
 /** The shared transform of the persistent film — all transform/opacity. */
@@ -157,7 +161,8 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
         prev.poster === next.poster &&
         prev.clipLabel === next.clipLabel &&
         prev.clipMeta === next.clipMeta &&
-        prev.chip === next.chip
+        prev.chip === next.chip &&
+        prev.dockCorner === next.dockCorner
       ) {
         return prev;
       }

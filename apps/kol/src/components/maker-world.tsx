@@ -26,7 +26,7 @@ import { Magnetic } from "./magnetic";
 import { MakerFilm } from "./maker-film";
 import { cn } from "@/lib/utils";
 import { useFilm } from "./film/film-context";
-import { HERO_TARGET, applyDockFrame, dockClip } from "./film/film-geometry";
+import { HERO_TARGET, applyDockFrame, dockClip, dockTarget } from "./film/film-geometry";
 
 const ACCENT_BG: Record<Ground, string> = {
   clay: "bg-clay",
@@ -301,10 +301,10 @@ function WorldFilm({
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (consumeHandoff()) {
       // The feed/cover is animating the entrance — just lock the hero origin.
-      snapTo({ originX: 100, originY: 100 });
+      snapTo({ originX: 0, originY: 0 });
     } else {
       // Direct nav or back-nav from a product: settle to the full-bleed hero.
-      snapTo({ originX: 100, originY: 100 });
+      snapTo({ originX: 0, originY: 0 });
       driveTo({ ...HERO_TARGET }, { reduce: prefersReduced, duration: 0.55 });
     }
     return () => setInteraction(null);
@@ -348,27 +348,22 @@ function WorldFilm({
       // the hero, then SNAP it to the docked corner past the hero so it never
       // covers the world content the buyer needs to read (no per-frame move).
       if (v > 0.6) {
-        snapTo({
-          scale: docked,
-          x: -24,
-          y: -24,
-          radius: 64,
-          opacity: 1,
-          originX: 100,
-          originY: 100,
-          shadow: 1,
-          clip: dockClip(window.innerWidth, window.innerHeight),
-        });
+        snapTo(dockTarget(docked, dockClip(window.innerWidth, window.innerHeight)));
       } else {
         snapTo({ ...HERO_TARGET });
       }
       return;
     }
     if (!enteredRef.current) return;
-    // Shared hero→dock settle (lands by 72%, insets 24px, linear shadow); the
-    // clip crops the dock to a landscape card on portrait phones so it never
-    // buries the world copy it scrolls past.
-    applyDockFrame(m, v, docked, dockClip(window.innerWidth, window.innerHeight));
+    // Shared hero→dock settle (lands by 72%, insets top-left below the masthead,
+    // linear shadow); the clip crops the dock to a landscape card on portrait
+    // phones so it never buries the world copy it scrolls past.
+    applyDockFrame(
+      m,
+      v,
+      docked,
+      dockClip(window.innerWidth, window.innerHeight),
+    );
   });
 
   return null;
@@ -539,8 +534,11 @@ function GalleryWall({ world, reduce }: { world: World; reduce: boolean }) {
 }
 
 function ProcessSection({ world, reduce }: { world: World; reduce: boolean }) {
+  // At xl the top-left dock (~400px) is pinned over this whole section as it
+  // scrolls; a left safe-lane (xl:pl) keeps its header + process cards clear of
+  // the dock's x-band. Below xl the dock is smaller / cropped and clears on its own.
   return (
-    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32">
+    <section className="mx-auto max-w-issue px-5 pb-24 sm:px-8 sm:pb-32 xl:pl-[27rem]">
       <Reveal reduce={reduce}>
         <p className="meta mb-3 text-bone-dim">How it&#39;s made</p>
         <h2
