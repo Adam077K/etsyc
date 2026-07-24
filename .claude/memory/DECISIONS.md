@@ -4,6 +4,14 @@
 > Empty template. Every C-suite agent appends one entry per significant decision
 > using the format below. Workers do not write here.
 
+## 2026-07-23 — Ground-aware focus ring: three-tone (ink → marigold → ink), not a single marigold outline
+
+**Decision:** The global `:focus-visible` indicator (globals.css) is a **three-concentric-tone** box-shadow — ink (2px) → marigold-bright `#FF7A3C` (2px) → ink (2px) — with a transparent `outline` retained as the forced-colors-mode fallback. Replaces the prior single `2px #FF7A3C` outline.
+
+**Why:** A lone marigold ring cleared 3:1 on the ink world (6.90:1) but measured only **2.09:1 on bone** grounds/controls — under the WCAG 2.4.11/1.4.11 non-text floor of 3:1 (the wave-4 a11y carry item). A *single* colour physically cannot clear 3:1 against both near-black ink (`#1C1613`) and near-white bone (`#EFE6D6`), so the indicator is two-tone-plus: whichever ground the ring edge meets, an **ink** layer carries the contrast (14.45:1 vs bone; harmlessly invisible on ink) while the **marigold** band stays the recognisable KOL focus colour (6.90:1 vs its ink neighbours). Correct on ink grounds, bone spreads, and around bone-filled controls alike — one app-wide rule, no per-surface scoping. Ratios script-verified (WCAG relative-luminance), per the scripted-contrast team standard — not eyeballed.
+
+**Reversibility:** trivially reversible (one CSS block). **Trade-off:** box-shadow rings can clip under an `overflow-hidden` ancestor; the always-present marigold band and the dominant ink world keep the indicator legible in practice. **Owner:** design-lead · **Affects:** every focusable surface app-wide · **Risk:** lite.
+
 ## 2026-07-22 — Gate-2 design rulings: optical properties are not numbers, and an anti-grid rule is not an anti-cycle rule
 
 **Context:** The first design-critic pass measured the built product at pixel level across ten captures. It confirmed the hardest Wave-3 call (light display weight over film) and found three places the direction itself — authored without ever running `/preview` — was wrong.

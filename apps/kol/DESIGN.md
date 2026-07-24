@@ -55,6 +55,16 @@ Asymmetric, mixed-size, breathing. A 12-col desktop field where feed items span 
 ## Media
 Stock only this pass: film via `<video muted loop playsInline>` with an Unsplash poster still (graceful fallback if a clip fails); photos via `next/image` from Unsplash/Pexels. Real people making real things — warm, editorial, no stocky-corporate clichés. All maker identities are synthetic demo data, labelled in fixtures.
 
+## Seller workspace — the calm "operate" surface
+
+Per concept-lock D15 the seller workspace is KOL's *fixed* chrome — a quiet productivity tool, not the warm/vivid buyer feed. Two treatments diverge deliberately from the buyer surfaces; both are intentional, not drift.
+
+- **Active chip variant — bone fill, not marigold.** Buyer filter/value chips are marigold-filled (`border-marigold bg-marigold text-ink`); the through-signal belongs to the vivid feed. In the seller workspace (sell-clips, sell-messages filter bars) the active chip is **bone-filled** (`bg-bone text-ink`). Marigold in the workspace is reserved for the maker's *primary actions* (Publish, "Answer on film"); a filter-state that also went marigold would compete with those CTAs and flatten the signal hierarchy. A calmer bone active-fill reads as tool-state, not call-to-action — the right register for "operate". (Rationale + rejected alternative in DECISIONS, 2026-07-23 active-chip entry.)
+
+## Focus — ground-aware, three-tone
+
+Keyboard focus is a first-class state (globals.css `:focus-visible`). Because a single ring colour cannot clear the WCAG **3:1 non-text floor** against both near-black ink and near-white bone, the indicator is three concentric tones — **ink → marigold → ink**. Whichever ground the ring's edge meets, an ink layer carries the contrast (14.45:1 vs bone) while the marigold band stays the recognisable KOL focus colour (6.90:1 vs its ink neighbours). This holds on ink grounds, on bone spreads, and around bone-filled controls alike; a lone marigold ring measured only 2.09:1 on bone. A transparent `outline` remains as the forced-colors-mode fallback. Ratios are script-verified, never eyeballed.
+
 ## Icons
 Phosphor (`@phosphor-icons/react`) only, `weight="regular"` default / `"fill"` for active states. No other icon set.
 
