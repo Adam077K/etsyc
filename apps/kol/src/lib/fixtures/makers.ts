@@ -2,8 +2,10 @@
  * Mock data for the Discovery Feed. SCREENS-ONLY pass — every maker below is
  * SYNTHETIC demo material (names, studios, blurbs authored for the mock), paired
  * with real Unsplash/Pexels stock of real people making real things (see
- * public/media/CREDITS.md). Nothing here is a real business; prices, review
+ * apps/kol/CREDITS.md). Nothing here is a real business; prices, review
  * counts and sales figures are deliberately absent (never fabricated).
+ * Exception: Two Dots is a REAL business (real Founder-provided assets, synthetic
+ * commerce data) — see apps/kol/CREDITS.md.
  */
 
 export type CraftId =
@@ -16,7 +18,8 @@ export type CraftId =
   | "print"
   | "leather"
   | "metal"
-  | "glass";
+  | "glass"
+  | "costume";
 
 export interface Craft {
   id: CraftId;
@@ -57,6 +60,14 @@ export interface Maker {
    * public/media/video/README.md for the filename → surface map.
    */
   filmSrc?: string;
+  /**
+   * Playhead (seconds) to seed the hero clip on its first/cold mount, so a
+   * portrait clip whose action sits low in frame doesn't open on the empty
+   * centre band a full-bleed landscape hero crops to. Only applied once on the
+   * persistent film node's first mount (via <MakerFilm initialTime>), so it
+   * never fights the feed→world currentTime carry. Omit to open at 0:00.
+   */
+  filmSeed?: number;
 }
 
 export const CRAFTS: Craft[] = [
@@ -70,6 +81,7 @@ export const CRAFTS: Craft[] = [
   { id: "leather", label: "Leather" },
   { id: "metal", label: "Metal" },
   { id: "glass", label: "Glass" },
+  { id: "costume", label: "Costumes" },
 ];
 
 /** The hero — the issue's cover maker, on film. */
@@ -312,6 +324,33 @@ export const MAKERS: Maker[] = [
     tone: "light",
     values: ["Small-batch"],
     ground: "bone",
+  },
+  {
+    // Two Dots — the FIRST real-maker world (real video + photography, Founder-
+    // provided). Sharon's children's-costume studio. Name/place are placeholders
+    // pending Founder confirmation (real business; do not fabricate specifics).
+    id: "two-dots",
+    name: "Sharon",
+    studio: "Two Dots",
+    place: "Israel",
+    craft: "costume",
+    discipline: "Hand-sewn children's costumes",
+    blurb: "A costume isn't clothes — it's permission. For one afternoon they get to be the whole story.",
+    image: "/media/twodots/hero-poster.jpg",
+    kind: "film",
+    duration: "0:45",
+    // Full-bleed hero footprint — she is the issue's FEATURED maker (pinned to
+    // the front of the feed in the unfiltered view; see Feed), so the demo opens
+    // the issue on a big film of her, not a small square. A hero span (col-span-12)
+    // also packs cleanly as a lead tile: no orphaned gutter beside a 7-col tile.
+    span: "hero",
+    tone: "light",
+    values: ["Hand-sewn", "Parent & child"],
+    filmSrc: "/media/video/two-dots.mp4",
+    // Portrait clip; the hands-on-felt proof moment sits low in frame. Seed to
+    // 0:06 so the full-bleed hero opens on a hand smoothing felt, not the empty
+    // white centre band the crop otherwise lands on at 0:00.
+    filmSeed: 6,
   },
 ];
 

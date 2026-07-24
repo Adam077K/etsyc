@@ -531,7 +531,7 @@ function Gallery({
               aria-label={`View image ${i + 1} of ${name}`}
               aria-current={i === active}
               className={cn(
-                "press relative aspect-square overflow-hidden rounded-2xl ring-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+                "press relative aspect-square min-h-[44px] min-w-[44px] overflow-hidden rounded-2xl ring-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
                 i === active
                   ? "ring-2 ring-marigold"
                   : "ring-line opacity-70 hover:opacity-100",

@@ -1,7 +1,7 @@
 /**
  * Per-maker WORLD data for the maker-world route (/m/[slug]).
  * SCREENS-ONLY, all synthetic demo content paired with verified stock (see
- * public/media/CREDITS.md). Prices are demo figures for the mock storefront,
+ * apps/kol/CREDITS.md). Prices are demo figures for the mock storefront,
  * not real commercial claims.
  *
  * Per concept-lock D15 + DESIGN.md: KOL's own UI keeps the fixed system. Maker
@@ -32,6 +32,26 @@ export interface WorldProcessStep {
   image: string;
 }
 
+/**
+ * A single tile in a world's optional "wall" — a dense, editorial masonry of the
+ * maker's own room (images + woven films). OPTIONAL per world: only a maker with
+ * a deep real-media library (currently Two Dots) fills one, which is exactly why
+ * her world reads as the most obviously-hers in the build. A tile is a film when
+ * `filmSrc` is set (played muted/looped via <MakerFilm>), otherwise a still.
+ * `ratio` is the tile's own aspect (Tailwind aspect-* value) so the wall packs
+ * with real editorial variety, never a uniform grid.
+ */
+export interface WorldWallItem {
+  src: string;
+  /** optional real clip; when set the tile is a muted, looped film (src = poster). */
+  filmSrc?: string;
+  alt: string;
+  /** the tile's aspect ratio — drives the masonry rhythm. */
+  ratio: "square" | "portrait" | "tall" | "landscape" | "video";
+  /** optional overlaid label, in the maker's register. */
+  caption?: string;
+}
+
 export interface MakerWorld {
   /** maker id (also the route slug) */
   slug: string;
@@ -58,6 +78,11 @@ export interface MakerWorld {
   /** section headers authored per-maker, in their own voice (no flattening) */
   processSectionHeader: string;
   process: WorldProcessStep[];
+  /** OPTIONAL dense gallery wall — the maker's whole room, images + woven films.
+      Present only for makers with a deep real-media library (Two Dots). */
+  wallSectionHeader?: string;
+  wallSectionKicker?: string;
+  wall?: WorldWallItem[];
   shopSectionHeader: string;
   products: WorldProduct[];
   studioImage: string;
@@ -334,6 +359,142 @@ export const WORLDS: Record<string, MakerWorld> = {
     studioImage: "/media/prints-wall.jpg",
     studioCaption: "The drying wall — Euljiro, Seoul",
     voice: "A print you can feel with your eyes shut is worth ten you scroll past. — Juno",
+  },
+  "two-dots": {
+    slug: "two-dots",
+    // Clay — stage-red / theatrical curtain register; the truest fit for a
+    // dress-up costume world and keeps cross-world differentiation load-bearing
+    // (plum stays sole to Grain & Groove). CEO-approved reassignment.
+    accent: "clay",
+    tagline: "Pick anyone you like. I'll sew you into them by the weekend.",
+    story: [
+      "I started making costumes because my own kids kept asking to be things the shops didn't sell. A specific dragon. A very specific swan. So I learned to sew the exact one in their head, not the nearest one on a shelf.",
+      "Everything here is cut and stitched by hand, in a small room that is always covered in felt. Parents come and make alongside me — that's half the point. The child leaves wearing something, and the grown-up leaves having made it.",
+      "I care most about the five seconds after they put it on, when they stop being shy and start being the thing. You can't buy that off a rack. You have to sew it in.",
+    ],
+    // Governance fallback applied pre-deploy: workshop.jpg (background minor in
+    // profile) is swapped out of the deploy path → the faceless quilt-detail still
+    // (fabric close-up suits the story beat). One-line revert to workshop.jpg if
+    // the Founder later approves the original.
+    storyImage: "/media/twodots/quilt.jpg",
+    storyImageAlt: "A patchwork-quilt detail — eyelet lace, tartan and floral cotton patches with a dusty-rose binding, from the Two Dots studio",
+    processSectionHeader: "Made the slow way, on purpose.",
+    process: [
+      {
+        id: "gather",
+        label: "01",
+        title: "A pile of nothing",
+        body: "Every costume starts as offcuts, felt, and a child's very firm opinion about exactly which animal they are this month. No pattern survives first contact with a four-year-old.",
+        image: "/media/twodots/materials.jpg",
+      },
+      {
+        id: "sew",
+        label: "02",
+        title: "Cut and sewn here, by hand",
+        body: "It's all made in the room, often with the parent at the next machine. Real seams, real hems — built to be run in, sat in, and slept in if it comes to that.",
+        // Governance fallback: workshop.jpg swapped out. Critic mapped this to
+        // materials.jpg, but step 01 already uses materials.jpg — side by side the
+        // two cards render an identical photo (reads as a bug, not before/during
+        // continuity). Held at felt.jpg (CREDITS-named alt, faceless, fits "cut and
+        // sewn here") to keep the process trio distinct; awaiting critic confirm.
+        image: "/media/twodots/felt.jpg",
+      },
+      {
+        id: "become",
+        label: "03",
+        title: "Then they disappear into it",
+        body: "The last step isn't mine. It's the moment they turn around in the mirror and the shy kid is gone and the dragon is standing there instead.",
+        image: "/media/twodots/butterfly-back.jpg",
+      },
+    ],
+    wallSectionKicker: "The whole room",
+    wallSectionHeader: "This is the studio — pinned to the wall.",
+    // Two Dots' real-media library is deep enough to fill a wall: her hero clip,
+    // the wings-that-spin film, and the felt, materials, quilting and printed
+    // pieces around them. Every asset is Founder-provided and CREDITS-cleared;
+    // no identifiable child face appears (the flagged workshop.jpg is kept OUT of
+    // the wall on purpose). This is what makes her world unmistakably hers.
+    wall: [
+      {
+        src: "/media/twodots/hero-poster.jpg",
+        filmSrc: "/media/video/two-dots.mp4",
+        alt: "Sharon's hands making a small felt craft, filmed top-down in the studio",
+        ratio: "video",
+        caption: "In the studio, on film",
+      },
+      {
+        src: "/media/twodots/felt.jpg",
+        alt: "The felt drawer — butterfly, cactus, panda and other felt characters laid out",
+        ratio: "portrait",
+        caption: "The felt drawer",
+      },
+      {
+        src: "/media/twodots/materials.jpg",
+        alt: "Beads, denim, fabric, scissors and yarn laid out ready to cut",
+        ratio: "landscape",
+      },
+      {
+        src: "/media/twodots/butterfly-back.jpg",
+        filmSrc: "/media/video/product-butterfly-wings.mp4",
+        alt: "A child seen from behind, curly hair showing, spinning to lift handmade felt butterfly wings",
+        ratio: "tall",
+        caption: "Wings that spin",
+      },
+      {
+        src: "/media/twodots/quilt.jpg",
+        alt: "Patchwork-quilt detail — eyelet lace, tartan and floral cotton with a dusty-rose binding",
+        ratio: "square",
+      },
+      {
+        src: "/media/twodots/tote.jpg",
+        alt: "A hand-printed cat-face cotton drawstring bag",
+        ratio: "portrait",
+        caption: "Studio-printed by the kids",
+      },
+      {
+        src: "/media/twodots/devil-back.jpg",
+        alt: "The little-devil costume seen from behind — felt wings and a tutu",
+        ratio: "tall",
+      },
+    ],
+    shopSectionHeader: "A few to become.",
+    products: [
+      {
+        id: "butterfly-wings",
+        name: "Butterfly Wings",
+        price: "£58",
+        blurb: "Felt wings on a hidden harness, cut so they lift when she spins. Made to be spun in.",
+        image: "/media/twodots/butterfly-back.jpg",
+        note: "Made to measure",
+      },
+      {
+        id: "little-devil",
+        name: "The Little Devil",
+        price: "£64",
+        blurb: "Soft felt horns, a tulle skirt with real body, and a trident that's all foam — mischief, no sharp edges.",
+        image: "/media/twodots/devil-back.jpg",
+        note: "Made to measure",
+      },
+      {
+        id: "cat-tote",
+        name: "The Cat Tote",
+        price: "£18",
+        blurb: "A cotton drawstring bag, every little cat face hand-printed by a kid in the studio. No two the same.",
+        image: "/media/twodots/tote.jpg",
+        note: "Studio-printed",
+      },
+      {
+        id: "costume-workshop",
+        name: "Parent & Child Workshop",
+        price: "£45",
+        blurb: "Two hours, two people, one costume you make together and take home the same day.",
+        image: "/media/twodots/materials.jpg",
+        note: "Per pair · booked by date",
+      },
+    ],
+    studioImage: "/media/twodots/felt.jpg",
+    studioCaption: "The felt drawer — Two Dots studio",
+    voice: "The shops sell what a child should want. I make the one they already dreamed up. — Sharon",
   },
 };
 
