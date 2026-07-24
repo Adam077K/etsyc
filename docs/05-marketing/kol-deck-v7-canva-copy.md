@@ -172,15 +172,16 @@ Story and shopping have never lived in the same place — until KOL.
 ---
 
 ## 17 · The opportunity
-**ON SLIDE**
+**ON SLIDE** *(3 anchors — market → lever → our money)*
 The sales a story unlocks.
-$11.9B → Etsy handmade GMS *(sourced, FY2025)*
-~$6B → story-rich categories *(our est.)*
-+15% → sales lift from a story-led storefront *(our est.)*
-~$180M → new GMS/yr at 20% adoption
-**KOL keeps ~10% → ~$18M/yr → ~$90M at full adoption.**
+$11.9B — Etsy handmade GMS *(sourced, FY2025)*
++15% — the lift a story adds to a maker's sales *(our est.)*
+~$18M → ~$90M/yr — KOL's 10% of the GMS we create
+*Full model in appendix. We only earn on sales we create for Etsy.*
 
-**NOTES:** Etsy's own $11.9 billion — half is story-rich. A 15% lift, one in five makers, is $180 million in new GMS. We keep ten percent of what we create: $18 million a year, scaling to ninety. We only make money by growing Etsy's.
+**NOTES:** Etsy's own $11.9 billion — say half is story-rich. Lift those makers just 15%, get one in five to adopt, and that's $180 million in new GMS. We keep ten percent of what we create — $18 million a year, scaling to ninety. We only make money by growing Etsy's.
+
+*(Appendix has the full 6-step chain: $11.9B → ~$6B SAM → +15% → ~$180M incremental → ~10% take → ~$18M → ~$90M.)*
 
 ---
 
