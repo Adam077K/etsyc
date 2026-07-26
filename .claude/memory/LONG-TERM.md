@@ -92,3 +92,7 @@
 - **06:30 FINAL: integration payload frozen — `feat/kol-integration` @ 6a13da4** (.worktrees/kol-integration, live :3030): the 14-car train assembled (one pre-agreed conflict resolved) + Founder live-walkthrough directives (vertical portrait store dock everywhere incl. product PiP chrome, face-band crops on endpoint docks, hero face reframe, blob divider off home+feed, mobile header clearances). Gate 16 delta pass: PASS-with-notes, all fixed. Build/e2e 5-5/detect green. MERGE PLAN: on Founder clearance → clearance commit on kol-sharon-journey → merge feat/kol-integration into main (--no-ff, one train merge) → Vercel. Audio attestation still gated in CREDITS (strip AAC if child audible).
 - **13:59 SHIPPED: Founder promoted PROD — https://kol-demo.vercel.app = main @ 9dfd55d** (42/42 pages, full train + Founder clearance). Pitch 14:15. Demo path: /etsy → KOL tab → sound chip → other tile → Sharon cover → world → Butterfly Wings → checkout → thank-you → /sell.
 - **16:55: Founder re-promoted PROD — kol-demo.vercel.app = main @ 22e0551** (face-forward cover hotfix live: MakerFilm focal+coverScale, Sharon's face on hero/tile/overlay at all widths).
+
+## Day 11 (Jul 25) — CLOSED OUT post-pitch (ceo-6)
+- Pitch delivered Jul 24. PROD = kol-demo.vercel.app @ 22e0551 (public). All train branches + hotfix merged; nothing product-side unmerged.
+- **Next-session entry point: docs/08-agents_work/handoffs/2026-07-25-KOL-POST-PITCH-HANDOFF.md** (state, governance opens, backlog, playbook).
