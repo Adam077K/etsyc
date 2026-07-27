@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// .claude/hooks/schema-lint.js — {{PROJECT_NAME}} agent file schema lint
+// .claude/hooks/schema-lint.js — agent file schema lint
 //
 // Validates .claude/agents/*.md (top-level only — NOT war-room/ which uses
 // the bespoke Routine schema acceptable per 07b §4) against the canonical

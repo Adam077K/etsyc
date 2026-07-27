@@ -5,7 +5,7 @@
 
 ## The Team
 
-{{PROJECT_NAME}} runs as an autonomous C-suite company. **Every task starts at the CEO.**
+Etsyc runs as an autonomous C-suite company. **Every task starts at the CEO.**
 
 ```
 Layer 1 — Entry

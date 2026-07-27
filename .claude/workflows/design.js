@@ -1,6 +1,6 @@
 export const meta = {
   name: 'design',
-  description: '{{PROJECT_NAME}} T5 design workflow — generates N independent design variations from different angles, scores each with parallel design-critic judges against the brand bar, and synthesizes a winning direction (grafting the best ideas from runners-up). Optimizes for craft/quality, not speed.',
+  description: 'T5 design workflow — generates N independent design variations from different angles, scores each with parallel design-critic judges against the brand bar, and synthesizes a winning direction (grafting the best ideas from runners-up). Optimizes for craft/quality, not speed.',
   phases: [
     { title: 'Explore', detail: 'N independent design directions, distinct angles' },
     { title: 'Critique', detail: 'design-critic scores each variation' },
@@ -25,7 +25,7 @@ const ANGLES = [
   'editorial / typographic-led — let type hierarchy and whitespace carry the design',
   'data-dense / dashboard-led — maximize information clarity at a glance',
   'guided / progressive-disclosure — minimize cognitive load, reveal complexity on demand',
-  'bold / brand-forward — lean hardest into the {{PROJECT_NAME}} accent ({{ACCENT_COLOR}}) and motion budget',
+  'bold / brand-forward — lean hardest into the project brand accent and motion budget',
   'minimal / restraint-led — fewest elements that still does the job, Linear-grade calm',
   'conversion-led — optimize the primary action and trust signals above the fold',
 ]
@@ -48,7 +48,7 @@ const SCORE_SCHEMA = {
   additionalProperties: false,
   required: ['brand_fidelity', 'craft', 'usability', 'brief_fit', 'total', 'best_idea', 'verdict'],
   properties: {
-    brand_fidelity: { type: 'number', description: '0-10 vs {{PROJECT_NAME}} brand bar (color, type, spacing, motion)' },
+    brand_fidelity: { type: 'number', description: '0-10 vs the project brand bar (color, type, spacing, motion)' },
     craft: { type: 'number', description: '0-10 billion-dollar-feel polish' },
     usability: { type: 'number', description: '0-10 clarity + flow' },
     brief_fit: { type: 'number', description: '0-10 how well it answers the brief' },
@@ -77,7 +77,7 @@ function explorePrompt(angle) {
 Brief: ${BRIEF}
 ${REFERENCE ? 'Reference/inspiration: ' + REFERENCE : ''}
 Take THIS angle and commit to it fully: ${angle}.
-Honor the {{PROJECT_NAME}} brand bar (load the {{BRAND_SKILL}} skill): accent {{ACCENT_COLOR}}, Inter/InterDisplay + Fraunces + Geist Mono, intentional spacing, restrained motion, zero placeholder UI, all empty/loading/error/success states considered. MANDATORY: before designing, Read and apply these global craft skills — ~/.claude/skills/{ui-typography,baseline-ui,frontend-design,12-principles-of-animation,design-audit,web-design-guidelines}/SKILL.md (project brand tokens win on conflict). Return concept, layout, rationale, risks.`
+Honor the project's brand bar (load the project's brand-system skill): the project's locked accent color, Inter/InterDisplay + Fraunces + Geist Mono, intentional spacing, restrained motion, zero placeholder UI, all empty/loading/error/success states considered. MANDATORY: before designing, Read and apply these global craft skills — ~/.claude/skills/{ui-typography,baseline-ui,frontend-design,12-principles-of-animation,design-audit,web-design-guidelines}/SKILL.md (project brand tokens win on conflict). Return concept, layout, rationale, risks.`
 }
 
 // ── Phase 1+2: explore variations → critique each (pipelined) ──
@@ -87,7 +87,7 @@ const judged = await pipeline(
   angle => agent(explorePrompt(angle), { label: `explore:${angle.split(' ')[0]}`, phase: 'Explore', agentType: 'product-designer', model: 'sonnet', schema: VARIATION_SCHEMA }).catch(() => null),
   (variation) => variation
     ? agent(
-        `Score this {{PROJECT_NAME}} design variation against the brand quality bar and the brief.
+        `Score this design variation against the project's brand quality bar and the brief.
 Brief: ${BRIEF}
 Variation: ${JSON.stringify(variation, null, 2)}
 Score each axis 0-10 (brand_fidelity, craft, usability, brief_fit), give total, name the single best idea worth keeping even if this loses, and a one-line verdict. Be a demanding critic — billion-dollar bar.`,
@@ -108,7 +108,7 @@ if (!ranked.length) {
 // ── Phase 3: synthesize winner + graft best ideas ──
 phase('Synthesize')
 const synthesis = await agent(
-  `Synthesize the final {{PROJECT_NAME}} design direction for: ${TARGET}.
+  `Synthesize the final design direction for: ${TARGET}.
 Brief: ${BRIEF}
 Ranked variations (best first):
 ${JSON.stringify(ranked.map(r => ({ angle: r.variation.angle, concept: r.variation.concept, total: r.score.total, best_idea: r.score.best_idea })), null, 2)}

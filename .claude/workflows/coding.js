@@ -1,6 +1,6 @@
 export const meta = {
   name: 'coding',
-  description: '{{PROJECT_NAME}} T5 complex-coding workflow — implements independent slices in parallel isolated worktrees, then chains the combined diff into the binding qa.js gate. Returns per-slice results + the QA verdict. Does NOT merge — merge is Adam-gated after a qa.js PASS.',
+  description: 'T5 complex-coding workflow — implements independent slices in parallel isolated worktrees, then chains the combined diff into the binding qa.js gate. Returns per-slice results + the QA verdict. Does NOT merge — merge is Adam-gated after a qa.js PASS.',
   phases: [
     { title: 'Build', detail: 'one engineer per slice, isolated worktrees' },
     { title: 'QA', detail: 'chain combined diff into the binding qa.js gate', model: 'opus' },
@@ -38,7 +38,7 @@ const SLICE_SCHEMA = {
 }
 
 function buildPrompt(s) {
-  return `You are implementing ONE focused {{PROJECT_NAME}} coding slice in an isolated git worktree branched from origin/main.
+  return `You are implementing ONE focused coding slice in an isolated git worktree branched from origin/main.
 Slice [${s.id}] — ${s.brief}
 Files in scope: ${(s.files || []).join(', ') || '(determine from the brief — stay narrow)'}.
 Rules: TypeScript strict, Zod validation on all inputs, no placeholder UI, all four UI states, atomic conventional commits, never touch files outside scope. If a real architectural ambiguity blocks you, return status:BLOCKED with the specific question rather than guessing.

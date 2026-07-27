@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PreToolUse safety gate — {{PROJECT_NAME}} Phase 6 (2026-05-16)
+# PreToolUse safety gate — Phase 6 (2026-05-16)
 #
 # PURPOSE: Block genuinely dangerous commands and file edits before they run.
 #          This hook fires on EVERY tool call, so it MUST be fast (<200ms).
@@ -114,7 +114,7 @@ except Exception:
 
     # ── BLOCK: pip install ───────────────────────────────────────────────────
     if printf '%s' "$command" | grep -qE 'pip\s+install|pip3\s+install'; then
-      block "pip install is blocked. Python deps are not part of the {{PROJECT_NAME}} stack. Confirm with the CEO if this is intentional."
+      block "pip install is blocked. Python deps are not part of the project's stack. Confirm with the CEO if this is intentional."
     fi
 
     # ── BLOCK: wget ──────────────────────────────────────────────────────────

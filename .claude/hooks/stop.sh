@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop hook — {{PROJECT_NAME}} Phase 6 (2026-05-16)
+# Stop hook — Phase 6 (2026-05-16)
 #
 # PURPOSE: Validate session hygiene at close. SOFT-WARN ONLY — never blocks.
 #          Errors surface on stderr so Claude/agent sees them on next interaction.

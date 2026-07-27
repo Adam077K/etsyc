@@ -1,6 +1,6 @@
-# design-screen — {{PROJECT_NAME}} Design Operating System Workflow
+# design-screen — Design Operating System Workflow
 
-The ultracode orchestration script for the {{PROJECT_NAME}} design pipeline. One screen in, one
+The ultracode orchestration script for the project's design pipeline. One screen in, one
 craft-validated screen out, graded against the founder's reference folder.
 
 ## What it does
@@ -13,7 +13,7 @@ deterministic `.claude/workflows` Workflow. Given a screen name, it:
    **vibe, not blueprint** — and design-lead distills the **DIRECTION** here (the one
    memorable element, the primary layout move, the motion-budget tier). The DIRECTION
    stage of the pipeline runs inside this first phase, feeding the build.
-2. Runs the dedicated front-end **product-designer** to BUILD the screen in {{PROJECT_NAME}}'s own
+2. Runs the dedicated front-end **product-designer** to BUILD the screen in the project's own
    design language.
 3. Runs a **design-critic <-> design-polisher** loop: the critic grades CRAFT-PARITY &
    FEELING vs the references (never 1:1 copy-fidelity); the polisher closes the named
@@ -62,10 +62,10 @@ steering. Both are documented in the design OS spec.
 export const meta = {
   name: "design-screen",
   description:
-    "{{PROJECT_NAME}} design pipeline as a deterministic Workflow: load the screen's reference folder + global product-feel, run the product-designer build, then a design-critic <-> design-polisher loop until craft-parity with the references (expressed in {{PROJECT_NAME}}'s own language), and return the validated screen + screenshots. References are vibe, not blueprint. Three founder checkpoints (lock refs, 50% first-paint, judge final) are surfaced as stop points.",
+    "The project's design pipeline as a deterministic Workflow: load the screen's reference folder + global product-feel, run the product-designer build, then a design-critic <-> design-polisher loop until craft-parity with the references (expressed in the project's own language), and return the validated screen + screenshots. References are vibe, not blueprint. Three founder checkpoints (lock refs, 50% first-paint, judge final) are surfaced as stop points.",
   phases: [
     { title: "Reference", detail: "Load the screen folder + _product-feel; lock the contract; design-lead distills the DIRECTION (one memorable move, layout, motion budget)." },
-    { title: "Build", detail: "product-designer builds the screen in {{PROJECT_NAME}}'s own design language." },
+    { title: "Build", detail: "product-designer builds the screen in the project's own design language." },
     { title: "First paint", detail: "Founder checkpoint #2 — surface the ~50% first-paint screenshots." },
     { title: "Validate loop", detail: "design-critic grades craft-parity; design-polisher closes the gaps; repeat to PASS or cap." },
     { title: "Judge", detail: "Founder checkpoint #3 — return the validated screen + screenshots for final judgment." }
@@ -95,7 +95,7 @@ phase("Reference");
 log(`Loading reference contract for "${screen}".`);
 
 const reference = await agent(
-  `You are the design-lead assembling the reference contract for the {{PROJECT_NAME}} screen "${screen}".
+  `You are the design-lead assembling the reference contract for the project's "${screen}" screen.
 
 PRINCIPLE — references are VIBE, not BLUEPRINT. You catalogue the FEELING, craft level, and
 aesthetic confidence to transfer. Cloning layouts 1:1 is forbidden downstream.
@@ -114,8 +114,8 @@ Return JSON ONLY:
   "screen": "${screen}",
   "product_feel_files": ["docs/design/references/_product-feel/..."],
   "screen_ref_files": ["docs/design/references/${screen}/..."],
-  "feeling_brief": "2-4 sentences: the richness/confidence/polish to hit, expressed for {{PROJECT_NAME}}",
-  "direction": "the DIRECTION for the build: the one memorable element, the primary layout move, and the motion-budget tier (1/2/3) — expressed for {{PROJECT_NAME}}",
+  "feeling_brief": "2-4 sentences: the richness/confidence/polish to hit, expressed for the project",
+  "direction": "the DIRECTION for the build: the one memorable element, the primary layout move, and the motion-budget tier (1/2/3) — expressed for the project",
   "what_we_steal": ["the move/feeling, never the layout", "..."],
   "missing": ["only if not locked: what the founder must add"]
 }`,
@@ -158,20 +158,20 @@ if (!reference || !reference.locked) {
 log(`Reference contract LOCKED for "${screen}". Feeling: ${reference.feeling_brief}`);
 
 // ---------------------------------------------------------------------------
-// PHASE 2 — BUILD  (product-designer builds in {{PROJECT_NAME}}'s own language)
+// PHASE 2 — BUILD  (product-designer builds in the project's own language)
 // ---------------------------------------------------------------------------
 phase("Build");
 log(`product-designer building "${screen}".`);
 
 const build = await agent(
-  `You are the dedicated front-end product-designer building the {{PROJECT_NAME}} "${screen}" screen.
+  `You are the dedicated front-end product-designer building the project's "${screen}" screen.
 
 LOAD BOTH reference sets BEFORE any code:
 - Global product-feel: read all of "${productFeelDir}".
 - This screen's contract: read all of "${screenRefDir}" including REFERENCE.md.
 
 VIBE, NOT CLONE: absorb the references' richness/confidence/polish, then SYNTHESIZE something
-ORIGINAL in {{PROJECT_NAME}}'s own design language. Inspired-by, never traced. Do NOT reproduce a
+ORIGINAL in the project's own design language. Inspired-by, never traced. Do NOT reproduce a
 reference layout 1:1.
 
 Feeling to hit: ${reference.feeling_brief}
@@ -179,9 +179,10 @@ Direction (the build target — one memorable element, primary layout move, moti
 What we steal: ${JSON.stringify(reference.what_we_steal || [])}
 
 Hard-wired craft (always on): design-taste-frontend, high-end-visual-design, emilkowal-animations,
-{{BRAND_SKILL}} (AUTHORITATIVE — Inter/InterDisplay/Fraunces/Geist Mono + {{ACCENT_COLOR}} palette,
-8pt grid, rounded-lg product utility), frontend-design, humanizer (all copy), full-output-enforcement
-(zero stubs/TODOs). Apply the generic skills' techniques with {{PROJECT_NAME}}'s locked brand tokens.
+the project's brand-system skill (AUTHORITATIVE — Inter/InterDisplay/Fraunces/Geist Mono + the
+project's locked accent-color palette, 8pt grid, rounded-lg product utility), frontend-design,
+humanizer (all copy), full-output-enforcement (zero stubs/TODOs). Apply the generic skills'
+techniques with the project's locked brand tokens.
 
 Build the real screen as shippable TSX + Tailwind with ALL FOUR states (loading skeletons, composed
 empty, inline error, success). Create a worktree, commit atomically, run pnpm typecheck + lint clean,
@@ -265,21 +266,21 @@ while (round < MAX_ROUNDS) {
   log(`Critic pass ${round}/${MAX_ROUNDS} for "${screen}".`);
 
   const critic = await agent(
-    `You are the design-critic grading the {{PROJECT_NAME}} "${screen}" build against its reference folder.
+    `You are the design-critic grading the project's "${screen}" build against its reference folder.
 
 GRADE CRAFT-PARITY & FEELING, NEVER COPY-FIDELITY. Forbidden question: "does this match reference X
 1:1?" Required question: "does this hit the same richness/confidence/polish as the references,
-expressed as {{PROJECT_NAME}}?" PASS = indistinguishable in CRAFT-LEVEL from the references, in {{PROJECT_NAME}}'s own
+expressed in the project's own voice?" PASS = indistinguishable in CRAFT-LEVEL from the references, in the project's own
 language — not a pixel match.
 
-Load ui-visual-validator + {{BRAND_SKILL}}. Read all of "${productFeelDir}" and all of
+Load ui-visual-validator + the project's brand-system skill. Read all of "${productFeelDir}" and all of
 "${screenRefDir}". Take Playwright screenshots of the BUILD (worktree ${worktree}, branch ${branch})
 at desktop/tablet/mobile and compare them SIDE-BY-SIDE against the reference images. Score the
 RICHNESS GAP: depth, micro-interactions, signature details, motion choreography, density of
-considered detail, brand-token discipline ({{ACCENT_COLOR}}, Inter/InterDisplay/Fraunces/Geist Mono, 8pt grid,
+considered detail, brand-token discipline (the project's locked accent color, Inter/InterDisplay/Fraunces/Geist Mono, 8pt grid,
 all four states).
 
-Return a SPECIFIC "here is what's missing to reach the references' craft bar, expressed as {{PROJECT_NAME}}"
+Return a SPECIFIC "here is what's missing to reach the references' craft bar, expressed for the project"
 list. Be measurable ("40px gap; system specifies 24px"), never vague. Include 1-3 things working well.
 
 Return JSON ONLY:
@@ -333,7 +334,7 @@ Return JSON ONLY:
   }
 
   if (critic && critic.verdict === "PASS") {
-    log(`Critic PASS on round ${round}. Craft-parity reached (in {{PROJECT_NAME}}'s language).`);
+    log(`Critic PASS on round ${round}. Craft-parity reached (in the project's own language).`);
     break;
   }
 
@@ -346,15 +347,15 @@ Return JSON ONLY:
   log(`design-polisher closing ${gaps.length} craft gap(s) for round ${round + 1}.`);
 
   const polish = await agent(
-    `You are the design-polisher. Your SOLE job is adding CRAFT DENSITY to the {{PROJECT_NAME}} "${screen}" build
+    `You are the design-polisher. Your SOLE job is adding CRAFT DENSITY to the project's "${screen}" build
 to close the gaps the critic named — against the reference folder, AFTER the functional build is done.
 
 Worktree ${worktree}, branch ${branch}. Read all of "${productFeelDir}" and all of "${screenRefDir}".
-Load {{BRAND_SKILL}} (AUTHORITATIVE tokens) + emilkowal-animations + design-taste-frontend +
+Load the project's brand-system skill (AUTHORITATIVE tokens) + emilkowal-animations + design-taste-frontend +
 high-end-visual-design + humanizer for any copy.
 
 Add depth, micro-interactions, signature details, and motion choreography (emilkowal: animate only
-transform/opacity, ease-out entering, 200-400ms UI, prefers-reduced-motion fallback). Stay in {{PROJECT_NAME}}'s
+transform/opacity, ease-out entering, 200-400ms UI, prefers-reduced-motion fallback). Stay in the project's
 own design language with locked brand tokens — do not drift toward generic Geist/Satoshi or off-palette
 colors. No new business logic (that is frontend-engineer's lane). Zero stubs/TODOs.
 
