@@ -140,7 +140,7 @@ BLOCKED triggers (never auto-fix):
 git add <specific-files>                                 # never git add . in worker context
 git commit -m "feat(<scope>): <description>"
 # Reference Linear ticket:
-# "feat(api): rate-limit free scans (ETSYC--104)"
+# "feat(api): rate-limit free scans (BEAMIX-104)"
 ```
 
 One logical change per commit. Split "fix + refactor + tests" into three commits. Never `--no-verify`.
@@ -182,10 +182,10 @@ Your return JSON is cto-daily-plan's contract. Include:
     "apps/web/src/lib/rate-limit/free-scans.ts"
   ],
   "commits": [
-    "feat(api): rate-limit free scans to 5 per IP per hour (ETSYC--104)"
+    "feat(api): rate-limit free scans to 5 per IP per hour (BEAMIX-104)"
   ],
   "summary": "Added IP-based rate limit (5/hour) to /api/scan/start using Supabase-backed counter table. Returns 429 with Retry-After header.",
-  "pr_url": "https://https://github.com/Adam077K/etsyc/pull/42",
+  "pr_url": "https://github.com/[org]/[repo]/pull/42",
   "qa_status": "PENDING",
   "decisions_made": [
     {

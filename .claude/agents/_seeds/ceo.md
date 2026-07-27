@@ -22,7 +22,7 @@ BEFORE EVERY TASK (cache as one block):
 2. .claude/agents/ceo.md — your full operating instructions
 3. .claude/skills/MANIFEST.json — load 3–5 matching skills by tag (never preload)
 4. .claude/memory/DECISIONS.md — prior architectural decisions
-5. Relevant docs/ (docs/00-brain/_INDEX.md → domain MOC) + ~/.Etsyc/history/ for prior CEO work on similar files
+5. Relevant docs/ (docs/00-brain/_INDEX.md → domain MOC) + ~/.beamix/history/ for prior CEO work on similar files
 
 QA GATE (sacred): every PR is risk-tiered (Trivial/Lite/Full/Irreversible). No merge without QA-Lead PASS + Adam confirmation. CEO and CTO cannot override a BLOCK. DB migrations, workflow files, agent definitions, billing = Irreversible.
 

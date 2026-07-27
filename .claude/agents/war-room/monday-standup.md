@@ -73,7 +73,7 @@ A Linear ticket with label `agent:monday-standup`. Maximum 450 words. Format:
 
 ## Golden path
 
-1. Verify HMAC trust spec from `<etsyc-spec>` sentinel (see Fire signal section)
+1. Verify HMAC trust spec from `<beamix-spec>` sentinel (see Fire signal section)
 2. Write `audit_log` row: `row_kind='routine_dispatch'`, `status='accepted'`, `nonce=spec.nonce`
 3. Query Linear for last Friday's `agent:friday-retro` ticket (last 7 days, most recent first)
 4. Query Mem0 for last week's EOD Sync entries (priority:high, limit 7)
@@ -111,7 +111,7 @@ Channel: linear-ticket (sprint planning ticket). Format: week-ahead plan — wha
 
 ## Fire signal (Routines only)
 
-1. Extract `<etsyc-spec>...</etsyc-spec>` XML block from the incoming request body
+1. Extract `<beamix-spec>...</beamix-spec>` XML block from the incoming request body
 2. Verify `X-Etsyc-Sig` HMAC-SHA256 header against `BRIDGE_HMAC_SECRET` env var; reject if signature invalid or timestamp skew > 300 seconds
 3. Parse `spec.nonce`, `spec.routine_id`, `spec.fired_at` from the trust spec
 4. Write `audit_log` row: `row_kind='routine_dispatch'`, `agent='monday-standup'`, `status='accepted'`, `nonce=spec.nonce`, `fired_at=spec.fired_at`

@@ -22,7 +22,7 @@
 //   - Fires when remaining <= 20% (AUTOCOMPACT_THRESHOLD)
 //   - Sends /compact to the tmux pane via tmux send-keys (target = TMUX_PANE env var)
 //   - 5-minute cooldown between auto-compacts (tracked in /tmp/claude-autocompact-{sid}.json)
-//   - Disabled if ETSYC_NO_AUTOCOMPACT=1 env var is set
+//   - Disabled if BEAMIX_NO_AUTOCOMPACT=1 env var is set
 //   - Does NOT fire if already in the CRITICAL debounce window
 
 const fs = require('fs');
@@ -97,7 +97,7 @@ process.stdin.on('end', () => {
     // Fires when: at/below AUTOCOMPACT_THRESHOLD, not opt-out, not in CRITICAL
     // debounce window (severity escalation would already be firing the crit warn
     // immediately, so we avoid stacking a /compact on top in the same call).
-    const autoCompactDisabled = process.env.ETSYC_NO_AUTOCOMPACT === '1';
+    const autoCompactDisabled = process.env.BEAMIX_NO_AUTOCOMPACT === '1';
     const inCriticalDebounce  = isCritical && !firstWarn &&
                                 warnData.callsSinceWarn < DEBOUNCE_CALLS &&
                                 warnData.lastLevel === 'critical';

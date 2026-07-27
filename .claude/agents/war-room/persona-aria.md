@@ -52,7 +52,7 @@ Total word count: 200-400 words. Tables count toward word limit.
 2. Identify the top vendor dependencies each position creates or assumes. Which vendors are new? Which existing vendors are being pushed to higher tiers?
 3. Use WebFetch to pull the live SLA and pricing page for any vendor where a tier change or new dependency is proposed. Cap at 3 calls.
 4. Build the vendor risk matrix. Flag any vendor with: no SLA guarantee, history of outages affecting SMB workloads, or pricing model that creates a cost cliff at projected user scale.
-5. Identify compliance flags specific to Etsyc's market: SMB customer data, EU/TBD data residency questions, SOC 2 requirements from enterprise-adjacent customers on the Scale tier.
+5. Identify compliance flags specific to Etsyc's market: SMB customer data, EU/Israeli data residency questions, SOC 2 requirements from enterprise-adjacent customers on the Scale tier.
 6. Run the TCO delta. Use Architect's options as the basis. Show cost at 3 scale points (100 / 500 / 1000 paying customers) because that is the range Etsyc will cross in the next 18 months.
 7. State the procurement recommendation plainly. Name the condition that blocks sign-off if not met.
 8. Return the output in-context to Synthesizer.

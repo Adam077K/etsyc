@@ -22,7 +22,7 @@ mcpServers:
   - mem0
   - context7
 skills:
-  - etsyc-scan-architecture
+  - beamix-scan-architecture
   - seo-content-writer
   - deep-research
   - competitive-landscape
@@ -42,7 +42,7 @@ Produce a weekly GEO algorithm trend report and post it as a Linear ticket in th
   ```sql
   SELECT s.business_id, s.created_at, ser.engine, ser.rank_position, ser.is_mentioned, ser.sentiment
   FROM scans s
-  JOIN your_results_table ser ON ser.scan_id = s.id
+  JOIN scan_engine_results ser ON ser.scan_id = s.id
   WHERE s.created_at > NOW() - INTERVAL '7 days'
   ORDER BY s.created_at DESC
   LIMIT 500
@@ -51,7 +51,7 @@ Produce a weekly GEO algorithm trend report and post it as a Linear ticket in th
   ```sql
   SELECT ser.engine, AVG(ser.rank_position) as avg_rank, COUNT(*) FILTER (WHERE ser.is_mentioned) as mention_count
   FROM scans s
-  JOIN your_results_table ser ON ser.scan_id = s.id
+  JOIN scan_engine_results ser ON ser.scan_id = s.id
   WHERE s.created_at BETWEEN NOW() - INTERVAL '14 days' AND NOW() - INTERVAL '7 days'
   GROUP BY ser.engine
   ```
@@ -90,7 +90,7 @@ Produce a weekly GEO algorithm trend report and post it as a Linear ticket in th
 
 ## Golden path
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `nonce=spec.nonce`
 4. Supabase: query last 7d scan results (current week)
 5. Supabase: query 7-14d scan results (prior week, for delta)
@@ -129,7 +129,7 @@ Channel: linear-ticket (Linear "Advisor" project section). Format: weekly trend 
 
 ## Fire signal (Routines only)
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s clock skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Confirm `spec.routine_id` matches `ROUTINE_GEO_ALGORITHM_SIGNAL_ID`
 4. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `agent='geo-algorithm-signal'`, `nonce=spec.nonce`
 5. On terminal exit: write `audit_log` with final `status` (`completed` | `failed` | `budget_exceeded` | `partial` | `insufficient_data`)

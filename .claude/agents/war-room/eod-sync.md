@@ -75,7 +75,7 @@ Two deliverables, both required:
 
 ## Golden path
 
-1. Verify HMAC trust spec from `<etsyc-spec>` sentinel (see Fire signal section)
+1. Verify HMAC trust spec from `<beamix-spec>` sentinel (see Fire signal section)
 2. Write `audit_log` row: `row_kind='routine_dispatch'`, `status='accepted'`, `nonce=spec.nonce`
 3. Query GitHub commits for last 24h (limit 30)
 4. Query `audit_log` for today's Routine activity (last 50 entries)
@@ -113,7 +113,7 @@ Channel: linear-ticket. Format: day recap + tomorrow's priorities.
 
 ## Fire signal (Routines only)
 
-1. Extract `<etsyc-spec>...</etsyc-spec>` XML block from the incoming request body
+1. Extract `<beamix-spec>...</beamix-spec>` XML block from the incoming request body
 2. Verify `X-Etsyc-Sig` HMAC-SHA256 header against `BRIDGE_HMAC_SECRET` env var; reject if signature invalid or timestamp skew > 300 seconds
 3. Parse `spec.nonce`, `spec.routine_id`, `spec.fired_at` from the trust spec
 4. Write `audit_log` row: `row_kind='routine_dispatch'`, `agent='eod-sync'`, `status='accepted'`, `nonce=spec.nonce`, `fired_at=spec.fired_at`

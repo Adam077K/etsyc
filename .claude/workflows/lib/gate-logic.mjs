@@ -1,4 +1,4 @@
-// Pure, testable logic for the {{PROJECT_NAME}} T5 QA gate.
+// Pure, testable logic for the T5 QA gate.
 //
 // WHY THIS FILE EXISTS: the Workflow runtime runs each .claude/workflows/*.js script in a
 // sandbox with NO module import. So qa.js cannot `import` from here at runtime — it MIRRORS

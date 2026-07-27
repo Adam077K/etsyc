@@ -72,7 +72,7 @@ Run the 4-round board-meeting protocol and produce a `SynthesizerOutput` JSON th
 
 ## Golden path
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `nonce=spec.nonce`
 4. Linear MCP: read triggering ticket — extract `topic_id`, topic statement, Adam's framing
 5. Supabase pgvector RAG: query prior decisions related to this topic (semantic search, top 5)
@@ -130,7 +130,7 @@ Channel: both (Linear ticket + DECISIONS.md update). Format: locked decision JSO
 
 ## Fire signal (Routines only)
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s clock skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Confirm `spec.routine_id` matches `ROUTINE_SYNTHESIZER_ID`
 4. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `agent='synthesizer'`, `nonce=spec.nonce`
 5. On terminal exit: write `audit_log` with final `status` (`completed` | `failed` | `traceability_failed` | `insufficient_personas` | `budget_exceeded`)

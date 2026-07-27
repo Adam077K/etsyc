@@ -1,6 +1,6 @@
-# design-screen — Etsyc Design Operating System Workflow
+# design-screen — Design Operating System Workflow
 
-The ultracode orchestration script for the Etsyc design pipeline. One screen in, one
+The ultracode orchestration script for the project's design pipeline. One screen in, one
 craft-validated screen out, graded against the founder's reference folder.
 
 ## What it does
@@ -13,7 +13,7 @@ deterministic `.claude/workflows` Workflow. Given a screen name, it:
    **vibe, not blueprint** — and design-lead distills the **DIRECTION** here (the one
    memorable element, the primary layout move, the motion-budget tier). The DIRECTION
    stage of the pipeline runs inside this first phase, feeding the build.
-2. Runs the dedicated front-end **product-designer** to BUILD the screen in Etsyc's own
+2. Runs the dedicated front-end **product-designer** to BUILD the screen in the project's own
    design language.
 3. Runs a **design-critic <-> design-polisher** loop: the critic grades CRAFT-PARITY &
    FEELING vs the references (never 1:1 copy-fidelity); the polisher closes the named
@@ -62,10 +62,10 @@ steering. Both are documented in the design OS spec.
 export const meta = {
   name: "design-screen",
   description:
-    "Etsyc design pipeline as a deterministic Workflow: load the screen's reference folder + global product-feel, run the product-designer build, then a design-critic <-> design-polisher loop until craft-parity with the references (expressed in Etsyc's own language), and return the validated screen + screenshots. References are vibe, not blueprint. Three founder checkpoints (lock refs, 50% first-paint, judge final) are surfaced as stop points.",
+    "The project's design pipeline as a deterministic Workflow: load the screen's reference folder + global product-feel, run the product-designer build, then a design-critic <-> design-polisher loop until craft-parity with the references (expressed in the project's own language), and return the validated screen + screenshots. References are vibe, not blueprint. Three founder checkpoints (lock refs, 50% first-paint, judge final) are surfaced as stop points.",
   phases: [
     { title: "Reference", detail: "Load the screen folder + _product-feel; lock the contract; design-lead distills the DIRECTION (one memorable move, layout, motion budget)." },
-    { title: "Build", detail: "product-designer builds the screen in Etsyc's own design language." },
+    { title: "Build", detail: "product-designer builds the screen in the project's own design language." },
     { title: "First paint", detail: "Founder checkpoint #2 — surface the ~50% first-paint screenshots." },
     { title: "Validate loop", detail: "design-critic grades craft-parity; design-polisher closes the gaps; repeat to PASS or cap." },
     { title: "Judge", detail: "Founder checkpoint #3 — return the validated screen + screenshots for final judgment." }
@@ -95,7 +95,7 @@ phase("Reference");
 log(`Loading reference contract for "${screen}".`);
 
 const reference = await agent(
-  `You are the design-lead assembling the reference contract for the Etsyc screen "${screen}".
+  `You are the design-lead assembling the reference contract for the project's "${screen}" screen.
 
 PRINCIPLE — references are VIBE, not BLUEPRINT. You catalogue the FEELING, craft level, and
 aesthetic confidence to transfer. Cloning layouts 1:1 is forbidden downstream.
@@ -114,8 +114,8 @@ Return JSON ONLY:
   "screen": "${screen}",
   "product_feel_files": ["docs/design/references/_product-feel/..."],
   "screen_ref_files": ["docs/design/references/${screen}/..."],
-  "feeling_brief": "2-4 sentences: the richness/confidence/polish to hit, expressed for Etsyc",
-  "direction": "the DIRECTION for the build: the one memorable element, the primary layout move, and the motion-budget tier (1/2/3) — expressed for Etsyc",
+  "feeling_brief": "2-4 sentences: the richness/confidence/polish to hit, expressed for the project",
+  "direction": "the DIRECTION for the build: the one memorable element, the primary layout move, and the motion-budget tier (1/2/3) — expressed for the project",
   "what_we_steal": ["the move/feeling, never the layout", "..."],
   "missing": ["only if not locked: what the founder must add"]
 }`,
@@ -158,20 +158,20 @@ if (!reference || !reference.locked) {
 log(`Reference contract LOCKED for "${screen}". Feeling: ${reference.feeling_brief}`);
 
 // ---------------------------------------------------------------------------
-// PHASE 2 — BUILD  (product-designer builds in Etsyc's own language)
+// PHASE 2 — BUILD  (product-designer builds in the project's own language)
 // ---------------------------------------------------------------------------
 phase("Build");
 log(`product-designer building "${screen}".`);
 
 const build = await agent(
-  `You are the dedicated front-end product-designer building the Etsyc "${screen}" screen.
+  `You are the dedicated front-end product-designer building the project's "${screen}" screen.
 
 LOAD BOTH reference sets BEFORE any code:
 - Global product-feel: read all of "${productFeelDir}".
 - This screen's contract: read all of "${screenRefDir}" including REFERENCE.md.
 
 VIBE, NOT CLONE: absorb the references' richness/confidence/polish, then SYNTHESIZE something
-ORIGINAL in Etsyc's own design language. Inspired-by, never traced. Do NOT reproduce a
+ORIGINAL in the project's own design language. Inspired-by, never traced. Do NOT reproduce a
 reference layout 1:1.
 
 Feeling to hit: ${reference.feeling_brief}
@@ -179,10 +179,10 @@ Direction (the build target — one memorable element, primary layout move, moti
 What we steal: ${JSON.stringify(reference.what_we_steal || [])}
 
 Hard-wired craft (always on): design-taste-frontend, high-end-visual-design, emilkowal-animations,
-honor the project's brand bar (accent color, type scale, spacing, motion budget) — load the project's
-brand/design-system skill if one exists (AUTHORITATIVE on conflict with generic skills), frontend-design,
-humanizer (all copy), full-output-enforcement (zero stubs/TODOs). Apply the generic skills' techniques
-with Etsyc's locked brand tokens.
+the project's brand-system skill (AUTHORITATIVE — Inter/InterDisplay/Fraunces/Geist Mono + the
+project's locked accent-color palette, 8pt grid, rounded-lg product utility), frontend-design,
+humanizer (all copy), full-output-enforcement (zero stubs/TODOs). Apply the generic skills'
+techniques with the project's locked brand tokens.
 
 Build the real screen as shippable TSX + Tailwind with ALL FOUR states (loading skeletons, composed
 empty, inline error, success). Create a worktree, commit atomically, run pnpm typecheck + lint clean,
@@ -196,7 +196,7 @@ Return JSON ONLY:
   "branch": "design/<slug>",
   "worktree": ".worktrees/design-<slug>",
   "files_changed": ["apps/web/src/..."],
-  "commits": ["design(<scope>): ..."],
+  "commits": ["design(<scope>): ... (BEAMIX-N)"],
   "screenshots": ["absolute path or base64 per breakpoint"],
   "summary": "2 sentences max",
   "blockers": []
@@ -266,20 +266,21 @@ while (round < MAX_ROUNDS) {
   log(`Critic pass ${round}/${MAX_ROUNDS} for "${screen}".`);
 
   const critic = await agent(
-    `You are the design-critic grading the Etsyc "${screen}" build against its reference folder.
+    `You are the design-critic grading the project's "${screen}" build against its reference folder.
 
 GRADE CRAFT-PARITY & FEELING, NEVER COPY-FIDELITY. Forbidden question: "does this match reference X
 1:1?" Required question: "does this hit the same richness/confidence/polish as the references,
-expressed as Etsyc?" PASS = indistinguishable in CRAFT-LEVEL from the references, in Etsyc's own
+expressed in the project's own voice?" PASS = indistinguishable in CRAFT-LEVEL from the references, in the project's own
 language — not a pixel match.
 
-Load ui-visual-validator + the project's brand/design-system skill if one exists. Read all of "${productFeelDir}" and all of
+Load ui-visual-validator + the project's brand-system skill. Read all of "${productFeelDir}" and all of
 "${screenRefDir}". Take Playwright screenshots of the BUILD (worktree ${worktree}, branch ${branch})
 at desktop/tablet/mobile and compare them SIDE-BY-SIDE against the reference images. Score the
 RICHNESS GAP: depth, micro-interactions, signature details, motion choreography, density of
-considered detail, brand-token discipline (honor the project's brand bar: accent color, type scale, spacing, motion budget, all four states).
+considered detail, brand-token discipline (the project's locked accent color, Inter/InterDisplay/Fraunces/Geist Mono, 8pt grid,
+all four states).
 
-Return a SPECIFIC "here is what's missing to reach the references' craft bar, expressed as Etsyc"
+Return a SPECIFIC "here is what's missing to reach the references' craft bar, expressed for the project"
 list. Be measurable ("40px gap; system specifies 24px"), never vague. Include 1-3 things working well.
 
 Return JSON ONLY:
@@ -333,7 +334,7 @@ Return JSON ONLY:
   }
 
   if (critic && critic.verdict === "PASS") {
-    log(`Critic PASS on round ${round}. Craft-parity reached (in Etsyc's language).`);
+    log(`Critic PASS on round ${round}. Craft-parity reached (in the project's own language).`);
     break;
   }
 
@@ -346,16 +347,17 @@ Return JSON ONLY:
   log(`design-polisher closing ${gaps.length} craft gap(s) for round ${round + 1}.`);
 
   const polish = await agent(
-    `You are the design-polisher. Your SOLE job is adding CRAFT DENSITY to the Etsyc "${screen}" build
+    `You are the design-polisher. Your SOLE job is adding CRAFT DENSITY to the project's "${screen}" build
 to close the gaps the critic named — against the reference folder, AFTER the functional build is done.
 
 Worktree ${worktree}, branch ${branch}. Read all of "${productFeelDir}" and all of "${screenRefDir}".
-Load the project's brand/design-system skill (AUTHORITATIVE tokens) + emilkowal-animations + design-taste-frontend +
+Load the project's brand-system skill (AUTHORITATIVE tokens) + emilkowal-animations + design-taste-frontend +
 high-end-visual-design + humanizer for any copy.
 
 Add depth, micro-interactions, signature details, and motion choreography (emilkowal: animate only
-transform/opacity, ease-out entering, 200-400ms UI, prefers-reduced-motion fallback). Stay in Etsyc's
-own design language with locked brand tokens. No new business logic (that is frontend-engineer's lane). Zero stubs/TODOs.
+transform/opacity, ease-out entering, 200-400ms UI, prefers-reduced-motion fallback). Stay in the project's
+own design language with locked brand tokens — do not drift toward generic Geist/Satoshi or off-palette
+colors. No new business logic (that is frontend-engineer's lane). Zero stubs/TODOs.
 
 Address these critic findings:
 ${JSON.stringify(gaps, null, 2)}
@@ -373,7 +375,7 @@ Return JSON ONLY:
   "branch": "${branch}",
   "worktree": "${worktree}",
   "files_changed": ["apps/web/src/..."],
-  "commits": ["design(polish/<scope>): ..."],
+  "commits": ["design(polish/<scope>): ... (BEAMIX-N)"],
   "gaps_closed": ["..."],
   "screenshots": ["..."],
   "blockers": []

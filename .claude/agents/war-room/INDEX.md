@@ -8,7 +8,7 @@ status: Phase 6B in progress — frontmatter locked, bodies being written
 
 **22 agents total: 12 Routines + 6 Worker templates + 4 Persona templates.**
 
-Per the war-room governance decision: only the 12 Routines are provisioned in claude.ai. Workers + Personas are **Task subagent templates** invoked in interactive sessions, NOT standalone Routines. They need no `routine_id_env_key` / `routine_token_env_key` and no wrangler secrets.
+Per Q13 (locked 2026-05-12): only the 12 Routines are provisioned in claude.ai. Workers + Personas are **Task subagent templates** invoked in interactive sessions, NOT standalone Routines. They need no `routine_id_env_key` / `routine_token_env_key` and no wrangler secrets.
 
 ---
 

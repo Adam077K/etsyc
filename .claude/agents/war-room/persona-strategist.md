@@ -40,7 +40,7 @@ Structured Round 1 response in exactly this format:
 
 **Execution Plan** (3-5 bullets): What specifically ships in 4-12 weeks? Each bullet: deliverable + owner type (backend / frontend / infra) + week-range estimate. No epics — name the actual thing.
 
-**Success Metrics** (2-3 metrics): Each metric must have: name, current baseline (or "unknown — measure in week 1"), target, measurement method. Example: "GEO agent activation rate: baseline unknown → target 40% of Build-tier users within 30 days of signup → measured via Supabase your_jobs_table table."
+**Success Metrics** (2-3 metrics): Each metric must have: name, current baseline (or "unknown — measure in week 1"), target, measurement method. Example: "GEO agent activation rate: baseline unknown → target 40% of Build-tier users within 30 days of signup → measured via Supabase agent_jobs table."
 
 **Trade-off Matrix** (table): 2-4 options with columns: Option | Ships-In | Cost | Risk | Reversibility. Recommend one.
 
