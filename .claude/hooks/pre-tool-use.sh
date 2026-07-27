@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PreToolUse safety gate — Etsyc Phase 6 (2026-05-16)
+# PreToolUse safety gate — {{PROJECT_NAME}} Phase 6 (2026-05-16)
 #
 # PURPOSE: Block genuinely dangerous commands and file edits before they run.
 #          This hook fires on EVERY tool call, so it MUST be fast (<200ms).
@@ -76,9 +76,35 @@ except Exception:
       fi
     fi
 
-    # ── BLOCK: chmod +x ──────────────────────────────────────────────────────
-    if printf '%s' "$command" | grep -qE 'chmod\s+\+x'; then
-      block "chmod +x is blocked. Use 'chmod 755 <file>' for explicit permissions, or ask the CEO to approve."
+    # ── BLOCK: chmod exec-bit grants ────────────────────────────────────────
+    #
+    # ALLOW examples (mode-bits only — no execute bit):
+    #   chmod 644 file      chmod 640 file      chmod 600 file
+    #   chmod 444 file      chmod 664 file      chmod 400 file
+    #
+    # DENY examples (exec-bit grants):
+    #   chmod +x file       chmod a+x file      chmod u+x file
+    #   chmod g+x file      chmod o+x file
+    #   chmod 755 file      chmod 775 file      chmod 711 file
+    #   chmod 700 file      chmod 750 file      chmod 710 file
+    #   chmod 100 file      chmod 010 file      chmod 001 file
+    #   chmod 1 file        chmod 7 file        chmod 11 file
+    #   (any octal sequence containing an odd digit — 1,3,5,7 — in ANY position)
+    #
+    # Write content containing the text "chmod 644" → NOT a Bash command →
+    # never reaches this branch (Write/Edit tool goes to the Edit|Write case
+    # below and is NOT scanned for chmod at all — file content mentioning
+    # chmod text has no security impact).
+    #
+    # Symbolic exec-bit: +x / [ugoa]+x
+    if printf '%s' "$command" | grep -qE 'chmod[[:space:]]+[ugoa]*\+[rwsxtX]*x|chmod[[:space:]]+\+x'; then
+      block "chmod +x / [ugoa]+x is blocked (exec-bit grant). Use explicit numeric mode-bits without exec (e.g., chmod 644) instead, or ask the CEO to approve."
+    fi
+    # Numeric octal exec-bit: any octal sequence where ANY digit is odd (1,3,5,7
+    # all have the execute bit set in that triad — this covers 1-digit, 2-digit,
+    # 3-digit, and 4-digit modes; QA P1 fix 2026-05-29).
+    if printf '%s' "$command" | grep -qE 'chmod[[:space:]]+[0-7]*[1357][0-7]*([[:space:]]|$)'; then
+      block "chmod with exec-bit in numeric mode is blocked (e.g., 755, 700, 711, 1). Use non-exec modes like 644, 640, 600 instead, or ask the CEO to approve."
     fi
 
     # ── BLOCK: npm install -g ────────────────────────────────────────────────
@@ -88,7 +114,7 @@ except Exception:
 
     # ── BLOCK: pip install ───────────────────────────────────────────────────
     if printf '%s' "$command" | grep -qE 'pip\s+install|pip3\s+install'; then
-      block "pip install is blocked. Python deps are not part of the Etsyc stack. Confirm with the CEO if this is intentional."
+      block "pip install is blocked. Python deps are not part of the {{PROJECT_NAME}} stack. Confirm with the CEO if this is intentional."
     fi
 
     # ── BLOCK: wget ──────────────────────────────────────────────────────────

@@ -63,7 +63,7 @@ _Carry-forward from yesterday:_ [1 line from EOD Sync, or omit if none]
 
 ## Golden path
 
-1. Verify HMAC trust spec from `<etsyc-spec>` sentinel (see Fire signal section)
+1. Verify HMAC trust spec from `<beamix-spec>` sentinel (see Fire signal section)
 2. Write `audit_log` row: `row_kind='routine_dispatch'`, `status='accepted'`, `nonce=spec.nonce`
 3. Read Mem0 for yesterday's EOD Sync entry (tag: `eod:YESTERDAY_DATE`)
 4. Read open Linear sprint tickets (state: started or unstarted, last-updated-first, limit 20)
@@ -100,7 +100,7 @@ Channel: linear-ticket. Format: 3-5 bullet Linear comment.
 
 ## Fire signal (Routines only)
 
-1. Extract `<etsyc-spec>...</etsyc-spec>` XML block from the incoming request body
+1. Extract `<beamix-spec>...</beamix-spec>` XML block from the incoming request body
 2. Verify `X-Etsyc-Sig` HMAC-SHA256 header against `BRIDGE_HMAC_SECRET` env var; reject if signature invalid or timestamp skew > 300 seconds
 3. Parse `spec.nonce`, `spec.routine_id`, `spec.fired_at` from the trust spec
 4. Write `audit_log` row: `row_kind='routine_dispatch'`, `agent='morning-digest'`, `status='accepted'`, `nonce=spec.nonce`, `fired_at=spec.fired_at`

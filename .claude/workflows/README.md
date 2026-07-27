@@ -1,4 +1,4 @@
-# Etsyc T5 Workflow Library
+# {{PROJECT_NAME}} T5 Workflow Library
 
 Deterministic multi-agent workflows the **CEO** runs via the `Workflow` tool for **T5** tasks
 (big / mid+ coding, design, research, QA). The script — not an agent — spawns the fleet, so the

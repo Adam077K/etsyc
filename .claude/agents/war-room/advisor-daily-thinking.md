@@ -67,7 +67,7 @@ Produce a 500-1000 word Advisor Brief with exactly 4 sections — Today's intere
 
 ## Golden path
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `nonce=spec.nonce`
 4. WebFetch HackerNews top 10 story IDs; fetch each item for title + URL
 5. WebFetch TechCrunch AI tag page; extract 5-8 headlines
@@ -105,7 +105,7 @@ Channel: linear-ticket (Linear "Advisor" project). Format: ~500-1000 word Adviso
 
 ## Fire signal (Routines only)
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s clock skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Confirm `spec.routine_id` matches `ROUTINE_ADVISOR_DAILY_THINKING_ID`
 4. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `agent='advisor-daily-thinking'`, `nonce=spec.nonce`
 5. On terminal exit (success or failure): write `audit_log` with final `status` value (`completed` | `failed` | `budget_exceeded` | `partial`)

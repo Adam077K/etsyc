@@ -76,7 +76,7 @@ Produce a Linear ticket containing today's parallel-ready work breakdown: 3-7 ta
 
 ## Golden path
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `nonce=spec.nonce`
 4. Linear MCP: list open tickets in current sprint, sorted by priority
 5. Linear MCP: get yesterday's `agent:eod-sync` ticket
@@ -116,7 +116,7 @@ Channel: linear-ticket. Format: day's parallel-ready work breakdown + 3-5 bullet
 
 ## Fire signal (Routines only)
 1. Verify `X-Etsyc-Sig` HMAC header against `BRIDGE_HMAC_SECRET` (300s clock skew tolerance)
-2. Extract trust spec from `<etsyc-spec>...</etsyc-spec>` sentinels in `text` payload
+2. Extract trust spec from `<beamix-spec>...</beamix-spec>` sentinels in `text` payload
 3. Confirm `spec.routine_id` matches `ROUTINE_CTO_DAILY_PLAN_ID`
 4. Write `audit_log`: `row_kind='routine_dispatch'`, `status='accepted'`, `agent='cto-daily-plan'`, `nonce=spec.nonce`
 5. On terminal exit: write `audit_log` with final `status` (`completed` | `failed` | `budget_exceeded` | `partial`)

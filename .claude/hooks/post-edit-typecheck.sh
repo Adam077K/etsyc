@@ -46,7 +46,7 @@ rel_path="${file_path#$repo_root/}"
 # Run tsc on the file alone (skipLibCheck for speed; standalone may emit
 # false-positive import errors which the agent should ignore unless persistent)
 cd "$repo_root" || exit 0
-tsc_output=$(pnpm --silent --filter '@etsyc/web' exec tsc --noEmit --skipLibCheck --pretty false "$rel_path" 2>&1)
+tsc_output=$(pnpm --silent --filter '@beamix/web' exec tsc --noEmit --skipLibCheck --pretty false "$rel_path" 2>&1)
 tsc_exit=$?
 
 if [ $tsc_exit -ne 0 ] && [ -n "$tsc_output" ]; then
@@ -58,7 +58,7 @@ if [ $tsc_exit -ne 0 ] && [ -n "$tsc_output" ]; then
     {
       echo "[post-edit-typecheck] tsc --noEmit on $rel_path:"
       echo "$filtered"
-      echo "[post-edit-typecheck] Run \`pnpm -F @etsyc/web typecheck\` for full project view."
+      echo "[post-edit-typecheck] Run \`pnpm -F @beamix/web typecheck\` for full project view."
     } >&2
   fi
 fi
